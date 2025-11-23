@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --background: #e0e0e0;
+  --foreground: #171717;
+
+  /* Regio App Colors */
+  --color-green-offer: #8cb348;
+  --color-red-search: #d32f2f;
+  --color-blue: #4285f4;
+  --color-orange: #f57c00;
+  --color-purple: #7e57c2;
+  --color-turquoise: #00acc1;
+  --color-yellow: #fbc02d;
+  
+  --color-nav-bg: #3f6238;
+  --color-text-main: #333333;
+  --bg-app: #f4f4f4;
+  --white: #ffffff;
+  --grey-badge: #b0b0b0;
+  --grey-line: #e0e0e0;
+  --input-bg: #f9f9f9;
+  --info-blue: #e3f2fd;
+  --info-text: #0d47a1;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
