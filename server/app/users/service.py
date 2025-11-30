@@ -4,7 +4,7 @@ import uuid
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.security import get_password_hash
+from app.auth.security import get_password_hash
 from app.users.models import User
 from app.users.schemas import UserCreate, UserUpdate, UserAdminUpdate
 from app.users.exceptions import UserAlreadyExists, UserNotFound, SystemSaturated, ImmutableFieldUpdate

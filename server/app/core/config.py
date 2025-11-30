@@ -30,8 +30,7 @@ class Settings(BaseSettings):
     # TODO: temporary key for prod to prevent jwt signature mismatch during development
     SECRET_KEY: str = 'adkSDK8984**493((_))ddDdsk8dLDKKDF9939DKkfadjkjzppeikfllx9334EE'
     # SECRET_KEY: str = secrets.token_urlsafe(32)
-    # 60 minutes * 24 hours * 7 days
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+
     FRONTEND_HOST: str = "http://localhost:3000"
     ENVIRONMENT: Literal["development", "staging", "production"] = os.getenv("ENVIRONMENT", "development")
 

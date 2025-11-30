@@ -6,9 +6,9 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 
 from app import security
-from app.config import settings
-from app.database import SessionDep
-from app.models import TokenPayload
+from app.core.config import settings
+from app.core.database import SessionDep
+from app.core.models import TokenPayload
 from app.users.models import User
 from app.users.service import UserService
 

@@ -9,8 +9,8 @@ from sqlmodel import select
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
 
-from app.config import settings
-from app.security import get_password_hash
+from app.core.config import settings
+from app.auth.security import get_password_hash
 from app.users.config import user_settings
 from app.users.enums import TrustLevel
 from app.users.models import User
