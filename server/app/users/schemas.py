@@ -1,19 +1,21 @@
-import uuid
 from datetime import datetime
 from typing import Optional
-from pydantic import EmailStr, BaseModel, Field
+
+from sqlmodel import SQLModel
+from pydantic import EmailStr, Field
+
 from app.users.enums import TrustLevel
 
 
 """Base model with shared properties."""
-class UserBase(BaseModel):
+class UserBase(SQLModel):
     email: EmailStr
     is_active: bool = True
     is_verified: bool = False
     trust_level: TrustLevel = TrustLevel.T1
 
 """Validation and API models."""
-class UserCreate(BaseModel):
+class UserCreate(SQLModel):
     email: EmailStr
     password: str = Field(min_length=8)
     first_name: str
@@ -22,7 +24,7 @@ class UserCreate(BaseModel):
     invite_code: str
     address: str
 
-class UserUpdate(BaseModel):
+class UserUpdate(SQLModel):
     """
     Fields that user can update themselves.
     """
@@ -42,7 +44,7 @@ class UserAdminUpdate(UserUpdate):
     last_name: Optional[str] = None
 
 # Properties to return via API
-class UserPublic(BaseModel):
+class UserPublic(SQLModel):
     user_code: str
     email: EmailStr
     first_name: str
@@ -54,6 +56,7 @@ class UserPublic(BaseModel):
     class Config:
         from_attributes = True
 
-class UsersPublic(BaseModel):
+class UsersPublic(SQLModel):
     data: list[UserPublic]
     count: int
+ 

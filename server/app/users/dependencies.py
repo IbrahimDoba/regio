@@ -5,10 +5,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 
-from app import security
+from app.auth.config import auth_settings
 from app.core.config import settings
 from app.core.database import SessionDep
-from app.core.models import TokenPayload
+from app.auth.schemas import TokenPayload
 from app.users.models import User
 from app.users.service import UserService
 
@@ -35,7 +35,7 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
     """
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[auth_settings.ALGORITHM]
         )
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, Exception):
