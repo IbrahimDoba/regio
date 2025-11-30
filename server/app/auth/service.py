@@ -129,7 +129,7 @@ class AuthService:
         await self._blacklist_token(old_refresh_token)
 
         # Issue new tokens
-        return await self._generate_tokens(uuid.UUID(user_id))
+        return self._generate_tokens(uuid.UUID(user_id))
 
     async def logout(self, access_token: str, refresh_token: Optional[str]):
         """
@@ -181,7 +181,7 @@ class AuthService:
         
         for _ in range(amount):
             # Simple code generation: UserID snippet + Random
-            suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
             code = f"{str(user_id)[:2].upper()}{suffix}"
             
             invite = Invite(
