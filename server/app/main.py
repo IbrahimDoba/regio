@@ -4,10 +4,11 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from starlette.middleware.cors import CORSMiddleware
 
-from app.config import settings
-from app.database import init_db, test_db_connection
+from app.core.config import settings
+from app.core.database import init_db, test_db_connection
 
-from app.users.routes import user_router
+from app.users.routes import router as user_router
+from app.auth.routes import router as auth_router
 
 
 @asynccontextmanager
@@ -40,4 +41,5 @@ async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
 # Include routers
-app.include_router(user_router)
+app.include_router(user_router, prefix="/users")
+app.include_router(auth_router, prefix="/auth")
