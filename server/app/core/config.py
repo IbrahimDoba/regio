@@ -8,7 +8,7 @@ from pydantic import (
     computed_field,
 )
 from pydantic_core import MultiHostUrl
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from app.base_config import RegioBaseSettings
 
 
 def parse_cors(v: Any) -> list[str] | str:
@@ -19,26 +19,18 @@ def parse_cors(v: Any) -> list[str] | str:
     raise ValueError(v)
 
 
-class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        # Use top level .env file
-        env_file=".env",
-        env_ignore_empty=True,
-        extra="ignore",
-    )
-
-    # TODO: temporary key for prod to prevent jwt signature mismatch during development
-    SECRET_KEY: str = 'adkSDK8984**493((_))ddDdsk8dLDKKDF9939DKkfadjkjzppeikfllx9334EE'
+class Settings(RegioBaseSettings):
+    SECRET_KEY: str
     # SECRET_KEY: str = secrets.token_urlsafe(32)
 
     FRONTEND_HOST: str = "http://localhost:3000"
-    ENVIRONMENT: Literal["development", "staging", "production"] = os.getenv("ENVIRONMENT", "development")
+    ENVIRONMENT: Literal["development", "staging", "production"]
 
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def all_cors_origins(self) -> list[str]:
         # return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
@@ -47,21 +39,21 @@ class Settings(BaseSettings):
         ]
 
 
-    PROJECT_NAME: str = os.getenv("PROJECT_NAME")
-    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER")
-    POSTGRES_USER: str = os.getenv("POSTGRES_USER")
-    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD")
-    POSTGRES_DB: str = os.getenv("POSTGRES_DB")
+    PROJECT_NAME: str
+    POSTGRES_SERVER: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
     POSTGRES_PORT: int = 5432
 
-    REDIS_URL: str = os.getenv("REDIS_URL")
+    REDIS_URL: str
 
-    R2_BUCKET_NAME: str = os.getenv("R2_BUCKET_NAME")
-    R2_ENDPOINT_URL: str = os.getenv("R2_ENDPOINT_URL")
-    R2_ACCESS_KEY_ID: str = os.getenv("R2_ACCESS_KEY_ID")
-    R2_SECRET_ACCESS_KEY: str = os.getenv("R2_SECRET_ACCESS_KEY")
+    R2_BUCKET_NAME: str
+    R2_ENDPOINT_URL: str
+    R2_ACCESS_KEY_ID: str
+    R2_SECRET_ACCESS_KEY: str
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def DATABASE_URL(self) -> PostgresDsn:
         return MultiHostUrl.build(
@@ -74,10 +66,10 @@ class Settings(BaseSettings):
         )
     
     # Initial super user config value
-    SYSTEM_SINK_CODE: str = os.getenv("SYSTEM_SINK_CODE")
-    SYSTEM_SINK_FIRST_NAME: str = os.getenv("SYSTEM_SINK_FIRST_NAME")
-    SYSTEM_SINK_LAST_NAME: str = os.getenv("SYSTEM_SINK_LAST_NAME")
-    SYSTEM_SINK_EMAIL: str = os.getenv("SYSTEM_SINK_EMAIL")
-    SYSTEM_SINK_PASSWORD: str = os.getenv("SYSTEM_SINK_PASSWORD")
+    SYSTEM_SINK_CODE: str
+    SYSTEM_SINK_FIRST_NAME: str
+    SYSTEM_SINK_LAST_NAME: str
+    SYSTEM_SINK_EMAIL: str
+    SYSTEM_SINK_PASSWORD: str
 
 settings = Settings()
