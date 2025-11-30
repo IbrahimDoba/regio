@@ -83,7 +83,7 @@ class AuthService:
         
         for _ in range(amount):
             # Simple code generation: UserID snippet + Random
-            suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+            suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
             code = f"{str(user_id)[:2].upper()}{suffix}"
             
             invite = Invite(
