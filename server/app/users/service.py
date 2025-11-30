@@ -1,18 +1,19 @@
 from typing import Optional
 import uuid
 
-from sqlmodel import select
+from sqlmodel import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.security import get_password_hash
 from app.users.models import User
-from app.users.schemas import UserCreate, UserUpdate, UserAdminUpdate
+from app.users.schemas import UserCreate, UserUpdate, UserAdminUpdate, UsersPublic
 from app.users.exceptions import UserAlreadyExists, UserNotFound, SystemSaturated, ImmutableFieldUpdate
 from app.users.utils import generate_user_code
 
 # from app.banking.service import BankingService
 # from app.auth.service import InviteService
 # from app.chat.service import ChatService
+# from app.auth.service import AuthService
 
 class UserService:
     def __init__(self, session: AsyncSession):
@@ -20,10 +21,30 @@ class UserService:
         # self.banking_service = BankingService(session)
         # self.chat_service = ChatService(session)
 
+    async def get_users(self, skip: int = 0, limit: int = 100) -> UsersPublic:
+        # Get total number of rows in table
+        count_statement = select(func.count()).select_from(User)
+        count_result = await self.session.execute(count_statement)
+        count = count_result.scalar()
+
+        # Filter to only active non-system-admin users
+        statement = select(User) \
+            .offset(skip) \
+            .limit(limit) \
+            .where(User.is_active == True, User.is_system_admin == False)
+        users_results = await self.session.execute(statement)
+
+        users = users_results.scalars().all()
+        
+        # Subtract number of results from count for final number of active users
+        result_count = count - len(users)
+
+        return UsersPublic(data=users, count=result_count)
+
     async def get_user_by_email(self, email: str) -> Optional[User]:
         statement = select(User).where(User.email == email)
         result = await self.session.execute(statement)
-        return result.first()
+        return result.scalar_one_or_none()
 
     async def get_user_by_id(self, user_id: uuid.UUID) -> Optional[User]:
         return await self.session.get(User, user_id)
@@ -31,15 +52,18 @@ class UserService:
     async def get_user_by_code(self, user_code: str) -> Optional[User]:
         statement = select(User).where(User.user_code == user_code)
         result = await self.session.execute(statement)
-        return result.first()
+        return result.scalar_one_or_none()
 
     async def create_user(self, user_in: UserCreate) -> User:
         # Check Email Uniqueness
         if await self.get_user_by_email(user_in.email):
             raise UserAlreadyExists()
+        
+        # TODO: Instantiate auth service
+        # auth_service = AuthService(self.session)
 
-        # Verify Invite Code (Future Logic)
-        # await InviteService.consume_invite(user_in.invite_code)
+        # TODO: Validate and consume invite code
+        # await auth_service.consume_invite(user_in.invite_code)
 
         # Generate Unique User Code (Retry Logic)
         user_code = generate_user_code()
@@ -47,14 +71,14 @@ class UserService:
         while retries > 0:
             # Check collision
             existing = await self.session.execute(select(User).where(User.user_code == user_code))
-            if not existing.first():
+            if not existing.scalar_one_or_none():
                 break
             user_code = generate_user_code()
             retries -= 1
         
         if retries == 0:
             raise SystemSaturated() # Failed to generate a unique system ID after 10 tries
-
+        
         # Create DB Object
         db_user = User(
             user_code=user_code,
@@ -77,6 +101,9 @@ class UserService:
 
         # Create Matrix account
         # await self.chat_service.create_matrix_account(user_id=db_user.id)
+
+        # Generate invite codes for user
+        # await auth_service.create_user_invites(db_user.id)
 
         return db_user
 
