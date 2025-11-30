@@ -31,6 +31,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Import all models here
+from app.banking.models import Account, PaymentRequest, Transaction
 from app.users.models import User
 from app.auth.models import Invite
 

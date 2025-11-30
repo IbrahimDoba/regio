@@ -8,11 +8,10 @@ from pydantic import EmailStr
 
 from app.users.enums import TrustLevel, Language
 
-# Avoid circular imports during runtime
 if TYPE_CHECKING:
-    pass
-    # from app.banking.models import Account, Transaction, PaymentRequest
-    # from app.listings.models import Post 
+    from app.banking.models import Account, Transaction, PaymentRequest
+    from app.auth.models import Invite
+    # from app.listings.models import Listing 
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
@@ -49,35 +48,47 @@ class User(SQLModel, table=True):
     # Metadata
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        sa_type=DateTime(timezone=True),
-        nullable=False
+        sa_type=DateTime(timezone=True)
     )
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         sa_type=DateTime(timezone=True),
-        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
-        nullable=False
+        sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)}
     )
 
     # ORM relationships
     # lisitngs: list["Listing"] = Relationship(back_populates="user")
 
-    # accounts: list["Account"] = Relationship(back_populates="user")
+    invites: list["Invite"] = Relationship(back_populates="user")
 
-    # outgoing_tx: list["Transaction"] = Relationship(
-    #     back_populates="sender",
-    #     sa_relationship_kwargs={"primaryjoin": "User.id==Transaction.sender_id", "lazy": "selectin"}
-    # )
-    # incoming_tx: list["Transaction"] = Relationship(
-    #     back_populates="receiver",
-    #     sa_relationship_kwargs={"primaryjoin": "User.id==Transaction.receiver_id", "lazy": "selectin"}
-    # )
+    accounts: list["Account"] = Relationship(back_populates="user")
 
-    # sent_requests: list["PaymentRequest"] = Relationship(
-    #     back_populates="creditor",
-    #     sa_relationship_kwargs={"primaryjoin": "User.id==Transaction.creditor_id", "lazy": "selectin"}
-    # )
-    # received_requests: list["PaymentRequest"] = Relationship(
-    #     back_populates="debtor",
-    #     sa_relationship_kwargs={"primaryjoin": "User.id==Transaction.debtor_id", "lazy": "selectin"}
-    # )
+    outgoing_tx: list["Transaction"] = Relationship(
+        back_populates="sender",
+        sa_relationship_kwargs={
+            "lazy": "selectin",
+            "foreign_keys": "[Transaction.sender_id]" 
+        }
+    )
+    incoming_tx: list["Transaction"] = Relationship(
+        back_populates="receiver",
+        sa_relationship_kwargs={
+            "lazy": "selectin",
+            "foreign_keys": "[Transaction.receiver_id]"
+        }
+    )
+
+    sent_requests: list["PaymentRequest"] = Relationship(
+        back_populates="creditor",
+        sa_relationship_kwargs={
+            "lazy": "selectin",
+            "foreign_keys": "[PaymentRequest.creditor_id]"
+        }
+    )
+    received_requests: list["PaymentRequest"] = Relationship(
+        back_populates="debtor",
+        sa_relationship_kwargs={
+            "lazy": "selectin",
+            "foreign_keys": "[PaymentRequest.debtor_id]"
+        }
+    )

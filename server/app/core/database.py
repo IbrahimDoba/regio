@@ -13,8 +13,13 @@ from app.core.config import settings
 from app.auth.security import get_password_hash
 from app.users.config import user_settings
 from app.users.enums import TrustLevel
-from app.users.models import User
 from app.users.service import UserService
+
+from app.users.models import User
+
+# Imports to solve circular dependency error on startup
+from app.banking import models as banking_models
+from app.auth import models as auth_models
 
 # Use an async engine
 DATABASE_URL = str(settings.DATABASE_URL)
