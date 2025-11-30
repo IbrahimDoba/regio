@@ -1,28 +1,22 @@
-import logging
+from typing import AsyncGenerator
 
 from fastapi import FastAPI
-from fastapi.routing import APIRoute
 from contextlib import asynccontextmanager
 from starlette.middleware.cors import CORSMiddleware
 
-from app.core.db import init_db, test_db_connection
-from app.core.config import settings
-from app.api.main import api_router
+from app.config import settings
+from app.database import init_db, test_db_connection
 
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s: %(message)s"
-)
-logger = logging.getLogger(__name__)
+from app.users.routes import user_router
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_application: FastAPI) -> AsyncGenerator:
+    # Startup
     await test_db_connection()
     await init_db()
     yield
-
+    # Shutdown
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -41,5 +35,9 @@ if settings.all_cors_origins:
         allow_headers=["*"],
     )
 
+@app.get("/healthcheck", include_in_schema=False)
+async def healthcheck() -> dict[str, str]:
+    return {"status": "ok"}
+
 # Include routers
-app.include_router(api_router)
+app.include_router(user_router)

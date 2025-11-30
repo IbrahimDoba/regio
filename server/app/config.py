@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from pydantic import (
@@ -65,7 +64,7 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
+    def DATABASE_URL(self) -> PostgresDsn:
         return MultiHostUrl.build(
             scheme="postgresql+asyncpg",
             username=self.POSTGRES_USER,
@@ -76,12 +75,10 @@ class Settings(BaseSettings):
         )
     
     # Initial super user config value
-    SUPERUSER_CODE: str = os.getenv("SUPERUSER_CODE")
-    SUPERUSER_FIRST_NAME: str = os.getenv("SUPERUSER_FIRST_NAME")
-    SUPERUSER_LAST_NAME: str = os.getenv("SUPERUSER_LAST_NAME")
-    SUPERUSER_EMAIL: str = os.getenv("SUPERUSER_EMAIL")
-    SUPERUSER_PASSWORD: str = os.getenv("SUPERUSER_PASSWORD")
+    SYSTEM_SINK_CODE: str = os.getenv("SYSTEM_SINK_CODE")
+    SYSTEM_SINK_FIRST_NAME: str = os.getenv("SYSTEM_SINK_FIRST_NAME")
+    SYSTEM_SINK_LAST_NAME: str = os.getenv("SYSTEM_SINK_LAST_NAME")
+    SYSTEM_SINK_EMAIL: str = os.getenv("SYSTEM_SINK_EMAIL")
+    SYSTEM_SINK_PASSWORD: str = os.getenv("SYSTEM_SINK_PASSWORD")
 
-    DOCUMENTS_ROOT: Path = Path("user_documents")
-
-settings = Settings()  # type: ignore
+settings = Settings()

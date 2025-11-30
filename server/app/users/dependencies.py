@@ -1,0 +1,77 @@
+from typing import Annotated
+
+import jwt
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jwt.exceptions import InvalidTokenError
+
+from app import security
+from app.config import settings
+from app.database import SessionDep
+from app.models import TokenPayload
+from app.users.models import User
+from app.users.service import UserService
+
+# AUTH CONFIG
+reusable_oauth2 = OAuth2PasswordBearer(
+    tokenUrl="/login/access-token"
+)
+
+TokenDep = Annotated[str, Depends(reusable_oauth2)]
+
+# SERVICE DEPENDENCY
+def get_user_service(session: SessionDep) -> UserService:
+    """
+    Dependency to get a UserService instance with an active AsyncSession.
+    """
+    return UserService(session)
+
+UserServiceDep = Annotated[UserService, Depends(get_user_service)]
+
+# USER RETRIEVAL DEPENDENCIES
+async def get_current_user(session: SessionDep, token: TokenDep) -> User:
+    """
+    Decodes the JWT token and fetches the current user from the database.
+    """
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+    except (InvalidTokenError, Exception):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = await session.get(User, token_data.sub)
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    if not user.is_active:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
+    
+    return user
+
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+async def get_current_active_system_admin(current_user: CurrentUser) -> User:
+    """
+    Validates that the current user is a system admin.
+    """
+    if not current_user.is_system_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Action disallowed by current user",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return current_user
+
+CurrentAdmin = Annotated[User, Depends(get_current_active_system_admin)]

@@ -31,15 +31,11 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Import all models here
-from app.models.users import User
-from app.models.posts import Post
-from app.models.accounts import Account
-from app.models.payment_requests import PaymentRequest
-from app.models.transactions import Transaction
+from app.users.models import User
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from app.models.users import SQLModel
+from app.users.models import SQLModel
 target_metadata = SQLModel.metadata
 
 # other values from the config, defined by the needs of env.py,
