@@ -15,3 +15,6 @@ class InvalidInviteCode(Exception):
 
 class InviteCodeDepleted(Exception):
     pass
+
+class AccountNotVerified(Exception):
+    pass
