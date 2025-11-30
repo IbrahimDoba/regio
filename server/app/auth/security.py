@@ -2,7 +2,6 @@ from pwdlib import PasswordHash
 
 
 PASSWORD_HASH = PasswordHash.recommended()
-ALGORITHM = "HS256"
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return PASSWORD_HASH.verify(plain_password, hashed_password)
