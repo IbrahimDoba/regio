@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.auth.utils import set_refresh_cookie
 from app.auth.dependencies import AuthServiceDep
-from app.auth.schemas import Token
+from app.auth.schemas import TokenResponse
 from app.core.schemas import Message
 from app.users.schemas import UserPublic
 from app.users.dependencies import CurrentUser
@@ -18,7 +18,7 @@ from app.auth.exceptions import (
 
 router = APIRouter()
 
-@router.post("/login/access-token", response_model=Token)
+@router.post("/login/access-token", response_model=TokenResponse)
 async def login_access_token(
     response: Response,
     service: AuthServiceDep,
@@ -64,7 +64,7 @@ async def test_token(current_user: CurrentUser) -> Any:
     """
     return current_user
 
-@router.post("/refresh-token", response_model=Token)
+@router.post("/refresh-token", response_model=TokenResponse)
 async def refresh_token(
     response: Response,
     request: Request,
@@ -114,10 +114,12 @@ async def logout(
     if auth_header and auth_header.startswith("Bearer "):
         access_token = auth_header.split(" ")[1]
 
+    # Blacklist the tokens before removing them
     if access_token:
         await service.logout(access_token, refresh_token)
     
-    # Always clear cookie client-side
+    # Clear cookies client-side
     response.delete_cookie("refresh_token")
+    response.delete_cookie("access_token")
     
     return Message(message="Logged out successfully")
