@@ -1,11 +1,14 @@
 import uuid
-from typing import Any
+from typing import Any, List
 
 from fastapi import APIRouter, HTTPException, status
 
+from app.auth.dependencies import AuthServiceDep
+from app.auth.schemas import InvitePublic
 from app.users.schemas import (
     UserCreate, 
     UserPublic, 
+    UsersPublic,
     UserUpdate, 
     UserAdminUpdate,
 )
@@ -23,9 +26,25 @@ from app.users.dependencies import (
     UserServiceDep
 )
 
-user_router = APIRouter()
+router = APIRouter()
 
-@user_router.post("/register", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
+@router.get("", response_model=UsersPublic)
+async def read_users(
+    service: UserServiceDep, 
+    _: CurrentAdmin,
+    skip: int = 0, 
+    limit: int = 100
+) -> Any:
+    """
+    Retrieve users with pagination.
+    """
+    try:
+        return await service.get_users(skip, limit)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.post("/register", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
 async def register_user(
     user_in: UserCreate,
     service: UserServiceDep
@@ -43,7 +62,7 @@ async def register_user(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@user_router.get("/me", response_model=UserPublic)
+@router.get("/me", response_model=UserPublic)
 async def read_user_me(
     current_user: CurrentUser
 ) -> Any:
@@ -53,7 +72,7 @@ async def read_user_me(
     return current_user
 
 
-@user_router.patch("/me", response_model=UserPublic)
+@router.patch("/me", response_model=UserPublic)
 async def update_user_me(
     user_in: UserUpdate,
     current_user: CurrentUser,
@@ -68,9 +87,20 @@ async def update_user_me(
         raise HTTPException(status_code=404, detail="User not found")
     except ImmutableFieldUpdate:
         raise HTTPException(status_code=400, detail="Cannot update real names or other protected fields")
+    
+
+@router.get("/invites", response_model=List[InvitePublic])
+async def read_my_invites(
+    current_user: CurrentUser,
+    service: AuthServiceDep
+) -> Any:
+    """
+    Get all active invite codes for the current user.
+    """
+    return await service.get_user_invites(current_user.id)
 
 
-@user_router.get("/{user_code}", response_model=UserPublic)
+@router.get("/{user_code}", response_model=UserPublic)
 async def read_user_by_code(
     user_code: uuid.UUID,
     _: CurrentAdmin,
@@ -85,7 +115,7 @@ async def read_user_by_code(
     return user
 
 
-@user_router.patch("/admin/{user_code}", response_model=UserPublic)
+@router.patch("/admin/{user_code}", response_model=UserPublic)
 async def update_user_by_admin(
     user_code: uuid.UUID,
     user_in: UserAdminUpdate,
@@ -101,7 +131,7 @@ async def update_user_by_admin(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
-@user_router.patch("/toggle/{user_code}", response_model=UserPublic)
+@router.patch("/toggle/{user_code}", response_model=UserPublic)
 async def toggle_user_active_status(
     user_code: uuid.UUID,
     _: CurrentAdmin,
