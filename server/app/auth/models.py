@@ -34,4 +34,4 @@ class Invite(SQLModel, table=True):
     )
 
     # Relationships
-    # user: "User" = Relationship(back_populates="invites")
+    user: "User" = Relationship(back_populates="invites")

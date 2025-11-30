@@ -32,6 +32,7 @@ if config.config_file_name is not None:
 
 # Import all models here
 from app.users.models import User
+from app.auth.models import Invite
 
 # add your model's MetaData object here
 # for 'autogenerate' support
