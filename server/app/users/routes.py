@@ -115,41 +115,41 @@ async def read_user_by_code(
     return user
 
 
-@router.patch("/admin/{user_code}", response_model=UserPublic)
-async def update_user_by_admin(
-    user_code: uuid.UUID,
-    user_in: UserAdminUpdate,
-    _: CurrentAdmin,
-    service: UserServiceDep
-) -> Any:
-    """
-    Admin: Update user (can edit Real Names and Trust Levels).
-    """
-    try:
-        return await service.admin_update_user(user_code, user_in)
-    except UserNotFound:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+# @router.patch("/admin/{user_code}", response_model=UserPublic)
+# async def update_user_by_admin(
+#     user_code: uuid.UUID,
+#     user_in: UserAdminUpdate,
+#     _: CurrentAdmin,
+#     service: UserServiceDep
+# ) -> Any:
+#     """
+#     Admin: Update user (can edit Real Names and Trust Levels).
+#     """
+#     try:
+#         return await service.admin_update_user(user_code, user_in)
+#     except UserNotFound:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
-@router.patch("/toggle/{user_code}", response_model=UserPublic)
-async def toggle_user_active_status(
-    user_code: uuid.UUID,
-    _: CurrentAdmin,
-    service: UserServiceDep
-) -> Any:
-    """
-    Admin: Toggle a user's active status.
-    """
-    try:
-        # Fetch user first
-        user = await service.get_user_by_code(user_code)
-        if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+# @router.patch("/toggle/{user_code}", response_model=UserPublic)
+# async def toggle_user_active_status(
+#     user_code: uuid.UUID,
+#     _: CurrentAdmin,
+#     service: UserServiceDep
+# ) -> Any:
+#     """
+#     Admin: Toggle a user's active status.
+#     """
+#     try:
+#         # Fetch user first
+#         user = await service.get_user_by_code(user_code)
+#         if not user:
+#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         
-        # Prepare toggle
-        new_status = not user.is_active
-        update_data = UserAdminUpdate(is_active=new_status)
+#         # Prepare toggle
+#         new_status = not user.is_active
+#         update_data = UserAdminUpdate(is_active=new_status)
         
-        return await service.admin_update_user(user_code, update_data)
-    except UserNotFound:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+#         return await service.admin_update_user(user_code, update_data)
+#     except UserNotFound:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
