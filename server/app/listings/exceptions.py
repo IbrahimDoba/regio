@@ -11,3 +11,6 @@ class InvalidCategoryData(ListingException):
 
 class ListingNotFound(ListingException):
     pass
+
+class ListingNotOwned(ListingException):
+    pass
