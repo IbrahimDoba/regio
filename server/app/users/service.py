@@ -10,16 +10,13 @@ from app.users.schemas import UserCreate, UserUpdate, UserAdminUpdate, UsersPubl
 from app.users.exceptions import UserAlreadyExists, UserNotFound, SystemSaturated, ImmutableFieldUpdate
 from app.users.utils import generate_user_code
 
-# from app.banking.service import BankingService
-# from app.auth.service import InviteService
+from app.banking.service import BankingService
+from app.auth.service import AuthService
 # from app.chat.service import ChatService
-# from app.auth.service import AuthService
 
 class UserService:
     def __init__(self, session: AsyncSession):
         self.session = session
-        # self.banking_service = BankingService(session)
-        # self.chat_service = ChatService(session)
 
     async def get_users(self, skip: int = 0, limit: int = 100) -> UsersPublic:
         # Get total number of rows in table
@@ -56,13 +53,11 @@ class UserService:
 
     async def create_user(self, user_in: UserCreate) -> User:
         # Check Email Uniqueness
-        if await self.get_user_by_email(user_in.email):
+        existing_user = await self.get_user_by_email(user_in.email)
+        if existing_user:
             raise UserAlreadyExists()
-        
-        # TODO: Instantiate auth service
-        # auth_service = AuthService(self.session)
 
-        # TODO: Validate and consume invite code
+        # Validate and consume invite code
         # await auth_service.consume_invite(user_in.invite_code)
 
         # Generate Unique User Code (Retry Logic)
@@ -80,32 +75,39 @@ class UserService:
             raise SystemSaturated() # Failed to generate a unique system ID after 10 tries
         
         # Create DB Object
-        db_user = User(
-            user_code=user_code,
-            email=user_in.email,
-            password_hash=get_password_hash(user_in.password),
-            first_name=user_in.first_name,
-            middle_name=user_in.middle_name,
-            last_name=user_in.last_name,
-            address=user_in.address,
-            is_active=True,
-            is_verified=False # Requires video verification later
+        db_user = User.model_validate(
+            user_in, 
+            update={
+                "password_hash": get_password_hash(user_in.password),
+                "user_code": user_code,
+                "is_active": True,  # Active but not verified
+                "is_verified": False # Admin must verify
+            }
         )
-        
-        self.session.add(db_user)
-        await self.session.commit()
-        await self.session.refresh(db_user)
 
-        # Create initial accounts
-        # await self.banking_service.create_initial_accounts(user_id=db_user.id)
+        try:
+            self.session.add(db_user)
+            await self.session.flush() # Generate ID for Banking Accounts
+            
+            # Initialize Banking Accounts
+            banking_service = BankingService(self.session)
+            await banking_service.create_initial_accounts(db_user.id)
+            
+            # Initialize Matrix (Placeholder)
+            # await self.chat_service.create_matrix_user(db_user)
 
-        # Create Matrix account
-        # await self.chat_service.create_matrix_account(user_id=db_user.id)
+            # Generate invite codes for user
+            auth_service = AuthService(self.session)
+            await auth_service.create_user_invites(db_user.id)
 
-        # Generate invite codes for user
-        # await auth_service.create_user_invites(db_user.id)
+            await self.session.commit()
+            await self.session.refresh(db_user)
+            return db_user
+            
+        except Exception as e:
+            await self.session.rollback()
+            raise e
 
-        return db_user
 
     async def update_user(self, user_id: uuid.UUID, user_in: UserUpdate) -> User:
         """
