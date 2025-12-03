@@ -11,7 +11,7 @@ from app.users.enums import TrustLevel, Language
 if TYPE_CHECKING:
     from app.banking.models import Account, Transaction, PaymentRequest
     from app.auth.models import Invite
-    # from app.listings.models import Listing 
+    from app.listings.models import Listing 
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
@@ -57,7 +57,7 @@ class User(SQLModel, table=True):
     )
 
     # ORM relationships
-    # lisitngs: list["Listing"] = Relationship(back_populates="user")
+    listings: list["Listing"] = Relationship(back_populates="owner")
 
     invites: list["Invite"] = Relationship(back_populates="user")
 

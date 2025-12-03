@@ -20,6 +20,7 @@ from app.users.models import User
 # Imports to solve circular dependency error on startup
 from app.banking import models as banking_models
 from app.auth import models as auth_models
+from app.listings import models as listing_models
 
 # Use an async engine
 DATABASE_URL = str(settings.DATABASE_URL)
