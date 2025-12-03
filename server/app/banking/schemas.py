@@ -37,9 +37,15 @@ class TransactionPublic(SQLModel):
     reference: Optional[str] = None
     is_system_fee: bool = False
 
+class TransactionMeta(SQLModel):
+    page: int
+    page_size: int
+    total_count: int
+    total_pages: int
+
 class TransactionHistory(SQLModel):
     data: List[TransactionPublic]
-    count: int
+    meta: TransactionMeta
 
 class PaymentRequestPublic(SQLModel):
     id: uuid.UUID
