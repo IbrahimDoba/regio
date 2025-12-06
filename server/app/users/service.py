@@ -4,11 +4,12 @@ import uuid
 from sqlmodel import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.auth.security import get_password_hash
 from app.users.models import User
 from app.users.enums import VerificationStatus
 from app.users.schemas import UserCreate, UserUpdate, UserAdminUpdate, UsersPublic
-from app.users.exceptions import UserAlreadyExists, UserNotFound, SystemSaturated, ImmutableFieldUpdate
+from app.users.exceptions import UserAlreadyExists, UserNotFound, SystemSaturated, ImmutableFieldUpdate, ActionNotPermitted
 from app.users.utils import generate_user_code
 
 from app.banking.service import BankingService
@@ -198,6 +199,10 @@ class UserService:
         """
         Admin override. Can change names if typo correction is needed.
         """
+        # Prevent system sink user updates
+        if user_code == settings.SYSTEM_SINK_CODE:
+            raise ActionNotPermitted()
+
         db_user = await self.get_user_by_code(user_code)
         if not db_user:
             raise UserNotFound()
