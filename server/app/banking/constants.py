@@ -1,4 +1,6 @@
+from typing import Dict, Tuple
 from decimal import Decimal
+
 from app.users.enums import TrustLevel
 
 # FEES & DEMURRAGE
@@ -9,7 +11,7 @@ DEMURRAGE_RATE_ANNUAL = 0.06
 # TRUST LIMITS
 # Format: {TrustLevel: (TIME_MIN, REGIO_MIN_DECIMAL)}
 # Example: T1 can go down to -60 Minutes and -10.00 Regio
-TRUST_LIMITS = {
+TRUST_LIMITS: Dict[TrustLevel, Tuple[int, Decimal]] = {
     TrustLevel.T1: (-60, Decimal("-10.00")),
     TrustLevel.T2: (-180, Decimal("-30.00")),
     TrustLevel.T3: (-300, Decimal("-50.00")),
