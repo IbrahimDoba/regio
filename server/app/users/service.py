@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 import uuid
 
-from sqlmodel import select, func
+from sqlmodel import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.security import get_password_hash
@@ -50,6 +50,52 @@ class UserService:
         statement = select(User).where(User.user_code == user_code)
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
+    
+    async def search_users(self, query: str, limit: int = 10) -> List[User]:
+        """
+        Public user search for autocomplete.
+        Matches: user_code OR (First Name + Last Name + Middle Name)
+        """
+        # Ensure we don't return system admins or inactive users
+        base_filter = [User.is_active == True, User.is_system_admin == False]
+        
+        # Determine if query is code or name
+        conditions = [
+            User.user_code.ilike(f"{query}%"),
+            User.first_name.ilike(f"%{query}%"),
+            User.middle_name.ilike(f"%{query}%"),
+            User.last_name.ilike(f"%{query}%"),
+        ]
+
+        # Multi-part name matching
+        if " " in query:
+            parts = query.split(" ")
+            if len(parts) >= 2:
+                p0 = parts[0]
+                p1 = parts[1]
+                
+                # Last + First
+                conditions.append(
+                    (User.last_name.ilike(f"%{p0}%")) & (User.first_name.ilike(f"%{p1}%"))
+                )
+                # Last + Middle
+                conditions.append(
+                    (User.last_name.ilike(f"%{p0}%")) & (User.middle_name.ilike(f"%{p1}%"))
+                )
+                # Middle + First
+                conditions.append(
+                    (User.middle_name.ilike(f"%{p0}%")) & (User.first_name.ilike(f"%{p1}%"))
+                )
+        
+        statement = (
+            select(User)
+            .where(*base_filter)
+            .where(or_(*conditions))
+            .limit(limit)
+        )
+        
+        results = await self.session.execute(statement)
+        return results.scalars().all()
 
     async def create_user(self, user_in: UserCreate) -> User:
         # Check Email Uniqueness

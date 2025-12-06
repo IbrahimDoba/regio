@@ -1,7 +1,7 @@
 import uuid
 from typing import Any, List
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Query
 
 from app.auth.dependencies import AuthServiceDep
 from app.auth.schemas import InvitePublic
@@ -9,8 +9,7 @@ from app.users.schemas import (
     UserCreate, 
     UserPublic, 
     UsersPublic,
-    UserUpdate, 
-    UserAdminUpdate,
+    UserUpdate
 )
 
 from app.users.exceptions import (
@@ -42,6 +41,19 @@ async def read_users(
         return await service.get_users(skip, limit)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    
+
+@router.get("/search", response_model=List[UserPublic])
+async def search_users(
+    service: UserServiceDep,
+    _: CurrentUser,
+    q: str = Query(min_length=2),
+    limit: int = 10
+) -> Any:
+    """
+    Search users by name or code for autocomplete.
+    """
+    return await service.search_users(q, limit)
 
 
 @router.post("/register", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
