@@ -44,5 +44,6 @@ class Invite(SQLModel, table=True):
     
     # Relationship to the user who consumed it
     used_by: Optional["User"] = Relationship(
+        back_populates="code_used",
         sa_relationship_kwargs={"foreign_keys": "[Invite.used_by_id]"}
     )
