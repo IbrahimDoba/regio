@@ -8,7 +8,7 @@ from app.banking.enums import TransactionType, PaymentStatus
 from app.users.enums import TrustLevel
 
 # SHARED
-class MoneyAmount(SQLModel):
+class MoneyAmounts(SQLModel):
     time: int
     regio: Decimal
 
@@ -23,7 +23,7 @@ class BalanceResponse(SQLModel):
     user_code: str
     trust_level: TrustLevel
     total_time_earned: int
-    balance: MoneyAmount
+    balance: MoneyAmounts
     limits: AccountLimits
 
 class TransactionPublic(SQLModel):
