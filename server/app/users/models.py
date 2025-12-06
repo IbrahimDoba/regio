@@ -92,3 +92,9 @@ class User(SQLModel, table=True):
             "foreign_keys": "[PaymentRequest.debtor_id]"
         }
     )
+
+    @property
+    def full_name(self) -> str:
+        """Helper to format full name consistently"""
+        parts = [self.last_name, self.middle_name, self.first_name]
+        return " ".join(filter(None, parts))
