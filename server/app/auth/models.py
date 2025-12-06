@@ -28,7 +28,7 @@ class Invite(SQLModel, table=True):
     expires_at: Optional[datetime] = Field(
         default=None,
         sa_type=DateTime(timezone=True),
-        nullable=False
+        nullable=True
     )
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
