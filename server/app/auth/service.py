@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 import jwt
 from sqlmodel import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis 
 
@@ -13,7 +14,7 @@ from app.auth.config import auth_settings
 from app.auth.security import verify_password
 from app.users.models import User
 from app.auth.models import Invite
-from app.auth.schemas import Token
+from app.auth.schemas import Token, InvitePublic
 from app.auth.utils import create_access_token, create_refresh_token, decode_token
 from app.auth.exceptions import (
     InvalidCredentials, 
@@ -138,17 +139,37 @@ class AuthService:
         await self._blacklist_token(access_token)
         if refresh_token:
             await self._blacklist_token(refresh_token)
-
-    async def get_user_invites(self, user_id: uuid.UUID) -> List[Invite]:
+    
+    async def get_user_invites(self, user_id: uuid.UUID) -> List[InvitePublic]:
         """
-        Fetches all active invite codes for the given user.
+        Fetches all invite codes for the user (active and used).
         """
-        statement = select(Invite).where(
-            Invite.owner_id == user_id, 
-            Invite.uses_left > 0
+        # Fetch invites + load the user who used it if it has been used.
+        statement = (
+            select(Invite)
+            .where(Invite.owner_id == user_id)
+            .options(selectinload(Invite.used_by))
+            .order_by(Invite.created_at.desc())
         )
         result = await self.session.execute(statement)
-        return result.all()
+        invites = result.scalars().all()
+        
+        # Map to Schema with "Used By" name logic
+        public_invites = []
+        for inv in invites:
+            used_by_name = None
+            if inv.used_by:
+                used_by_name = inv.used_by.full_name
+
+            public_invites.append(InvitePublic(
+                code=inv.code,
+                uses_left=inv.uses_left,
+                expires_at=str(inv.expires_at) if inv.expires_at else None,
+                is_used=inv.uses_left == 0,
+                used_by_name=used_by_name
+            ))
+            
+        return public_invites
 
     async def consume_invite(self, code: str) -> Invite:
         """

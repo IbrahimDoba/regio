@@ -25,3 +25,7 @@ class InvitePublic(SQLModel):
     code: str
     uses_left: int
     expires_at: Optional[str]
+    
+    # Tracking info
+    is_used: bool
+    used_by_name: Optional[str] = None

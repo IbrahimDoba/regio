@@ -12,10 +12,13 @@ class Invite(SQLModel, table=True):
     __tablename__ = "invites"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    code: str = Field(unique=True, max_length=10, nullable=False)
+    code: str = Field(unique=True, max_length=20, nullable=False)
     
-    # Foreign key to users table
+    # Creator of the invite
     owner_id: uuid.UUID = Field(foreign_key="users.id", nullable=False)
+    
+    # Invite used by who?
+    used_by_id: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
     
     # Usage logic
     uses_left: int = Field(default=1)
@@ -34,4 +37,12 @@ class Invite(SQLModel, table=True):
     )
 
     # Relationships
-    user: "User" = Relationship(back_populates="invites")
+    owner: "User" = Relationship(
+        back_populates="invites", 
+        sa_relationship_kwargs={"foreign_keys": "[Invite.owner_id]"}
+    )
+    
+    # Relationship to the user who consumed it
+    used_by: Optional["User"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Invite.used_by_id]"}
+    )
