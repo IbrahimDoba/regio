@@ -171,11 +171,13 @@ class AuthService:
             
         return public_invites
 
-    async def consume_invite(self, code: str) -> Invite:
+    async def consume_invite(self, code: str, consumer_id: uuid.UUID) -> Invite:
         """
-        Validates and decrements an invite code. 
-        Called by UsersService during registration.
+        Validates, decrements, and links the invite code to the new user.
         """
+        if code.casefold() == 'system'.casefold():
+            raise InvalidInviteCode()
+
         statement = select(Invite).where(Invite.code == code)
         result = await self.session.execute(statement)
         invite = result.scalar_one_or_none()
@@ -186,24 +188,32 @@ class AuthService:
         if invite.uses_left <= 0:
             raise InviteCodeDepleted()
 
-        # Decrement usage
+        # Update Logic
         invite.uses_left -= 1
+        invite.used_by_id = consumer_id
+        
         self.session.add(invite)
-        # Note: Do not commit here. The caller (UserService) should commit 
-        # to ensure User Creation + Invite Consumption happen atomically.
+        # Note: Transaction commit handled by caller (UserService)
         
         return invite
 
     async def create_user_invites(self, user_id: uuid.UUID, amount: int = 3):
         """
-        Generates welcome invites for a new user.
+        Generates welcome invites. Format: REGIO-AB-12345678 (Longer, harder to guess)
         """
         import random, string
         
+        # Fetch user code prefix to personalize it slightly (optional, but requested context)
+        # Or just use random. Let's use a standard format for uniformity.
+        # Format: REGIO-{2 chars from ID}-{8 random chars}
+        
+        user_str = str(user_id).replace("-", "")
+        prefix = user_str[:2].upper()
+        
         for _ in range(amount):
-            # Simple code generation: UserID snippet + Random
-            suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-            code = f"{str(user_id)[:2].upper()}{suffix}"
+            # 8 char random suffix
+            suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            code = f"REGIO-{prefix}-{suffix}"
             
             invite = Invite(
                 code=code,

@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, status, Query
 
 from app.auth.dependencies import AuthServiceDep
 from app.auth.schemas import InvitePublic
+from app.auth.exceptions import InvalidInviteCode
 from app.users.schemas import (
     UserCreate, 
     UserPublic, 
@@ -70,8 +71,10 @@ async def register_user(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already taken")
     except SystemSaturated:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="System capacity reached, failed to generate unique user code")
+    except InvalidInviteCode:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid invite code")
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @router.get("/me", response_model=UserPublic)

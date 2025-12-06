@@ -103,9 +103,6 @@ class UserService:
         if existing_user:
             raise UserAlreadyExists()
 
-        # Validate and consume invite code
-        # await auth_service.consume_invite(user_in.invite_code)
-
         # Generate Unique User Code (Retry Logic)
         user_code = generate_user_code()
         retries = 10
@@ -133,18 +130,27 @@ class UserService:
 
         try:
             self.session.add(db_user)
-            await self.session.flush() # Generate ID for Banking Accounts
+            await self.session.flush() # Generate ID
+
+            # Initialize Invites & CONSUME USED INVITE
+            auth_service = AuthService(self.session)
             
-            # Initialize Banking Accounts
+            # Mark the invite they used as consumed and link it to them
+            if user_in.invite_code:
+                await auth_service.consume_invite(
+                    code=user_in.invite_code, 
+                    consumer_id=db_user.id
+                )
+            
+            # Create 3 new invites for this new user
+            await auth_service.create_user_invites(db_user.id)
+
+            # Initialize Banking Accounts after verifying invite
             banking_service = BankingService(self.session)
             await banking_service.create_initial_accounts(db_user.id)
-            
+
             # Initialize Matrix (Placeholder)
             # await self.chat_service.create_matrix_user(db_user)
-
-            # Generate invite codes for user
-            auth_service = AuthService(self.session)
-            await auth_service.create_user_invites(db_user.id)
 
             await self.session.commit()
             await self.session.refresh(db_user)
@@ -153,7 +159,6 @@ class UserService:
         except Exception as e:
             await self.session.rollback()
             raise e
-
 
     async def update_user(self, user_id: uuid.UUID, user_in: UserUpdate) -> User:
         """
