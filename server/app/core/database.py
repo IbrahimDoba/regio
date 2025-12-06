@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_asyn
 from app.core.config import settings
 from app.auth.security import get_password_hash
 from app.users.config import user_settings
-from app.users.enums import TrustLevel
+from app.users.enums import TrustLevel, VerificationStatus
 from app.users.service import UserService
 
 from app.users.models import User
@@ -99,6 +99,7 @@ async def init_db() -> None:
                     address="SYSTEM",
                     invite_code=user_settings.SYSTEM_INVITE_CODE, # Bypass invite check for system init
                     is_verified=True,
+                    verification_status=VerificationStatus.VERIFIED,
                     is_active=True,
                     is_system_admin=True,
                     trust_level=TrustLevel.T6
