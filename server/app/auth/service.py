@@ -180,9 +180,9 @@ class AuthService:
         import random, string
         
         for _ in range(amount):
-            # Simple code generation: UserID snippet + Random
+            # Simple code generation: UserID snippet-REGIO + Random
             suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-            code = f"{str(user_id)[:2].upper()}{suffix}"
+            code = f"{str(user_id)[:2].upper()}-REGIO-{suffix}"
             
             invite = Invite(
                 code=code,
