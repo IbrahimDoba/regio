@@ -18,9 +18,15 @@ class Tag(SQLModel, table=True):
     
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(unique=True, nullable=False)
+    
+    # Translations
+    name_de: Optional[str] = None
+    name_en: Optional[str] = None
+    name_hu: Optional[str] = None
+
     category_filter: Optional[str] = None
     
-    is_official: bool = Field(default=False) # True = Admin/System Approved
+    is_official: bool = Field(default=False) # False = User suggested (Pending), True = Approved
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -34,9 +40,8 @@ class Listing(SQLModel, table=True):
     status: ListingStatus = Field(default=ListingStatus.ACTIVE, index=True)
 
     # CONTENT (Translated)
-    # We store the inputs here. AI Translation fills the others.
     title_original: str = Field(max_length=150)
-    description_original: str = Field(sa_type=String) # Unlimited text
+    description_original: str = Field(sa_type=String)
     
     # Translations (Populated by Service/Worker)
     title_en: Optional[str] = None
