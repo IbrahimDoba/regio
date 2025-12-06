@@ -1,7 +1,7 @@
 from decimal import Decimal
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 from sqlalchemy.orm import selectinload
 from sqlmodel import select, update, func, or_
@@ -12,7 +12,7 @@ from app.users.models import User
 from app.users.enums import TrustLevel
 from app.banking.models import Account, Transaction, PaymentRequest
 from app.banking.enums import Currency, PaymentStatus, TransactionType
-from app.banking.schemas import TransactionPublic, TransactionHistory, TransactionMeta
+from app.banking.schemas import TransactionPublic, TransactionHistory, TransactionMeta, PaymentRequestPublic
 
 from app.banking.constants import (
     MONTHLY_FEE_MINUTES,
@@ -96,7 +96,7 @@ class BankingService:
         reference: str,
         payment_request_id: Optional[uuid.UUID] = None,
         skip_limit_check: bool = False
-    ) -> Transaction:
+    ) -> TransactionPublic:
         # Input Validation
         self._validate_transaction_amounts(amount_time, amount_regio)
         if sender_code == receiver_code:
@@ -189,33 +189,49 @@ class BankingService:
         await self.session.commit() 
         await self.session.refresh(transaction)
 
-        # Attach objects to transaction to avoid lazy loading issues in the route
-        transaction.receiver = receiver
-        transaction.sender = sender
-
-        return transaction
+        # Return Schema immediately (Decoupling)
+        return TransactionPublic(
+            id=transaction.id,
+            date=transaction.created_at,
+            type=TransactionType.OUTGOING, # Context is always the initiator
+            other_party_code=receiver.user_code,
+            other_party_name=receiver.full_name,
+            amount_time=transaction.amount_time,
+            amount_regio=transaction.amount_regio,
+            reference=transaction.reference,
+            is_system_fee=False
+        )
 
     async def get_transaction_history(
         self, 
-        user: User,
+        user: User, 
         page: int = 1, 
-        page_size: int = 50
-    ) -> Dict[str, Any]:
+        page_size: int = 50,
+        days: Optional[int] = None
+    ) -> TransactionHistory:
         """
         Returns transaction history transformed for the specific viewer (user).
         """
         skip = (page - 1) * page_size
 
-        # Count Query
-        count_statement = select(func.count()).where(
-            or_(Transaction.sender_id == user.id, Transaction.receiver_id == user.id)
-        )
-        total_count: int = (await self.session.execute(count_statement)).one()[0]
+        # Base filter condition
+        conditions = [or_(Transaction.sender_id == user.id, Transaction.receiver_id == user.id)]
+        
+        # Date filter
+        if days:
+            cutoff_date = datetime.now(timezone.UTC) - timedelta(days=days)
+            conditions.append(Transaction.created_at >= cutoff_date)
 
-        # Data Query - Eager load Sender/Receiver to map codes
+        # Count Query
+        count_statement = select(func.count()).where(*conditions)
+        total_count = (await self.session.execute(count_statement)).one()[0]
+        
+        total_pages = (total_count + page_size - 1) // page_size
+
+        # Data Query
         statement = (
             select(Transaction)
-            .where(or_(Transaction.sender_id == user.id, Transaction.receiver_id == user.id))
+            .where(*conditions)
             .options(selectinload(Transaction.sender), selectinload(Transaction.receiver))
             .order_by(Transaction.created_at.desc())
             .offset(skip)
@@ -223,7 +239,6 @@ class BankingService:
         )
         transactions = (await self.session.execute(statement)).scalars().all()
 
-        # Transformation Logic
         formatted_data = []
         for tx in transactions:
             is_outgoing = tx.sender_id == user.id
@@ -234,15 +249,12 @@ class BankingService:
                 date=tx.created_at,
                 type=TransactionType.OUTGOING if is_outgoing else TransactionType.INCOMING,
                 other_party_code=other_party.user_code,
-                other_party_name=f"{other_party.first_name} {other_party.last_name}",
+                other_party_name=other_party.full_name,
                 amount_time=tx.amount_time,
                 amount_regio=tx.amount_regio,
                 reference=tx.reference,
                 is_system_fee=tx.is_system_fee
             ))
-
-        # Calculate Total Pages
-        total_pages = (total_count + page_size - 1) // page_size
 
         return TransactionHistory(
             data=formatted_data,
@@ -286,7 +298,7 @@ class BankingService:
         amount_time: int,
         amount_regio: Decimal,
         description: str
-    ) -> PaymentRequest:
+    ) -> PaymentRequestPublic:
         self._validate_transaction_amounts(amount_time, amount_regio)
         if creditor_code == debtor_code:
             raise SelfTransferError()
@@ -306,11 +318,19 @@ class BankingService:
         await self.session.commit()
         await self.session.refresh(req)
 
-        # Attach objects for immediate UI usage (e.g. showing names in response)
-        req.creditor = creditor
-        req.debtor = debtor
-        
-        return req
+        # Construct and return Schema immediately
+        return PaymentRequestPublic(
+            id=req.id,
+            creditor_code=creditor.user_code,
+            creditor_name=creditor.full_name,
+            debtor_code=debtor.user_code,
+            debtor_name=debtor.full_name,
+            amount_time=req.amount_time,
+            amount_regio=req.amount_regio,
+            description=req.description,
+            status=req.status,
+            created_at=req.created_at
+        )
 
     async def get_incoming_payment_requests(self, user: User) -> List[PaymentRequest]:
         """Requests where the user is the DEBTOR (needs to pay)."""
@@ -321,6 +341,36 @@ class BankingService:
             .order_by(PaymentRequest.created_at.desc())
         )
         return (await self.session.execute(stmt)).scalars().all()
+    
+    async def get_outgoing_payment_requests(self, user: User) -> List[PaymentRequest]:
+        """Requests where the user is the CREDITOR (waiting for payment)."""
+        stmt = (
+            select(PaymentRequest)
+            .where(PaymentRequest.creditor_id == user.id, PaymentRequest.status == PaymentStatus.PENDING)
+            .options(selectinload(PaymentRequest.debtor)) # Load debtor for UI display ("To: Sarah")
+            .order_by(PaymentRequest.created_at.desc())
+        )
+        return (await self.session.execute(stmt)).scalars().all()
+
+    async def cancel_payment_request(self, request_id: uuid.UUID, creditor_id: uuid.UUID) -> PaymentRequest:
+        """Allows the Creditor to cancel their own request."""
+        stmt = select(PaymentRequest).where(PaymentRequest.id == request_id)
+        req = (await self.session.execute(stmt)).scalar_one_or_none()
+        
+        if not req:
+            raise PaymentRequestNotFound()
+            
+        # Ensure only the creator can cancel
+        if req.creditor_id != creditor_id:
+            raise UnauthorizedPaymentRequestAccess()
+
+        if req.status != PaymentStatus.PENDING:
+            raise InvalidPaymentRequestStatus(req.status)
+            
+        req.status = PaymentStatus.CANCELLED
+        self.session.add(req)
+        await self.session.commit()
+        return req
 
     async def process_payment_request(
         self, 
