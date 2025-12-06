@@ -1,4 +1,6 @@
 import uuid
+import string
+import random
 from typing import Optional, List
 from datetime import datetime, timezone
 
@@ -45,7 +47,7 @@ class AuthService:
         if not user.is_active:
             raise AccountInactive()
         
-        if not user.verification_status != VerificationStatus.VERIFIED:
+        if user.verification_status != VerificationStatus.VERIFIED:
             raise AccountNotVerified()
 
         # Generate Tokens
@@ -151,6 +153,7 @@ class AuthService:
             .where(Invite.owner_id == user_id)
             .options(selectinload(Invite.used_by))
             .order_by(Invite.created_at.desc())
+            .limit(3) # Limit to three most recent invites
         )
         result = await self.session.execute(statement)
         invites = result.scalars().all()
@@ -171,6 +174,34 @@ class AuthService:
             ))
             
         return public_invites
+    
+    async def request_invites(self, user_id: uuid.UUID) -> List[InvitePublic]:
+        """
+        Fetches a user's unused invites, immediately renders them as used and creates 3 new ones.
+        """
+        # Fetch invites + load the user who used it if it has been used.
+        statement = select(Invite).where(
+            Invite.owner_id == user_id, 
+            Invite.uses_left > 0 # Only invites that have been used
+        )
+        results = await self.session.execute(statement)
+        active_invites = results.scalars().all()
+        
+        # Void all the active invites
+        for inv in active_invites:
+            inv.uses_left = 0
+            # We do NOT set used_by_id, so used_by_name remains None 
+            # (UI will see it as used/expired but without a name)
+            self.session.add(inv)
+            
+        # Generate 3 new invites
+        await self.create_user_invites(user_id)
+        
+        # Commit all changes
+        await self.session.commit()
+        
+        # Return the fresh list (which will pick up the 3 new ones due to order_by desc)
+        return await self.get_user_invites(user_id)
 
     async def consume_invite(self, code: str, consumer_id: uuid.UUID) -> Invite:
         """
@@ -191,18 +222,17 @@ class AuthService:
 
         # Update Logic
         invite.uses_left -= 1
-        invite.used_by_id = consumer_id
+        invite.used_by_id = consumer_id # Attach ID of user that used invite
         
         self.session.add(invite)
         # Note: Transaction commit handled by caller (UserService)
         
         return invite
 
-    async def create_user_invites(self, user_id: uuid.UUID, amount: int = 3):
+    async def create_user_invites(self, user_id: uuid.UUID, amount: int = 3) -> None:
         """
         Generates welcome invites. Format: REGIO-AB-12345678 (Longer, harder to guess)
         """
-        import random, string
         
         # Fetch user code prefix to personalize it slightly (optional, but requested context)
         # Or just use random. Let's use a standard format for uniformity.
