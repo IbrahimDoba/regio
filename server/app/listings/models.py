@@ -27,7 +27,10 @@ class Tag(SQLModel, table=True):
     category_filter: Optional[str] = None
     
     is_official: bool = Field(default=False) # False = User suggested (Pending), True = Approved
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_type=DateTime(timezone=True)
+    )
 
 
 class Listing(SQLModel, table=True):
