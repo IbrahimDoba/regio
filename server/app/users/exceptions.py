@@ -14,3 +14,6 @@ class ImmutableFieldUpdate(Exception):
 class SystemSaturated(Exception):
     """Raised when unique code generation fails repeatedly."""
     pass
+
+class ActionNotPermitted(Exception):
+    pass
