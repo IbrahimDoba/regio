@@ -26,6 +26,9 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url="/openapi.json",
     lifespan=lifespan,
+    docs_url=None if settings.ENVIRONMENT == 'production' else '/docs',
+    redoc_url=None if settings.ENVIRONMENT == 'production' else '/redoc',
+    # openapi_external_docs=None if settings.ENVIRONMENT == 'production' else '/openapi.json',
 )
 
 # Set all CORS enabled origins
