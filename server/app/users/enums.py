@@ -12,3 +12,9 @@ class Language(StrEnum):
     EN = "EN"
     DE = "DE"
     HU = "HU"
+
+class VerificationStatus(StrEnum):
+    PENDING = "PENDING"
+    VERIFIED = "VERIFIED"
+    REJECTED = "REJECTED"
+    ACTION_REQUIRED = "ACTION_REQUIRED"

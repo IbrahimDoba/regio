@@ -6,7 +6,7 @@ from sqlmodel import Field, SQLModel, Relationship
 from sqlalchemy import DateTime
 from pydantic import EmailStr
 
-from app.users.enums import TrustLevel, Language
+from app.users.enums import TrustLevel, Language, VerificationStatus
 
 if TYPE_CHECKING:
     from app.banking.models import Account, Transaction, PaymentRequest
@@ -32,12 +32,25 @@ class User(SQLModel, table=True):
     middle_name: Optional[str] = Field(default=None, max_length=100)
     last_name: str = Field(max_length=100)
 
-    # Additional data
+    # Profile Data
+    avatar_url: Optional[str] = Field(default=None, description="URL to profile image (R2)")
+    bio: Optional[str] = Field(default=None, max_length=500, description="Short about me")
     address: str = Field(max_length=255)
     language: Language = Field(default=Language.EN)
 
+    # Notification Settings
+    notif_email_digest: bool = Field(default=True)
+    notif_push: bool = Field(default=True)
+    notif_newsletter: bool = Field(default=False)
+
     # Status
     is_verified: bool = Field(default=False)
+    verification_status: VerificationStatus = Field(default=VerificationStatus.PENDING)
+    verified_at: Optional[datetime] = Field(
+        default=None, 
+        sa_type=DateTime(timezone=True),
+        description="When the user account was verified."
+    )
     is_active: bool = Field(default=True)
     is_system_admin: bool = Field(default=False)
 
