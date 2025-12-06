@@ -113,7 +113,7 @@ class BankingService:
         receiver_time_acc = await self._get_account_or_fail(receiver.id, Currency.TIME)
         receiver_regio_acc = await self._get_account_or_fail(receiver.id, Currency.REGIO)
 
-        # Limit Checks
+        # Limit Checks (VERY IMPORTANT)
         if not skip_limit_check:
             limits = TRUST_LIMITS.get(sender.trust_level, TRUST_LIMITS[TrustLevel.T1])
             limit_time_min, limit_regio_min = limits
@@ -122,10 +122,10 @@ class BankingService:
             potential_regio_bal = sender_regio_acc.balance_regio - amount_regio
 
             if potential_time_bal < limit_time_min:
-                 raise InsufficientFunds("TIME", potential_time_bal, limit_time_min)
+                raise InsufficientFunds("TIME", potential_time_bal, limit_time_min)
             
             if potential_regio_bal < limit_regio_min:
-                 raise InsufficientFunds("REGIO", float(potential_regio_bal), float(limit_regio_min))
+                raise InsufficientFunds("REGIO", float(potential_regio_bal), float(limit_regio_min))
 
         # Optimistic Locking Updates
         # Update Sender TIME
@@ -359,7 +359,7 @@ class BankingService:
             await self.session.commit()
             return req
         else:
-             raise ValueError("Invalid Action")
+            raise ValueError("Invalid Action")
 
     # CRON / SYSTEM JOBS
     # (Kept mostly same, just update to use new transfer_funds signature if needed)
@@ -435,4 +435,7 @@ class BankingService:
             self.session.add(acc)
         
         await self.session.commit()
-        return {"processed_users": processed_count, "total_minutes_collected": total_minutes}
+        return {
+            "processed_users": processed_count, 
+            "total_minutes_collected": total_minutes
+        }
