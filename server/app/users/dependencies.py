@@ -15,7 +15,7 @@ from app.users.enums import VerificationStatus
 
 # AUTH CONFIG
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl="/login/access-token"
+    tokenUrl="/auth/login/access-token"
 )
 
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
@@ -56,7 +56,7 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
         )
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
-    if not user.verification_status != VerificationStatus.VERIFIED:
+    if user.verification_status != VerificationStatus.VERIFIED:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="User not verified",
