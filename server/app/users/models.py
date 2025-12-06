@@ -72,22 +72,9 @@ class User(SQLModel, table=True):
     # ORM relationships
     listings: list["Listing"] = Relationship(back_populates="owner")
 
-    accounts: list["Account"] = Relationship(back_populates="user")
+    invites: list["Invite"] = Relationship(back_populates="user")
 
-    invites: list["Invite"] = Relationship(
-        back_populates="owner",
-        sa_relationship_kwargs={
-            "lazy": "selectin",
-            "foreign_keys": "[Invite.owner_id]" 
-        }
-    )
-    code_used: Optional["Invite"] = Relationship(
-        back_populates="used_by",
-        sa_relationship_kwargs={
-            "lazy": "selectin",
-            "foreign_keys": "[Invite.used_by_id]" 
-        }
-    )
+    accounts: list["Account"] = Relationship(back_populates="user")
 
     outgoing_tx: list["Transaction"] = Relationship(
         back_populates="sender",
