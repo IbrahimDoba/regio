@@ -97,7 +97,7 @@ async def init_db() -> None:
                     first_name=user_settings.SYSTEM_SINK_FIRST_NAME,
                     last_name=user_settings.SYSTEM_SINK_LAST_NAME,
                     address="SYSTEM",
-                    invite_code="SYSTEM", # Bypass invite check for system init
+                    invite_code=settings.SYSTEM_INVITE_CODE, # Bypass invite check for system init
                     is_verified=True,
                     is_active=True,
                     is_system_admin=True,
