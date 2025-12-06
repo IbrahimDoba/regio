@@ -10,53 +10,105 @@ from app.users.dependencies import CurrentUser
 
 router = APIRouter()
 
-@router.post("/", response_model=ListingPublic)
+@router.post("/", response_model=ListingPublic, status_code=status.HTTP_201_CREATED, responses={
+    status.HTTP_400_BAD_REQUEST: {"description": "Validation failed (e.g. missing category attributes)."},
+    status.HTTP_401_UNAUTHORIZED: {"description": "User is not authenticated."},
+    status.HTTP_404_NOT_FOUND: {"description": "Resource not found error during creation."},
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+})
 async def create_listing(
     data: ListingCreate,
     current_user: CurrentUser,
     service: ListingServiceDep
 ) -> Any:
     """
-    Create a new listing. 
-    'attributes' field validates based on 'category'.
+    Create a new listing.
+    
+    Validates the 'attributes' field dynamically based on the provided 'category'.
     """
-    try:
-        # We assume service returns the ORM object, we might need to map it manually 
-        # to ListingPublic to handle the "owner_name" logic, or let Pydantic try.
-        # For safety, let's create the response dict manually or update Service to return schema.
-        # Here we rely on the service saving it and we refetch or construct response.
-        
+    try:       
         listing = await service.create_listing(current_user, data)
 
-        return listing
+        formatted_listing = await service.format_listing(listing)
+
+        return formatted_listing
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     
-@router.get("/{listing_id}", response_model=ListingPublic)
+@router.get("/feed", response_model=FeedResponse, status_code=status.HTTP_200_OK, responses={
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+})
+async def get_feed(
+    service: ListingServiceDep,
+    categories: Optional[List[ListingCategory]] = Query(None, description="Filter by one or more listing categories."),
+    q: Optional[str] = Query(None, description="Search term for titles and descriptions."),
+    tags: Optional[List[str]] = Query(None, description="Filter by specific tags."),
+    offset: int = Query(0, ge=0, description="Pagination offset (skip N items).")
+) -> Any:
+    """
+    Main Feed. 
+    
+    Supports filtering by multiple categories, tags, text search, and pagination.
+    """
+    return await service.get_feed(
+        categories=categories,
+        search_query=q,
+        tags=tags,
+        offset=offset
+    )
+
+@router.get("/tags", response_model=List[TagPublic], status_code=status.HTTP_200_OK, responses={
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+})
+async def autocomplete_tags(
+    q: str,
+    service: ListingServiceDep
+) -> Any:
+    """
+    Search tags for autocomplete.
+    
+    Returns a list of tags matching the query string 'q'.
+    """
+    return await service.search_tags(q)
+    
+@router.get("/{listing_id}", response_model=ListingPublic, status_code=status.HTTP_200_OK, responses={
+    status.HTTP_404_NOT_FOUND: {"description": "Listing not found."},
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+})
 async def get_listing_by_id(
     service: ListingServiceDep, 
     listing_id: uuid.UUID
 ) -> Any:
     """
-    Get a listing by it's ID for display on it's standalone page.
+    Get a listing by its ID.
+    
+    Fetches the full details of a listing for display on its standalone page.
     """
 
     try:
         # Get listing ORM object
         listing = await service.get_listing(listing_id)
 
-        return listing
+        formatted_listing = await service.format_listing(listing)
+
+        return formatted_listing
     except ListingNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found")
     
-@router.delete("/{listing_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{listing_id}", status_code=status.HTTP_204_NO_CONTENT, responses={
+    status.HTTP_404_NOT_FOUND: {"description": "Listing to be deleted was not found."},
+    status.HTTP_403_FORBIDDEN: {"description": "When a user that does not own the listing attempts to delete it."},
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."},
+})
 async def delete_listing_by_id(
     service: ListingServiceDep, 
     listing_id: uuid.UUID,
     current_user: CurrentUser
 ) -> None:
     """
-    Delete a listing by its ID. Only allowed by listing's owner and admins.
+    Delete a listing by its ID. 
+    
+    Only allowed by listing's owner and admins. Action is irreversible.
     """
 
     try:
@@ -73,7 +125,13 @@ async def delete_listing_by_id(
             detail="You do not have permission to delete this listing"
         )
 
-@router.patch("/{listing_id}", response_model=ListingPublic)
+@router.patch("/{listing_id}", response_model=ListingPublic, status_code=status.HTTP_200_OK, responses={
+    status.HTTP_400_BAD_REQUEST: {"description": "Validation error in update data."},
+    status.HTTP_401_UNAUTHORIZED: {"description": "User is not authenticated."},
+    status.HTTP_403_FORBIDDEN: {"description": "User does not own the listing."},
+    status.HTTP_404_NOT_FOUND: {"description": "Listing not found."},
+    status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+})
 async def update_listing(
     listing_id: uuid.UUID,
     update_data: ListingUpdate,
@@ -82,38 +140,15 @@ async def update_listing(
 ) -> Any:
     """
     Edit an existing listing.
+    
+    Accepts partial updates. Only the owner can perform this action.
     """
     try:
-        return await service.update_listing(listing_id, current_user, update_data)
+        listing = await service.update_listing(listing_id, current_user, update_data)
+        formatted_listing = await service.format_listing(listing)
+
+        return formatted_listing
     except ListingNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found")
     except ListingNotOwned:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not own this listing")
-
-@router.get("/feed", response_model=List[ListingPublic])
-async def get_feed(
-    service: ListingServiceDep,
-    categories: Optional[List[ListingCategory]] = Query(None),
-    q: Optional[str] = None,
-    tags: Optional[List[str]] = Query(None),
-    offset: int = 0
-) -> Any:
-    """
-    Main Feed. Supports filtering by multiple categories, tags, and text search.
-    """
-    return await service.get_feed(
-        categories=categories,
-        search_query=q,
-        tags=tags,
-        offset=offset
-    )
-
-@router.get("/tags", response_model=List[TagPublic])
-async def autocomplete_tags(
-    q: str,
-    service: ListingServiceDep
-) -> Any:
-    """
-    Search tags for autocomplete.
-    """
-    return await service.search_tags(q)
