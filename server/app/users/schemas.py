@@ -4,14 +4,15 @@ from typing import Optional
 from sqlmodel import SQLModel
 from pydantic import EmailStr, Field
 
-from app.users.enums import TrustLevel
+from app.users.enums import TrustLevel, VerificationStatus
 
 
 """Base model with shared properties."""
 class UserBase(SQLModel):
     email: EmailStr
     is_active: bool = True
-    is_verified: bool = False
+    # is_verified: bool = False
+    verification_status: VerificationStatus.PENDING
     trust_level: TrustLevel = TrustLevel.T1
 
 """Validation and API models."""
@@ -38,7 +39,8 @@ class UserAdminUpdate(UserUpdate):
     Fields only admins can touch.
     """
     is_active: Optional[bool] = None
-    is_verified: Optional[bool] = None
+    # is_verified: Optional[bool] = None
+    verification_status: Optional[VerificationStatus] = None
     trust_level: Optional[TrustLevel] = None
     first_name: Optional[str] = None 
     last_name: Optional[str] = None

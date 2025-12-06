@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.security import get_password_hash
 from app.users.models import User
+from app.users.enums import VerificationStatus
 from app.users.schemas import UserCreate, UserUpdate, UserAdminUpdate, UsersPublic
 from app.users.exceptions import UserAlreadyExists, UserNotFound, SystemSaturated, ImmutableFieldUpdate
 from app.users.utils import generate_user_code
@@ -124,7 +125,8 @@ class UserService:
                 "password_hash": get_password_hash(user_in.password),
                 "user_code": user_code,
                 "is_active": True,  # Active but not verified
-                "is_verified": False # Admin must verify
+                # "is_verified": False,
+                "verification_status": VerificationStatus.PENDING # Admin must verify
             }
         )
 
@@ -173,7 +175,8 @@ class UserService:
         # ENFORCEMENT OF IMMUTABILITY
         immutable_fields = {
             "first_name", "last_name", "middle_name", 
-            "user_code", "trust_level", "is_verified", "is_system_admin"
+            "user_code", "trust_level", "verification_status", "is_system_admin"
+            # "is_verified"
         }
         
         # Check if any forbidden key exists in the update payload

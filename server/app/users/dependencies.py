@@ -11,6 +11,7 @@ from app.core.database import SessionDep
 from app.auth.schemas import TokenPayload
 from app.users.models import User
 from app.users.service import UserService
+from app.users.enums import VerificationStatus
 
 # AUTH CONFIG
 reusable_oauth2 = OAuth2PasswordBearer(
@@ -55,6 +56,12 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
         )
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
+    if not user.verification_status != VerificationStatus.VERIFIED:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="User not verified",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
     
     return user
 

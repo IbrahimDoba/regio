@@ -44,7 +44,7 @@ class User(SQLModel, table=True):
     notif_newsletter: bool = Field(default=False)
 
     # Status
-    is_verified: bool = Field(default=False)
+    # is_verified: bool = Field(default=False)
     verification_status: VerificationStatus = Field(default=VerificationStatus.PENDING)
     verified_at: Optional[datetime] = Field(
         default=None, 

@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.auth.config import auth_settings
 from app.auth.security import verify_password
 from app.users.models import User
+from app.users.enums import VerificationStatus
 from app.auth.models import Invite
 from app.auth.schemas import Token, InvitePublic
 from app.auth.utils import create_access_token, create_refresh_token, decode_token
@@ -44,7 +45,7 @@ class AuthService:
         if not user.is_active:
             raise AccountInactive()
         
-        if not user.is_verified:
+        if not user.verification_status != VerificationStatus.VERIFIED:
             raise AccountNotVerified()
 
         # Generate Tokens
