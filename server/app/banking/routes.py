@@ -87,7 +87,7 @@ async def transfer_funds(
             date=tx.created_at,
             type="OUTGOING",
             other_party_code=request.receiver_code,
-            other_party_name="Recipient", # Ideally fetched, but keeping it fast for now
+            other_party_name=f" ".join(filter(None, [tx.receiver.last_name, tx.receiver.middle_name, tx.receiver.first_name])),
             amount_time=tx.amount_time,
             amount_regio=tx.amount_regio,
             reference=tx.reference
@@ -128,9 +128,9 @@ async def create_payment_request(
         return PaymentRequestPublic(
             id=req.id,
             creditor_code=current_user.user_code,
-            creditor_name=f"{current_user.first_name} {current_user.last_name}",
+            creditor_name=" ".join(filter(None, [current_user.last_name, current_user.middle_name, current_user.first_name])),
             debtor_code=data.debtor_code,
-            debtor_name="Debtor", # Placeholder if lazy loaded
+            debtor_name=" ".join(filter(None, [req.debtor.first_name, req.debtor.middle_name, req.debtor.last_name])),
             amount_time=req.amount_time,
             amount_regio=req.amount_regio,
             description=req.description,

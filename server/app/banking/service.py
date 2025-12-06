@@ -188,6 +188,11 @@ class BankingService:
         
         await self.session.commit() 
         await self.session.refresh(transaction)
+
+        # Attach objects to transaction to avoid lazy loading issues in the route
+        transaction.receiver = receiver
+        transaction.sender = sender
+
         return transaction
 
     async def get_transaction_history(
@@ -300,6 +305,11 @@ class BankingService:
         self.session.add(req)
         await self.session.commit()
         await self.session.refresh(req)
+
+        # Attach objects for immediate UI usage (e.g. showing names in response)
+        req.creditor = creditor
+        req.debtor = debtor
+        
         return req
 
     async def get_incoming_payment_requests(self, user: User) -> List[PaymentRequest]:
