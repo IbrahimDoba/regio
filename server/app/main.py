@@ -11,6 +11,7 @@ from app.users.routes import router as user_router
 from app.auth.routes import router as auth_router
 from app.banking.routes import router as banking_router
 from app.listings.routes import router as listing_router
+from app.admin.routes import router as admin_router
 
 
 @asynccontextmanager
@@ -43,6 +44,7 @@ async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
 # Include routers
+app.include_router(admin_router, prefix="/admin", tags=["admin"])
 app.include_router(user_router, prefix="/users", tags=["users"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(banking_router, prefix="/banking", tags=["banking"])
