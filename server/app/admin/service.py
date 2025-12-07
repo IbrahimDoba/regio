@@ -1,8 +1,8 @@
-from typing import List, Optional
+from typing import List
 import uuid
 from decimal import Decimal
 
-from sqlmodel import select, func, col, or_, desc
+from sqlmodel import select, func, or_, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -12,6 +12,7 @@ from app.banking.models import Account, PaymentRequest
 from app.banking.enums import Currency, PaymentStatus
 from app.listings.models import Tag, Listing
 from app.listings.enums import ListingStatus
+from app.listings.exceptions import TagNotFound
 from app.admin.schemas import SystemStats, UserAdminView, UserListResponse, TagAdminUpdate, BroadcastCreate, DisputePublic, TagAdminView
 
 class AdminService:
@@ -160,7 +161,7 @@ class AdminService:
     async def update_tag(self, tag_id: uuid.UUID, update_data: TagAdminUpdate):
         tag = await self.session.get(Tag, tag_id)
         if not tag:
-            return None
+            raise TagNotFound()
         
         data = update_data.model_dump(exclude_unset=True)
         tag.sqlmodel_update(data)
@@ -172,11 +173,11 @@ class AdminService:
 
     async def delete_tag(self, tag_id: uuid.UUID):
         tag = await self.session.get(Tag, tag_id)
-        if tag:
-            await self.session.delete(tag)
-            await self.session.commit()
-            return True
-        return False
+        if not tag:
+            raise TagNotFound()
+        await self.session.delete(tag)
+        await self.session.commit()
+        # No return, route returns 204 (no content)
 
     # BROADCAST
     async def send_broadcast(self, data: BroadcastCreate):
