@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Optional, List
+from typing import Optional, List, Sequence
 import uuid
 from datetime import datetime, timezone, timedelta
 
@@ -29,7 +29,8 @@ from app.banking.exceptions import (
     TransactionConflict,
     PaymentRequestNotFound,
     InvalidPaymentRequestStatus,
-    UnauthorizedPaymentRequestAccess
+    UnauthorizedPaymentRequestAccess,
+    InvalidPaymentAction
 )
 from app.users.exceptions import UserNotFound
 
@@ -331,26 +332,57 @@ class BankingService:
             status=req.status,
             created_at=req.created_at
         )
+    
+    async def _map_payment_request_to_schema(
+        self, requests: Sequence[PaymentRequest], current_user: User
+    ) -> List[PaymentRequest]:
+        """
+        Maps fetched payment requests to the schema for use in the API response.
+        """
+        results = []
 
-    async def get_incoming_payment_requests(self, user: User) -> List[PaymentRequest]:
+        for r in requests:
+            results.append(PaymentRequestPublic(
+                id=r.id,
+                creditor_code=r.creditor.user_code,
+                creditor_name=r.creditor.full_name,
+                debtor_code=current_user.user_code,
+                debtor_name=current_user.full_name,
+                amount_time=r.amount_time,
+                amount_regio=r.amount_regio,
+                description=r.description,
+                status=r.status,
+                created_at=r.created_at
+            ))
+        return results
+
+    async def get_incoming_payment_requests(self, current_user: User) -> List[PaymentRequest]:
         """Requests where the user is the DEBTOR (needs to pay)."""
         stmt = (
             select(PaymentRequest)
-            .where(PaymentRequest.debtor_id == user.id, PaymentRequest.status == PaymentStatus.PENDING)
+            .where(PaymentRequest.debtor_id == current_user.id, PaymentRequest.status == PaymentStatus.PENDING)
             .options(selectinload(PaymentRequest.creditor)) # Load creditor for UI display
             .order_by(PaymentRequest.created_at.desc())
         )
-        return (await self.session.execute(stmt)).scalars().all()
+        requests = (await self.session.execute(stmt)).scalars().all()
+
+        # Map to schema
+        results = await self._map_payment_request_to_schema(requests, current_user)
+        return results
     
-    async def get_outgoing_payment_requests(self, user: User) -> List[PaymentRequest]:
+    async def get_outgoing_payment_requests(self, current_user: User) -> List[PaymentRequest]:
         """Requests where the user is the CREDITOR (waiting for payment)."""
         stmt = (
             select(PaymentRequest)
-            .where(PaymentRequest.creditor_id == user.id, PaymentRequest.status == PaymentStatus.PENDING)
-            .options(selectinload(PaymentRequest.debtor)) # Load debtor for UI display ("To: Sarah")
+            .where(PaymentRequest.creditor_id == current_user.id, PaymentRequest.status == PaymentStatus.PENDING)
+            .options(selectinload(PaymentRequest.debtor)) # Load debtor for UI display
             .order_by(PaymentRequest.created_at.desc())
         )
-        return (await self.session.execute(stmt)).scalars().all()
+        requests = (await self.session.execute(stmt)).scalars().all()
+    
+        # Map to schema
+        results = await self._map_payment_request_to_schema(requests, current_user)
+        return results
 
     async def cancel_payment_request(self, request_id: uuid.UUID, creditor_id: uuid.UUID) -> PaymentRequest:
         """Allows the Creditor to cancel their own request."""
@@ -389,7 +421,7 @@ class BankingService:
             
         # Permission Check (debtor_id is None if Admin)
         if debtor_id and req.debtor_id != debtor_id:
-             raise UnauthorizedPaymentRequestAccess()
+            raise UnauthorizedPaymentRequestAccess()
              
         if action == "REJECT":
             req.status = PaymentStatus.REJECTED
@@ -419,7 +451,7 @@ class BankingService:
             await self.session.commit()
             return req
         else:
-            raise ValueError("Invalid Action")
+            raise InvalidPaymentAction()
 
     # CRON / SYSTEM JOBS
     # (Kept mostly same, just update to use new transfer_funds signature if needed)
