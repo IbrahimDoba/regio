@@ -1,44 +1,67 @@
-class BankingException(Exception):
-    """Base exception for banking module."""
+class BankingBaseException(Exception):
+    """Base class for all banking module exceptions"""
+    detail = "A banking error occurred."
+
+    def __init__(self, detail: str = None):
+        if detail:
+            self.detail = detail
+        super().__init__(self.detail)
+
+# ==========================================
+# Category: 404 Not Found
+# ==========================================
+class BankingNotFound(BankingBaseException):
+    """Base for 404 errors in banking"""
     pass
 
-class AccountNotFound(BankingException):
-    def __init__(self, detail: str = "Account not found"):
-        self.message = detail
-        super().__init__(self.message)
+class AccountNotFound(BankingNotFound):
+    detail = "Account not found"
 
-class InvalidTransactionAmount(BankingException):
-    def __init__(self, detail: str = "Transaction amount must be positive"):
-        self.message = detail
-        super().__init__(self.message)
+class PaymentRequestNotFound(BankingNotFound):
+    detail = "Payment request not found"
 
-class SelfTransferError(BankingException):
-    def __init__(self):
-        self.message = "Cannot transfer funds to yourself"
-        super().__init__(self.message)
+# ==========================================
+# Category: 400 Bad Request
+# ==========================================
+class BankingBadRequest(BankingBaseException):
+    """Base for 400 errors (Bad Input / Business Logic)"""
+    pass
 
-class InsufficientFunds(BankingException):
+class InvalidTransactionAmount(BankingBadRequest):
+    detail = "Transaction amount must be positive"
+
+class SelfTransferError(BankingBadRequest):
+    detail = "Cannot transfer funds to yourself"
+
+class InsufficientFunds(BankingBadRequest):
     def __init__(self, currency: str, current: float, limit: float):
-        self.message = f"Insufficient {currency} funds. Current: {current}, Limit: {limit}"
-        super().__init__(self.message)
+        detail = f"Insufficient {currency} funds. Current: {current}, Limit: {limit}"
+        super().__init__(detail)
 
-class TransactionConflict(BankingException):
-    """Raised when Optimistic Locking fails (concurrent updates)."""
-    def __init__(self):
-        self.message = "Transaction conflict detected. Please retry."
-        super().__init__(self.message)
-
-class PaymentRequestNotFound(BankingException):
-    def __init__(self):
-        self.message = "Payment request not found"
-        super().__init__(self.message)
-
-class InvalidPaymentRequestStatus(BankingException):
+class InvalidPaymentRequestStatus(BankingBadRequest):
     def __init__(self, current_status: str):
-        self.message = f"Payment request is {current_status}, cannot process."
-        super().__init__(self.message)
+        detail = f"Payment request is {current_status}, cannot process."
+        super().__init__(detail)
 
-class UnauthorizedPaymentRequestAccess(BankingException):
-    def __init__(self):
-        self.message = "You are not authorized to manage this payment request"
-        super().__init__(self.message)
+class InvalidPaymentAction(BankingBadRequest):
+    detail = "Invalid action performed on payment request"
+
+# ==========================================
+# Category: 403 Forbidden
+# ==========================================
+class BankingForbidden(BankingBaseException):
+    """Base for 403 errors (Auth/Permission issues in banking)"""
+    pass
+
+class UnauthorizedPaymentRequestAccess(BankingForbidden):
+    detail = "You are not authorized to manage this payment request"
+
+# ==========================================
+# Category: 409 Conflict
+# ==========================================
+class BankingConflict(BankingBaseException):
+    """Base for 409 errors (Concurrency)"""
+    pass
+
+class TransactionConflict(BankingConflict):
+    detail = "Transaction conflict detected. Please retry."
