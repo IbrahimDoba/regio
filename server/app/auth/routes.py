@@ -1,5 +1,5 @@
 from typing import Any, Annotated, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie, Request
+from fastapi import APIRouter, Depends, status, Response, Cookie, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.auth.utils import set_refresh_cookie
@@ -8,97 +8,94 @@ from app.auth.schemas import TokenResponse
 from app.core.schemas import Message
 from app.users.schemas import UserPublic
 from app.users.dependencies import CurrentUser
-from app.auth.exceptions import (
-    InvalidCredentials, 
-    AccountInactive, 
-    InvalidToken,
-    RefreshTokenExpired,
-    AccountNotVerified
-)
 
 router = APIRouter()
 
-@router.post("/login/access-token", response_model=TokenResponse)
+@router.post(
+    "/login/access-token", 
+    response_model=TokenResponse,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"description": "Incorrect email or password"},
+        status.HTTP_400_BAD_REQUEST: {"description": "Inactive user account"},
+        status.HTTP_403_FORBIDDEN: {"description": "Account exists but is not verified yet"},
+    }
+)
 async def login_access_token(
     response: Response,
     service: AuthServiceDep,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Any:
     """
-    Login: Returns Access Token in body, Refresh Token in HttpOnly Cookie.
+    Login with Email and Password.
+    
+    Returns a short-lived **Access Token** in the response body and Refresh Token in HttpOnly Cookie.
+    
+    - **username**: User's email address.
+    - **password**: User's plain text password.
     """
 
-    try:
-        token_data = await service.authenticate_user(form_data.username, form_data.password)
-        
-        # Set the Refresh Token in the cookie
-        set_refresh_cookie(response, token_data.refresh_token)
-        
-        # Remove refresh_token from body response for security/cleanliness
-        token_data.refresh_token = None 
-        return token_data
+    token_data = await service.authenticate_user(form_data.username, form_data.password)
     
-    except InvalidCredentials:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    except AccountInactive:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Inactive user",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    except AccountNotVerified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="User not verified",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
+    # Set the Refresh Token in the cookie
+    set_refresh_cookie(response, token_data.refresh_token)
+    
+    # Remove refresh_token from body response for security/cleanliness
+    token_data.refresh_token = None 
+    return token_data
 
-@router.post("/login/test-token", response_model=UserPublic)
+@router.post(
+    "/login/test-token", 
+    response_model=UserPublic,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"description": "Token is invalid or expired"}
+    }
+)
 async def test_token(current_user: CurrentUser) -> Any:
     """
-    Test access token
+    Verify Access Token validity.
     """
     return current_user
 
-@router.post("/refresh-token", response_model=TokenResponse)
+@router.post(
+    "/refresh-token", 
+    response_model=TokenResponse,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"description": "Refresh token missing, invalid or expired"},
+        status.HTTP_400_BAD_REQUEST: {"description": "Bad Request"}
+    }
+)
 async def refresh_token(
     response: Response,
-    request: Request,
     service: AuthServiceDep,
     refresh_token: Optional[str] = Cookie(None)
 ) -> Any:
     """
-    Exchanges a valid Refresh Token (cookie) for a new Access Token & Refresh Token.
-    Rotates the Refresh Token.
+    Get a new Access Token using the Refresh Token cookie.
+    
+    Also performs **Token Rotation**:
+    1. Validates the old refresh token.
+    2. Issues a new Access Token.
+    3. Issues a *new* Refresh Token and updates the cookie.
+    4. Invalidates the old refresh token.
     """
     if not refresh_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Refresh token missing"
-        )
+        from app.auth.exceptions import NotAuthorized 
+        raise NotAuthorized("Refresh token missing")
 
-    try:
-        new_tokens = await service.refresh_token(refresh_token)
-        
-        # Update the cookie with the NEW refresh token (Rotation)
-        set_refresh_cookie(response, new_tokens.refresh_token)
-        
-        new_tokens.refresh_token = None
-        return new_tokens
-        
-    except (InvalidToken, RefreshTokenExpired):
-        # If rotation fails or token is bad, clear the cookie
-        response.delete_cookie("refresh_token")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Invalid or expired refresh token"
-        )
+    new_tokens = await service.refresh_token(refresh_token)
+    
+    set_refresh_cookie(response, new_tokens.refresh_token)
+    
+    new_tokens.refresh_token = None
+    return new_tokens
 
-@router.post("/logout")
+@router.post(
+    "/logout", 
+    response_model=Message,
+    responses={
+        status.HTTP_200_OK: {"description": "Successfully logged out"}
+    }
+)
 async def logout(
     response: Response,
     request: Request,
@@ -106,19 +103,16 @@ async def logout(
     refresh_token: Optional[str] = Cookie(None)
 ) -> Message:
     """
-    Logout: Blacklists tokens and clears cookies.
+    Logout the user.
     """
-    # Attempt to extract access token from Authorization header
     auth_header = request.headers.get("Authorization")
     access_token = None
     if auth_header and auth_header.startswith("Bearer "):
         access_token = auth_header.split(" ")[1]
 
-    # Blacklist the tokens before removing them
     if access_token:
         await service.logout(access_token, refresh_token)
     
-    # Clear cookies client-side
     response.delete_cookie("refresh_token")
     response.delete_cookie("access_token")
     

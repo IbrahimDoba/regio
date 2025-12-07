@@ -177,7 +177,6 @@ class UserService:
         immutable_fields = {
             "first_name", "last_name", "middle_name", 
             "user_code", "trust_level", "verification_status", "is_system_admin"
-            # "is_verified"
         }
         
         # Check if any forbidden key exists in the update payload

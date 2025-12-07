@@ -77,7 +77,7 @@ class ListingService:
             media_urls=data.media_urls,
             tags=final_tags,
             radius_km=data.radius_km,
-            attributes=data.attributes
+            attributes=data.attributes.model_dump()
         )
         
         self.session.add(listing)
@@ -107,7 +107,7 @@ class ListingService:
     
     async def get_listing(self, listing_id: uuid.UUID) -> Listing:
         # Form query for getting listing
-        query = select(Listing).where(Listing.id == listing_id).selectinload(Listing.owner)
+        query = select(Listing).where(Listing.id == listing_id).options(selectinload(Listing.owner))
 
         # Execute query and raise appropriate error if listing is not found
         results = await self.session.execute(query)
@@ -139,8 +139,6 @@ class ListingService:
             data["title_original"] = data.pop("title")
         if "description" in data:
             data["description_original"] = data.pop("description")
-
-        # db_listing = await self.session.get(Listing, listing_id)
             
         listing.sqlmodel_update(data)
         

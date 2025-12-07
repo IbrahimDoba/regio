@@ -1,19 +1,17 @@
 import uuid
 from typing import Any, List, Optional
-from fastapi import APIRouter, HTTPException, Query, status, Response
+from fastapi import APIRouter, Query, status
 
 from app.listings.schemas import ListingCreate, ListingPublic, FeedResponse, TagPublic, ListingUpdate
 from app.listings.dependencies import ListingServiceDep
 from app.listings.enums import ListingCategory
-from app.listings.exceptions import ListingNotFound, ListingNotOwned
 from app.users.dependencies import CurrentUser
 
 router = APIRouter()
 
 @router.post("/", response_model=ListingPublic, status_code=status.HTTP_201_CREATED, responses={
-    status.HTTP_400_BAD_REQUEST: {"description": "Validation failed (e.g. missing category attributes)."},
+    status.HTTP_400_BAD_REQUEST: {"description": "Invalid category data or attributes."},
     status.HTTP_401_UNAUTHORIZED: {"description": "User is not authenticated."},
-    status.HTTP_404_NOT_FOUND: {"description": "Resource not found error during creation."},
     status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
 })
 async def create_listing(
@@ -26,14 +24,9 @@ async def create_listing(
     
     Validates the 'attributes' field dynamically based on the provided 'category'.
     """
-    try:       
-        listing = await service.create_listing(current_user, data)
+    listing = await service.create_listing(current_user, data)
+    return await service.format_listing(listing)
 
-        formatted_listing = await service.format_listing(listing)
-
-        return formatted_listing
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     
 @router.get("/feed", response_model=FeedResponse, status_code=status.HTTP_200_OK, responses={
     status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
@@ -84,20 +77,12 @@ async def get_listing_by_id(
     
     Fetches the full details of a listing for display on its standalone page.
     """
+    listing = await service.get_listing(listing_id)
+    return await service.format_listing(listing)
 
-    try:
-        # Get listing ORM object
-        listing = await service.get_listing(listing_id)
-
-        formatted_listing = await service.format_listing(listing)
-
-        return formatted_listing
-    except ListingNotFound:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found")
-    
 @router.delete("/{listing_id}", status_code=status.HTTP_204_NO_CONTENT, responses={
-    status.HTTP_404_NOT_FOUND: {"description": "Listing to be deleted was not found."},
-    status.HTTP_403_FORBIDDEN: {"description": "When a user that does not own the listing attempts to delete it."},
+    status.HTTP_404_NOT_FOUND: {"description": "Listing not found."},
+    status.HTTP_403_FORBIDDEN: {"description": "You do not have permission to delete this listing."},
     status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."},
 })
 async def delete_listing_by_id(
@@ -110,20 +95,8 @@ async def delete_listing_by_id(
     
     Only allowed by listing's owner and admins. Action is irreversible.
     """
-
-    try:
-        await service.delete_listing(listing_id, current_user)
-        # No return statement needed for 204 No Content
-    except ListingNotFound:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Listing not found"
-        )
-    except ListingNotOwned:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail="You do not have permission to delete this listing"
-        )
+    await service.delete_listing(listing_id, current_user)
+    # 204 requires no return body
 
 @router.patch("/{listing_id}", response_model=ListingPublic, status_code=status.HTTP_200_OK, responses={
     status.HTTP_400_BAD_REQUEST: {"description": "Validation error in update data."},
@@ -143,12 +116,5 @@ async def update_listing(
     
     Accepts partial updates. Only the owner can perform this action.
     """
-    try:
-        listing = await service.update_listing(listing_id, current_user, update_data)
-        formatted_listing = await service.format_listing(listing)
-
-        return formatted_listing
-    except ListingNotFound:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found")
-    except ListingNotOwned:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not own this listing")
+    listing = await service.update_listing(listing_id, current_user, update_data)
+    return await service.format_listing(listing)

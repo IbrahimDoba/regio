@@ -1,25 +1,19 @@
 import uuid
 from typing import Any, List
 
-from fastapi import APIRouter, HTTPException, status, Query
+from fastapi import APIRouter, status, Query
 
 from app.auth.dependencies import AuthServiceDep
 from app.auth.schemas import InvitePublic
-from app.auth.exceptions import InvalidInviteCode
 from app.users.schemas import (
     UserCreate, 
     UserPublic, 
     UsersPublic,
     UserUpdate
 )
-
 from app.users.exceptions import (
-    UserAlreadyExists, 
-    SystemSaturated, 
-    UserNotFound,
-    ImmutableFieldUpdate
+    UserNotFound
 )
-
 from app.users.dependencies import (
     CurrentUser,
     CurrentAdmin,
@@ -46,10 +40,7 @@ async def read_users(
     - **skip**: Number of records to skip.
     - **limit**: Maximum number of records to return.
     """
-    try:
-        return await service.get_users(skip, limit)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    return await service.get_users(skip, limit)
     
 
 @router.get("/search", response_model=List[UserPublic], status_code=status.HTTP_200_OK, responses={
@@ -90,16 +81,7 @@ async def register_user(
     
     - **user_in**: Registration payload including invite code and profile data.
     """
-    try:
-        return await service.create_user(user_in)
-    except UserAlreadyExists:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already taken")
-    except SystemSaturated:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="System capacity reached, failed to generate unique user code")
-    except InvalidInviteCode:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid invite code")
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    return await service.create_user(user_in)
 
 
 @router.get("/me", response_model=UserPublic, status_code=status.HTTP_200_OK)
@@ -131,12 +113,7 @@ async def update_user_me(
     
     - **user_in**: Fields to update.
     """
-    try:
-        return await service.update_user(current_user.id, user_in)
-    except UserNotFound:
-        raise HTTPException(status_code=404, detail="User not found")
-    except ImmutableFieldUpdate:
-        raise HTTPException(status_code=400, detail="Cannot update real names or other protected fields")
+    return await service.update_user(current_user.id, user_in)
     
 
 @router.get("/invites", response_model=List[InvitePublic], status_code=status.HTTP_200_OK)
@@ -166,10 +143,7 @@ async def request_new_invites(
 ) -> List[InvitePublic]:
     """
     Void existing unused invites and generate 3 new ones.
-    
-    Use this if the user's previous invites are lost or stale.
     """
-    
     return await auth_service.request_invites(current_user.id)
 
 
@@ -178,19 +152,18 @@ async def request_new_invites(
     status.HTTP_404_NOT_FOUND: {"description": "User with this code not found."}
 })
 async def read_user_by_code(
-    user_code: uuid.UUID,
-    # _: CurrentAdmin,
+    user_code: str,
+    _: CurrentUser,
     service: UserServiceDep
 ) -> Any:
     """
     Admin: Get specific user by code.
     
     Fetch a user's profile using their UUID or internal code.
-    (Note: Type hint implies UUID, but usage suggests unique code lookup).
     
     - **user_code**: The identifier of the user to fetch.
     """
     user = await service.get_user_by_code(user_code)
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise UserNotFound()
     return user
