@@ -1,6 +1,7 @@
 import sys
 import logging
 from typing import Annotated
+from datetime import datetime, timezone
 from collections.abc import AsyncGenerator
 
 from fastapi import Depends
@@ -14,6 +15,7 @@ from app.auth.security import get_password_hash
 from app.users.config import user_settings
 from app.users.enums import TrustLevel, VerificationStatus
 from app.users.service import UserService
+from app.banking.service import BankingService
 
 from app.users.models import User
 
@@ -82,10 +84,12 @@ async def init_db() -> None:
     # NOTE: Tables should be created with Alembic migrations
     logger.info("Initialising database")
     async with AsyncSessionLocal() as session:
-        service = UserService(session)
+        # Instantiate services
+        user_service = UserService(session)
+        banking_service = BankingService(session)
 
         # Check if sink user exists
-        user = await service.get_user_by_email(user_settings.SYSTEM_SINK_EMAIL)
+        user = await user_service.get_user_by_email(user_settings.SYSTEM_SINK_EMAIL)
 
         if not user:
             logger.info("Creating System Sink User...")
@@ -97,15 +101,23 @@ async def init_db() -> None:
                     first_name=user_settings.SYSTEM_SINK_FIRST_NAME,
                     last_name=user_settings.SYSTEM_SINK_LAST_NAME,
                     address="SYSTEM",
-                    invite_code=user_settings.SYSTEM_INVITE_CODE, # Bypass invite check for system init
-                    # is_verified=True,
                     verification_status=VerificationStatus.VERIFIED,
+                    verified_at=datetime.now(timezone.utc),
                     is_active=True,
                     is_system_admin=True,
                     trust_level=TrustLevel.T6
                 )
+
+                # Stage user in session
                 session.add(db_user)
+                await session.flush() # Generate ID for just added user
+                
+                # Create system sink accounts
+                await banking_service.create_initial_accounts(db_user.id)
+
+                # Commit changes
                 await session.commit()
+
                 logger.info("Created System Sink User Successfully")
             except Exception as e:
                 logger.error(f"Failed to init system user: {e}")

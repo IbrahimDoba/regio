@@ -130,6 +130,8 @@ async def get_incoming_requests(
 ) -> Any:
     """
     Get pending requests where I am the Debtor.
+
+    PENDING requests only.
     """
     requests = await service.get_incoming_payment_requests(current_user)
     
@@ -158,6 +160,8 @@ async def get_outgoing_requests(
 ) -> Any:
     """
     Get pending requests where I am the Creditor (I asked someone for money).
+
+    PENDING requests only.
     """
     requests = await service.get_outgoing_payment_requests(current_user)
     
