@@ -156,7 +156,7 @@ class CreateRideShareListing(ListingCreateBase):
 
 class CreateEventListing(ListingCreateBase):
     category: Literal[ListingCategory.EVENT_WORKSHOP] = Field(ListingCategory.EVENT_WORKSHOP, description="Category: EVENT_WORKSHOP")
-    attributes: EventAttributes = Field(..., description="Event timing.")
+    attributes: EventAttributes = Field(..., description="Event time period.")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -168,7 +168,8 @@ class CreateEventListing(ListingCreateBase):
                 "tags": ["cooking", "workshop"],
                 "radius_km": 30,
                 "attributes": {
-                    "event_date": "2023-12-25T14:00:00Z"
+                    "event_start_date": "2023-12-25T14:00:00Z",
+                    "event_end_date": "2024-01-01T14:00:00Z"
                 }
             }
         }
