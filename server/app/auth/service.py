@@ -33,7 +33,7 @@ class AuthService:
     def __init__(self, session: AsyncSession):
         self.session = session
         # Initialize Redis for token blacklisting
-        self.redis = Redis.from_url(settings.REDIS_URL, decode_responses=True)
+        self.redis = Redis.from_url(settings.REDIS_URL, decode_responses=True, ssl_cert_reqs=None)
 
     async def authenticate_user(self, email: str, password: str) -> Token:
         # Fetch User
