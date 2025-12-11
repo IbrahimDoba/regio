@@ -7,6 +7,7 @@ export const metadata: Metadata = {
 };
 
 import { LanguageProvider } from "@/context/LanguageContext";
+import { QueryProvider } from "@/lib/api/query-provider";
 
 export default function RootLayout({
   children,
@@ -16,9 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-[#e0e0e0] flex justify-center min-h-screen font-sans antialiased">
-        <LanguageProvider>
-          {children}
-        </LanguageProvider>
+        <QueryProvider>
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
+        </QueryProvider>
       </body>
     </html>
   );
