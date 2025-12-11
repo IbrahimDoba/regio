@@ -20,9 +20,9 @@ from app.banking.service import BankingService
 from app.users.models import User
 
 # Imports to solve circular dependency error on startup
-from app.banking import models as banking_models
-from app.auth import models as auth_models
-from app.listings import models as listing_models
+from app.banking import models as banking_models  # noqa: F401
+from app.auth import models as auth_models  # noqa: F401
+from app.listings import models as listing_models  # noqa: F401
 
 # Use an async engine
 DATABASE_URL = str(settings.DATABASE_URL)
@@ -46,6 +46,7 @@ logger = logging.getLogger(__name__)
 # make sure all SQLModel models are imported (app.users.models) before initializing DB
 # otherwise, SQLModel might fail to initialize relationships properly
 
+
 async def test_db_connection() -> None:
     """
     Tests the database connection by attempting to connect and logging the result.
@@ -63,11 +64,16 @@ async def test_db_connection() -> None:
         logger.error(f"Reason: {e}")
         sys.exit(1)
     except SQLAlchemyError as e:
-        logger.error(f"❌ An unexpected SQLAlchemy error occurred during connection test: {e}")
+        logger.error(
+            f"❌ An unexpected SQLAlchemy error occurred during connection test: {e}"
+        )
         sys.exit(1)
     except Exception as e:
-        logger.error(f"❌ An unexpected error occurred during database connection test: {e}")
+        logger.error(
+            f"❌ An unexpected error occurred during database connection test: {e}"
+        )
         sys.exit(1)
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
@@ -76,7 +82,8 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         yield session
 
-# GLOBAL DEPENDENCY 
+
+# GLOBAL DEPENDENCY
 SessionDep = Annotated[AsyncSession, Depends(get_db)]
 
 
@@ -105,13 +112,13 @@ async def init_db() -> None:
                     verified_at=datetime.now(timezone.utc),
                     is_active=True,
                     is_system_admin=True,
-                    trust_level=TrustLevel.T6
+                    trust_level=TrustLevel.T6,
                 )
 
                 # Stage user in session
                 session.add(db_user)
-                await session.flush() # Generate ID for just added user
-                
+                await session.flush()  # Generate ID for just added user
+
                 # Create system sink accounts
                 await banking_service.create_initial_accounts(db_user.id)
 

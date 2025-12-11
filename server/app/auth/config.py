@@ -1,6 +1,5 @@
-import os
-
 from app.base_config import RegioBaseSettings
+
 
 class AuthConfig(RegioBaseSettings):
     # Auth token configs
@@ -8,5 +7,6 @@ class AuthConfig(RegioBaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     ALGORITHM: str
+
 
 auth_settings = AuthConfig()

@@ -5,8 +5,9 @@ from app.users.exceptions import (
     ResourceConflict,
     InvalidUserRequest,
     AccessDenied,
-    SystemFailure
+    SystemFailure,
 )
+
 
 async def resource_not_found_handler(request: Request, exc: ResourceNotFound):
     return JSONResponse(
@@ -14,11 +15,13 @@ async def resource_not_found_handler(request: Request, exc: ResourceNotFound):
         content={"detail": exc.detail},
     )
 
+
 async def resource_conflict_handler(request: Request, exc: ResourceConflict):
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
         content={"detail": exc.detail},
     )
+
 
 async def invalid_user_request_handler(request: Request, exc: InvalidUserRequest):
     return JSONResponse(
@@ -26,11 +29,13 @@ async def invalid_user_request_handler(request: Request, exc: InvalidUserRequest
         content={"detail": exc.detail},
     )
 
+
 async def access_denied_handler(request: Request, exc: AccessDenied):
     return JSONResponse(
         status_code=status.HTTP_403_FORBIDDEN,
         content={"detail": exc.detail},
     )
+
 
 async def system_failure_handler(request: Request, exc: SystemFailure):
     return JSONResponse(

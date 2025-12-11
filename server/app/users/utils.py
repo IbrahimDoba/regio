@@ -1,6 +1,7 @@
 import random
 import string
 
+
 def generate_user_code() -> str:
     """
     Generates a random 5-character code (1 letter + 4 digits).

@@ -18,42 +18,42 @@ from app.auth.exceptions import NotAuthorized, PermissionDenied, BadAuthRequest
 from app.auth.handlers import (
     not_authorized_handler,
     permission_denied_handler,
-    bad_auth_request_handler
+    bad_auth_request_handler,
 )
 
 from app.users.exceptions import (
-    ResourceNotFound, 
-    ResourceConflict, 
+    ResourceNotFound,
+    ResourceConflict,
     InvalidUserRequest,
     AccessDenied,
-    SystemFailure
+    SystemFailure,
 )
 from app.users.handlers import (
-    resource_not_found_handler, 
+    resource_not_found_handler,
     resource_conflict_handler,
     invalid_user_request_handler,
     access_denied_handler,
-    system_failure_handler
+    system_failure_handler,
 )
 
 from app.listings.exceptions import ListingNotFound, ListingNotOwned, InvalidListingData
 from app.listings.handlers import (
-    listing_not_found_handler, 
-    listing_permission_handler, 
-    invalid_listing_data_handler
+    listing_not_found_handler,
+    listing_permission_handler,
+    invalid_listing_data_handler,
 )
 
 from app.banking.exceptions import (
     BankingNotFound,
     BankingBadRequest,
     BankingForbidden,
-    BankingConflict
+    BankingConflict,
 )
 from app.banking.handlers import (
     banking_not_found_handler,
     banking_bad_request_handler,
     banking_forbidden_handler,
-    banking_conflict_handler
+    banking_conflict_handler,
 )
 
 
@@ -65,12 +65,13 @@ async def lifespan(_application: FastAPI) -> AsyncGenerator:
     yield
     # Shutdown
 
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url="/openapi.json",
     lifespan=lifespan,
-    docs_url=None if settings.ENVIRONMENT == 'production' else '/docs',
-    redoc_url=None if settings.ENVIRONMENT == 'production' else '/redoc',
+    docs_url=None if settings.ENVIRONMENT == "production" else "/docs",
+    redoc_url=None if settings.ENVIRONMENT == "production" else "/redoc",
     # openapi_external_docs=None if settings.ENVIRONMENT == 'production' else '/openapi.json',
 )
 
@@ -85,9 +86,11 @@ if settings.all_cors_origins:
         allow_headers=["*"],
     )
 
+
 @app.get("/healthcheck", include_in_schema=False)
 async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
+
 
 # Include routers
 app.include_router(admin_router, prefix="/admin", tags=["admin"])

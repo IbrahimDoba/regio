@@ -31,10 +31,10 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Import all models here
-from app.banking.models import Account, PaymentRequest, Transaction
-from app.listings.models import Listing, Tag
-from app.users.models import User
-from app.auth.models import Invite
+from app.banking.models import Account, PaymentRequest, Transaction # noqa: F401
+from app.listings.models import Listing, Tag # noqa: F401
+from app.users.models import User # noqa: F401
+from app.auth.models import Invite # noqa: F401
 
 # add your model's MetaData object here
 # for 'autogenerate' support

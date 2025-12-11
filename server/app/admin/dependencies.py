@@ -11,7 +11,9 @@ from app.core.database import SessionDep
 # It ensures ONLY system admins can access these endpoints
 AdminUser = Annotated[User, Depends(get_current_active_system_admin)]
 
+
 def get_admin_service(session: SessionDep) -> AdminService:
     return AdminService(session)
+
 
 AdminServiceDep = Annotated[AdminService, Depends(get_admin_service)]

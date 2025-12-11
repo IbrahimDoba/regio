@@ -3,7 +3,7 @@ from typing import Sequence, Union
 import sqlmodel
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql # Import this
+from sqlalchemy.dialects import postgresql # noqa: F401
 
 # revision identifiers, used by Alembic.
 revision: str = 'd81c46ddeda4'

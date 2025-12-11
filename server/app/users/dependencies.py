@@ -14,11 +14,10 @@ from app.users.service import UserService
 from app.users.enums import VerificationStatus
 
 # AUTH CONFIG
-reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl="/auth/login/access-token"
-)
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/login/access-token")
 
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
+
 
 # SERVICE DEPENDENCY
 def get_user_service(session: SessionDep) -> UserService:
@@ -27,7 +26,9 @@ def get_user_service(session: SessionDep) -> UserService:
     """
     return UserService(session)
 
+
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
+
 
 # USER RETRIEVAL DEPENDENCIES
 async def get_current_user(session: SessionDep, token: TokenDep) -> User:
@@ -47,22 +48,24 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
         )
 
     user = await session.get(User, token_data.sub)
-    
+
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
     if not user.is_active:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+        )
     if user.verification_status != VerificationStatus.VERIFIED:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="User not verified",
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     return user
 
 
@@ -75,10 +78,11 @@ async def get_current_active_system_admin(current_user: CurrentUser) -> User:
     """
     if not current_user.is_system_admin:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Action disallowed by current user",
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
     return current_user
+
 
 CurrentAdmin = Annotated[User, Depends(get_current_active_system_admin)]

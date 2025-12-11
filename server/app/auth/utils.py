@@ -16,39 +16,50 @@ def create_access_token(subject: str | Any, expires_delta: timedelta = None) -> 
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+
     to_encode = {
-        "exp": expire, 
-        "sub": str(subject), 
+        "exp": expire,
+        "sub": str(subject),
         "type": "access",
-        "jti": str(uuid.uuid4()) # Unique ID for blacklist checking
+        "jti": str(uuid.uuid4()),  # Unique ID for blacklist checking
     }
-    
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=auth_settings.ALGORITHM)
+
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=auth_settings.ALGORITHM
+    )
     return encoded_jwt
+
 
 def create_refresh_token(subject: str | Any) -> str:
     """
     Creates a long-lived JWT for refreshing access tokens.
     """
-    expire = datetime.now(timezone.utc) + timedelta(days=auth_settings.REFRESH_TOKEN_EXPIRE_DAYS)
-    
+    expire = datetime.now(timezone.utc) + timedelta(
+        days=auth_settings.REFRESH_TOKEN_EXPIRE_DAYS
+    )
+
     to_encode = {
-        "exp": expire, 
-        "sub": str(subject), 
+        "exp": expire,
+        "sub": str(subject),
         "type": "refresh",
-        "jti": str(uuid.uuid4())
+        "jti": str(uuid.uuid4()),
     }
-    
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=auth_settings.ALGORITHM)
+
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=auth_settings.ALGORITHM
+    )
     return encoded_jwt
+
 
 def decode_token(token: str) -> Dict[str, Any]:
     """
     Decodes a token to check claims. Verification handled by caller or library.
     """
     return jwt.decode(token, settings.SECRET_KEY, algorithms=[auth_settings.ALGORITHM])
+
 
 def set_refresh_cookie(response: Response, refresh_token: str):
     """
@@ -58,7 +69,7 @@ def set_refresh_cookie(response: Response, refresh_token: str):
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=True, # Set to False only if testing on localhost via HTTP, but better to use HTTPS locally
+        secure=True,  # Set to False only if testing on localhost via HTTP, but better to use HTTPS locally
         samesite="lax",
-        max_age=auth_settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+        max_age=auth_settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
     )

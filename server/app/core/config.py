@@ -1,4 +1,3 @@
-import os
 from typing import Annotated, Any, Literal
 
 from pydantic import (
@@ -8,6 +7,8 @@ from pydantic import (
     computed_field,
 )
 from pydantic_core import MultiHostUrl
+
+# Import this
 from app.base_config import RegioBaseSettings
 
 
@@ -38,7 +39,6 @@ class Settings(RegioBaseSettings):
             self.FRONTEND_HOST
         ]
 
-
     PROJECT_NAME: str
     POSTGRES_SERVER: str
     POSTGRES_USER: str
@@ -64,12 +64,13 @@ class Settings(RegioBaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
-    
+
     # Initial super user config value
     SYSTEM_SINK_CODE: str
     SYSTEM_SINK_FIRST_NAME: str
     SYSTEM_SINK_LAST_NAME: str
     SYSTEM_SINK_EMAIL: str
     SYSTEM_SINK_PASSWORD: str
+
 
 settings = Settings()

@@ -2,6 +2,7 @@ from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from app.auth.exceptions import NotAuthorized, PermissionDenied, BadAuthRequest
 
+
 async def not_authorized_handler(request: Request, exc: NotAuthorized):
     """
     Catches 401 errors (InvalidCredentials, InvalidToken, etc).
@@ -16,6 +17,7 @@ async def not_authorized_handler(request: Request, exc: NotAuthorized):
     response.delete_cookie("refresh_token")
     return response
 
+
 async def permission_denied_handler(request: Request, exc: PermissionDenied):
     """
     Catches 403 errors (AccountNotVerified, etc).
@@ -25,6 +27,7 @@ async def permission_denied_handler(request: Request, exc: PermissionDenied):
         content={"detail": exc.detail},
         headers={"WWW-Authenticate": "Bearer"},
     )
+
 
 async def bad_auth_request_handler(request: Request, exc: BadAuthRequest):
     """

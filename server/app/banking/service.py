@@ -12,14 +12,19 @@ from app.users.models import User
 from app.users.enums import TrustLevel
 from app.banking.models import Account, Transaction, PaymentRequest
 from app.banking.enums import Currency, PaymentStatus, TransactionType
-from app.banking.schemas import TransactionPublic, TransactionHistory, TransactionMeta, PaymentRequestPublic
+from app.banking.schemas import (
+    TransactionPublic,
+    TransactionHistory,
+    TransactionMeta,
+    PaymentRequestPublic,
+)
 
 from app.banking.constants import (
     MONTHLY_FEE_MINUTES,
     DEMURRAGE_THRESHOLD_MINUTES,
     DEMURRAGE_RATE_ANNUAL,
     TRUST_LIMITS,
-    TRUST_UPGRADE_THRESHOLDS
+    TRUST_UPGRADE_THRESHOLDS,
 )
 from app.banking.exceptions import (
     AccountNotFound,
@@ -30,9 +35,10 @@ from app.banking.exceptions import (
     PaymentRequestNotFound,
     InvalidPaymentRequestStatus,
     UnauthorizedPaymentRequestAccess,
-    InvalidPaymentAction
+    InvalidPaymentAction,
 )
 from app.users.exceptions import UserNotFound
+
 
 class BankingService:
     def __init__(self, session: AsyncSession):
@@ -53,19 +59,34 @@ class BankingService:
                 return level
         return TrustLevel.T1
 
-    def _is_higher_level(self, new_level: TrustLevel, current_level: TrustLevel) -> bool:
-        levels = [TrustLevel.T1, TrustLevel.T2, TrustLevel.T3, TrustLevel.T4, TrustLevel.T5, TrustLevel.T6]
+    def _is_higher_level(
+        self, new_level: TrustLevel, current_level: TrustLevel
+    ) -> bool:
+        levels = [
+            TrustLevel.T1,
+            TrustLevel.T2,
+            TrustLevel.T3,
+            TrustLevel.T4,
+            TrustLevel.T5,
+            TrustLevel.T6,
+        ]
         try:
             return levels.index(new_level) > levels.index(current_level)
         except ValueError:
             return False
 
-    async def _get_account_or_fail(self, user_id: uuid.UUID, currency_type: Currency) -> Account:
-        statement = select(Account).where(Account.user_id == user_id, Account.type == currency_type)
+    async def _get_account_or_fail(
+        self, user_id: uuid.UUID, currency_type: Currency
+    ) -> Account:
+        statement = select(Account).where(
+            Account.user_id == user_id, Account.type == currency_type
+        )
         result = await self.session.execute(statement)
         account = result.scalar_one_or_none()
         if not account:
-            raise AccountNotFound(f"Account {currency_type} not found for user {user_id}")
+            raise AccountNotFound(
+                f"Account {currency_type} not found for user {user_id}"
+            )
         return account
 
     async def _get_user_by_code_or_fail(self, user_code: str) -> User:
@@ -82,9 +103,16 @@ class BankingService:
         """
         Generates the initial TIME and REGIO accounts for a new user.
         """
-        time_acc = Account(user_id=user_id, type=Currency.TIME, balance_time=0, version=1)
-        regio_acc = Account(user_id=user_id, type=Currency.REGIO, balance_regio=Decimal("0.00"), version=1)
-        
+        time_acc = Account(
+            user_id=user_id, type=Currency.TIME, balance_time=0, version=1
+        )
+        regio_acc = Account(
+            user_id=user_id,
+            type=Currency.REGIO,
+            balance_regio=Decimal("0.00"),
+            version=1,
+        )
+
         self.session.add(time_acc)
         self.session.add(regio_acc)
 
@@ -96,7 +124,7 @@ class BankingService:
         amount_regio: Decimal,
         reference: str,
         payment_request_id: Optional[uuid.UUID] = None,
-        skip_limit_check: bool = False
+        skip_limit_check: bool = False,
     ) -> TransactionPublic:
         # Input Validation
         self._validate_transaction_amounts(amount_time, amount_regio)
@@ -110,9 +138,11 @@ class BankingService:
         # Load Accounts
         sender_time_acc = await self._get_account_or_fail(sender.id, Currency.TIME)
         sender_regio_acc = await self._get_account_or_fail(sender.id, Currency.REGIO)
-        
+
         receiver_time_acc = await self._get_account_or_fail(receiver.id, Currency.TIME)
-        receiver_regio_acc = await self._get_account_or_fail(receiver.id, Currency.REGIO)
+        receiver_regio_acc = await self._get_account_or_fail(
+            receiver.id, Currency.REGIO
+        )
 
         # Limit Checks (VERY IMPORTANT)
         if not skip_limit_check:
@@ -124,16 +154,24 @@ class BankingService:
 
             if potential_time_bal < limit_time_min:
                 raise InsufficientFunds("TIME", potential_time_bal, limit_time_min)
-            
+
             if potential_regio_bal < limit_regio_min:
-                raise InsufficientFunds("REGIO", float(potential_regio_bal), float(limit_regio_min))
+                raise InsufficientFunds(
+                    "REGIO", float(potential_regio_bal), float(limit_regio_min)
+                )
 
         # Optimistic Locking Updates
         # Update Sender TIME
         stmt_sender_time = (
             update(Account)
-            .where(Account.id == sender_time_acc.id, Account.version == sender_time_acc.version)
-            .values(balance_time=sender_time_acc.balance_time - amount_time, version=sender_time_acc.version + 1)
+            .where(
+                Account.id == sender_time_acc.id,
+                Account.version == sender_time_acc.version,
+            )
+            .values(
+                balance_time=sender_time_acc.balance_time - amount_time,
+                version=sender_time_acc.version + 1,
+            )
         )
         if (await self.session.execute(stmt_sender_time)).rowcount == 0:
             raise TransactionConflict()
@@ -141,8 +179,14 @@ class BankingService:
         # Update Sender REGIO
         stmt_sender_regio = (
             update(Account)
-            .where(Account.id == sender_regio_acc.id, Account.version == sender_regio_acc.version)
-            .values(balance_regio=sender_regio_acc.balance_regio - amount_regio, version=sender_regio_acc.version + 1)
+            .where(
+                Account.id == sender_regio_acc.id,
+                Account.version == sender_regio_acc.version,
+            )
+            .values(
+                balance_regio=sender_regio_acc.balance_regio - amount_regio,
+                version=sender_regio_acc.version + 1,
+            )
         )
         if (await self.session.execute(stmt_sender_regio)).rowcount == 0:
             raise TransactionConflict()
@@ -150,8 +194,14 @@ class BankingService:
         # Update Receiver TIME
         stmt_rec_time = (
             update(Account)
-            .where(Account.id == receiver_time_acc.id, Account.version == receiver_time_acc.version)
-            .values(balance_time=receiver_time_acc.balance_time + amount_time, version=receiver_time_acc.version + 1)
+            .where(
+                Account.id == receiver_time_acc.id,
+                Account.version == receiver_time_acc.version,
+            )
+            .values(
+                balance_time=receiver_time_acc.balance_time + amount_time,
+                version=receiver_time_acc.version + 1,
+            )
         )
         if (await self.session.execute(stmt_rec_time)).rowcount == 0:
             raise TransactionConflict()
@@ -159,8 +209,14 @@ class BankingService:
         # Update Receiver REGIO
         stmt_rec_regio = (
             update(Account)
-            .where(Account.id == receiver_regio_acc.id, Account.version == receiver_regio_acc.version)
-            .values(balance_regio=receiver_regio_acc.balance_regio + amount_regio, version=receiver_regio_acc.version + 1)
+            .where(
+                Account.id == receiver_regio_acc.id,
+                Account.version == receiver_regio_acc.version,
+            )
+            .values(
+                balance_regio=receiver_regio_acc.balance_regio + amount_regio,
+                version=receiver_regio_acc.version + 1,
+            )
         )
         if (await self.session.execute(stmt_rec_regio)).rowcount == 0:
             raise TransactionConflict()
@@ -170,7 +226,7 @@ class BankingService:
             new_total_earned = receiver.total_time_earned + amount_time
             receiver.total_time_earned = new_total_earned
             self.session.add(receiver)
-            
+
             potential_level = self._calculate_new_trust_level(new_total_earned)
             if self._is_higher_level(potential_level, receiver.trust_level):
                 receiver.trust_level = potential_level
@@ -183,32 +239,28 @@ class BankingService:
             amount_time=amount_time,
             amount_regio=amount_regio,
             reference=reference,
-            payment_request_id=payment_request_id
+            payment_request_id=payment_request_id,
         )
         self.session.add(transaction)
-        
-        await self.session.commit() 
+
+        await self.session.commit()
         await self.session.refresh(transaction)
 
         # Return Schema immediately (Decoupling)
         return TransactionPublic(
             id=transaction.id,
             date=transaction.created_at,
-            type=TransactionType.OUTGOING, # Context is always the initiator
+            type=TransactionType.OUTGOING,  # Context is always the initiator
             other_party_code=receiver.user_code,
             other_party_name=receiver.full_name,
             amount_time=transaction.amount_time,
             amount_regio=transaction.amount_regio,
             reference=transaction.reference,
-            is_system_fee=False
+            is_system_fee=False,
         )
 
     async def get_transaction_history(
-        self, 
-        user: User, 
-        page: int = 1, 
-        page_size: int = 50,
-        days: Optional[int] = None
+        self, user: User, page: int = 1, page_size: int = 50, days: Optional[int] = None
     ) -> TransactionHistory:
         """
         Returns transaction history transformed for the specific viewer (user).
@@ -216,8 +268,10 @@ class BankingService:
         skip = (page - 1) * page_size
 
         # Base filter condition
-        conditions = [or_(Transaction.sender_id == user.id, Transaction.receiver_id == user.id)]
-        
+        conditions = [
+            or_(Transaction.sender_id == user.id, Transaction.receiver_id == user.id)
+        ]
+
         # Date filter
         if days:
             cutoff_date = datetime.now(timezone.UTC) - timedelta(days=days)
@@ -226,14 +280,16 @@ class BankingService:
         # Count Query
         count_statement = select(func.count()).where(*conditions)
         total_count = (await self.session.execute(count_statement)).one()[0]
-        
+
         total_pages = (total_count + page_size - 1) // page_size
 
         # Data Query
         statement = (
             select(Transaction)
             .where(*conditions)
-            .options(selectinload(Transaction.sender), selectinload(Transaction.receiver))
+            .options(
+                selectinload(Transaction.sender), selectinload(Transaction.receiver)
+            )
             .order_by(Transaction.created_at.desc())
             .offset(skip)
             .limit(page_size)
@@ -244,18 +300,22 @@ class BankingService:
         for tx in transactions:
             is_outgoing = tx.sender_id == user.id
             other_party = tx.receiver if is_outgoing else tx.sender
-            
-            formatted_data.append(TransactionPublic(
-                id=tx.id,
-                date=tx.created_at,
-                type=TransactionType.OUTGOING if is_outgoing else TransactionType.INCOMING,
-                other_party_code=other_party.user_code,
-                other_party_name=other_party.full_name,
-                amount_time=tx.amount_time,
-                amount_regio=tx.amount_regio,
-                reference=tx.reference,
-                is_system_fee=tx.is_system_fee
-            ))
+
+            formatted_data.append(
+                TransactionPublic(
+                    id=tx.id,
+                    date=tx.created_at,
+                    type=TransactionType.OUTGOING
+                    if is_outgoing
+                    else TransactionType.INCOMING,
+                    other_party_code=other_party.user_code,
+                    other_party_name=other_party.full_name,
+                    amount_time=tx.amount_time,
+                    amount_regio=tx.amount_regio,
+                    reference=tx.reference,
+                    is_system_fee=tx.is_system_fee,
+                )
+            )
 
         return TransactionHistory(
             data=formatted_data,
@@ -263,16 +323,16 @@ class BankingService:
                 page=page,
                 page_size=page_size,
                 total_count=total_count,
-                total_pages=total_pages
-            )
+                total_pages=total_pages,
+            ),
         )
 
     async def get_balance_info(self, user_code: str):
         user = await self._get_user_by_code_or_fail(user_code)
-        
+
         time_acc = await self._get_account_or_fail(user.id, Currency.TIME)
         regio_acc = await self._get_account_or_fail(user.id, Currency.REGIO)
-        
+
         limits = TRUST_LIMITS.get(user.trust_level, TRUST_LIMITS[TrustLevel.T1])
         limit_time, limit_regio = limits
 
@@ -282,14 +342,14 @@ class BankingService:
             "total_time_earned": user.total_time_earned,
             "balance": {
                 "time": time_acc.balance_time,
-                "regio": regio_acc.balance_regio
+                "regio": regio_acc.balance_regio,
             },
             "limits": {
                 "max_debt_time": limit_time,
                 "max_debt_regio": limit_regio,
                 "available_time": time_acc.balance_time - limit_time,
-                "available_regio": regio_acc.balance_regio - limit_regio
-            }
+                "available_regio": regio_acc.balance_regio - limit_regio,
+            },
         }
 
     async def create_payment_request(
@@ -298,12 +358,12 @@ class BankingService:
         debtor_code: str,
         amount_time: int,
         amount_regio: Decimal,
-        description: str
+        description: str,
     ) -> PaymentRequestPublic:
         self._validate_transaction_amounts(amount_time, amount_regio)
         if creditor_code == debtor_code:
             raise SelfTransferError()
-        
+
         creditor = await self._get_user_by_code_or_fail(creditor_code)
         debtor = await self._get_user_by_code_or_fail(debtor_code)
 
@@ -313,7 +373,7 @@ class BankingService:
             amount_time=amount_time,
             amount_regio=amount_regio,
             description=description,
-            status=PaymentStatus.PENDING
+            status=PaymentStatus.PENDING,
         )
         self.session.add(req)
         await self.session.commit()
@@ -330,9 +390,9 @@ class BankingService:
             amount_regio=req.amount_regio,
             description=req.description,
             status=req.status,
-            created_at=req.created_at
+            created_at=req.created_at,
         )
-    
+
     async def _map_payment_request_to_schema(
         self, requests: Sequence[PaymentRequest], current_user: User
     ) -> List[PaymentRequest]:
@@ -342,26 +402,35 @@ class BankingService:
         results = []
 
         for r in requests:
-            results.append(PaymentRequestPublic(
-                id=r.id,
-                creditor_code=r.creditor.user_code,
-                creditor_name=r.creditor.full_name,
-                debtor_code=current_user.user_code,
-                debtor_name=current_user.full_name,
-                amount_time=r.amount_time,
-                amount_regio=r.amount_regio,
-                description=r.description,
-                status=r.status,
-                created_at=r.created_at
-            ))
+            results.append(
+                PaymentRequestPublic(
+                    id=r.id,
+                    creditor_code=r.creditor.user_code,
+                    creditor_name=r.creditor.full_name,
+                    debtor_code=current_user.user_code,
+                    debtor_name=current_user.full_name,
+                    amount_time=r.amount_time,
+                    amount_regio=r.amount_regio,
+                    description=r.description,
+                    status=r.status,
+                    created_at=r.created_at,
+                )
+            )
         return results
 
-    async def get_incoming_payment_requests(self, current_user: User) -> List[PaymentRequest]:
+    async def get_incoming_payment_requests(
+        self, current_user: User
+    ) -> List[PaymentRequest]:
         """Requests where the user is the DEBTOR (needs to pay)."""
         stmt = (
             select(PaymentRequest)
-            .where(PaymentRequest.debtor_id == current_user.id, PaymentRequest.status == PaymentStatus.PENDING)
-            .options(selectinload(PaymentRequest.creditor)) # Load creditor for UI display
+            .where(
+                PaymentRequest.debtor_id == current_user.id,
+                PaymentRequest.status == PaymentStatus.PENDING,
+            )
+            .options(
+                selectinload(PaymentRequest.creditor)
+            )  # Load creditor for UI display
             .order_by(PaymentRequest.created_at.desc())
         )
         requests = (await self.session.execute(stmt)).scalars().all()
@@ -369,71 +438,75 @@ class BankingService:
         # Map to schema
         results = await self._map_payment_request_to_schema(requests, current_user)
         return results
-    
-    async def get_outgoing_payment_requests(self, current_user: User) -> List[PaymentRequest]:
+
+    async def get_outgoing_payment_requests(
+        self, current_user: User
+    ) -> List[PaymentRequest]:
         """Requests where the user is the CREDITOR (waiting for payment)."""
         stmt = (
             select(PaymentRequest)
-            .where(PaymentRequest.creditor_id == current_user.id, PaymentRequest.status == PaymentStatus.PENDING)
-            .options(selectinload(PaymentRequest.debtor)) # Load debtor for UI display
+            .where(
+                PaymentRequest.creditor_id == current_user.id,
+                PaymentRequest.status == PaymentStatus.PENDING,
+            )
+            .options(selectinload(PaymentRequest.debtor))  # Load debtor for UI display
             .order_by(PaymentRequest.created_at.desc())
         )
         requests = (await self.session.execute(stmt)).scalars().all()
-    
+
         # Map to schema
         results = await self._map_payment_request_to_schema(requests, current_user)
         return results
 
-    async def cancel_payment_request(self, request_id: uuid.UUID, creditor_id: uuid.UUID) -> PaymentRequest:
+    async def cancel_payment_request(
+        self, request_id: uuid.UUID, creditor_id: uuid.UUID
+    ) -> PaymentRequest:
         """Allows the Creditor to cancel their own request."""
         stmt = select(PaymentRequest).where(PaymentRequest.id == request_id)
         req = (await self.session.execute(stmt)).scalar_one_or_none()
-        
+
         if not req:
             raise PaymentRequestNotFound()
-            
+
         # Ensure only the creator can cancel
         if req.creditor_id != creditor_id:
             raise UnauthorizedPaymentRequestAccess()
 
         if req.status != PaymentStatus.PENDING:
             raise InvalidPaymentRequestStatus(req.status)
-            
+
         req.status = PaymentStatus.CANCELLED
         self.session.add(req)
         await self.session.commit()
         return req
 
     async def process_payment_request(
-        self, 
-        request_id: uuid.UUID, 
-        debtor_id: Optional[uuid.UUID], 
-        action: str
+        self, request_id: uuid.UUID, debtor_id: Optional[uuid.UUID], action: str
     ):
         stmt = select(PaymentRequest).where(PaymentRequest.id == request_id)
         req = (await self.session.execute(stmt)).scalar_one_or_none()
-        
+
         if not req:
             raise PaymentRequestNotFound()
-            
+
         if req.status != PaymentStatus.PENDING:
             raise InvalidPaymentRequestStatus(req.status)
-            
+
         # Permission Check (debtor_id is None if Admin)
         if debtor_id and req.debtor_id != debtor_id:
             raise UnauthorizedPaymentRequestAccess()
-             
+
         if action == "REJECT":
             req.status = PaymentStatus.REJECTED
             self.session.add(req)
             await self.session.commit()
             return req
-            
+
         elif action == "APPROVE":
             # Need to fetch codes for transfer function
             creditor = await self.session.get(User, req.creditor_id)
             debtor = await self.session.get(User, req.debtor_id)
-            
+
             # This might raise InsufficientFunds, which is good
             tx = await self.transfer_funds(
                 sender_code=debtor.user_code,
@@ -442,9 +515,9 @@ class BankingService:
                 amount_regio=req.amount_regio,
                 reference=f"Payment Req: {req.description or 'Confirmed'}",
                 payment_request_id=req.id,
-                skip_limit_check=False 
+                skip_limit_check=False,
             )
-            
+
             req.status = PaymentStatus.EXECUTED
             req.transaction_id = tx.id
             self.session.add(req)
@@ -460,7 +533,7 @@ class BankingService:
         if not (await self.session.execute(stmt_sys)).scalar_one_or_none():
             raise Exception("System Sink User not found")
 
-        stmt_users = select(User).where(User.is_active == True, User.is_system_admin == False)
+        stmt_users = select(User).where(User.is_active, User.is_system_admin.is_(False))
         users = (await self.session.execute(stmt_users)).scalars().all()
 
         results = []
@@ -472,11 +545,13 @@ class BankingService:
                     amount_time=MONTHLY_FEE_MINUTES,
                     amount_regio=Decimal(0),
                     reference="Membership Fee",
-                    skip_limit_check=True 
+                    skip_limit_check=True,
                 )
                 results.append({"user": user.user_code, "status": "SUCCESS"})
             except Exception as e:
-                results.append({"user": user.user_code, "status": "FAILED", "error": str(e)})
+                results.append(
+                    {"user": user.user_code, "status": "FAILED", "error": str(e)}
+                )
         return results
 
     async def process_demurrage(self):
@@ -486,7 +561,7 @@ class BankingService:
             .where(
                 Account.type == Currency.TIME,
                 Account.balance_time > DEMURRAGE_THRESHOLD_MINUTES,
-                User.is_system_admin == False
+                User.is_system_admin.is_(False),
             )
         )
         hoarding_accounts = (await self.session.execute(statement)).scalars().all()
@@ -497,7 +572,7 @@ class BankingService:
 
         for acc in hoarding_accounts:
             user = await self.session.get(User, acc.user_id)
-            last_calc = acc.last_demurrage_calc or now 
+            last_calc = acc.last_demurrage_calc or now
             delta = now - last_calc
             days_elapsed = delta.total_seconds() / (24 * 3600)
 
@@ -516,18 +591,18 @@ class BankingService:
                         amount_time=demurrage_minutes,
                         amount_regio=Decimal(0),
                         reference=f"Demurrage ({days_elapsed:.1f} days)",
-                        skip_limit_check=True
+                        skip_limit_check=True,
                     )
                     total_minutes += demurrage_minutes
                     processed_count += 1
                 except Exception as e:
                     print(f"Failed demurrage for {user.user_code}: {e}")
-            
+
             acc.last_demurrage_calc = now
             self.session.add(acc)
-        
+
         await self.session.commit()
         return {
-            "processed_users": processed_count, 
-            "total_minutes_collected": total_minutes
+            "processed_users": processed_count,
+            "total_minutes_collected": total_minutes,
         }
