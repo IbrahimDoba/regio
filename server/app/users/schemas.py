@@ -42,7 +42,9 @@ class UserCreate(SQLModel):
     invite_code: str = Field(
         ..., description="Valid invite code required for registration."
     )
-    address: str = Field(..., description="Physical address for verification purposes.")
+    address: Optional[str] = Field(
+        default=None, description="Physical address for verification purposes."
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
