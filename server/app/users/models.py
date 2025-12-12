@@ -40,7 +40,7 @@ class User(SQLModel, table=True):
     bio: Optional[str] = Field(
         default=None, max_length=500, description="Short about me"
     )
-    address: str = Field(max_length=255)
+    address: Optional[str] = Field(default=None, max_length=255)
     language: Language = Field(default=Language.EN)
 
     # Notification Settings
