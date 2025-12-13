@@ -31,7 +31,7 @@ class UserAdminView(BaseModel):
     """
 
     # id: uuid.UUID
-    user_code: str = Field(..., description="Public user identifier (e.g. A1000).")
+    user_code: str = Field(..., description="Public user identifier (e.g. B4444).")
     email: str = Field(..., description="User's email address.")
     full_name: str = Field(..., description="Concatenated first and last name.")
     avatar_url: Optional[str] = Field(default=None, description="URL to profile image.")
@@ -53,7 +53,7 @@ class UserAdminView(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "user_code": "A1000",
+                "user_code": "B4444",
                 "email": "jane@example.com",
                 "full_name": "Jane Doe",
                 "role": "User",

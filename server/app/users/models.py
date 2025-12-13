@@ -23,7 +23,7 @@ class User(SQLModel, table=True):
         unique=True,
         max_length=5,
         nullable=False,
-        description="Public 5-digit ID (e.g., A1000).",
+        description="Public 5-digit ID (e.g., B4444).",
     )
     email: EmailStr = Field(unique=True, max_length=255)
     password_hash: str
