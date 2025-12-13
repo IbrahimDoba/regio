@@ -57,7 +57,7 @@ class BalanceResponse(SQLModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "user_code": "A1000",
+                "user_code": "B4444",
                 "trust_level": "T3",
                 "total_time_earned": 1200,
                 "balance": {"time": 60, "regio": "25.50"},
@@ -136,7 +136,7 @@ class PaymentRequestPublic(SQLModel):
 # REQUESTS
 class TransferRequest(SQLModel):
     receiver_code: str = Field(
-        ..., description="User code of the recipient (e.g. A1000)."
+        ..., description="User code of the recipient (e.g. B4444)."
     )
     amount_time: int = Field(default=0, ge=0, description="Amount of minutes to send.")
     amount_regio: Decimal = Field(
