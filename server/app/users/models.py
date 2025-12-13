@@ -28,6 +28,8 @@ class User(SQLModel, table=True):
     email: EmailStr = Field(unique=True, max_length=255)
     password_hash: str
 
+    matrix_password: Optional[str] = Field(default=None, max_length=255, description="Encrypted user password for logging into the matrix server for chat.")
+
     # Real Name Policy (Immutable)
     first_name: str = Field(max_length=100)
     middle_name: Optional[str] = Field(default=None, max_length=100)

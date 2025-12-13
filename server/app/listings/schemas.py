@@ -77,7 +77,7 @@ class TagCreate(BaseModel):
 
 
 class TagPublic(BaseModel):
-    id: uuid.UUID = Field(..., description="Unique identifier for the tag.")
+    id: int = Field(..., description="Unique identifier for the tag.")
     name: str = Field(..., description="The display name/text of the tag.")
     is_official: bool = Field(
         ...,

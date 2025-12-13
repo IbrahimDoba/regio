@@ -187,7 +187,7 @@ class AdminService:
 
         return results
 
-    async def update_tag(self, tag_id: uuid.UUID, update_data: TagAdminUpdate):
+    async def update_tag(self, tag_id: int, update_data: TagAdminUpdate):
         tag = await self.session.get(Tag, tag_id)
         if not tag:
             raise TagNotFound()
@@ -200,7 +200,7 @@ class AdminService:
         await self.session.refresh(tag)
         return tag
 
-    async def delete_tag(self, tag_id: uuid.UUID):
+    async def delete_tag(self, tag_id: int):
         tag = await self.session.get(Tag, tag_id)
         if not tag:
             raise TagNotFound()

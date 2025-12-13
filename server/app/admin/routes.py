@@ -170,7 +170,7 @@ async def get_tags(
     },
 )
 async def update_tag(
-    tag_id: uuid.UUID, update_data: TagAdminUpdate, service: AdminServiceDep
+    tag_id: int, update_data: TagAdminUpdate, service: AdminServiceDep
 ) -> Any:
     """
     Update or Approve a tag.
@@ -190,7 +190,7 @@ async def update_tag(
         },
     },
 )
-async def delete_tag(tag_id: uuid.UUID, service: AdminServiceDep) -> None:
+async def delete_tag(tag_id: int, service: AdminServiceDep) -> None:
     """
     Delete a tag completely.
     """

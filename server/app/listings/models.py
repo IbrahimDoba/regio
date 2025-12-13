@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class Tag(SQLModel, table=True):
     __tablename__ = "tags"
 
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(unique=True, nullable=False)
 
     # Translations
