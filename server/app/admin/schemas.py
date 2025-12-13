@@ -94,7 +94,7 @@ class TagAdminUpdate(BaseModel):
 
 
 class TagAdminView(BaseModel):
-    id: uuid.UUID = Field(..., description="Unique Tag ID.")
+    id: int = Field(..., description="Unique Tag ID.")
     name: str = Field(..., description="Internal identifier/name.")
     name_de: Optional[str] = Field(default=None, description="German translation.")
     name_en: Optional[str] = Field(default=None, description="English translation.")

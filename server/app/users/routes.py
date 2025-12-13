@@ -2,6 +2,8 @@ from typing import Any, List
 
 from fastapi import APIRouter, status, Query
 
+from app.users.config import user_settings
+
 from app.auth.dependencies import AuthServiceDep
 from app.auth.schemas import InvitePublic
 from app.users.schemas import UserCreate, UserPublic, UsersPublic, UserUpdate
@@ -9,7 +11,6 @@ from app.users.exceptions import UserNotFound
 from app.users.dependencies import CurrentUser, CurrentAdmin, UserServiceDep
 
 router = APIRouter()
-
 
 @router.get(
     "",
@@ -173,6 +174,10 @@ async def read_user_by_code(
 
     - **user_code**: The identifier of the user to fetch.
     """
+
+    if user_code.upper() == user_settings.SYSTEM_SINK_CODE:
+        raise UserNotFound()
+
     user = await service.get_user_by_code(user_code)
     if not user:
         raise UserNotFound()
