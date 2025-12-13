@@ -13,6 +13,7 @@ from app.auth.routes import router as auth_router
 from app.banking.routes import router as banking_router
 from app.listings.routes import router as listing_router
 from app.admin.routes import router as admin_router
+from app.chat.routes import router as chat_router
 
 from app.auth.exceptions import NotAuthorized, PermissionDenied, BadAuthRequest
 from app.auth.handlers import (
@@ -98,6 +99,7 @@ app.include_router(user_router, prefix="/users", tags=["users"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(banking_router, prefix="/banking", tags=["banking"])
 app.include_router(listing_router, prefix="/listings", tags=["listings"])
+app.include_router(chat_router, prefix="/chat", tags=["chat"])
 
 """Register exception handlers"""
 

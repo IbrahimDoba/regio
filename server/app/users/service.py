@@ -20,7 +20,7 @@ from app.users.utils import generate_user_code
 
 from app.banking.service import BankingService
 from app.auth.service import AuthService
-# from app.chat.service import ChatService
+from app.chat.service import ChatService
 
 
 class UserService:
@@ -146,7 +146,7 @@ class UserService:
             self.session.add(db_user)
             await self.session.flush()  # Generate ID
 
-            # Initialize Invites & CONSUME USED INVITE
+            # Initialize Auth service for invite consumption and creations
             auth_service = AuthService(self.session)
 
             # Mark the invite they used as consumed and link it to them
@@ -162,8 +162,11 @@ class UserService:
             banking_service = BankingService(self.session)
             await banking_service.create_initial_accounts(db_user.id)
 
-            # Initialize Matrix (Placeholder)
-            # await self.chat_service.create_matrix_user(db_user)
+            # Initialize Matrix for registring Matrix user
+            chat_service = ChatService(self.session)
+            matrix_id = await chat_service.register_user(db_user)
+            if not matrix_id:  # Matrix registration failed
+                pass
 
             await self.session.commit()
             await self.session.refresh(db_user)
