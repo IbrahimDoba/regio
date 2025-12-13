@@ -1,5 +1,4 @@
 from typing import List
-import uuid
 from decimal import Decimal
 
 from sqlmodel import select, func, or_, desc

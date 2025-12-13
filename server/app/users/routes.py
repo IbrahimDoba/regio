@@ -12,6 +12,7 @@ from app.users.dependencies import CurrentUser, CurrentAdmin, UserServiceDep
 
 router = APIRouter()
 
+
 @router.get(
     "",
     response_model=UsersPublic,
