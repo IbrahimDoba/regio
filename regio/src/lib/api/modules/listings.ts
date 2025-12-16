@@ -1,39 +1,45 @@
 /**
- * Listings API Client
- *
- * API calls for listings and feed endpoints
+ * Listings API Module
  */
 
-import apiClient from '../client';
-import { API_ENDPOINTS } from '../endpoints';
-import type {
+import apiClient from "../client";
+import { API_ENDPOINTS } from "../endpoints";
+import {
   ListingPublic,
   ListingCreate,
   ListingUpdate,
-  FeedParams,
   FeedResponse,
-  TagAutocomplete,
-} from '../types';
-
-// ============================================================================
-// Feed
-// ============================================================================
+  TagPublic,
+  FeedParams,
+} from "../types";
 
 /**
- * Get main feed with filters
- * Supports filtering by categories, tags, text search, and cursor-based pagination
+ * Get the main feed of listings
  */
 export const getFeed = async (params?: FeedParams): Promise<FeedResponse> => {
+  // Convert array params to comma-separated if needed, depending on how backend expects it.
+  // FastAPI handles repeated query params like ?categories=A&categories=B automatically.
+  // Axios handles array params by default as ?categories[]=A or repeated keys.
+  // We'll pass params directly to apiClient which uses axios.
+
   const response = await apiClient.get<FeedResponse>(
     API_ENDPOINTS.LISTINGS.FEED,
-    { params }
+    {
+      params,
+    }
   );
   return response.data;
 };
 
-// ============================================================================
-// Listings CRUD
-// ============================================================================
+/**
+ * Get a single listing by ID
+ */
+export const getListing = async (listingId: string): Promise<ListingPublic> => {
+  const response = await apiClient.get<ListingPublic>(
+    API_ENDPOINTS.LISTINGS.BY_ID(listingId)
+  );
+  return response.data;
+};
 
 /**
  * Create a new listing
@@ -49,50 +55,34 @@ export const createListing = async (
 };
 
 /**
- * Get listing by ID
- */
-export const getListingById = async (id: string): Promise<ListingPublic> => {
-  const response = await apiClient.get<ListingPublic>(
-    API_ENDPOINTS.LISTINGS.BY_ID(id)
-  );
-  return response.data;
-};
-
-/**
- * Update a listing (partial update, owner only)
+ * Update an existing listing
  */
 export const updateListing = async (
-  id: string,
+  listingId: string,
   data: ListingUpdate
 ): Promise<ListingPublic> => {
   const response = await apiClient.patch<ListingPublic>(
-    API_ENDPOINTS.LISTINGS.BY_ID(id),
+    API_ENDPOINTS.LISTINGS.BY_ID(listingId),
     data
   );
   return response.data;
 };
 
 /**
- * Delete a listing (owner and admins only)
+ * Delete a listing
  */
-export const deleteListing = async (id: string): Promise<void> => {
-  await apiClient.delete(API_ENDPOINTS.LISTINGS.BY_ID(id));
+export const deleteListing = async (listingId: string): Promise<void> => {
+  await apiClient.delete(API_ENDPOINTS.LISTINGS.BY_ID(listingId));
 };
 
-// ============================================================================
-// Tags
-// ============================================================================
-
 /**
- * Autocomplete tags - search tags for autocomplete
+ * Search tags for autocomplete
  */
-export const autocompleteTags = async (
-  query: string
-): Promise<TagAutocomplete[]> => {
-  const response = await apiClient.get<TagAutocomplete[]>(
+export const searchTags = async (q: string): Promise<TagPublic[]> => {
+  const response = await apiClient.get<TagPublic[]>(
     API_ENDPOINTS.LISTINGS.TAGS,
     {
-      params: { q: query },
+      params: { q },
     }
   );
   return response.data;
@@ -104,9 +94,9 @@ export const autocompleteTags = async (
 
 export const listingsApi = {
   getFeed,
+  getListing,
   createListing,
-  getListingById,
   updateListing,
   deleteListing,
-  autocompleteTags,
+  searchTags,
 } as const;

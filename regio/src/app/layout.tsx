@@ -7,6 +7,7 @@ export const metadata: Metadata = {
 };
 
 import { LanguageProvider } from "@/context/LanguageContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { QueryProvider } from "@/lib/api/query-provider";
 
 export default function RootLayout({
@@ -18,9 +19,11 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-[#e0e0e0] flex justify-center min-h-screen font-sans antialiased">
         <QueryProvider>
-          <LanguageProvider>
-            {children}
-          </LanguageProvider>
+          <AuthProvider>
+            <LanguageProvider>
+              {children}
+            </LanguageProvider>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

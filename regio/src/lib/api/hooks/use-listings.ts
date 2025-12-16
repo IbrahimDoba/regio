@@ -1,52 +1,67 @@
-/**
- * Listings Hooks
- *
- * Custom React hooks for listings and feed operations using TanStack Query
- */
-
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { listingsApi } from '../modules/listings';
-import { queryKeys } from '../query-keys';
-import type {
-  FeedParams,
+import {
+  useQuery,
+  useMutation,
+  useInfiniteQuery,
+  useQueryClient,
+  InfiniteData,
+} from "@tanstack/react-query";
+import * as listingsApi from "../modules/listings";
+import { queryKeys, invalidationGroups } from "../query-keys";
+import {
   ListingCreate,
   ListingUpdate,
-} from '../types';
+  FeedParams,
+  FeedResponse,
+  ListingPublic,
+} from "../types";
 
 // ============================================================================
-// Feed Queries
+// Queries
 // ============================================================================
 
 /**
- * Get feed with filters
- * Supports filtering by categories, tags, text search, and cursor-based pagination
+ * Hook to fetch the listings feed (Infinite Scroll)
  */
 export function useFeed(params?: FeedParams) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: queryKeys.listings.feed(params),
-    queryFn: () => listingsApi.getFeed(params),
-    // Keep feed data fresh
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    queryFn: ({ pageParam = 0 }) =>
+      listingsApi.getFeed({ ...params, offset: pageParam as number }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage: FeedResponse) =>
+      lastPage.next_cursor ?? undefined,
   });
 }
 
 /**
- * Get listing by ID
+ * Hook to fetch a single listing by ID
  */
-export function useListing(id: string, enabled = true) {
+export function useListing(listingId: string) {
   return useQuery({
-    queryKey: queryKeys.listings.detail(id),
-    queryFn: () => listingsApi.getListingById(id),
-    enabled: enabled && !!id,
+    queryKey: queryKeys.listings.detail(listingId),
+    queryFn: () => listingsApi.getListing(listingId),
+    enabled: !!listingId,
+  });
+}
+
+/**
+ * Hook to search tags
+ */
+export function useSearchTags(query: string) {
+  return useQuery({
+    queryKey: queryKeys.listings.tags.search(query),
+    queryFn: () => listingsApi.searchTags(query),
+    enabled: query.length > 1,
+    staleTime: 5 * 60 * 1000, // Cache tags for 5 minutes
   });
 }
 
 // ============================================================================
-// Listing Mutations
+// Mutations
 // ============================================================================
 
 /**
- * Create listing mutation
+ * Hook to create a new listing
  */
 export function useCreateListing() {
   const queryClient = useQueryClient();
@@ -54,65 +69,51 @@ export function useCreateListing() {
   return useMutation({
     mutationFn: (data: ListingCreate) => listingsApi.createListing(data),
     onSuccess: () => {
-      // Invalidate feed and listings
-      queryClient.invalidateQueries({ queryKey: queryKeys.listings.lists() });
+      // Invalidate feed to show new listing
+      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all() });
     },
   });
 }
 
 /**
- * Update listing mutation
+ * Hook to update existing listing
  */
 export function useUpdateListing() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: ListingUpdate }) =>
-      listingsApi.updateListing(id, data),
+    mutationFn: ({
+      listingId,
+      data,
+    }: {
+      listingId: string;
+      data: ListingUpdate;
+    }) => listingsApi.updateListing(listingId, data),
     onSuccess: (updatedListing) => {
-      // Update cache for this specific listing
+      // Update specific listing in cache
       queryClient.setQueryData(
         queryKeys.listings.detail(updatedListing.id),
         updatedListing
       );
-
-      // Invalidate related queries
+      // Invalidate feeds to reflect changes
       queryClient.invalidateQueries({ queryKey: queryKeys.listings.lists() });
     },
   });
 }
 
 /**
- * Delete listing mutation
+ * Hook to delete a listing
  */
 export function useDeleteListing() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => listingsApi.deleteListing(id),
-    onSuccess: (_, id) => {
-      // Remove from cache
-      queryClient.removeQueries({ queryKey: queryKeys.listings.detail(id) });
-
-      // Invalidate lists
-      queryClient.invalidateQueries({ queryKey: queryKeys.listings.lists() });
+    mutationFn: (listingId: string) => listingsApi.deleteListing(listingId),
+    onSuccess: (_, listingId) => {
+      queryClient.removeQueries({
+        queryKey: queryKeys.listings.detail(listingId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all() });
     },
-  });
-}
-
-// ============================================================================
-// Tags
-// ============================================================================
-
-/**
- * Autocomplete tags - search tags for autocomplete
- */
-export function useAutocompleteTags(query: string, enabled = true) {
-  return useQuery({
-    queryKey: queryKeys.listings.tags.search(query),
-    queryFn: () => listingsApi.autocompleteTags(query),
-    enabled: enabled && !!query && query.length > 0,
-    // Keep search results fresh
-    staleTime: 1 * 60 * 1000, // 1 minute
   });
 }
