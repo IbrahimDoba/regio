@@ -13,7 +13,7 @@
   --color-purple: #7e57c2;
   --color-turquoise: #00acc1;
   --color-yellow: #fbc02d;
-  
+
   --color-nav-bg: #3f6238;
   --color-text-main: #333333;
   --bg-app: #f4f4f4;
@@ -43,4 +43,11 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Fix for input text visibility */
+input,
+textarea,
+select {
+  color: var(--color-text-main);
 }

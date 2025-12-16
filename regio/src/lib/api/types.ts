@@ -80,6 +80,8 @@ export interface UserRich {
   verification_status: VerificationStatus;
   role: UserRole;
   is_active: boolean;
+  is_system_admin: boolean;
+  avatar_url?: string | null;
   created_at: string;
 }
 
