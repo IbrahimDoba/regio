@@ -4,18 +4,24 @@
  * Custom React hooks for user management using TanStack Query
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { usersApi } from '../modules/users';
-import { queryKeys } from '../query-keys';
-import type {
-  UserCreate,
-  UserUpdate,
-  PaginationParams,
-} from '../types';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { usersApi } from "../modules/users";
+import { queryKeys } from "../query-keys";
+import type { UserCreate, UserUpdate, PaginationParams } from "../types";
 
 // ============================================================================
 // User Queries
 // ============================================================================
+
+/**
+ * Get current user (me)
+ */
+export function useMe() {
+  return useQuery({
+    queryKey: queryKeys.users.me(),
+    queryFn: () => usersApi.getCurrentUser(),
+  });
+}
 
 /**
  * Get user by code
@@ -43,7 +49,7 @@ export function useListUsers(params?: PaginationParams) {
  */
 export function useSearchUsers(query: string, limit?: number, enabled = true) {
   return useQuery({
-    queryKey: [...queryKeys.users.all(), 'search', query, limit] as const,
+    queryKey: [...queryKeys.users.all(), "search", query, limit] as const,
     queryFn: () => usersApi.searchUsers({ q: query, limit }),
     enabled: enabled && !!query && query.length >= 2,
     staleTime: 30 * 1000, // 30 seconds

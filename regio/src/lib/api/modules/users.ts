@@ -4,8 +4,8 @@
  * API calls for user management endpoints
  */
 
-import apiClient from '../client';
-import { API_ENDPOINTS } from '../endpoints';
+import apiClient from "../client";
+import { API_ENDPOINTS } from "../endpoints";
 import type {
   UserPublic,
   UserCreate,
@@ -13,7 +13,7 @@ import type {
   UsersListResponse,
   InvitePublic,
   PaginationParams,
-} from '../types';
+} from "../types";
 
 // ============================================================================
 // User CRUD
@@ -78,7 +78,9 @@ export const registerUser = async (data: UserCreate): Promise<UserPublic> => {
 /**
  * Update current user profile
  */
-export const updateCurrentUser = async (data: UserUpdate): Promise<UserPublic> => {
+export const updateCurrentUser = async (
+  data: UserUpdate
+): Promise<UserPublic> => {
   const response = await apiClient.patch<UserPublic>(
     API_ENDPOINTS.USERS.UPDATE_ME,
     data
