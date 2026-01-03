@@ -1,5 +1,6 @@
 from typing import Optional, List
 import uuid
+from datetime import datetime, timezone
 
 from sqlmodel import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -209,7 +210,9 @@ class UserService:
         await self.session.refresh(db_user)
         return db_user
 
-    async def admin_update_user(self, user_code: str, user_in: UserAdminUpdate) -> User:
+    async def admin_update_user(
+        self, user_code: str, user_in: UserAdminUpdate, current_admin: User
+    ) -> User:
         """
         Admin override. Can change names if typo correction is needed.
         """
@@ -223,6 +226,13 @@ class UserService:
 
         update_data = user_in.model_dump(exclude_unset=True)
         db_user.sqlmodel_update(update_data)
+
+        # Update verification fields (verified_by, verified_at)
+        if "verification_status" in update_data:
+            if update_data["verification_status"] == VerificationStatus.VERIFIED:
+                db_user.verified_by = current_admin
+                db_user.verified_at = datetime.now(timezone.utc)
+        # NOTE: Updating verification_status of user in update_user is now deprecated, please use admin_service.verify_user. The UserAdminUpdate schema will be updated in the future.
 
         self.session.add(db_user)
         await self.session.commit()

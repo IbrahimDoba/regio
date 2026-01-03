@@ -39,9 +39,14 @@ class UserAdminView(BaseModel):
     role: str = Field(..., description="Role: 'User' or 'Admin'.")
     trust_level: TrustLevel = Field(..., description="Current trust/reputation level.")
     is_active: bool = Field(..., description="If False, user is banned/disabled.")
-    # is_verified: bool
     verification_status: VerificationStatus = Field(
         ..., description="Status of ID verification."
+    )
+    verified_at: datetime | None = Field(
+        None, description="Timestamp at which user was verified."
+    )
+    verified_by: str | None = Field(
+        None, description="Name of admin that verified this user."
     )
 
     # Financials
@@ -60,6 +65,8 @@ class UserAdminView(BaseModel):
                 "trust_level": "T3",
                 "is_active": True,
                 "verification_status": "VERIFIED",
+                "verification_at": "2024-01-05T12:00:00Z",
+                "verification_by": "Markus Messemmer",
                 "balance_time": 120,
                 "balance_regio": "50.50",
                 "created_at": "2024-01-01T12:00:00Z",
