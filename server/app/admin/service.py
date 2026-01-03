@@ -1,12 +1,15 @@
 from typing import List
 from decimal import Decimal
+from datetime import datetime, timezone
 
 from sqlmodel import select, func, or_, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.users.service import UserService
 from app.users.models import User
 from app.users.enums import VerificationStatus
+from app.users.exceptions import UserNotFound
 from app.banking.models import Account, PaymentRequest
 from app.banking.enums import Currency, PaymentStatus
 from app.listings.models import Tag, Listing
@@ -69,6 +72,34 @@ class AdminService:
         )
 
     # USER MANAGEMENT
+    async def verify_user(self, user_code: str, current_admin: User) -> User:
+        """
+        Allows for an admin to approve a user currently pending verification.
+
+        :param user_code: Unique user code of user being verified.
+        :type user_code: str
+        :param current_admin: Currently authenticated admin performing the action.
+        :type current_admin: User
+        :return: DB object of the updated user.
+        :rtype: User
+        """
+
+        user_service = UserService(self.session)
+
+        db_user = await user_service.get_user_by_code(user_code)
+        if not db_user:
+            raise UserNotFound()
+
+        # Update verification fields (verification_status, verified_by, verified_at)
+        db_user.verified_by = current_admin
+        db_user.verification_status = VerificationStatus.VERIFIED
+        db_user.verified_at = datetime.now(timezone.utc)
+
+        self.session.add(db_user)
+        await self.session.commit()
+        await self.session.refresh(db_user)
+        return db_user
+
     async def get_users_rich(
         self, query: str = None, skip: int = 0, limit: int = 20
     ) -> UserListResponse:
@@ -127,8 +158,9 @@ class AdminService:
                     role=role,
                     trust_level=u.trust_level,
                     is_active=u.is_active,
-                    # is_verified=u.is_verified,
                     verification_status=u.verification_status,
+                    verified_at=u.verified_at,
+                    verified_by=u.verified_by.full_name if u.verified_by else None,
                     balance_time=time_bal,
                     balance_regio=regio_bal,
                     created_at=u.created_at,

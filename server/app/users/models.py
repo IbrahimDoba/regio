@@ -55,8 +55,12 @@ class User(SQLModel, table=True):
     notif_newsletter: bool = Field(default=False)
 
     # Status
-    # is_verified: bool = Field(default=False)
     verification_status: VerificationStatus = Field(default=VerificationStatus.PENDING)
+    verified_by_id: Optional[uuid.UUID] = Field(
+        default=None,
+        foreign_key="users.id",  # Pointing to self table
+        description="The ID of the admin user who verified this account.",
+    )
     verified_at: Optional[datetime] = Field(
         default=None,
         sa_type=DateTime(timezone=True),
@@ -81,6 +85,14 @@ class User(SQLModel, table=True):
     )
 
     # ORM relationships
+    verified_by: Optional["User"] = Relationship(
+        back_populates="verified_users",
+        sa_relationship_kwargs={"remote_side": "User.id", "lazy": "joined"},
+    )
+    verified_users: list["User"] = Relationship(
+        back_populates="verified_by", sa_relationship_kwargs={"lazy": "selectin"}
+    )
+
     listings: list["Listing"] = Relationship(back_populates="owner")
 
     accounts: list["Account"] = Relationship(back_populates="user")

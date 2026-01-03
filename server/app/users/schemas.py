@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any
 
 from sqlmodel import SQLModel
-from pydantic import EmailStr, Field, ConfigDict
+from pydantic import EmailStr, Field, ConfigDict, field_validator
 
 from app.users.enums import TrustLevel, VerificationStatus
 
@@ -151,6 +151,12 @@ class UserPublic(SQLModel):
     verification_status: VerificationStatus = Field(
         ..., description="Identity verification status."
     )
+    verified_at: datetime | None = Field(
+        None, description="Timestamp at which user was verified."
+    )
+    verified_by: str | None = Field(
+        None, description="Name of admin that verified this user."
+    )
 
     # Reputation & Gamification
     trust_level: TrustLevel = Field(..., description="Current trust level.")
@@ -174,12 +180,30 @@ class UserPublic(SQLModel):
                 "is_active": True,
                 "is_system_admin": False,
                 "verification_status": "PENDING",
+                "verification_at": "2024-01-05T12:00:00Z",
+                "verification_by": "Markus Messemmer",
                 "trust_level": "T1",
                 "total_time_earned": 125,
                 "created_at": "2024-01-01T12:00:00Z",
             }
         },
     )
+
+    @field_validator("verified_by", mode="before")
+    @classmethod
+    def extract_verifier_name(cls, v: Any) -> str | None:
+        """
+        Extracts the full name of the 'verified_by' User object.
+        """
+        if v is None:
+            return None
+        
+        # If v is a User object
+        if hasattr(v, "full_name"):
+            return v.full_name
+            
+        # If value is already a string (rare, I made it a User object)
+        return str(v)
 
 
 class UsersPublic(SQLModel):

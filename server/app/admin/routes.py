@@ -17,7 +17,7 @@ from app.admin.schemas import (
     TagAdminView,
 )
 from app.admin.dependencies import AdminServiceDep
-from app.users.dependencies import get_current_active_system_admin
+from app.users.dependencies import get_current_active_system_admin, CurrentUser
 
 # Protect entire router
 router = APIRouter(dependencies=[Depends(get_current_active_system_admin)])
@@ -89,6 +89,7 @@ async def list_users_rich(
 async def update_user_details(
     user_code: str,
     user_in: UserAdminUpdate,
+    current_admin: CurrentUser,
     user_service: UserService = Depends(get_user_service),
 ) -> Any:
     """
@@ -97,7 +98,28 @@ async def update_user_details(
     Allows Admins to correct Real Names (immutable for users) or manually change
     Trust Levels and Verification Status.
     """
-    return await user_service.admin_update_user(user_code, user_in)
+    return await user_service.admin_update_user(user_code, user_in, current_admin)
+
+
+@router.patch(
+    "/users/verify-user/{user_code}",
+    response_model=UserPublic,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {"description": "User not found."},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error."
+        },
+    },
+    operation_id="verify_user",
+)
+async def verify_user(
+    user_code: str, current_admin: CurrentUser, admin_service: AdminServiceDep
+) -> Any:
+    """
+    Approve a user's status and set to VERIFIED.
+    """
+    return await admin_service.verify_user(user_code, current_admin)
 
 
 @router.patch(
