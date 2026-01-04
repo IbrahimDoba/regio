@@ -22,7 +22,6 @@ from app.users.dependencies import (
 from app.users.schemas import UserAdminUpdate, UserPublic
 from app.users.service import UserService
 
-# Protect entire router
 router = APIRouter(dependencies=[Depends(get_current_active_system_admin)])
 
 """DASHBOARD"""
