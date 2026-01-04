@@ -41,7 +41,7 @@ class PermissionDenied(AuthBaseException):
 
 
 class AccountNotVerified(PermissionDenied):
-    detail = "Account exists but is not verified yet"
+    detail = "Account not verified"
 
 
 # ==========================================
