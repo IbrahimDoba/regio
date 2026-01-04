@@ -20,7 +20,7 @@ router = APIRouter()
         status.HTTP_401_UNAUTHORIZED: {"description": "Incorrect email or password"},
         status.HTTP_400_BAD_REQUEST: {"description": "Inactive user account"},
         status.HTTP_403_FORBIDDEN: {
-            "description": "Account exists but is not verified yet"
+            "description": "Account not verified"
         },
     },
 )

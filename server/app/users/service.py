@@ -9,6 +9,7 @@ from app.auth.security import get_password_hash
 from app.auth.service import AuthService
 from app.banking.service import BankingService
 from app.core.config import settings
+from app.chat.service import ChatService
 from app.users.enums import VerificationStatus
 from app.users.exceptions import (
     ActionNotPermitted,
@@ -20,8 +21,6 @@ from app.users.exceptions import (
 from app.users.models import User
 from app.users.schemas import UserAdminUpdate, UserCreate, UsersPublic, UserUpdate
 from app.users.utils import generate_user_code
-
-# from app.chat.service import ChatService
 
 
 class UserService:
@@ -110,6 +109,9 @@ class UserService:
         return results.scalars().all()
 
     async def create_user(self, user_in: UserCreate) -> User:
+        # Create chat service instance for collision check on matrix server
+        chat_service = ChatService(self.session)
+
         # Check Email Uniqueness
         existing_user = await self.get_user_by_email(user_in.email)
         if existing_user:
@@ -123,10 +125,18 @@ class UserService:
             existing = await self.session.execute(
                 select(User).where(User.user_code == user_code)
             )
-            if not existing.scalar_one_or_none():
-                break
-            user_code = generate_user_code()
-            retries -= 1
+            if existing.scalar_one_or_none():
+                user_code = generate_user_code()
+                retries -= 1
+                continue
+            
+            is_matrix_free = await chat_service.is_user_id_available(user_code)
+            if not is_matrix_free:
+                 user_code = generate_user_code()
+                 retries -= 1
+                 continue
+            
+            break
 
         if retries == 0:
             raise SystemSaturated()  # Failed to generate a unique system ID after 10 tries
@@ -164,7 +174,8 @@ class UserService:
             await banking_service.create_initial_accounts(db_user.id)
 
             # Initialize Matrix (Placeholder)
-            # await self.chat_service.create_matrix_user(db_user)
+            chat_service = ChatService(self.session)
+            await chat_service.register_user(db_user)
 
             await self.session.commit()
             await self.session.refresh(db_user)

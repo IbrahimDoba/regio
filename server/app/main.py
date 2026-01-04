@@ -50,6 +50,7 @@ from app.users.handlers import (
     system_failure_handler,
 )
 from app.users.routes import router as user_router
+from app.chat.routes import router as chat_router
 
 
 @asynccontextmanager
@@ -93,6 +94,7 @@ app.include_router(user_router, prefix="/users", tags=["users"])
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(banking_router, prefix="/banking", tags=["banking"])
 app.include_router(listing_router, prefix="/listings", tags=["listings"])
+app.include_router(chat_router, prefix="/chats", tags=["chat"])
 
 """Register exception handlers"""
 
