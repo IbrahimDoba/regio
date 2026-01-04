@@ -1,16 +1,16 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
-from sqlmodel import Field, SQLModel, Relationship
-from sqlalchemy import DateTime
 from pydantic import EmailStr
+from sqlalchemy import DateTime
+from sqlmodel import Field, Relationship, SQLModel
 
-from app.users.enums import TrustLevel, Language, VerificationStatus
+from app.users.enums import Language, TrustLevel, VerificationStatus
 
 if TYPE_CHECKING:
-    from app.banking.models import Account, Transaction, PaymentRequest
     from app.auth.models import Invite
+    from app.banking.models import Account, PaymentRequest, Transaction
     from app.listings.models import Listing
 
 

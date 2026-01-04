@@ -1,28 +1,26 @@
-import sys
 import logging
-from typing import Annotated
-from datetime import datetime, timezone
+import sys
 from collections.abc import AsyncGenerator
+from datetime import datetime, timezone
+from typing import Annotated
 
 from fastapi import Depends
-
-from sqlmodel import select
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlmodel import select
 
-from app.core.config import settings
+from app.auth import models as auth_models  # noqa: F401
 from app.auth.security import get_password_hash
-from app.users.config import user_settings
-from app.users.enums import TrustLevel, VerificationStatus
-from app.users.service import UserService
-from app.banking.service import BankingService
-
-from app.users.models import User
 
 # Imports to solve circular dependency error on startup
 from app.banking import models as banking_models  # noqa: F401
-from app.auth import models as auth_models  # noqa: F401
+from app.banking.service import BankingService
+from app.core.config import settings
 from app.listings import models as listing_models  # noqa: F401
+from app.users.config import user_settings
+from app.users.enums import TrustLevel, VerificationStatus
+from app.users.models import User
+from app.users.service import UserService
 
 # Use an async engine
 DATABASE_URL = str(settings.DATABASE_URL)

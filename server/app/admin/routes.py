@@ -1,25 +1,27 @@
 import uuid
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.users.dependencies import get_user_service
-from app.banking.dependencies import get_banking_service
-from app.users.service import UserService
-from app.banking.service import BankingService
-from app.users.schemas import UserPublic, UserAdminUpdate
+from app.admin.dependencies import AdminServiceDep
 from app.admin.schemas import (
-    SystemStats,
-    DisputePublic,
     DisputeAction,
-    UserListResponse,
+    DisputePublic,
+    SystemStats,
     TagAdminUpdate,
     TagAdminView,
+    UserListResponse,
 )
-from app.admin.dependencies import AdminServiceDep
-from app.users.dependencies import get_current_active_system_admin, CurrentUser
+from app.banking.dependencies import get_banking_service
+from app.banking.service import BankingService
+from app.users.dependencies import (
+    CurrentUser,
+    get_current_active_system_admin,
+    get_user_service,
+)
+from app.users.schemas import UserAdminUpdate, UserPublic
+from app.users.service import UserService
 
-# Protect entire router
 router = APIRouter(dependencies=[Depends(get_current_active_system_admin)])
 
 """DASHBOARD"""

@@ -1,20 +1,21 @@
 import uuid
 from typing import List, Optional
-from sqlalchemy.orm import selectinload
-from sqlmodel import select, or_, func, desc, col
-from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+from sqlmodel import col, desc, func, or_, select
+
+from app.listings.enums import ListingCategory, ListingStatus
+from app.listings.exceptions import ListingNotFound, ListingNotOwned
 from app.listings.models import Listing, Tag
 from app.listings.schemas import (
+    FeedResponse,
     ListingCreate,
     ListingPublic,
     ListingUpdate,
-    FeedResponse,
 )
-from app.listings.enums import ListingCategory, ListingStatus
-from app.users.models import User
-from app.listings.exceptions import ListingNotFound, ListingNotOwned
 from app.listings.utils import translate_text
+from app.users.models import User
 
 
 class ListingService:

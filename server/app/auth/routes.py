@@ -1,13 +1,14 @@
-from typing import Any, Annotated, Optional
-from fastapi import APIRouter, Depends, status, Response, Cookie, Request
+from typing import Annotated, Any, Optional
+
+from fastapi import APIRouter, Cookie, Depends, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.auth.utils import set_refresh_cookie
 from app.auth.dependencies import AuthServiceDep
 from app.auth.schemas import TokenResponse
+from app.auth.utils import set_refresh_cookie
 from app.core.schemas import Message
-from app.users.schemas import UserPublic
 from app.users.dependencies import CurrentUser
+from app.users.schemas import UserPublic
 
 router = APIRouter()
 

@@ -1,5 +1,5 @@
-from typing import Dict, Tuple
 from decimal import Decimal
+from typing import Dict, Tuple
 
 from app.users.enums import TrustLevel
 

@@ -1,14 +1,13 @@
 from typing import Any, List
 
-from fastapi import APIRouter, status, Query
-
-from app.users.config import user_settings
+from fastapi import APIRouter, Query, status
 
 from app.auth.dependencies import AuthServiceDep
 from app.auth.schemas import InvitePublic
-from app.users.schemas import UserCreate, UserPublic, UsersPublic, UserUpdate
+from app.users.config import user_settings
+from app.users.dependencies import CurrentAdmin, CurrentUser, UserServiceDep
 from app.users.exceptions import UserNotFound
-from app.users.dependencies import CurrentUser, CurrentAdmin, UserServiceDep
+from app.users.schemas import UserCreate, UserPublic, UsersPublic, UserUpdate
 
 router = APIRouter()
 

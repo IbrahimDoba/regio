@@ -1,7 +1,7 @@
 from typing import Optional
 
+from pydantic import ConfigDict, Field
 from sqlmodel import SQLModel
-from pydantic import Field, ConfigDict
 
 
 # TOKEN SCHEMAS

@@ -1,43 +1,42 @@
-from decimal import Decimal
-from typing import Optional, List, Sequence
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
+from typing import List, Optional, Sequence
 
-from sqlalchemy.orm import selectinload
-from sqlmodel import select, update, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.core.config import settings
-from app.users.models import User
-from app.users.enums import TrustLevel
-from app.banking.models import Account, Transaction, PaymentRequest
-from app.banking.enums import Currency, PaymentStatus, TransactionType
-from app.banking.schemas import (
-    TransactionPublic,
-    TransactionHistory,
-    TransactionMeta,
-    PaymentRequestPublic,
-)
+from sqlalchemy.orm import selectinload
+from sqlmodel import func, or_, select, update
 
 from app.banking.constants import (
-    MONTHLY_FEE_MINUTES,
-    DEMURRAGE_THRESHOLD_MINUTES,
     DEMURRAGE_RATE_ANNUAL,
+    DEMURRAGE_THRESHOLD_MINUTES,
+    MONTHLY_FEE_MINUTES,
     TRUST_LIMITS,
     TRUST_UPGRADE_THRESHOLDS,
 )
+from app.banking.enums import Currency, PaymentStatus, TransactionType
 from app.banking.exceptions import (
     AccountNotFound,
-    InvalidTransactionAmount,
-    SelfTransferError,
     InsufficientFunds,
-    TransactionConflict,
-    PaymentRequestNotFound,
-    InvalidPaymentRequestStatus,
-    UnauthorizedPaymentRequestAccess,
     InvalidPaymentAction,
+    InvalidPaymentRequestStatus,
+    InvalidTransactionAmount,
+    PaymentRequestNotFound,
+    SelfTransferError,
+    TransactionConflict,
+    UnauthorizedPaymentRequestAccess,
 )
+from app.banking.models import Account, PaymentRequest, Transaction
+from app.banking.schemas import (
+    PaymentRequestPublic,
+    TransactionHistory,
+    TransactionMeta,
+    TransactionPublic,
+)
+from app.core.config import settings
+from app.users.enums import TrustLevel
 from app.users.exceptions import UserNotFound
+from app.users.models import User
 
 
 class BankingService:

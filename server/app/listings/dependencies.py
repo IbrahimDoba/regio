@@ -1,5 +1,7 @@
 from typing import Annotated
+
 from fastapi import Depends
+
 from app.core.database import SessionDep
 from app.listings.service import ListingService
 

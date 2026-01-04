@@ -1,12 +1,12 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
-import jwt
-import uuid
 
+import jwt
 from fastapi import Response
 
-from app.core.config import settings
 from app.auth.config import auth_settings
+from app.core.config import settings
 
 
 def create_access_token(subject: str | Any, expires_delta: timedelta = None) -> str:

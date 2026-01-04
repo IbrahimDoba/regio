@@ -1,6 +1,7 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
-from app.auth.exceptions import NotAuthorized, PermissionDenied, BadAuthRequest
+
+from app.auth.exceptions import BadAuthRequest, NotAuthorized, PermissionDenied
 
 
 async def not_authorized_handler(request: Request, exc: NotAuthorized):

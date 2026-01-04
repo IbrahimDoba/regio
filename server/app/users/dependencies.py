@@ -4,16 +4,16 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
-from sqlmodel import select
 from sqlalchemy.orm import selectinload
+from sqlmodel import select
 
 from app.auth.config import auth_settings
+from app.auth.schemas import TokenPayload
 from app.core.config import settings
 from app.core.database import SessionDep
-from app.auth.schemas import TokenPayload
+from app.users.enums import VerificationStatus
 from app.users.models import User
 from app.users.service import UserService
-from app.users.enums import VerificationStatus
 
 # AUTH CONFIG
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/login/access-token")
