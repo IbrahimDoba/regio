@@ -1,26 +1,26 @@
-from typing import Optional, List
 import uuid
 from datetime import datetime, timezone
+from typing import List, Optional
 
-from sqlmodel import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import func, or_, select
 
-from app.core.config import settings
 from app.auth.security import get_password_hash
-from app.users.models import User
+from app.auth.service import AuthService
+from app.banking.service import BankingService
+from app.core.config import settings
 from app.users.enums import VerificationStatus
-from app.users.schemas import UserCreate, UserUpdate, UserAdminUpdate, UsersPublic
 from app.users.exceptions import (
+    ActionNotPermitted,
+    ImmutableFieldUpdate,
+    SystemSaturated,
     UserAlreadyExists,
     UserNotFound,
-    SystemSaturated,
-    ImmutableFieldUpdate,
-    ActionNotPermitted,
 )
+from app.users.models import User
+from app.users.schemas import UserAdminUpdate, UserCreate, UsersPublic, UserUpdate
 from app.users.utils import generate_user_code
 
-from app.banking.service import BankingService
-from app.auth.service import AuthService
 # from app.chat.service import ChatService
 
 

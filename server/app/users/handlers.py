@@ -1,10 +1,11 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
+
 from app.users.exceptions import (
-    ResourceNotFound,
-    ResourceConflict,
-    InvalidUserRequest,
     AccessDenied,
+    InvalidUserRequest,
+    ResourceConflict,
+    ResourceNotFound,
     SystemFailure,
 )
 

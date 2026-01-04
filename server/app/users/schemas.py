@@ -1,11 +1,10 @@
 from datetime import datetime
-from typing import Optional, Any
+from typing import Any, Optional
 
+from pydantic import ConfigDict, EmailStr, Field, field_validator
 from sqlmodel import SQLModel
-from pydantic import EmailStr, Field, ConfigDict, field_validator
 
 from app.users.enums import TrustLevel, VerificationStatus
-
 
 """Base model with shared properties."""
 
@@ -197,11 +196,11 @@ class UserPublic(SQLModel):
         """
         if v is None:
             return None
-        
+
         # If v is a User object
         if hasattr(v, "full_name"):
             return v.full_name
-            
+
         # If value is already a string (rare, I made it a User object)
         return str(v)
 

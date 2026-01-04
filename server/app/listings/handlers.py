@@ -1,6 +1,7 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
-from app.listings.exceptions import ListingNotFound, ListingNotOwned, InvalidListingData
+
+from app.listings.exceptions import InvalidListingData, ListingNotFound, ListingNotOwned
 
 
 async def listing_not_found_handler(request: Request, exc: ListingNotFound):

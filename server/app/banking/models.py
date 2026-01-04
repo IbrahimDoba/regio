@@ -1,12 +1,11 @@
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from sqlmodel import Field, SQLModel, Relationship, Numeric, DateTime
+from sqlmodel import DateTime, Field, Numeric, Relationship, SQLModel
+
 from app.banking.enums import Currency, PaymentStatus
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.users.models import User

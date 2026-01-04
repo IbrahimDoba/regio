@@ -1,11 +1,12 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional, List
-from sqlmodel import SQLModel
-from pydantic import Field, ConfigDict
+from typing import List, Optional
 
-from app.banking.enums import TransactionType, PaymentStatus
+from pydantic import ConfigDict, Field
+from sqlmodel import SQLModel
+
+from app.banking.enums import PaymentStatus, TransactionType
 from app.users.enums import TrustLevel
 
 

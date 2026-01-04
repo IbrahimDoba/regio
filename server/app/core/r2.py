@@ -1,11 +1,10 @@
 from typing import Annotated, AsyncGenerator
 
-from fastapi import Depends
-
 import aioboto3
 from aiobotocore.client import AioBaseClient
-from app.core.config import settings
+from fastapi import Depends
 
+from app.core.config import settings
 
 # This session holds the configuration and can be reused
 session = aioboto3.Session(

@@ -1,15 +1,14 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Optional, List, Any, Dict
-
-from sqlmodel import Field, SQLModel, Relationship, JSON, Column
-from sqlalchemy import DateTime, String
-from sqlalchemy.dialects.postgresql import JSONB
-
-from app.listings.enums import ListingCategory, ListingStatus
 
 # Forward refs
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
+from sqlalchemy import DateTime, String
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+
+from app.listings.enums import ListingCategory, ListingStatus
 
 if TYPE_CHECKING:
     from app.users.models import User

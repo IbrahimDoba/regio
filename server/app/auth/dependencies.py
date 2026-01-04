@@ -1,8 +1,9 @@
 from typing import Annotated
 
 from fastapi import Depends
-from app.core.database import SessionDep
+
 from app.auth.service import AuthService
+from app.core.database import SessionDep
 
 
 def get_auth_service(session: SessionDep) -> AuthService:

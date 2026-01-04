@@ -1,16 +1,17 @@
 import uuid
 from typing import Any, List, Optional
+
 from fastapi import APIRouter, Query, status
 
-from app.listings.schemas import (
-    ListingCreate,
-    ListingPublic,
-    FeedResponse,
-    TagPublic,
-    ListingUpdate,
-)
 from app.listings.dependencies import ListingServiceDep
 from app.listings.enums import ListingCategory
+from app.listings.schemas import (
+    FeedResponse,
+    ListingCreate,
+    ListingPublic,
+    ListingUpdate,
+    TagPublic,
+)
 from app.users.dependencies import CurrentUser
 
 router = APIRouter()

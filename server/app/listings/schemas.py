@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime
-from typing import Optional, List, Dict, Any, Literal, Union, Annotated
-from pydantic import BaseModel, Field, model_validator, ConfigDict
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.listings.enums import ListingCategory, ListingStatus
 

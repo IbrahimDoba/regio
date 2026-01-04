@@ -1,60 +1,55 @@
+from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
-from contextlib import asynccontextmanager
 from starlette.middleware.cors import CORSMiddleware
 
+from app.admin.routes import router as admin_router
+from app.auth.exceptions import BadAuthRequest, NotAuthorized, PermissionDenied
+from app.auth.handlers import (
+    bad_auth_request_handler,
+    not_authorized_handler,
+    permission_denied_handler,
+)
+from app.auth.routes import router as auth_router
+from app.banking.exceptions import (
+    BankingBadRequest,
+    BankingConflict,
+    BankingForbidden,
+    BankingNotFound,
+)
+from app.banking.handlers import (
+    banking_bad_request_handler,
+    banking_conflict_handler,
+    banking_forbidden_handler,
+    banking_not_found_handler,
+)
+from app.banking.routes import router as banking_router
 from app.core.config import settings
 from app.core.database import init_db, test_db_connection
 from app.core.handlers import global_exception_handler
-
-from app.users.routes import router as user_router
-from app.auth.routes import router as auth_router
-from app.banking.routes import router as banking_router
-from app.listings.routes import router as listing_router
-from app.admin.routes import router as admin_router
-
-from app.auth.exceptions import NotAuthorized, PermissionDenied, BadAuthRequest
-from app.auth.handlers import (
-    not_authorized_handler,
-    permission_denied_handler,
-    bad_auth_request_handler,
+from app.listings.exceptions import InvalidListingData, ListingNotFound, ListingNotOwned
+from app.listings.handlers import (
+    invalid_listing_data_handler,
+    listing_not_found_handler,
+    listing_permission_handler,
 )
-
+from app.listings.routes import router as listing_router
 from app.users.exceptions import (
-    ResourceNotFound,
-    ResourceConflict,
-    InvalidUserRequest,
     AccessDenied,
+    InvalidUserRequest,
+    ResourceConflict,
+    ResourceNotFound,
     SystemFailure,
 )
 from app.users.handlers import (
-    resource_not_found_handler,
-    resource_conflict_handler,
-    invalid_user_request_handler,
     access_denied_handler,
+    invalid_user_request_handler,
+    resource_conflict_handler,
+    resource_not_found_handler,
     system_failure_handler,
 )
-
-from app.listings.exceptions import ListingNotFound, ListingNotOwned, InvalidListingData
-from app.listings.handlers import (
-    listing_not_found_handler,
-    listing_permission_handler,
-    invalid_listing_data_handler,
-)
-
-from app.banking.exceptions import (
-    BankingNotFound,
-    BankingBadRequest,
-    BankingForbidden,
-    BankingConflict,
-)
-from app.banking.handlers import (
-    banking_not_found_handler,
-    banking_bad_request_handler,
-    banking_forbidden_handler,
-    banking_conflict_handler,
-)
+from app.users.routes import router as user_router
 
 
 @asynccontextmanager
