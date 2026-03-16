@@ -37,7 +37,10 @@ export default function AdminDisputesPage() {
     reason?: string
   ) => {
     resolveDisputeMutation.mutate(
-      { requestId, action, reason },
+      { 
+        requestId, 
+        data: { action, reason: reason || '' } 
+      },
       {
         onSuccess: () => {
           alert(`Dispute ${action.toLowerCase()}d successfully!`);
@@ -115,7 +118,7 @@ export default function AdminDisputesPage() {
                     </td>
                     <td className="p-3 border-b border-[#eee]">
                       <span className="text-[13px] text-[#666] italic">
-                        "{dispute.description?.substring(0, 50) || 'No description'}..."
+                        &ldquo;{dispute.description?.substring(0, 50) || 'No description'}...&rdquo;
                       </span>
                     </td>
                     <td className="p-3 border-b border-[#eee]">

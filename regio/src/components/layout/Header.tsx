@@ -2,7 +2,7 @@
 
 import React from "react";
 import { FaArrowRightArrowLeft, FaFilter, FaRegCircleUser } from "react-icons/fa6";
-import { cn } from "@/lib/utils";
+
 import { useLanguage } from "@/context/LanguageContext";
 
 interface HeaderProps {
@@ -48,7 +48,7 @@ export default function Header({ isFilterOpen, toggleFilter, children, count, to
                     key={lang}
                     className="p-[5px_10px] text-[20px] cursor-pointer hover:bg-[#f5f5f5] flex justify-center"
                     onClick={() => {
-                      setLanguage(lang as any);
+                      setLanguage(lang as "GB" | "DE" | "HU");
                       setIsLangOpen(false);
                     }}
                   >

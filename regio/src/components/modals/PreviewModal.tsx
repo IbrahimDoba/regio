@@ -9,9 +9,11 @@ import { getCategoryDetails, formatPrice } from "@/lib/feed-helpers";
 interface PreviewModalProps {
   listing: ListingPublic | null;
   onClose: () => void;
+  onContact?: (listing: ListingPublic) => void;
+  isContacting?: boolean;
 }
 
-export default function PreviewModal({ listing, onClose }: PreviewModalProps) {
+export default function PreviewModal({ listing, onClose, onContact, isContacting }: PreviewModalProps) {
   if (!listing) return null;
 
   const { color, icon, label, colorVar } = getCategoryDetails(listing.category);
@@ -101,10 +103,21 @@ export default function PreviewModal({ listing, onClose }: PreviewModalProps) {
             </div>
           )}
           <button
-            className={`w-full p-[12px] text-[16px] rounded-[5px] border-none text-white font-bold cursor-pointer flex justify-center items-center gap-[10px] hover:brightness-110`}
+            onClick={() => onContact?.(listing)}
+            disabled={isContacting}
+            className={`w-full p-[12px] text-[16px] rounded-[5px] border-none text-white font-bold cursor-pointer flex justify-center items-center gap-[10px] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
             style={{ backgroundColor: colorVar }}
           >
-            <FaEnvelope /> Contact
+            {isContacting ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Starting chat...
+              </>
+            ) : (
+              <>
+                <FaEnvelope /> Contact
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -1,182 +1,237 @@
-from typing import Any
+import logging
+import uuid
+from typing import Dict, List
 
-from fastapi import APIRouter, HTTPException, status
+import jwt
+from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect, status
+from sqlmodel import select
 
+from app.auth.config import auth_settings
+from app.auth.schemas import TokenPayload
 from app.chat.dependencies import ChatServiceDep
-from app.chat.schemas import (
-    JoinedRoomsResponse,
-    ListingInquiryRequest,
-    MatrixTokenResponse,
-    RoomCreateRequest,
-    RoomResponse,
-)
+from app.chat.schemas import ListingInquiryRequest, RoomResponse
+from app.chat.service import ChatService
+from app.core.config import settings
+from app.core.database import AsyncSessionLocal
 from app.users.dependencies import CurrentUser, UserServiceDep
+from app.users.models import User
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get(
-    "/token",
-    response_model=MatrixTokenResponse,
-    status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_502_BAD_GATEWAY: {
-            "description": "Failed to communicate with Matrix Homeserver."
-        },
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Internal server error."
-        },
-    },
-)
-async def get_matrix_session(current_user: CurrentUser, service: ChatServiceDep) -> Any:
-    """
-    Get Matrix Access Token (Handshake).
+# ============================================================================
+# WebSocket Connection Manager
+# ============================================================================
 
-    The frontend calls this to authenticate with the Matrix Homeserver.
-    If the user does not have a Matrix account yet, one is JIT-provisioned.
-    """
-    try:
-        data = await service.get_user_access_token(current_user)
-        return data
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Matrix Handshake Failed: {str(e)}",
-        )
+class ConnectionManager:
+    def __init__(self):
+        # room_id -> list of (websocket, user_id, sender_name)
+        self.rooms: Dict[str, List[tuple]] = {}
 
+    async def connect(
+        self, room_id: str, websocket: WebSocket, user_id: str, sender_name: str
+    ):
+        await websocket.accept()
+        if room_id not in self.rooms:
+            self.rooms[room_id] = []
+        self.rooms[room_id].append((websocket, user_id, sender_name))
 
-@router.get(
-    "/rooms",
-    response_model=JoinedRoomsResponse,
-    status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_502_BAD_GATEWAY: {
-            "description": "Failed to fetch data from Matrix."
-        }
-    },
-)
-async def get_my_rooms(current_user: CurrentUser, service: ChatServiceDep) -> Any:
-    """
-    Get joined rooms.
+    def disconnect(self, room_id: str, websocket: WebSocket):
+        if room_id in self.rooms:
+            self.rooms[room_id] = [
+                (ws, uid, name)
+                for ws, uid, name in self.rooms[room_id]
+                if ws is not websocket
+            ]
 
-    Returns a list of all Matrix Room IDs that the current user is a member of.
-    """
-    try:
-        rooms = await service.get_joined_rooms(current_user)
-        return JoinedRoomsResponse(joined_rooms=rooms)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Failed to fetch joined rooms: {str(e)}",
-        )
+    async def broadcast(
+        self, room_id: str, message: dict, exclude_ws: WebSocket = None
+    ):
+        if room_id not in self.rooms:
+            return
+        dead = []
+        for ws, uid, name in self.rooms[room_id]:
+            if exclude_ws and ws is exclude_ws:
+                continue
+            try:
+                await ws.send_json(message)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.rooms[room_id] = [
+                (w, u, n) for w, u, n in self.rooms[room_id] if w is not ws
+            ]
 
 
-@router.post(
-    "/rooms/inquiry",
-    response_model=RoomResponse,
-    status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_400_BAD_REQUEST: {
-            "description": "Cannot inquire about own listing."
-        },
-        status.HTTP_404_NOT_FOUND: {"description": "Seller not found."},
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Failed to create/join room."
-        },
-    },
-)
+manager = ConnectionManager()
+
+
+# ============================================================================
+# REST Endpoints
+# ============================================================================
+
+@router.get("/rooms", status_code=status.HTTP_200_OK)
+async def get_my_rooms(current_user: CurrentUser, service: ChatServiceDep):
+    """List all chat rooms for the current user."""
+    rooms = await service.get_user_rooms(current_user)
+    return {"rooms": rooms}
+
+
+@router.post("/rooms/inquiry", response_model=RoomResponse, status_code=status.HTTP_200_OK)
 async def inquire_listing(
     data: ListingInquiryRequest,
     current_user: CurrentUser,
     user_service: UserServiceDep,
     chat_service: ChatServiceDep,
-) -> RoomResponse:
-    """
-    Start an inquiry (Contextual Chat).
-
-    Triggered when a user clicks 'Inquire' on a Listing.
-    - If a chat for this specific listing + buyer pair exists, returns that room.
-    - If not, creates a new private, encrypted room with the seller.
-    """
-
-    # Validate Seller Exists
+):
+    """Create or retrieve an existing chat room for a listing inquiry."""
     seller = await user_service.get_user_by_code(data.seller_user_code)
     if not seller:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Seller not found",
+            status_code=status.HTTP_404_NOT_FOUND, detail="Seller not found"
         )
-
-    # Prevent Self-Inquiry
     if seller.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot inquire about your own listing.",
+            detail="Cannot inquire about your own listing.",
         )
 
-    try:
-        # Join or Create Contextual Room
-        result = await chat_service.join_or_create_listing_room(
-            buyer=current_user,
-            seller=seller,
-            listing_id=data.listing_id,
-            listing_title=data.listing_title,
-        )
-        return result
-
-    except HTTPException as he:
-        raise he
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to establish inquiry chat room.",
-        )
+    room, is_new = await chat_service.get_or_create_room(
+        buyer=current_user,
+        seller=seller,
+        listing_id=data.listing_id,
+        listing_title=data.listing_title,
+    )
+    return RoomResponse(
+        room_id=str(room.id),
+        listing_title=room.listing_title,
+        partner_name=f"{seller.first_name} {seller.last_name}".strip(),
+        partner_code=seller.user_code,
+        is_new=is_new,
+    )
 
 
-@router.post(
-    "/rooms",
-    response_model=RoomResponse,
-    status_code=status.HTTP_201_CREATED,
-    responses={
-        status.HTTP_404_NOT_FOUND: {"description": "One or more invitees not found."},
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Failed to create room."
-        },
-    },
-)
-async def create_generic_room(
-    data: RoomCreateRequest,
+@router.get("/rooms/{room_id}/messages", status_code=status.HTTP_200_OK)
+async def get_room_messages(
+    room_id: uuid.UUID,
     current_user: CurrentUser,
-    user_service: UserServiceDep,
     chat_service: ChatServiceDep,
-) -> Any:
+    limit: int = 50,
+):
+    """Fetch message history for a room."""
+    messages = await chat_service.get_room_messages(current_user, room_id, limit=limit)
+    return {"messages": messages, "has_more": len(messages) >= limit}
+
+
+# ============================================================================
+# WebSocket Endpoint
+# ============================================================================
+
+@router.websocket("/ws/{room_id}")
+async def websocket_endpoint(
+    websocket: WebSocket,
+    room_id: str,
+    token: str = Query(...),
+):
     """
-    Create a generic ad-hoc room.
+    WebSocket endpoint for real-time chat.
 
-    Used for creating standard chats outside of the listing context.
-    - **invite_user_codes**: List of users to invite.
-    - **is_direct**: If true, marks as DM.
+    Auth: JWT passed as ?token= query parameter.
+    Client sends: {"type": "text"|"payment_request"|"offer_accept"|"offer_reject"|"typing", "content": "...", "meta": {...}}
+    Server sends: {"event": "message"|"typing", ...}
     """
-    invitees = []
-    for code in data.invite_user_codes:
-        user = await user_service.get_user_by_code(code)
-        if user:
-            invitees.append(user)
-
-    if not invitees:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No valid users found to invite",
-        )
-
+    # 1. Authenticate
     try:
-        room_id = await chat_service.create_room(
-            creator=current_user, invitees=invitees, name=data.name, topic=data.topic
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[auth_settings.ALGORITHM]
         )
-        return RoomResponse(room_id=room_id)
-    except Exception as e:
-        print(f"Room Creation Error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create chat room",
+        token_data = TokenPayload(**payload)
+        user_id = token_data.sub
+        if not user_id:
+            await websocket.close(code=4001)
+            return
+    except Exception:
+        await websocket.close(code=4001)
+        return
+
+    async with AsyncSessionLocal() as session:
+        # 2. Load user
+        result = await session.execute(
+            select(User).where(User.id == uuid.UUID(user_id))
         )
+        user = result.scalar_one_or_none()
+        if not user or not user.is_active:
+            await websocket.close(code=4001)
+            return
+
+        # 3. Validate room membership
+        service = ChatService(session)
+        try:
+            room_uuid = uuid.UUID(room_id)
+            await service._get_room_or_403(user, room_uuid)
+        except HTTPException:
+            await websocket.close(code=4003)
+            return
+
+        sender_name = f"{user.first_name} {user.last_name}".strip() or user.user_code
+        await manager.connect(room_id, websocket, str(user.id), sender_name)
+
+        try:
+            while True:
+                data = await websocket.receive_json()
+                msg_type = data.get("type", "text")
+
+                # Typing indicator — broadcast only, don't persist
+                if msg_type == "typing":
+                    await manager.broadcast(
+                        room_id,
+                        {
+                            "event": "typing",
+                            "sender_name": sender_name,
+                            "is_typing": bool(data.get("is_typing", False)),
+                        },
+                        exclude_ws=websocket,
+                    )
+                    continue
+
+                content = str(data.get("content", "")).strip()
+                meta = data.get("meta")
+
+                if not content:
+                    continue
+
+                # Save to DB
+                saved = await service.save_message(
+                    user=user,
+                    room_id=room_uuid,
+                    content=content,
+                    message_type=msg_type,
+                    meta=meta,
+                )
+
+                base_payload = {
+                    "event": "message",
+                    "id": str(saved.id),
+                    "room_id": room_id,
+                    "sender_id": str(user.id),
+                    "sender_name": sender_name,
+                    "content": content,
+                    "message_type": msg_type,
+                    "meta": meta,
+                    "is_read": False,
+                    "created_at": saved.created_at.isoformat(),
+                }
+
+                # Broadcast to others in the room (is_own=False)
+                await manager.broadcast(
+                    room_id,
+                    {**base_payload, "is_own": False},
+                    exclude_ws=websocket,
+                )
+
+                # Echo back to sender (is_own=True)
+                await websocket.send_json({**base_payload, "is_own": True, "is_read": True})
+
+        except WebSocketDisconnect:
+            manager.disconnect(room_id, websocket)

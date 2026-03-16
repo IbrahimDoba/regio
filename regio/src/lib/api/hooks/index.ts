@@ -18,3 +18,6 @@ export * from './use-listings';
 
 // Admin hooks
 export * from './use-admin';
+
+// Chat hooks
+export * from './use-chat';

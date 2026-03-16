@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FaCircleInfo, FaSpinner } from "react-icons/fa6";
+import { FaSpinner } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingCategory, ListingCreate } from "@/lib/api/types";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
@@ -18,9 +18,29 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-  const [priceRegio, setPriceRegio] = useState(10);
-  const [timeMinutes, setTimeMinutes] = useState(60);
+
+  // OFFER_SERVICE
   const [timeFactor, setTimeFactor] = useState(1.0);
+
+  // SELL_PRODUCT
+  const [productRegio, setProductRegio] = useState("");
+  const [productTime, setProductTime] = useState("");
+
+  // OFFER_RENTAL
+  const [rentalFeeRegio, setRentalFeeRegio] = useState("");
+  const [rentalFeeTime, setRentalFeeTime] = useState("");
+
+  // RIDE_SHARE
+  const [rideStart, setRideStart] = useState("");
+  const [rideDestination, setRideDestination] = useState("");
+
+  // EVENT_WORKSHOP
+  const [eventStart, setEventStart] = useState("");
+  const [eventEnd, setEventEnd] = useState("");
+
+  // SEARCH_SERVICE / SEARCH_PRODUCT (optional budget)
+  const [maxBudgetTime, setMaxBudgetTime] = useState("");
+  const [maxBudgetRegio, setMaxBudgetRegio] = useState("");
 
   const createMutation = useCreateListing();
 
@@ -41,43 +61,81 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     setTags(tags.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
-    if (!title || !description) return; // Basic validation
+  const buildAttributes = (): Record<string, unknown> => {
+    switch (category) {
+      case "OFFER_SERVICE":
+        return { time_factor: timeFactor };
+      case "SEARCH_SERVICE":
+        return maxBudgetTime ? { max_budget_time: parseInt(maxBudgetTime) } : {};
+      case "SELL_PRODUCT":
+        return {
+          regio_amount: productRegio ? parseInt(productRegio) : undefined,
+          time_amount: productTime ? parseInt(productTime) : undefined,
+        };
+      case "SEARCH_PRODUCT":
+        return {
+          max_budget_regio: maxBudgetRegio ? parseInt(maxBudgetRegio) : undefined,
+          max_budget_time: maxBudgetTime ? parseInt(maxBudgetTime) : undefined,
+        };
+      case "OFFER_RENTAL":
+        return {
+          fee_regio: rentalFeeRegio ? parseInt(rentalFeeRegio) : undefined,
+          fee_time: rentalFeeTime ? parseInt(rentalFeeTime) : undefined,
+        };
+      case "RIDE_SHARE":
+        return { start: rideStart, destination: rideDestination };
+      case "EVENT_WORKSHOP":
+        return {
+          event_start_date: eventStart,
+          event_end_date: eventEnd,
+        };
+      default:
+        return {};
+    }
+  };
 
-    // Construct payload
-    // Note: This is simplified. Different categories might have different attribute needs.
-    // For now, we assume simple listing structure.
+  const isValid = (): boolean => {
+    if (!title || title.length < 5) return false;
+    if (!description || description.length < 20) return false;
+    switch (category) {
+      case "SELL_PRODUCT":
+        return !!(productRegio || productTime);
+      case "OFFER_RENTAL":
+        return !!(rentalFeeRegio || rentalFeeTime);
+      case "RIDE_SHARE":
+        return rideStart.length >= 2 && rideDestination.length >= 2;
+      case "EVENT_WORKSHOP":
+        return !!(eventStart && eventEnd);
+      default:
+        return true;
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!isValid()) return;
+
     const payload: ListingCreate = {
       title,
       description,
       category,
       tags,
-      attributes: {
-        price: {
-          regio: priceRegio,
-          time_minutes: timeMinutes,
-        },
-        time_factor: category === "OFFER_SERVICE" ? timeFactor : undefined,
-        location: {
-          // Mock location for now, ideally from user or map
-          lat: 47.4979,
-          lng: 19.0402,
-          address: "Budapest",
-          region_id: 1,
-        },
-      },
+      attributes: buildAttributes(),
     };
 
     createMutation.mutate(payload, {
       onSuccess: () => {
         onClose();
-        // Reset form?
         setTitle("");
         setDescription("");
         setTags([]);
       },
     });
   };
+
+  const inputClass =
+    "w-full p-[10px] border border-[#ccc] rounded-[4px] text-[14px] bg-[var(--input-bg)]";
+  const labelClass = "text-[12px] font-[700] text-[#555] block mb-[5px]";
+  const fieldClass = "mb-[15px]";
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-[1000] flex justify-center items-center backdrop-blur-[3px] animate-in fade-in duration-200">
@@ -96,14 +154,10 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
         <div className="p-[20px] overflow-y-auto flex-grow">
           {/* Category */}
-          <div className="mb-[15px]">
-            <div className="flex items-center gap-[6px] mb-[5px]">
-              <label className="text-[12px] font-[700] text-[#555]">
-                Category
-              </label>
-            </div>
+          <div className={fieldClass}>
+            <label className={labelClass}>Category</label>
             <select
-              className="w-full p-[10px] border border-[#ccc] rounded-[4px] text-[14px] bg-[var(--input-bg)]"
+              className={inputClass}
               value={category}
               onChange={(e) => setCategory(e.target.value as ListingCategory)}
             >
@@ -116,105 +170,208 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           </div>
 
           {/* Title */}
-          <div className="mb-[15px]">
-            <div className="flex items-center gap-[6px] mb-[5px]">
-              <label className="text-[12px] font-[700] text-[#555]">
-                Title
-              </label>
-            </div>
+          <div className={fieldClass}>
+            <label className={labelClass}>Title</label>
             <input
               type="text"
               className={cn(
-                "w-full p-[10px] border border-[#ccc] rounded-[4px] text-[14px] bg-[var(--input-bg)]",
+                inputClass,
                 title.length >= 80 ? "border-[var(--color-red-search)]" : ""
               )}
               placeholder="What are you offering or looking for?"
-              maxLength={80}
+              maxLength={100}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
-            <div className="float-right text-[11px] color-[#888] mt-[4px]">
-              {title.length}/80
+            <div className="float-right text-[11px] text-[#888] mt-[4px]">
+              {title.length}/100
             </div>
           </div>
 
           {/* Description */}
-          <div className="mb-[15px]">
-            <div className="flex items-center gap-[6px] mb-[5px]">
-              <label className="text-[12px] font-[700] text-[#555]">
-                Description
-              </label>
-            </div>
+          <div className={fieldClass}>
+            <label className={labelClass}>Description</label>
             <textarea
-              className="w-full p-[10px] border border-[#ccc] rounded-[4px] text-[14px] bg-[var(--input-bg)] h-[80px] resize-none"
-              placeholder="Describe your listing in detail..."
+              className={cn(inputClass, "h-[80px] resize-none")}
+              placeholder="Describe your listing in detail... (min 20 characters)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
+            />
           </div>
-          {/* Dynamic Fields */}
+
+          {/* ── Category-specific fields ── */}
+
           {category === "OFFER_SERVICE" && (
-            <div className="mb-[15px]">
-              <div className="flex items-center gap-[6px] mb-[5px]">
-                <label className="text-[12px] font-[700] text-[#555]">
-                  Time Factor
-                </label>
-              </div>
-              <div className="p-[10px_0]">
-                <input
-                  type="range"
-                  min="0.25"
-                  max="3.0"
-                  step="0.25"
-                  value={timeFactor}
-                  onChange={(e) => setTimeFactor(parseFloat(e.target.value))}
-                  className="w-full cursor-pointer"
-                />
-                <div className="text-center text-[12px] font-bold text-[#666]">
-                  {timeFactor}x
-                </div>
+            <div className={fieldClass}>
+              <label className={labelClass}>Time Factor</label>
+              <input
+                type="range"
+                min="0.25"
+                max="3.0"
+                step="0.25"
+                value={timeFactor}
+                onChange={(e) => setTimeFactor(parseFloat(e.target.value))}
+                className="w-full cursor-pointer"
+              />
+              <div className="text-center text-[12px] font-bold text-[#666] mt-1">
+                {timeFactor}x
               </div>
             </div>
           )}
 
-          {/* Price (Simplified) */}
-          <div className="mb-[15px] flex gap-4">
-            <div className="flex-1">
-              <label className="text-[12px] font-[700] text-[#555] block mb-[5px]">
-                Price (Regio)
-              </label>
+          {category === "SEARCH_SERVICE" && (
+            <div className={fieldClass}>
+              <label className={labelClass}>Max Budget (minutes, optional)</label>
               <input
                 type="number"
-                value={priceRegio}
-                onChange={(e) => setPriceRegio(Number(e.target.value))}
-                className="w-full p-[10px] border border-[#ccc] rounded-[4px]"
+                min="0"
+                value={maxBudgetTime}
+                onChange={(e) => setMaxBudgetTime(e.target.value)}
+                placeholder="e.g. 120"
+                className={inputClass}
               />
             </div>
-            <div className="flex-1">
-              <label className="text-[12px] font-[700] text-[#555] block mb-[5px]">
-                Duration (Min)
-              </label>
-              <input
-                type="number"
-                value={timeMinutes}
-                onChange={(e) => setTimeMinutes(Number(e.target.value))}
-                className="w-full p-[10px] border border-[#ccc] rounded-[4px]"
-              />
+          )}
+
+          {category === "SELL_PRODUCT" && (
+            <div className={cn(fieldClass, "flex gap-4")}>
+              <div className="flex-1">
+                <label className={labelClass}>Price (Regio)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={productRegio}
+                  onChange={(e) => setProductRegio(e.target.value)}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
+              <div className="flex-1">
+                <label className={labelClass}>Price (Minutes)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={productTime}
+                  onChange={(e) => setProductTime(e.target.value)}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
             </div>
-          </div>
+          )}
+
+          {category === "SEARCH_PRODUCT" && (
+            <div className={cn(fieldClass, "flex gap-4")}>
+              <div className="flex-1">
+                <label className={labelClass}>Max Budget (Regio, optional)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={maxBudgetRegio}
+                  onChange={(e) => setMaxBudgetRegio(e.target.value)}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
+              <div className="flex-1">
+                <label className={labelClass}>Max Budget (Min, optional)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={maxBudgetTime}
+                  onChange={(e) => setMaxBudgetTime(e.target.value)}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          )}
+
+          {category === "OFFER_RENTAL" && (
+            <div className={cn(fieldClass, "flex gap-4")}>
+              <div className="flex-1">
+                <label className={labelClass}>Fee (Regio)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={rentalFeeRegio}
+                  onChange={(e) => setRentalFeeRegio(e.target.value)}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
+              <div className="flex-1">
+                <label className={labelClass}>Fee (Minutes)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={rentalFeeTime}
+                  onChange={(e) => setRentalFeeTime(e.target.value)}
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          )}
+
+          {category === "RIDE_SHARE" && (
+            <>
+              <div className={fieldClass}>
+                <label className={labelClass}>Starting Location</label>
+                <input
+                  type="text"
+                  value={rideStart}
+                  onChange={(e) => setRideStart(e.target.value)}
+                  placeholder="e.g. Munich"
+                  className={inputClass}
+                />
+              </div>
+              <div className={fieldClass}>
+                <label className={labelClass}>Destination</label>
+                <input
+                  type="text"
+                  value={rideDestination}
+                  onChange={(e) => setRideDestination(e.target.value)}
+                  placeholder="e.g. Berlin"
+                  className={inputClass}
+                />
+              </div>
+            </>
+          )}
+
+          {category === "EVENT_WORKSHOP" && (
+            <>
+              <div className={fieldClass}>
+                <label className={labelClass}>Start Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={eventStart}
+                  onChange={(e) => setEventStart(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div className={fieldClass}>
+                <label className={labelClass}>End Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={eventEnd}
+                  onChange={(e) => setEventEnd(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+            </>
+          )}
 
           {/* Tags */}
-          <div className="mb-[15px]">
-            <div className="flex items-center gap-[6px] mb-[5px]">
-              <label className="text-[12px] font-[700] text-[#555]">Tags</label>
-            </div>
+          <div className={fieldClass}>
+            <label className={labelClass}>Tags</label>
             <div className="border border-[#ccc] rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]">
               {tags.map((tag, i) => (
                 <div
                   key={i}
                   className="bg-[#e0e0e0] rounded-[12px] p-[2px_10px] text-[12px] flex items-center gap-[5px]"
                 >
-                  {tag}{" "}
+                  {tag}
                   <span
                     className="cursor-pointer font-bold text-[#666]"
                     onClick={() => removeTag(i)}
@@ -226,17 +383,23 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <input
                 type="text"
                 className="border-none outline-none bg-transparent text-[14px] flex-grow p-[5px]"
-                placeholder="Add tag..."
+                placeholder="Add tag, press Enter..."
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleTagKeyDown}
               />
             </div>
           </div>
+
+          {createMutation.isError && (
+            <p className="text-[12px] text-red-500 mt-1">
+              Failed to create listing. Please check all fields and try again.
+            </p>
+          )}
         </div>
 
         <div className="p-[15px] border-t border-[#eee] bg-white">
-          <div className="flex gap-[10px] mt-[10px]">
+          <div className="flex gap-[10px]">
             <button
               className="flex-1 p-[12px] border-none rounded-[4px] font-bold cursor-pointer bg-[#ddd] text-[#333]"
               onClick={onClose}
@@ -245,9 +408,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               Cancel
             </button>
             <button
-              className="flex-1 p-[12px] border-none rounded-[4px] font-bold cursor-pointer bg-[var(--color-green-offer)] text-white flex justify-center items-center gap-2"
+              className="flex-1 p-[12px] border-none rounded-[4px] font-bold cursor-pointer bg-[var(--color-green-offer)] text-white flex justify-center items-center gap-2 disabled:opacity-50"
               onClick={handleSubmit}
-              disabled={createMutation.isPending}
+              disabled={createMutation.isPending || !isValid()}
             >
               {createMutation.isPending && (
                 <FaSpinner className="animate-spin" />

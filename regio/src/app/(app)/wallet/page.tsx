@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   FaWallet,
   FaQrcode,
@@ -8,11 +9,9 @@ import {
   FaCoins,
   FaArrowDown,
   FaArrowUp,
-  FaBuildingColumns,
-  FaCheck,
   FaPaperPlane,
   FaHandHoldingDollar,
-  FaXmark,
+  FaArrowLeft,
 } from "react-icons/fa6";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -29,6 +28,7 @@ import {
 import { TransactionPublic } from "@/lib/api/types";
 
 export default function WalletPage() {
+  const router = useRouter();
   const { t } = useLanguage();
   const [sendOpen, setSendOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
@@ -92,9 +92,10 @@ export default function WalletPage() {
             setSendTime("");
             setSendRef("");
           },
-          onError: (err: any) => {
+          onError: (err: unknown) => {
+            const error = err as { response?: { data?: { detail?: string } }; message?: string };
             alert(
-              "Transfer failed: " + (err?.response?.data?.detail || err.message)
+              "Transfer failed: " + (error?.response?.data?.detail || error.message || "Unknown error")
             );
           },
         }
@@ -124,9 +125,10 @@ export default function WalletPage() {
           setReqRef("");
           refetchOutgoing();
         },
-        onError: (err: any) => {
+        onError: (err: unknown) => {
+          const error = err as { response?: { data?: { detail?: string } }; message?: string };
           alert(
-            "Request failed: " + (err?.response?.data?.detail || err.message)
+            "Request failed: " + (error?.response?.data?.detail || error.message || "Unknown error")
           );
         },
       }
@@ -140,8 +142,10 @@ export default function WalletPage() {
           refetchIncoming();
           alert("Paid!");
         },
-        onError: (err: any) =>
-          alert("Failed: " + (err?.response?.data?.detail || err.message)),
+        onError: (err: unknown) => {
+          const error = err as { response?: { data?: { detail?: string } }; message?: string };
+          alert("Failed: " + (error?.response?.data?.detail || error.message || "Unknown error"));
+        },
       });
     }
   };
@@ -152,8 +156,10 @@ export default function WalletPage() {
         onSuccess: () => {
           refetchIncoming();
         },
-        onError: (err: any) =>
-          alert("Failed: " + (err?.response?.data?.detail || err.message)),
+        onError: (err: unknown) => {
+          const error = err as { response?: { data?: { detail?: string } }; message?: string };
+          alert("Failed: " + (error?.response?.data?.detail || error.message || "Unknown error"));
+        },
       });
     }
   };
@@ -164,8 +170,10 @@ export default function WalletPage() {
         onSuccess: () => {
           refetchOutgoing();
         },
-        onError: (err: any) =>
-          alert("Failed: " + (err?.response?.data?.detail || err.message)),
+        onError: (err: unknown) => {
+          const error = err as { response?: { data?: { detail?: string } }; message?: string };
+          alert("Failed: " + (error?.response?.data?.detail || error.message || "Unknown error"));
+        },
       });
     }
   };
@@ -185,8 +193,16 @@ export default function WalletPage() {
       {/* Header */}
       <header className="bg-white border-b border-[#eee] sticky top-0 z-100">
         <div className="flex justify-between items-center p-[15px]">
-          <div className="text-[20px] font-[800] text-[#333] flex items-center gap-[10px]">
-            <FaWallet className="text-[var(--color-nav-bg)]" /> My Wallet
+          <div className="flex items-center gap-[10px]">
+            <button
+              onClick={() => router.back()}
+              className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              <FaArrowLeft className="w-4 h-4" />
+            </button>
+            <div className="text-[20px] font-[800] text-[#333] flex items-center gap-[10px]">
+              <FaWallet className="text-[var(--color-nav-bg)]" /> My Wallet
+            </div>
           </div>
           <div className="cursor-pointer text-[#888] text-[20px]">
             <FaQrcode />

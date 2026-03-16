@@ -1,17 +1,37 @@
 "use client";
 
 import React, { useState } from "react";
-import { FaLocationDot } from "react-icons/fa6";
+import {
+  FaLocationDot,
+  FaScrewdriverWrench,
+  FaMagnifyingGlass,
+  FaTags,
+  FaMagnifyingGlassDollar,
+  FaHandHoldingHand,
+  FaCar,
+  FaCalendarDays,
+} from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingPublic } from "@/lib/api/types";
 import { getCategoryDetails, formatPrice } from "@/lib/feed-helpers";
 
+const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
+  "fa-screwdriver-wrench": <FaScrewdriverWrench />,
+  "fa-magnifying-glass": <FaMagnifyingGlass />,
+  "fa-tags": <FaTags />,
+  "fa-magnifying-glass-dollar": <FaMagnifyingGlassDollar />,
+  "fa-hand-holding-hand": <FaHandHoldingHand />,
+  "fa-car": <FaCar />,
+  "fa-calendar-days": <FaCalendarDays />,
+};
+
 interface FeedCardProps {
   listing: ListingPublic;
   onOpenPreview: (listing: ListingPublic) => void;
+  onContact?: (listing: ListingPublic) => void;
 }
 
-export default function FeedCard({ listing, onOpenPreview }: FeedCardProps) {
+export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCardProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const { color, icon, label, colorVar } = getCategoryDetails(listing.category);
@@ -41,11 +61,8 @@ export default function FeedCard({ listing, onOpenPreview }: FeedCardProps) {
           className="grid grid-cols-[50px_1fr] gap-[10px] mb-[5px] cursor-pointer border-b border-[var(--grey-line)] pb-[8px]"
           onClick={() => onOpenPreview(listing)}
         >
-          <div className="flex justify-center items-start pt-[2px]">
-            <i
-              className={`fa-solid ${icon} text-[42px] leading-none`}
-              style={{ color: colorVar }}
-            ></i>
+          <div className="flex justify-center items-start pt-[2px] text-[42px] leading-none" style={{ color: colorVar }}>
+            {CATEGORY_ICON_MAP[icon]}
           </div>
           <div className="flex flex-col justify-between">
             <h3 className="text-[17px] font-[500] leading-[1.3] m-[0_0_8px_0] text-[var(--color-text-main)]">
@@ -120,7 +137,8 @@ export default function FeedCard({ listing, onOpenPreview }: FeedCardProps) {
                   {priceDisplay}
                 </div>
                 <button
-                  className={`text-white border-none p-[8px_20px] rounded-[3px] text-[13px] font-[700] cursor-pointer`}
+                  onClick={() => onContact?.(listing)}
+                  className={`text-white border-none p-[8px_20px] rounded-[3px] text-[13px] font-[700] cursor-pointer hover:brightness-110 transition-all`}
                   style={{ backgroundColor: colorVar }}
                 >
                   Contact

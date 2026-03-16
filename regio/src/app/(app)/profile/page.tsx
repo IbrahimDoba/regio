@@ -10,11 +10,6 @@ import {
   FaFloppyDisk,
   FaVideo,
   FaChevronRight,
-  FaBell,
-  FaEnvelope,
-  FaWallet,
-  FaSquarePlus,
-  FaBars,
 } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
@@ -62,7 +57,7 @@ export default function ProfilePage() {
       // "About me" might not be supported in backend yet. I'll comment it out or leave it local for now/map to something else if found.
       // For now I'll map Location -> address.
       if (user) {
-        setLocation((user as any).address || ""); // user object might come with extra fields if backend sends Pydantic model dump?
+        setLocation((user as { address?: string }).address || ""); // user object might come with extra fields if backend sends Pydantic model dump?
         // But strict typing says UserPublic.
         // Let's check if UserPublic has address. It does NOT.
         // This suggests /me might satisfy UserRich?
@@ -86,7 +81,7 @@ export default function ProfilePage() {
     updateUser.mutate(
       {
         address: location,
-        language: language as any, // Language is handled by context but we also save it to backend?
+        language: language === "GB" ? "EN" : (language as "EN" | "DE" | "HU"), // Language is handled by context but we also save it to backend?
       },
       {
         onSuccess: () => {
@@ -241,7 +236,7 @@ export default function ProfilePage() {
               <select
                 className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
                 value={language}
-                onChange={(e) => setLanguage(e.target.value as any)}
+                onChange={(e) => setLanguage(e.target.value as "GB" | "DE" | "HU")}
               >
                 <option value="GB">English (GB)</option>
                 <option value="DE">Deutsch</option>

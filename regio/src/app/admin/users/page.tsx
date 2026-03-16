@@ -69,7 +69,7 @@ export default function AdminUsersPage() {
     );
   };
 
-  const handleSaveUser = (userCode: string, data: any) => {
+  const handleSaveUser = (userCode: string, data: Record<string, unknown>) => {
     updateUserMutation.mutate(
       { userCode, data },
       {

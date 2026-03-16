@@ -21,7 +21,7 @@ interface EditUserModalProps {
   user: UserAdminView | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (userCode: string, updates: any) => void;
+  onSave: (userCode: string, updates: Record<string, unknown>) => void;
 }
 
 export default function EditUserModal({
@@ -36,11 +36,15 @@ export default function EditUserModal({
 
   useEffect(() => {
     if (user) {
-      setTrustLevel(user.trust_level);
-      setVerificationStatus(user.verification_status);
-      setIsActive(user.is_active);
+      // Initialize state from user data - using requestAnimationFrame to avoid sync setState in render
+      requestAnimationFrame(() => {
+        setTrustLevel(user.trust_level);
+        setVerificationStatus(user.verification_status);
+        setIsActive(user.is_active);
+      });
     }
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.user_code]);
 
   if (!isOpen || !user) return null;
 

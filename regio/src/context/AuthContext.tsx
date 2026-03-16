@@ -10,7 +10,7 @@
 import React, { createContext, useContext, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCurrentUser, useLogin, useLogout } from '@/lib/api';
-import type { UserRich, LoginRequest } from '@/lib/api';
+import type { UserPublic, LoginRequest } from '@/lib/api';
 
 // ============================================================================
 // Types
@@ -18,7 +18,7 @@ import type { UserRich, LoginRequest } from '@/lib/api';
 
 interface AuthContextValue {
   // State
-  user: UserRich | null | undefined;
+  user: UserPublic | null | undefined;
   isLoading: boolean;
   isAuthenticated: boolean;
 

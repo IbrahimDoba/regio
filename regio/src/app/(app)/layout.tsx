@@ -2,13 +2,10 @@
 
 import React, { useState } from "react";
 import MobileContainer from "@/components/layout/MobileContainer";
-import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
+import ChatToast from "@/components/layout/ChatToast";
 import CreateModal from "@/components/modals/CreateModal";
-import FilterPanel from "@/components/feed/FilterPanel";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { posts } from "@/data/mockData";
-import { CategoryColor } from "@/lib/types";
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -20,6 +17,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
           <BottomNav onOpenCreate={() => setIsCreateOpen(true)} />
           <CreateModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
+          <ChatToast />
       </MobileContainer>
     </ProtectedRoute>
   );
