@@ -6,24 +6,24 @@ import ContentCard from '@/components/admin/ui/ContentCard';
 import { FaCheck, FaTrash, FaPen, FaHourglassHalf } from 'react-icons/fa6';
 
 interface TagAdminView {
-  id: number;
+  id: string;
   name: string;
-  name_de: string | null;
-  name_en: string | null;
-  name_hu: string | null;
+  name_de?: string | null;
+  name_en?: string | null;
+  name_hu?: string | null;
   is_official: boolean;
-  usage_count: number;
+  usage_count?: number;
 }
 
 export default function AdminTagsPage() {
-  const { data: pendingTags, isLoading: pendingLoading } = useAdminTags(true);
-  const { data: officialTags, isLoading: officialLoading } = useAdminTags(false);
+  const { data: pendingTags, isLoading: pendingLoading } = useAdminTags({ pending: true });
+  const { data: officialTags, isLoading: officialLoading } = useAdminTags({ pending: false });
   const updateTagMutation = useUpdateTag();
   const deleteTagMutation = useDeleteTag();
 
-  const [editingTags, setEditingTags] = useState<{ [key: number]: TagAdminView }>({});
+  const [editingTags, setEditingTags] = useState<Record<string, TagAdminView>>({});
 
-  const handleEditChange = (tagId: number, field: string, value: string) => {
+  const handleEditChange = (tagId: string, field: string, value: string) => {
     setEditingTags((prev) => ({
       ...prev,
       [tagId]: {
@@ -38,8 +38,8 @@ export default function AdminTagsPage() {
 
     updateTagMutation.mutate(
       {
-        tagId: tag.id,
-        updates: {
+        tagId: String(tag.id),
+        data: {
           name_de: editedTag.name_de || undefined,
           name_en: editedTag.name_en || undefined,
           name_hu: editedTag.name_hu || undefined,
@@ -63,7 +63,7 @@ export default function AdminTagsPage() {
     );
   };
 
-  const handleDeleteTag = (tagId: number) => {
+  const handleDeleteTag = (tagId: string) => {
     if (!confirm('Are you sure you want to delete this tag?')) return;
 
     deleteTagMutation.mutate(tagId, {
@@ -217,7 +217,7 @@ export default function AdminTagsPage() {
                     <td className="p-3 border-b border-[#eee]">{tag.name_de || '-'}</td>
                     <td className="p-3 border-b border-[#eee]">{tag.name_en || '-'}</td>
                     <td className="p-3 border-b border-[#eee]">{tag.name_hu || '-'}</td>
-                    <td className="p-3 border-b border-[#eee]">{tag.usage_count.toLocaleString()}</td>
+                    <td className="p-3 border-b border-[#eee]">{(tag.usage_count ?? 0).toLocaleString()}</td>
                     <td className="p-3 border-b border-[#eee]">
                       <FaPen className="text-[#666] cursor-pointer hover:text-[#8cb348]" />
                     </td>

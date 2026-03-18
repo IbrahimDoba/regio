@@ -86,6 +86,17 @@ export const queryKeys = {
   },
 
   // ============================================================================
+  // Chat
+  // ============================================================================
+  chat: {
+    all: () => ['chat'] as const,
+    token: () => [...queryKeys.chat.all(), 'token'] as const,
+    rooms: () => [...queryKeys.chat.all(), 'rooms'] as const,
+    room: (roomId: string) => [...queryKeys.chat.all(), 'room', roomId] as const,
+    messages: (roomId: string) => [...queryKeys.chat.room(roomId), 'messages'] as const,
+  },
+
+  // ============================================================================
   // Admin
   // ============================================================================
   admin: {
@@ -101,6 +112,12 @@ export const queryKeys = {
  * Type helper to infer query key types
  */
 export type QueryKeys = typeof queryKeys;
+
+/**
+ * Query keys for useQuery and queryClient
+ * Alias for convenience
+ */
+export const QUERY_KEYS = queryKeys;
 
 /**
  * Helper to invalidate related queries

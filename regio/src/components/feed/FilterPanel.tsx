@@ -4,15 +4,23 @@ import React from "react";
 import {
   FaScrewdriverWrench,
   FaMagnifyingGlass,
-  FaBoxOpen,
-  FaMagnifyingGlassPlus,
-  FaHandsHoldingCircle,
+  FaTags,
+  FaMagnifyingGlassDollar,
+  FaHandHoldingHand,
   FaCar,
-  FaCalendarDay,
+  FaCalendarDays,
 } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingCategory } from "@/lib/api/types";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
+
+interface FilterItem {
+  category: ListingCategory;
+  color: string;
+  colorVar: string;
+  icon: string;
+  label: string;
+}
 
 interface FilterPanelProps {
   isOpen: boolean;
@@ -34,11 +42,11 @@ const filters = (Object.keys(CATEGORY_CONFIG) as ListingCategory[]).map(
 const ICON_MAP: Record<string, React.ReactNode> = {
   "fa-screwdriver-wrench": <FaScrewdriverWrench />,
   "fa-magnifying-glass": <FaMagnifyingGlass />,
-  "fa-tags": <FaBoxOpen />,
-  "fa-magnifying-glass-dollar": <FaMagnifyingGlassPlus />,
-  "fa-hand-holding-hand": <FaHandsHoldingCircle />,
+  "fa-tags": <FaTags />,
+  "fa-magnifying-glass-dollar": <FaMagnifyingGlassDollar />,
+  "fa-hand-holding-hand": <FaHandHoldingHand />,
   "fa-car": <FaCar />,
-  "fa-calendar-days": <FaCalendarDay />,
+  "fa-calendar-days": <FaCalendarDays />,
 };
 
 export default function FilterPanel({
@@ -73,7 +81,7 @@ export default function FilterPanel({
                   : "bg-white text-[#ccc]"
               )}
               style={{
-                backgroundColor: isActive ? (f as any).colorVar : undefined,
+                backgroundColor: isActive ? CATEGORY_CONFIG[f.category].colorVar : undefined,
               }}
               title={f.label}
             >

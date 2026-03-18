@@ -59,8 +59,16 @@ export function getCategoryDetails(category: ListingCategory) {
   );
 }
 
+interface ListingAttributes {
+  time_factor?: number;
+  regio_amount?: number;
+  time_amount?: number;
+  fee_regio?: number;
+  fee_time?: number;
+}
+
 export function formatPrice(listing: ListingPublic): string {
-  const attrs = listing.attributes as any;
+  const attrs = listing.attributes as ListingAttributes | undefined;
   if (!attrs) return "";
 
   if (listing.category === "OFFER_SERVICE") {

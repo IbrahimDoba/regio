@@ -14,6 +14,7 @@ from app.auth.security import get_password_hash
 
 # Imports to solve circular dependency error on startup
 from app.banking import models as banking_models  # noqa: F401
+from app.chat import models as chat_models  # noqa: F401
 from app.banking.service import BankingService
 from app.core.config import settings
 from app.listings import models as listing_models  # noqa: F401
@@ -86,8 +87,13 @@ SessionDep = Annotated[AsyncSession, Depends(get_db)]
 
 
 async def init_db() -> None:
-    # NOTE: Tables should be created with Alembic migrations
+    # NOTE: Existing tables are managed by Alembic migrations.
+    # New chat tables are created here if they don't exist yet.
     logger.info("Initialising database")
+    from sqlmodel import SQLModel
+
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
     async with AsyncSessionLocal() as session:
         # Instantiate services
         user_service = UserService(session)

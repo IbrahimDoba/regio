@@ -57,6 +57,21 @@ class RideShareAttributes(BaseModel):
     )
 
 
+class SearchServiceAttributes(BaseModel):
+    max_budget_time: Optional[int] = Field(
+        None, description="Maximum budget in time minutes (optional)."
+    )
+
+
+class SearchProductAttributes(BaseModel):
+    max_budget_regio: Optional[int] = Field(
+        None, description="Maximum budget in Regio currency (optional)."
+    )
+    max_budget_time: Optional[int] = Field(
+        None, description="Maximum budget in time minutes (optional)."
+    )
+
+
 class EventAttributes(BaseModel):
     event_start_date: datetime = Field(
         ..., description="ISO 8601 format start date and time of the event."
@@ -134,6 +149,26 @@ class CreateServiceListing(ListingCreateBase):
                 "attributes": {"time_factor": 1.0},
             }
         }
+    )
+
+
+class CreateSearchServiceListing(ListingCreateBase):
+    category: Literal[ListingCategory.SEARCH_SERVICE] = Field(
+        ListingCategory.SEARCH_SERVICE, description="Category: SEARCH_SERVICE"
+    )
+    attributes: SearchServiceAttributes = Field(
+        default_factory=SearchServiceAttributes,
+        description="Optional budget for the searched service.",
+    )
+
+
+class CreateSearchProductListing(ListingCreateBase):
+    category: Literal[ListingCategory.SEARCH_PRODUCT] = Field(
+        ListingCategory.SEARCH_PRODUCT, description="Category: SEARCH_PRODUCT"
+    )
+    attributes: SearchProductAttributes = Field(
+        default_factory=SearchProductAttributes,
+        description="Optional budget for the searched product.",
     )
 
 
@@ -230,7 +265,9 @@ class CreateEventListing(ListingCreateBase):
 ListingCreate = Annotated[
     Union[
         CreateServiceListing,
+        CreateSearchServiceListing,
         CreateProductListing,
+        CreateSearchProductListing,
         CreateRentalListing,
         CreateRideShareListing,
         CreateEventListing,

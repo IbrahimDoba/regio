@@ -9,7 +9,6 @@ from app.auth.security import get_password_hash
 from app.auth.service import AuthService
 from app.banking.service import BankingService
 from app.core.config import settings
-from app.chat.service import ChatService
 from app.users.enums import VerificationStatus
 from app.users.exceptions import (
     ActionNotPermitted,
@@ -109,9 +108,6 @@ class UserService:
         return results.scalars().all()
 
     async def create_user(self, user_in: UserCreate) -> User:
-        # Create chat service instance for collision check on matrix server
-        chat_service = ChatService(self.session)
-
         # Check Email Uniqueness
         existing_user = await self.get_user_by_email(user_in.email)
         if existing_user:
@@ -129,13 +125,7 @@ class UserService:
                 user_code = generate_user_code()
                 retries -= 1
                 continue
-            
-            is_matrix_free = await chat_service.is_user_id_available(user_code)
-            if not is_matrix_free:
-                 user_code = generate_user_code()
-                 retries -= 1
-                 continue
-            
+
             break
 
         if retries == 0:
@@ -172,10 +162,6 @@ class UserService:
             # Initialize Banking Accounts after verifying invite
             banking_service = BankingService(self.session)
             await banking_service.create_initial_accounts(db_user.id)
-
-            # Initialize Matrix (Placeholder)
-            chat_service = ChatService(self.session)
-            await chat_service.register_user(db_user)
 
             await self.session.commit()
             await self.session.refresh(db_user)

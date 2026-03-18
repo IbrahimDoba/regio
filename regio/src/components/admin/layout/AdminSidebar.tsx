@@ -109,7 +109,7 @@ export default function AdminSidebar() {
           className="w-8 h-8 rounded-full"
         />
         <div>
-          <div className="font-bold">{user?.full_name || 'Admin'}</div>
+          <div className="font-bold">{user ? `${user.first_name} ${user.last_name}` : 'Admin'}</div>
           <div className="text-[11px] opacity-70">{t.superAdmin}</div>
         </div>
       </div>
