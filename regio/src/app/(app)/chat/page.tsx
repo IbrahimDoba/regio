@@ -15,6 +15,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
 import {
   ChatHeader,
   MessageList,
@@ -64,7 +65,13 @@ export default function ChatPage() {
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const getApiErrorMessage = (err: unknown, fallback: string): string => {
+    const axiosErr = err as AxiosError<{ detail?: string }>;
+    return axiosErr?.response?.data?.detail || (err instanceof Error ? err.message : fallback);
+  };
 
   // Connect on mount and join room when ready
   useEffect(() => {
@@ -127,7 +134,7 @@ export default function ChatPage() {
           }
         );
       } catch (err) {
-        setLocalError(err instanceof Error ? err.message : "Failed to send payment request");
+        setActionError(getApiErrorMessage(err, "Failed to send payment request"));
       }
     },
     [roomId, sendMessage, rooms]
@@ -140,15 +147,16 @@ export default function ChatPage() {
       try {
         await bankingApi.confirmPaymentRequest(requestId);
         updatePaymentRequestStatus(roomId, requestId, "paid");
+        await sendMessage(roomId, "", "payment_status", { banking_request_id: requestId, status: "paid" });
         // Refresh wallet balance and transactions
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.balance() });
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.transactions.all() });
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.paymentRequests.all() });
       } catch (err) {
-        setLocalError(err instanceof Error ? err.message : "Failed to process payment");
+        setActionError(getApiErrorMessage(err, "Failed to process payment"));
       }
     },
-    [roomId, updatePaymentRequestStatus, queryClient]
+    [roomId, updatePaymentRequestStatus, sendMessage, queryClient]
   );
 
   // Handle denying a payment request
@@ -158,12 +166,13 @@ export default function ChatPage() {
       try {
         await bankingApi.rejectPaymentRequest(requestId);
         updatePaymentRequestStatus(roomId, requestId, "denied");
+        await sendMessage(roomId, "", "payment_status", { banking_request_id: requestId, status: "denied" });
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.paymentRequests.all() });
       } catch (err) {
-        setLocalError(err instanceof Error ? err.message : "Failed to decline request");
+        setActionError(getApiErrorMessage(err, "Failed to decline request"));
       }
     },
-    [roomId, updatePaymentRequestStatus, queryClient]
+    [roomId, updatePaymentRequestStatus, sendMessage, queryClient]
   );
 
   // Handle typing indicator
@@ -337,6 +346,19 @@ export default function ChatPage() {
       {!isConnected && (
         <div className="bg-yellow-100 px-4 py-2 text-xs text-yellow-800 text-center">
           Reconnecting...
+        </div>
+      )}
+
+      {/* Action Error Banner */}
+      {actionError && (
+        <div className="bg-red-50 border-b border-red-100 px-4 py-2 flex items-center justify-between">
+          <p className="text-xs text-red-700 flex-1">{actionError}</p>
+          <button
+            onClick={() => setActionError(null)}
+            className="ml-2 text-red-400 hover:text-red-600 text-sm font-bold shrink-0"
+          >
+            ×
+          </button>
         </div>
       )}
 

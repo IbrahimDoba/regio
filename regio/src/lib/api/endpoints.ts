@@ -68,7 +68,8 @@ export const API_ENDPOINTS = {
   CHAT: {
     ROOMS: '/chats/rooms',
     INQUIRY: '/chats/rooms/inquiry',
-    MESSAGES: (roomId: string) => `/chats/rooms/${roomId}/messages`,
+    MATRIX_REGISTER: '/chats/matrix/register',
+    MATRIX_TOKEN: '/chats/matrix/token',
   },
 
   // ============================================================================

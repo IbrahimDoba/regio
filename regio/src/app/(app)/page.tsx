@@ -42,7 +42,7 @@ export default function FeedPage() {
           listing_title: listing.title,
           seller_user_code: listing.owner_code,
         });
-        roomId = result.room_id;
+        roomId = result.matrix_room_id;
       } catch (backendErr) {
         console.warn("Backend inquiry failed, trying context fallback:", backendErr);
         roomId = await createListingRoom(listing.id, listing.title, listing.owner_code);

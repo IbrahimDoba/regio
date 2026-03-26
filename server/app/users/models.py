@@ -78,6 +78,20 @@ class User(SQLModel, table=True):
         sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
     )
 
+    # Matrix integration
+    matrix_user_id: Optional[str] = Field(
+        default=None,
+        unique=True,
+        nullable=True,
+        description="Matrix user ID, e.g. @immo_<uuid>:151.hu",
+    )
+    matrix_password: Optional[str] = Field(
+        default=None,
+        max_length=255,
+        nullable=True,
+        description="AES-256-CBC encrypted Matrix password",
+    )
+
     # ORM relationships
     verified_by: Optional["User"] = Relationship(
         back_populates="verified_users",
