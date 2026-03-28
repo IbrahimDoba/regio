@@ -12,8 +12,8 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.chat.config import chat_settings
-from app.chat.schemas import RoomResponse
 from app.chat.exceptions import MatrixUserCollisionError
+from app.chat.schemas import RoomResponse
 from app.core.config import settings as global_settings
 from app.users.models import User
 
@@ -31,7 +31,9 @@ class ChatService:
         self.admin_user = chat_settings.MATRIX_ADMIN_USER
         self.admin_pass = chat_settings.MATRIX_ADMIN_PASSWORD
         self.registration_token = chat_settings.MATRIX_REGISTRATION_TOKEN
-        self.redis = Redis.from_url(global_settings.REDIS_URL, decode_responses=True)
+        self.redis = Redis.from_url(
+            global_settings.REDIS_URL, decode_responses=True
+        )
 
     def _encrypt_password(self, password: str) -> str:
         """Encrypts plain password for DB storage."""
@@ -84,7 +86,7 @@ class ChatService:
         # Remove anything that isn't alphanumeric or underscore for the handle
         clean_code = re.sub(r"[^a-z0-9_]", "", user_code.lower())
         return f"@regio_{clean_code}:{self.domain}"
-    
+
     async def is_user_id_available(self, user_code: str) -> bool:
         """
         Checks if the Matrix ID is available on the server.
@@ -92,7 +94,7 @@ class ChatService:
         username = self._sanitize_username(user_code)
 
         url = f"{self.base_url}/_matrix/client/v3/register/available"
-        
+
         async with httpx.AsyncClient() as client:
             try:
                 resp = await client.get(url, params={"username": username})
@@ -121,7 +123,9 @@ class ChatService:
                     json={"displayname": display_name},
                 )
             except Exception as e:
-                logger.warning(f"Failed to set display name for {user_id}: {e}")
+                logger.warning(
+                    f"Failed to set display name for {user_id}: {e}"
+                )
 
     async def _handle_registration_success(
         self, resp: httpx.Response, user: User
@@ -157,7 +161,9 @@ class ChatService:
 
         async with httpx.AsyncClient() as client:
             try:
-                reg_url = f"{self.base_url}/_matrix/client/v3/register?kind=user"
+                reg_url = (
+                    f"{self.base_url}/_matrix/client/v3/register?kind=user"
+                )
 
                 # Initial Attempt: Send Token immediately
                 initial_auth = {
@@ -181,7 +187,9 @@ class ChatService:
                     logger.info(
                         f"Matrix user {matrix_id} already exists. Skipping registration."
                     )
-                    raise MatrixUserCollisionError(f"Matrix user {matrix_id} already exists")
+                    raise MatrixUserCollisionError(
+                        f"Matrix user {matrix_id} already exists"
+                    )
 
                 # Case C: Interactive Auth (The Standard Path)
                 if resp.status_code == 401:
@@ -211,7 +219,9 @@ class ChatService:
                         )
 
                         if resp.status_code == 200:
-                            return await self._handle_registration_success(resp, user)
+                            return await self._handle_registration_success(
+                                resp, user
+                            )
 
                         if resp.status_code == 401:
                             # Update completed list from latest response
@@ -225,15 +235,22 @@ class ChatService:
 
                     # STAGE 2: Dummy Auth
                     if "m.login.dummy" not in completed:
-                        auth_dummy = {"type": "m.login.dummy", "session": session}
+                        auth_dummy = {
+                            "type": "m.login.dummy",
+                            "session": session,
+                        }
                         resp = await client.post(
                             reg_url, json={**payload_base, "auth": auth_dummy}
                         )
 
                         if resp.status_code == 200:
-                            return await self._handle_registration_success(resp, user)
+                            return await self._handle_registration_success(
+                                resp, user
+                            )
 
-                        logger.error(f"Matrix Dummy Registration failed: {resp.text}")
+                        logger.error(
+                            f"Matrix Dummy Registration failed: {resp.text}"
+                        )
                         return None
 
                 # Catch-all
@@ -327,7 +344,9 @@ class ChatService:
                     # Room exists, return ID
                     room_id = resolve_resp.json().get("room_id")
 
-                    return RoomResponse(room_id=room_id, alias=room_alias, is_new=False)
+                    return RoomResponse(
+                        room_id=room_id, alias=room_alias, is_new=False
+                    )
 
                 elif resolve_resp.status_code == 404:
                     # Create Room if 404
@@ -348,7 +367,9 @@ class ChatService:
                             {
                                 "type": "m.room.encryption",
                                 "state_key": "",
-                                "content": {"algorithm": "m.megolm.v1.aes-sha2"},
+                                "content": {
+                                    "algorithm": "m.megolm.v1.aes-sha2"
+                                },
                             }
                         ],
                     }
@@ -368,7 +389,9 @@ class ChatService:
                     create_resp.raise_for_status()
                     room_id = create_resp.json()["room_id"]
 
-                    return RoomResponse(room_id=room_id, alias=room_alias, is_new=True)
+                    return RoomResponse(
+                        room_id=room_id, alias=room_alias, is_new=True
+                    )
 
                 else:
                     resolve_resp.raise_for_status()
@@ -381,7 +404,11 @@ class ChatService:
                 )
 
     async def create_room(
-        self, creator: User, invitees: List[User], name: str = None, topic: str = None
+        self,
+        creator: User,
+        invitees: List[User],
+        name: str = None,
+        topic: str = None,
     ) -> str:
         """
         Standard generic room creation (Fallback or manual creation).

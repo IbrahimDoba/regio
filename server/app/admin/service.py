@@ -65,7 +65,8 @@ class AdminService:
         return SystemStats(
             total_users=total_users.one()[0] or 0,
             active_users=active_users.one()[0] or 0,
-            verification_pending_users=verification_pending_users.one()[0] or 0,
+            verification_pending_users=verification_pending_users.one()[0]
+            or 0,
             total_time_volume=total_time.one()[0] or 0,
             total_regio_volume=total_regio.one()[0] or 0,
             pending_disputes=pending.one()[0] or 0,
@@ -106,7 +107,12 @@ class AdminService:
         """
         Fetches users AND their balances in one go.
         """
-        stmt = select(User).offset(skip).limit(limit).order_by(desc(User.created_at))
+        stmt = (
+            select(User)
+            .offset(skip)
+            .limit(limit)
+            .order_by(desc(User.created_at))
+        )
 
         if query:
             stmt = stmt.where(
@@ -160,7 +166,9 @@ class AdminService:
                     is_active=u.is_active,
                     verification_status=u.verification_status,
                     verified_at=u.verified_at,
-                    verified_by=u.verified_by.full_name if u.verified_by else None,
+                    verified_by=u.verified_by.full_name
+                    if u.verified_by
+                    else None,
                     balance_time=time_bal,
                     balance_regio=regio_bal,
                     created_at=u.created_at,
@@ -257,7 +265,10 @@ class AdminService:
         # MOCK IMPLEMENTATION FOR PHASE 1
         print(f"[BROADCAST] Sent '{data.title}' to {count} users.")
 
-        return {"sent_count": count, "message": "Broadcast queued successfully"}
+        return {
+            "sent_count": count,
+            "message": "Broadcast queued successfully",
+        }
 
     # DISPUTES
     async def get_pending_disputes(self) -> List[DisputePublic]:

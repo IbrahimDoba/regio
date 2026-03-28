@@ -9,10 +9,15 @@ class MatrixTokenResponse(BaseModel):
     """
 
     user_id: str = Field(
-        ..., description="The full Matrix User ID (e.g. @regio_z2000:matrix.org)."
+        ...,
+        description="The full Matrix User ID (e.g. @regio_z2000:matrix.org).",
     )
-    access_token: str = Field(..., description="The session token for the Matrix API.")
-    home_server: str = Field(..., description="The URL of the Matrix Homeserver.")
+    access_token: str = Field(
+        ..., description="The session token for the Matrix API."
+    )
+    home_server: str = Field(
+        ..., description="The URL of the Matrix Homeserver."
+    )
     device_id: str = Field(
         ..., description="The device ID associated with this session."
     )
@@ -34,12 +39,15 @@ class RoomCreateRequest(BaseModel):
     Generic request to create a chat room.
     """
 
-    name: Optional[str] = Field(default=None, description="Display name of the room.")
+    name: Optional[str] = Field(
+        default=None, description="Display name of the room."
+    )
     topic: Optional[str] = Field(
         default=None, description="Topic or subject of the room."
     )
     invite_user_codes: List[str] = Field(
-        ..., description="List of user codes (e.g. ['B2000']) to invite immediately."
+        ...,
+        description="List of user codes (e.g. ['B2000']) to invite immediately.",
     )
     is_direct: bool = Field(
         default=True,
@@ -111,4 +119,6 @@ class JoinedRoomsResponse(BaseModel):
     List of room IDs the user has joined.
     """
 
-    joined_rooms: List[str] = Field(..., description="List of Matrix Room IDs.")
+    joined_rooms: List[str] = Field(
+        ..., description="List of Matrix Room IDs."
+    )

@@ -14,10 +14,14 @@ session = aioboto3.Session(
 
 
 async def fetch_s3_object(key: str) -> bytes | None:
-    async with session.client("s3", endpoint_url=settings.R2_ENDPOINT_URL) as s3_client:
+    async with session.client(
+        "s3", endpoint_url=settings.R2_ENDPOINT_URL
+    ) as s3_client:
         """Helper to safely download a file and return bytes."""
         try:
-            obj = await s3_client.get_object(Bucket=settings.R2_BUCKET_NAME, Key=key)
+            obj = await s3_client.get_object(
+                Bucket=settings.R2_BUCKET_NAME, Key=key
+            )
             async with obj["Body"] as stream:
                 return await stream.read()
         except Exception:
@@ -35,7 +39,9 @@ async def get_s3_client() -> AsyncGenerator[AioBaseClient, None]:
     and is automatically closed after usage.
     """
     # Use 'aioboto3.Session' to create a client
-    async with session.client("s3", endpoint_url=settings.R2_ENDPOINT_URL) as s3_client:
+    async with session.client(
+        "s3", endpoint_url=settings.R2_ENDPOINT_URL
+    ) as s3_client:
         yield s3_client
 
 

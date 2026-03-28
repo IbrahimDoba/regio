@@ -18,7 +18,9 @@ class Invite(SQLModel, table=True):
     owner_id: uuid.UUID = Field(foreign_key="users.id", nullable=False)
 
     # Invite used by who?
-    used_by_id: Optional[uuid.UUID] = Field(default=None, foreign_key="users.id")
+    used_by_id: Optional[uuid.UUID] = Field(
+        default=None, foreign_key="users.id"
+    )
 
     # Usage logic
     uses_left: int = Field(default=1)

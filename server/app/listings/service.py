@@ -26,7 +26,9 @@ class ListingService:
 
     async def search_tags(self, query: str) -> List[Tag]:
         """Autocomplete for tags"""
-        statement = select(Tag).where(col(Tag.name).ilike(f"%{query}%")).limit(10)
+        statement = (
+            select(Tag).where(col(Tag.name).ilike(f"%{query}%")).limit(10)
+        )
         results = await self.session.execute(statement)
         return results.scalars().all()
 
@@ -165,14 +167,18 @@ class ListingService:
 
         return listing
 
-    async def delete_listing(self, listing_id: uuid.UUID, current_user: User) -> None:
+    async def delete_listing(
+        self, listing_id: uuid.UUID, current_user: User
+    ) -> None:
         # Get listing
         listing = await self.session.get(Listing, listing_id)
         if not listing:
             raise ListingNotFound()
 
         # Prevent non-owner from deleting listing, allow system admins
-        if not (current_user.id == listing.owner_id or current_user.is_system_admin):
+        if not (
+            current_user.id == listing.owner_id or current_user.is_system_admin
+        ):
             raise ListingNotOwned()
 
         await self.session.delete(listing)
@@ -214,7 +220,11 @@ class ListingService:
             )
 
         # Order and Pagination
-        query = query.order_by(desc(Listing.created_at)).offset(offset).limit(limit)
+        query = (
+            query.order_by(desc(Listing.created_at))
+            .offset(offset)
+            .limit(limit)
+        )
 
         # Join Owner for Display Info
         # We need eager loading to get owner name

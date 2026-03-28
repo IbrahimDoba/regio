@@ -1,7 +1,11 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 
-from app.listings.exceptions import InvalidListingData, ListingNotFound, ListingNotOwned
+from app.listings.exceptions import (
+    InvalidListingData,
+    ListingNotFound,
+    ListingNotOwned,
+)
 
 
 async def listing_not_found_handler(request: Request, exc: ListingNotFound):
@@ -18,7 +22,9 @@ async def listing_permission_handler(request: Request, exc: ListingNotOwned):
     )
 
 
-async def invalid_listing_data_handler(request: Request, exc: InvalidListingData):
+async def invalid_listing_data_handler(
+    request: Request, exc: InvalidListingData
+):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": exc.detail},

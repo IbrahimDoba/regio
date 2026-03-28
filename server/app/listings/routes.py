@@ -25,7 +25,9 @@ router = APIRouter()
         status.HTTP_400_BAD_REQUEST: {
             "description": "Invalid category data or attributes."
         },
-        status.HTTP_401_UNAUTHORIZED: {"description": "User is not authenticated."},
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "User is not authenticated."
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error."
         },
@@ -48,7 +50,9 @@ async def create_listing(
     response_model=FeedResponse,
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error."
+        }
     },
 )
 async def get_feed(
@@ -59,8 +63,12 @@ async def get_feed(
     q: Optional[str] = Query(
         None, description="Search term for titles and descriptions."
     ),
-    tags: Optional[List[str]] = Query(None, description="Filter by specific tags."),
-    offset: int = Query(0, ge=0, description="Pagination offset (skip N items)."),
+    tags: Optional[List[str]] = Query(
+        None, description="Filter by specific tags."
+    ),
+    offset: int = Query(
+        0, ge=0, description="Pagination offset (skip N items)."
+    ),
 ) -> Any:
     """
     Main Feed.
@@ -77,7 +85,9 @@ async def get_feed(
     response_model=List[TagPublic],
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error."
+        }
     },
 )
 async def autocomplete_tags(q: str, service: ListingServiceDep) -> Any:
@@ -100,7 +110,9 @@ async def autocomplete_tags(q: str, service: ListingServiceDep) -> Any:
         },
     },
 )
-async def get_listing_by_id(service: ListingServiceDep, listing_id: uuid.UUID) -> Any:
+async def get_listing_by_id(
+    service: ListingServiceDep, listing_id: uuid.UUID
+) -> Any:
     """
     Get a listing by its ID.
 
@@ -124,7 +136,9 @@ async def get_listing_by_id(service: ListingServiceDep, listing_id: uuid.UUID) -
     },
 )
 async def delete_listing_by_id(
-    service: ListingServiceDep, listing_id: uuid.UUID, current_user: CurrentUser
+    service: ListingServiceDep,
+    listing_id: uuid.UUID,
+    current_user: CurrentUser,
 ) -> None:
     """
     Delete a listing by its ID.
@@ -143,8 +157,12 @@ async def delete_listing_by_id(
         status.HTTP_400_BAD_REQUEST: {
             "description": "Validation error in update data."
         },
-        status.HTTP_401_UNAUTHORIZED: {"description": "User is not authenticated."},
-        status.HTTP_403_FORBIDDEN: {"description": "User does not own the listing."},
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "User is not authenticated."
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "User does not own the listing."
+        },
         status.HTTP_404_NOT_FOUND: {"description": "Listing not found."},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error."
@@ -162,5 +180,7 @@ async def update_listing(
 
     Accepts partial updates. Only the owner can perform this action.
     """
-    listing = await service.update_listing(listing_id, current_user, update_data)
+    listing = await service.update_listing(
+        listing_id, current_user, update_data
+    )
     return await service.format_listing(listing)
