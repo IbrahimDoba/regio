@@ -16,7 +16,9 @@ async def banking_not_found_handler(request: Request, exc: BankingNotFound):
     )
 
 
-async def banking_bad_request_handler(request: Request, exc: BankingBadRequest):
+async def banking_bad_request_handler(
+    request: Request, exc: BankingBadRequest
+):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": exc.detail},

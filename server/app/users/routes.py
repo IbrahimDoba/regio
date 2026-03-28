@@ -17,7 +17,9 @@ router = APIRouter()
     response_model=UsersPublic,
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error."
+        }
     },
 )
 async def read_users(
@@ -40,13 +42,17 @@ async def read_users(
     response_model=List[UserPublic],
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error."
+        }
     },
 )
 async def search_users(
     service: UserServiceDep,
     _: CurrentUser,
-    q: str = Query(min_length=2, description="Search string (name or user code)."),
+    q: str = Query(
+        min_length=2, description="Search string (name or user code)."
+    ),
     limit: int = 10,
 ) -> Any:
     """
@@ -123,9 +129,13 @@ async def update_user_me(
 
 
 @router.get(
-    "/invites", response_model=List[InvitePublic], status_code=status.HTTP_200_OK
+    "/invites",
+    response_model=List[InvitePublic],
+    status_code=status.HTTP_200_OK,
 )
-async def read_my_invites(current_user: CurrentUser, service: AuthServiceDep) -> Any:
+async def read_my_invites(
+    current_user: CurrentUser, service: AuthServiceDep
+) -> Any:
     """
     Get the invite codes for the current user.
 
@@ -161,7 +171,9 @@ async def request_new_invites(
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_403_FORBIDDEN: {"description": "User is not an admin."},
-        status.HTTP_404_NOT_FOUND: {"description": "User with this code not found."},
+        status.HTTP_404_NOT_FOUND: {
+            "description": "User with this code not found."
+        },
     },
 )
 async def read_user_by_code(

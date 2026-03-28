@@ -10,7 +10,9 @@ from app.users.enums import TrustLevel, VerificationStatus
 
 
 class UserBase(SQLModel):
-    email: EmailStr = Field(..., description="Unique email address of the user.")
+    email: EmailStr = Field(
+        ..., description="Unique email address of the user."
+    )
     is_active: bool = Field(
         default=True, description="Whether the account is active or disabled."
     )
@@ -19,7 +21,8 @@ class UserBase(SQLModel):
         description="Current status of identity verification.",
     )
     trust_level: TrustLevel = Field(
-        default=TrustLevel.T1, description="Calculated trust score/reputation level."
+        default=TrustLevel.T1,
+        description="Calculated trust score/reputation level.",
     )
 
 
@@ -64,7 +67,9 @@ class UserUpdate(SQLModel):
     Fields that user can update themselves.
     """
 
-    email: Optional[EmailStr] = Field(default=None, description="New email address.")
+    email: Optional[EmailStr] = Field(
+        default=None, description="New email address."
+    )
     password: Optional[str] = Field(default=None, description="New password.")
     address: Optional[str] = Field(
         default=None, description="Updated physical address."
@@ -74,7 +79,9 @@ class UserUpdate(SQLModel):
     )
 
     # Profile updates
-    avatar_url: Optional[str] = Field(default=None, description="URL to profile image.")
+    avatar_url: Optional[str] = Field(
+        default=None, description="URL to profile image."
+    )
     bio: Optional[str] = Field(
         default=None, max_length=500, description="Short about me."
     )
@@ -127,17 +134,24 @@ class UserAdminUpdate(UserUpdate):
 
 # Properties to return via API
 class UserPublic(SQLModel):
-    user_code: str = Field(..., description="Public 5-digit unique ID (e.g. B4444).")
+    user_code: str = Field(
+        ..., description="Public 5-digit unique ID (e.g. B4444)."
+    )
     email: EmailStr = Field(..., description="User's email address.")
     first_name: str = Field(..., description="First name.")
-    middle_name: Optional[str] = Field(default=None, description="Middle name.")
+    middle_name: Optional[str] = Field(
+        default=None, description="Middle name."
+    )
     last_name: str = Field(..., description="Last name.")
     full_name: str = Field(
-        ..., description="Full name derived from first, middle, and last names."
+        ...,
+        description="Full name derived from first, middle, and last names.",
     )
 
     # Profile & Bio
-    avatar_url: Optional[str] = Field(default=None, description="URL to profile image.")
+    avatar_url: Optional[str] = Field(
+        default=None, description="URL to profile image."
+    )
     bio: Optional[str] = Field(default=None, description="Short about me.")
     address: Optional[str] = Field(..., description="User's physical address.")
     language: Optional[str] = Field(
@@ -146,7 +160,9 @@ class UserPublic(SQLModel):
 
     # Status & Privileges
     is_active: bool = Field(..., description="Whether account is active.")
-    is_system_admin: bool = Field(..., description="Whether user is a system admin.")
+    is_system_admin: bool = Field(
+        ..., description="Whether user is a system admin."
+    )
     verification_status: VerificationStatus = Field(
         ..., description="Identity verification status."
     )
@@ -159,14 +175,18 @@ class UserPublic(SQLModel):
 
     # Reputation & Gamification
     trust_level: TrustLevel = Field(..., description="Current trust level.")
-    total_time_earned: int = Field(..., description="Total time currency earned.")
+    total_time_earned: int = Field(
+        ..., description="Total time currency earned."
+    )
 
     # Settings
     notif_email_digest: bool = Field(..., description="Setting: Email digest.")
     notif_push: bool = Field(..., description="Setting: Push notifications.")
     notif_newsletter: bool = Field(..., description="Setting: Newsletter.")
 
-    created_at: datetime = Field(..., description="Account creation timestamp.")
+    created_at: datetime = Field(
+        ..., description="Account creation timestamp."
+    )
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -207,4 +227,6 @@ class UserPublic(SQLModel):
 
 class UsersPublic(SQLModel):
     data: list[UserPublic] = Field(..., description="List of users.")
-    count: int = Field(..., description="Total number of users matching the query.")
+    count: int = Field(
+        ..., description="Total number of users matching the query."
+    )

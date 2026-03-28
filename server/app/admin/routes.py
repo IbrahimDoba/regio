@@ -56,7 +56,9 @@ async def get_dashboard_stats(service: AdminServiceDep) -> Any:
     response_model=UserListResponse,
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error."
+        }
     },
 )
 async def list_users_rich(
@@ -100,7 +102,9 @@ async def update_user_details(
     Allows Admins to correct Real Names (immutable for users) or manually change
     Trust Levels and Verification Status.
     """
-    return await user_service.admin_update_user(user_code, user_in, current_admin)
+    return await user_service.admin_update_user(
+        user_code, user_in, current_admin
+    )
 
 
 @router.patch(
@@ -166,7 +170,9 @@ async def toggle_user_active(
     response_model=List[TagAdminView],
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error."
+        }
     },
 )
 async def get_tags(
@@ -237,7 +243,9 @@ async def delete_tag(tag_id: int, service: AdminServiceDep) -> None:
     response_model=List[DisputePublic],
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error."
+        }
     },
 )
 async def list_pending_disputes(admin_service: AdminServiceDep) -> Any:
@@ -254,7 +262,9 @@ async def list_pending_disputes(admin_service: AdminServiceDep) -> Any:
         status.HTTP_400_BAD_REQUEST: {
             "description": "Invalid action or payment state."
         },
-        status.HTTP_404_NOT_FOUND: {"description": "Payment request not found."},
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Payment request not found."
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Internal server error."
         },

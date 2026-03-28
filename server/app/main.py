@@ -1,5 +1,5 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
@@ -25,10 +25,18 @@ from app.banking.handlers import (
     banking_not_found_handler,
 )
 from app.banking.routes import router as banking_router
+from app.broadcast.exceptions import BroadcastNotFound
+from app.broadcast.handlers import broadcast_not_found_handler
+from app.broadcast.routes import router as broadcast_router
+from app.chat.routes import router as chat_router
 from app.core.config import settings
 from app.core.database import init_db, test_db_connection
 from app.core.handlers import global_exception_handler
-from app.listings.exceptions import InvalidListingData, ListingNotFound, ListingNotOwned
+from app.listings.exceptions import (
+    InvalidListingData,
+    ListingNotFound,
+    ListingNotOwned,
+)
 from app.listings.handlers import (
     invalid_listing_data_handler,
     listing_not_found_handler,
@@ -50,7 +58,6 @@ from app.users.handlers import (
     system_failure_handler,
 )
 from app.users.routes import router as user_router
-from app.chat.routes import router as chat_router
 
 
 @asynccontextmanager
@@ -95,31 +102,35 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(banking_router, prefix="/banking", tags=["banking"])
 app.include_router(listing_router, prefix="/listings", tags=["listings"])
 app.include_router(chat_router, prefix="/chats", tags=["chat"])
+app.include_router(broadcast_router, prefix="/broadcasts", tags=["broadcasts"])
 
 """Register exception handlers"""
 
 # Auth handlers
-app.add_exception_handler(NotAuthorized, not_authorized_handler)
-app.add_exception_handler(PermissionDenied, permission_denied_handler)
-app.add_exception_handler(BadAuthRequest, bad_auth_request_handler)
+app.add_exception_handler(NotAuthorized, not_authorized_handler)  # type: ignore
+app.add_exception_handler(PermissionDenied, permission_denied_handler)  # type: ignore
+app.add_exception_handler(BadAuthRequest, bad_auth_request_handler)  # type: ignore
 
 # User handlers
-app.add_exception_handler(ResourceNotFound, resource_not_found_handler)
-app.add_exception_handler(ResourceConflict, resource_conflict_handler)
-app.add_exception_handler(InvalidUserRequest, invalid_user_request_handler)
-app.add_exception_handler(AccessDenied, access_denied_handler)
-app.add_exception_handler(SystemFailure, system_failure_handler)
+app.add_exception_handler(ResourceNotFound, resource_not_found_handler)  # type: ignore
+app.add_exception_handler(ResourceConflict, resource_conflict_handler)  # type: ignore
+app.add_exception_handler(InvalidUserRequest, invalid_user_request_handler)  # type: ignore
+app.add_exception_handler(AccessDenied, access_denied_handler)  # type: ignore
+app.add_exception_handler(SystemFailure, system_failure_handler)  # type: ignore
 
 # Listing handlers
-app.add_exception_handler(ListingNotFound, listing_not_found_handler)
-app.add_exception_handler(ListingNotOwned, listing_permission_handler)
-app.add_exception_handler(InvalidListingData, invalid_listing_data_handler)
+app.add_exception_handler(ListingNotFound, listing_not_found_handler)  # type: ignore
+app.add_exception_handler(ListingNotOwned, listing_permission_handler)  # type: ignore
+app.add_exception_handler(InvalidListingData, invalid_listing_data_handler)  # type: ignore
 
 # Banking handlers
-app.add_exception_handler(BankingNotFound, banking_not_found_handler)
-app.add_exception_handler(BankingBadRequest, banking_bad_request_handler)
-app.add_exception_handler(BankingForbidden, banking_forbidden_handler)
-app.add_exception_handler(BankingConflict, banking_conflict_handler)
+app.add_exception_handler(BankingNotFound, banking_not_found_handler)  # type: ignore
+app.add_exception_handler(BankingBadRequest, banking_bad_request_handler)  # type: ignore
+app.add_exception_handler(BankingForbidden, banking_forbidden_handler)  # type: ignore
+app.add_exception_handler(BankingConflict, banking_conflict_handler)  # type: ignore
+
+# Broadcast handlers
+app.add_exception_handler(BroadcastNotFound, broadcast_not_found_handler)  # type: ignore
 
 # Register the global catch-all last
 app.add_exception_handler(Exception, global_exception_handler)

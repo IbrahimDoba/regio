@@ -22,10 +22,14 @@ router = APIRouter()
     "/balance",
     response_model=BalanceResponse,
     responses={
-        status.HTTP_404_NOT_FOUND: {"description": "Account not found for user."}
+        status.HTTP_404_NOT_FOUND: {
+            "description": "Account not found for user."
+        }
     },
 )
-async def get_my_balance(current_user: CurrentUser, service: BankingServiceDep) -> Any:
+async def get_my_balance(
+    current_user: CurrentUser, service: BankingServiceDep
+) -> Any:
     """
     Get current user's balance, trust level, and limits.
     """
@@ -36,7 +40,9 @@ async def get_my_balance(current_user: CurrentUser, service: BankingServiceDep) 
     "/history",
     response_model=TransactionHistory,
     responses={
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error."}
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error."
+        }
     },
 )
 async def get_my_history(
@@ -68,7 +74,9 @@ async def get_my_history(
     },
 )
 async def transfer_funds(
-    request: TransferRequest, current_user: CurrentUser, service: BankingServiceDep
+    request: TransferRequest,
+    current_user: CurrentUser,
+    service: BankingServiceDep,
 ) -> Any:
     """
     Execute a direct transfer of Time or Regio to another user.
@@ -93,7 +101,9 @@ async def transfer_funds(
     },
 )
 async def create_payment_request(
-    data: PaymentRequestCreate, current_user: CurrentUser, service: BankingServiceDep
+    data: PaymentRequestCreate,
+    current_user: CurrentUser,
+    service: BankingServiceDep,
 ) -> Any:
     """
     Send a request for payment (invoice) to another user.
@@ -141,7 +151,9 @@ async def get_outgoing_requests(
     },
 )
 async def confirm_payment_request(
-    request_id: uuid.UUID, current_user: CurrentUser, service: BankingServiceDep
+    request_id: uuid.UUID,
+    current_user: CurrentUser,
+    service: BankingServiceDep,
 ) -> Message:
     """
     Pay a received request.
@@ -163,7 +175,9 @@ async def confirm_payment_request(
     },
 )
 async def reject_payment_request(
-    request_id: uuid.UUID, current_user: CurrentUser, service: BankingServiceDep
+    request_id: uuid.UUID,
+    current_user: CurrentUser,
+    service: BankingServiceDep,
 ) -> Message:
     """
     Decline a received request.
@@ -185,7 +199,9 @@ async def reject_payment_request(
     },
 )
 async def cancel_payment_request(
-    request_id: uuid.UUID, current_user: CurrentUser, service: BankingServiceDep
+    request_id: uuid.UUID,
+    current_user: CurrentUser,
+    service: BankingServiceDep,
 ) -> Message:
     """
     Cancel a request I sent.

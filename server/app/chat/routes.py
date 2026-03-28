@@ -28,7 +28,9 @@ router = APIRouter()
         },
     },
 )
-async def get_matrix_session(current_user: CurrentUser, service: ChatServiceDep) -> Any:
+async def get_matrix_session(
+    current_user: CurrentUser, service: ChatServiceDep
+) -> Any:
     """
     Get Matrix Access Token (Handshake).
 
@@ -55,7 +57,9 @@ async def get_matrix_session(current_user: CurrentUser, service: ChatServiceDep)
         }
     },
 )
-async def get_my_rooms(current_user: CurrentUser, service: ChatServiceDep) -> Any:
+async def get_my_rooms(
+    current_user: CurrentUser, service: ChatServiceDep
+) -> Any:
     """
     Get joined rooms.
 
@@ -138,7 +142,9 @@ async def inquire_listing(
     response_model=RoomResponse,
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_404_NOT_FOUND: {"description": "One or more invitees not found."},
+        status.HTTP_404_NOT_FOUND: {
+            "description": "One or more invitees not found."
+        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             "description": "Failed to create room."
         },
@@ -171,7 +177,10 @@ async def create_generic_room(
 
     try:
         room_id = await chat_service.create_room(
-            creator=current_user, invitees=invitees, name=data.name, topic=data.topic
+            creator=current_user,
+            invitees=invitees,
+            name=data.name,
+            topic=data.topic,
         )
         return RoomResponse(room_id=room_id)
     except Exception as e:

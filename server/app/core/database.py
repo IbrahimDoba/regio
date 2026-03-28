@@ -6,7 +6,11 @@ from typing import Annotated
 
 from fastapi import Depends
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlmodel import select
 
 from app.auth import models as auth_models  # noqa: F401
@@ -15,6 +19,7 @@ from app.auth.security import get_password_hash
 # Imports to solve circular dependency error on startup
 from app.banking import models as banking_models  # noqa: F401
 from app.banking.service import BankingService
+from app.broadcast import models as broadcast_models  # noqa: F401
 from app.core.config import settings
 from app.listings import models as listing_models  # noqa: F401
 from app.users.config import user_settings
@@ -94,7 +99,9 @@ async def init_db() -> None:
         banking_service = BankingService(session)
 
         # Check if sink user exists
-        user = await user_service.get_user_by_email(user_settings.SYSTEM_SINK_EMAIL)
+        user = await user_service.get_user_by_email(
+            user_settings.SYSTEM_SINK_EMAIL
+        )
 
         if not user:
             logger.info("Creating System Sink User...")
@@ -102,7 +109,9 @@ async def init_db() -> None:
                 db_user = User(
                     user_code=user_settings.SYSTEM_SINK_CODE,
                     email=user_settings.SYSTEM_SINK_EMAIL,
-                    password_hash=get_password_hash(user_settings.SYSTEM_SINK_PASSWORD),
+                    password_hash=get_password_hash(
+                        user_settings.SYSTEM_SINK_PASSWORD
+                    ),
                     first_name=user_settings.SYSTEM_SINK_FIRST_NAME,
                     last_name=user_settings.SYSTEM_SINK_LAST_NAME,
                     address="SYSTEM",
