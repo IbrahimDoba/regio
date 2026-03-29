@@ -11,16 +11,6 @@ class ListingCategory(StrEnum):
     EVENT_WORKSHOP = "EVENT_WORKSHOP"  # Yellow, Calendar
 
 
-class RentalStatus(StrEnum):
-    AVAILABLE = "AVAILABLE"
-    LENT = "LENT"
-
-
-class RideMode(StrEnum):
-    ONE_TIME = "ONE_TIME"
-    RECURRING = "RECURRING"
-
-
 class ListingStatus(StrEnum):
     ACTIVE = "ACTIVE"
     SOLD = "SOLD"

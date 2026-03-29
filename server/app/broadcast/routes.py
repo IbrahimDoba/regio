@@ -1,7 +1,7 @@
 from typing import Any, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 
 from app.broadcast.dependencies import BroadcastServiceDep
 from app.broadcast.schemas import (
@@ -9,6 +9,8 @@ from app.broadcast.schemas import (
     BroadcastStatsResponse,
     InboxItemResponse,
 )
+from app.email.schemas import BroadcastDigestEmailData
+from app.email.tasks import send_broadcast_digest_emails_task
 from app.users.dependencies import CurrentUser, get_current_active_system_admin
 
 router = APIRouter()
@@ -26,17 +28,38 @@ async def send_broadcast(
     data: BroadcastCreateRequest,
     current_user: CurrentUser,
     service: BroadcastServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> Any:
     """
     Sends a message to users.
 
     - If **target_trust_levels** is empty or null, sends to **ALL** users.
     - If **target_trust_levels** is `[1, 6]`, sends only to users with those specific levels.
-    """
 
+    Users with email digest notifications enabled will also receive the
+    broadcast content via email.
+    """
     broadcast_stats = await service.create_broadcast(
         sender_id=current_user.id, data=data
     )
+
+    recipients = await service.get_email_digest_recipients(
+        data.target_trust_levels
+    )
+    if recipients:
+        digest_data = [
+            BroadcastDigestEmailData(
+                user_first_name=first_name,
+                user_email=email,
+                broadcast_title=data.title,
+                broadcast_body=data.body,
+                broadcast_link=data.link,
+            )
+            for first_name, email in recipients
+        ]
+        background_tasks.add_task(
+            send_broadcast_digest_emails_task, digest_data
+        )
 
     return broadcast_stats
 

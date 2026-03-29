@@ -42,3 +42,7 @@ class InvalidCategoryData(InvalidListingData):
 
 class TagNotAllowed(InvalidListingData):
     detail = "Tag usage not allowed"
+
+
+class MediaLimitExceeded(InvalidListingData):
+    detail = "Too many files or file exceeds size/type limits"

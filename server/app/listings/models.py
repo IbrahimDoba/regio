@@ -67,11 +67,20 @@ class Listing(SQLModel, table=True):
     media_urls: List[str] = Field(default=[], sa_column=Column(JSON))
 
     radius_km: int = Field(default=10)
-    location_lat: Optional[float] = None
-    location_lng: Optional[float] = None
+    location_lat: Optional[float] = Field(
+        default=None,
+        description="Latitude from map selection (e.g. OpenStreetMap). Enables precise map pin for viewers.",
+    )
+    location_lng: Optional[float] = Field(
+        default=None,
+        description="Longitude from map selection (e.g. OpenStreetMap). Enables precise map pin for viewers.",
+    )
+
+    # Free-text field for payment/price notes (all categories)
+    payment_notes: Optional[str] = Field(default=None, sa_type=String)
 
     # POLYMORPHIC ATTRIBUTES
-    # Stores: time_factor, regio_amount, start_dest, waypoints, etc.
+    # Stores category-specific fields (time_factor, prices, locations, etc.)
     # Queryable in Postgres via attributes->>'key'
     attributes: Dict[str, Any] = Field(default={}, sa_column=Column(JSONB))
 

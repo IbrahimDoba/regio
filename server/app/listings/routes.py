@@ -1,8 +1,10 @@
 import uuid
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, BackgroundTasks, Query, UploadFile, status
 
+from app.core.r2 import StorageServiceDep
+from app.core.translate import TranslateService
 from app.listings.dependencies import ListingServiceDep
 from app.listings.enums import ListingCategory
 from app.listings.schemas import (
@@ -34,7 +36,10 @@ router = APIRouter()
     },
 )
 async def create_listing(
-    data: ListingCreate, current_user: CurrentUser, service: ListingServiceDep
+    data: ListingCreate,
+    current_user: CurrentUser,
+    service: ListingServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> Any:
     """
     Create a new listing.
@@ -42,7 +47,16 @@ async def create_listing(
     Validates the 'attributes' field dynamically based on the provided 'category'.
     """
     listing = await service.create_listing(current_user, data)
-    return await service.format_listing(listing)
+
+    background_tasks.add_task(
+        TranslateService.translate_listing,
+        listing_id=listing.id,
+        title=data.title,
+        description=data.description,
+        origin_language=current_user.language,
+    )
+
+    return await service.format_listing(listing, current_user.language)
 
 
 @router.get(
@@ -69,6 +83,9 @@ async def get_feed(
     offset: int = Query(
         0, ge=0, description="Pagination offset (skip N items)."
     ),
+    lang: str = Query(
+        "en", description="Language for localized content (en, de, hu)."
+    ),
 ) -> Any:
     """
     Main Feed.
@@ -76,7 +93,8 @@ async def get_feed(
     Supports filtering by multiple categories, tags, text search, and pagination.
     """
     return await service.get_feed(
-        categories=categories, search_query=q, tags=tags, offset=offset
+        categories=categories, search_query=q, tags=tags, offset=offset,
+        user_lang=lang,
     )
 
 
@@ -111,7 +129,11 @@ async def autocomplete_tags(q: str, service: ListingServiceDep) -> Any:
     },
 )
 async def get_listing_by_id(
-    service: ListingServiceDep, listing_id: uuid.UUID
+    service: ListingServiceDep,
+    listing_id: uuid.UUID,
+    lang: str = Query(
+        "en", description="Language for localized content (en, de, hu)."
+    ),
 ) -> Any:
     """
     Get a listing by its ID.
@@ -119,7 +141,44 @@ async def get_listing_by_id(
     Fetches the full details of a listing for display on its standalone page.
     """
     listing = await service.get_listing(listing_id)
-    return await service.format_listing(listing)
+    return await service.format_listing(listing, lang)
+
+
+@router.post(
+    "/{listing_id}/media",
+    response_model=ListingPublic,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "File type not allowed, size exceeded, or too many files."
+        },
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "User is not authenticated."
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "User does not own the listing."
+        },
+        status.HTTP_404_NOT_FOUND: {"description": "Listing not found."},
+    },
+)
+async def upload_listing_media(
+    listing_id: uuid.UUID,
+    files: List[UploadFile],
+    current_user: CurrentUser,
+    service: ListingServiceDep,
+    storage: StorageServiceDep,
+) -> Any:
+    """
+    Upload media files (images/PDFs) to a listing.
+
+    Accepts multiple files per request. Files are stored in S3 and their keys
+    are appended to the listing's media_urls array. Max 10 files per listing,
+    10MB per file. Allowed types: JPEG, PNG, WebP, GIF, PDF.
+    """
+    listing = await service.upload_media(
+        listing_id, current_user, files, storage
+    )
+    return await service.format_listing(listing, current_user.language)
 
 
 @router.delete(
@@ -174,13 +233,27 @@ async def update_listing(
     update_data: ListingUpdate,
     current_user: CurrentUser,
     service: ListingServiceDep,
+    storage: StorageServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> Any:
     """
     Edit an existing listing.
 
     Accepts partial updates. Only the owner can perform this action.
+    If media_urls is updated, any removed URLs will have their S3 objects deleted.
     """
     listing = await service.update_listing(
-        listing_id, current_user, update_data
+        listing_id, current_user, update_data, storage=storage
     )
-    return await service.format_listing(listing)
+
+    # Re-translate only if title or description changed
+    if update_data.title is not None or update_data.description is not None:
+        background_tasks.add_task(
+            TranslateService.translate_listing,
+            listing_id=listing.id,
+            title=listing.title_original,
+            description=listing.description_original,
+            origin_language=current_user.language,
+        )
+
+    return await service.format_listing(listing, current_user.language)

@@ -35,7 +35,7 @@ class UserService:
         # Get total number of rows in table
         count_statement = select(func.count()).select_from(User)
         count_result = await self.session.execute(count_statement)
-        count = count_result.scalar()
+        count = count_result.scalar() or 0
 
         # Filter to only active non-system-admin users
         statement = (
@@ -133,6 +133,12 @@ class UserService:
                 user_code = generate_user_code()
                 retries -= 1
                 continue
+
+            # is_matrix_free = await chat_service.is_user_id_available(user_code)
+            # if not is_matrix_free:
+            #     user_code = generate_user_code()
+            #     retries -= 1
+            #     continue
 
             break
 
