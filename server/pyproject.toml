@@ -5,6 +5,7 @@ description = "Regio P2P Marketplace API."
 requires-python = ">=3.13.9"
 dependencies = [
     "aioboto3>=15.5.0",
+    "aiosmtplib>=3.0.0",
     "alembic>=1.17.2",
     "asyncpg>=0.31.0",
     "cryptography>=46.0.3",

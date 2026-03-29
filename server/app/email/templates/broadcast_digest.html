@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regio Update</title>
+  <style>
+    body { margin: 0; padding: 0; background-color: #f4f4f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    .container { max-width: 580px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .header { background-color: #1a1a2e; padding: 32px 40px; text-align: center; }
+    .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; }
+    .body { padding: 40px; color: #333333; line-height: 1.6; }
+    .body h2 { margin-top: 0; font-size: 20px; color: #1a1a2e; }
+    .body p { margin: 0 0 16px; }
+    .broadcast-content { background-color: #f9f9fb; border-radius: 6px; padding: 24px; margin: 16px 0; }
+    .broadcast-content p { margin: 0; white-space: pre-wrap; }
+    .cta { display: inline-block; margin: 24px 0; padding: 14px 32px; background-color: #1a1a2e; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; }
+    .footer { padding: 24px 40px; text-align: center; font-size: 13px; color: #888888; background-color: #f9f9fb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Regio</h1>
+    </div>
+    <div class="body">
+      <p>Hello {{ user_first_name }},</p>
+      <p>There is a new announcement from the Regio team:</p>
+
+      <h2>{{ broadcast_title }}</h2>
+      <div class="broadcast-content">
+        <p>{{ broadcast_body }}</p>
+      </div>
+
+      {% if broadcast_link %}
+      <div style="text-align: center;">
+        <a class="cta" href="{{ broadcast_link }}">Learn More</a>
+      </div>
+      {% endif %}
+    </div>
+    <div class="footer">
+      You are receiving this email because you have email digests enabled.
+      You can turn this off in your profile settings.
+      <br><br>
+      &copy; Regio
+    </div>
+  </div>
+</body>
+</html>

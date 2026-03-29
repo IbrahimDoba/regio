@@ -1,9 +1,12 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, BackgroundTasks, Query, status
 
 from app.auth.dependencies import AuthServiceDep
 from app.auth.schemas import InvitePublic
+from app.email.config import email_settings
+from app.email.schemas import VerificationEmailData
+from app.email.tasks import send_welcome_email_task
 from app.users.config import user_settings
 from app.users.dependencies import CurrentAdmin, CurrentUser, UserServiceDep
 from app.users.exceptions import UserNotFound
@@ -81,16 +84,33 @@ async def search_users(
         },
     },
 )
-async def register_user(user_in: UserCreate, service: UserServiceDep) -> Any:
+async def register_user(
+    user_in: UserCreate,
+    service: UserServiceDep,
+    background_tasks: BackgroundTasks,
+) -> Any:
     """
     Public registration endpoint.
 
     Requires a valid Invite Code to create a new account.
     The system automatically assigns a unique 5-digit User Code upon success.
+    A welcome email with a Calendly verification booking link is sent
+    asynchronously after registration.
 
     - **user_in**: Registration payload including invite code and profile data.
     """
-    return await service.create_user(user_in)
+    db_user = await service.create_user(user_in)
+
+    background_tasks.add_task(
+        send_welcome_email_task,
+        VerificationEmailData(
+            user_first_name=db_user.first_name,
+            user_email=db_user.email,
+            calendly_url=email_settings.CALENDLY_URL,
+        ),
+    )
+
+    return db_user
 
 
 @router.get("/me", response_model=UserPublic, status_code=status.HTTP_200_OK)
