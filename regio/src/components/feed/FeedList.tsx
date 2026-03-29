@@ -9,6 +9,7 @@ interface FeedListProps {
   activeFilters: ListingCategory[];
   searchQuery: string;
   onOpenPreview: (listing: ListingPublic) => void;
+  onContact?: (listing: ListingPublic) => void;
 }
 
 export default function FeedList({
@@ -16,6 +17,7 @@ export default function FeedList({
   activeFilters,
   searchQuery,
   onOpenPreview,
+  onContact,
 }: FeedListProps) {
   const filteredListings = listings.filter((listing) => {
     if (!activeFilters.includes(listing.category)) return false;
@@ -35,6 +37,7 @@ export default function FeedList({
           key={listing.id}
           listing={listing}
           onOpenPreview={onOpenPreview}
+          onContact={onContact}
         />
       ))}
     </div>

@@ -78,7 +78,7 @@ export default function UserTable({ users, onEditUser, onVerifyUser }: UserTable
               className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase cursor-pointer select-none hover:text-[#8cb348]"
               onClick={() => handleSort(3)}
             >
-              Regio Bal. <FaSort className="inline ml-1" />
+              Garas Bal. <FaSort className="inline ml-1" />
             </th>
             <th
               className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase cursor-pointer select-none hover:text-[#8cb348]"

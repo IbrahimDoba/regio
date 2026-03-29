@@ -1,191 +1,111 @@
-from typing import Any
+import logging
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.chat.dependencies import ChatServiceDep
+from app.chat.matrix_service import (
+    ensure_matrix_user,
+    get_matrix_access_token,
+    get_or_create_inquiry_room,
+    get_user_rooms,
+)
 from app.chat.schemas import (
-    JoinedRoomsResponse,
+    InquiryRoomResponse,
     ListingInquiryRequest,
     MatrixTokenResponse,
-    RoomCreateRequest,
-    RoomResponse,
+    RoomsListResponse,
+    RoomSummary,
 )
+from app.core.config import settings
+from app.core.database import SessionDep
 from app.users.dependencies import CurrentUser, UserServiceDep
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get(
-    "/token",
+@router.post(
+    "/matrix/register",
+    status_code=status.HTTP_200_OK,
+    summary="Lazy-register Matrix account for current user",
+)
+async def matrix_register(current_user: CurrentUser, db: SessionDep):
+    """
+    Called when a user opens the chat for the first time.
+    Provisions a Matrix account if one doesn't exist yet.
+    """
+    matrix_user_id, access_token = await ensure_matrix_user(current_user.id, db)
+    return MatrixTokenResponse(
+        matrix_user_id=matrix_user_id,
+        matrix_access_token=access_token,
+        matrix_homeserver=settings.MATRIX_HOMESERVER,
+    )
+
+
+@router.post(
+    "/matrix/token",
     response_model=MatrixTokenResponse,
     status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_502_BAD_GATEWAY: {
-            "description": "Failed to communicate with Matrix Homeserver."
-        },
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Internal server error."
-        },
-    },
+    summary="Get Matrix access token for current user",
 )
-async def get_matrix_session(
-    current_user: CurrentUser, service: ChatServiceDep
-) -> Any:
+async def get_matrix_token(current_user: CurrentUser, db: SessionDep):
     """
-    Get Matrix Access Token (Handshake).
-
-    The frontend calls this to authenticate with the Matrix Homeserver.
-    If the user does not have a Matrix account yet, one is JIT-provisioned.
+    Returns the Matrix access token (and user id / homeserver) for the
+    currently authenticated platform user.  Provisions a Matrix account
+    lazily if needed.
     """
-    try:
-        data = await service.get_user_access_token(current_user)
-        return data
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Matrix Handshake Failed: {str(e)}",
-        )
-
-
-@router.get(
-    "/rooms",
-    response_model=JoinedRoomsResponse,
-    status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_502_BAD_GATEWAY: {
-            "description": "Failed to fetch data from Matrix."
-        }
-    },
-)
-async def get_my_rooms(
-    current_user: CurrentUser, service: ChatServiceDep
-) -> Any:
-    """
-    Get joined rooms.
-
-    Returns a list of all Matrix Room IDs that the current user is a member of.
-    """
-    try:
-        rooms = await service.get_joined_rooms(current_user)
-        return JoinedRoomsResponse(joined_rooms=rooms)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Failed to fetch joined rooms: {str(e)}",
-        )
+    matrix_user_id, access_token = await ensure_matrix_user(current_user.id, db)
+    return MatrixTokenResponse(
+        matrix_user_id=matrix_user_id,
+        matrix_access_token=access_token,
+        matrix_homeserver=settings.MATRIX_HOMESERVER,
+    )
 
 
 @router.post(
     "/rooms/inquiry",
-    response_model=RoomResponse,
+    response_model=InquiryRoomResponse,
     status_code=status.HTTP_200_OK,
-    responses={
-        status.HTTP_400_BAD_REQUEST: {
-            "description": "Cannot inquire about own listing."
-        },
-        status.HTTP_404_NOT_FOUND: {"description": "Seller not found."},
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Failed to create/join room."
-        },
-    },
+    summary="Create or get inquiry room for a listing",
 )
 async def inquire_listing(
     data: ListingInquiryRequest,
     current_user: CurrentUser,
     user_service: UserServiceDep,
-    chat_service: ChatServiceDep,
-) -> RoomResponse:
+    db: SessionDep,
+):
     """
-    Start an inquiry (Contextual Chat).
-
-    Triggered when a user clicks 'Inquire' on a Listing.
-    - If a chat for this specific listing + buyer pair exists, returns that room.
-    - If not, creates a new private, encrypted room with the seller.
+    Create (or retrieve) a Matrix room for a listing inquiry between buyer
+    and seller.  Returns the Matrix room ID so the frontend SDK can join.
     """
-
-    # Validate Seller Exists
     seller = await user_service.get_user_by_code(data.seller_user_code)
     if not seller:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Seller not found",
+            status_code=status.HTTP_404_NOT_FOUND, detail="Seller not found"
         )
-
-    # Prevent Self-Inquiry
     if seller.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You cannot inquire about your own listing.",
+            detail="Cannot inquire about your own listing.",
         )
 
-    try:
-        # Join or Create Contextual Room
-        result = await chat_service.join_or_create_listing_room(
-            buyer=current_user,
-            seller=seller,
-            listing_id=data.listing_id,
-            listing_title=data.listing_title,
-        )
-        return result
-
-    except HTTPException as he:
-        raise he
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to establish inquiry chat room.",
-        )
+    matrix_room_id = await get_or_create_inquiry_room(
+        listing_id=data.listing_id,
+        buyer_id=current_user.id,
+        seller_id=seller.id,
+        listing_title=data.listing_title,
+        db=db,
+    )
+    return InquiryRoomResponse(matrix_room_id=matrix_room_id)
 
 
-@router.post(
+@router.get(
     "/rooms",
-    response_model=RoomResponse,
-    status_code=status.HTTP_201_CREATED,
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            "description": "One or more invitees not found."
-        },
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            "description": "Failed to create room."
-        },
-    },
+    response_model=RoomsListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List user's Matrix chat rooms",
 )
-async def create_generic_room(
-    data: RoomCreateRequest,
-    current_user: CurrentUser,
-    user_service: UserServiceDep,
-    chat_service: ChatServiceDep,
-) -> Any:
-    """
-    Create a generic ad-hoc room.
-
-    Used for creating standard chats outside of the listing context.
-    - **invite_user_codes**: List of users to invite.
-    - **is_direct**: If true, marks as DM.
-    """
-    invitees = []
-    for code in data.invite_user_codes:
-        user = await user_service.get_user_by_code(code)
-        if user:
-            invitees.append(user)
-
-    if not invitees:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No valid users found to invite",
-        )
-
-    try:
-        room_id = await chat_service.create_room(
-            creator=current_user,
-            invitees=invitees,
-            name=data.name,
-            topic=data.topic,
-        )
-        return RoomResponse(room_id=room_id)
-    except Exception as e:
-        print(f"Room Creation Error: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create chat room",
-        )
+async def get_my_rooms(current_user: CurrentUser, db: SessionDep):
+    """Return all Matrix rooms the current user participates in."""
+    rooms_data = await get_user_rooms(current_user.id, db)
+    rooms = [RoomSummary(**r) for r in rooms_data]
+    return RoomsListResponse(rooms=rooms)

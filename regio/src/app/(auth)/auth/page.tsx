@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { FaArrowRightArrowLeft, FaEnvelope, FaLock, FaTicket, FaCircleInfo, FaUsers, FaPenNib, FaSpinner } from "react-icons/fa6";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
-import { useRegisterUser, setAccessToken } from "@/lib/api";
+import { useRegisterUser } from "@/lib/api";
 import MobileContainer from "@/components/layout/MobileContainer";
 import ErrorMessage from "@/components/auth/ErrorMessage";
 
@@ -52,10 +52,11 @@ export default function AuthPage() {
         password: loginPassword,
       });
       // On success, AuthContext redirects to '/'
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
       // Extract error message from API response
-      const message = error?.response?.data?.detail || 'Invalid email or password. Please try again.';
+      const err = error as { response?: { data?: { detail?: string } }; message?: string };
+      const message = err?.response?.data?.detail || err.message || 'Invalid email or password. Please try again.';
       setLoginError(message);
     } finally {
       setIsLoggingIn(false);
@@ -96,16 +97,17 @@ export default function AuthPage() {
         password: registerPassword,
       });
       // AuthContext will redirect to '/'
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Registration error:', error);
       // Extract error message from API response
       let message = 'Registration failed. Please try again.';
-
-      if (error?.response?.data?.detail) {
-        const detail = error.response.data.detail;
+      
+      const err = error as { response?: { data?: { detail?: unknown } } };
+      if (err?.response?.data?.detail) {
+        const detail = err.response.data.detail;
         // Handle array of validation errors
         if (Array.isArray(detail)) {
-          message = detail.map((err: any) => err.msg).join(', ');
+          message = detail.map((item: { msg?: string }) => item.msg).filter(Boolean).join(', ');
         } else if (typeof detail === 'string') {
           message = detail;
         }

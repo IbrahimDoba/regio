@@ -121,6 +121,7 @@ export default function InvitePage() {
         );
         break;
       case "email":
+        // eslint-disable-next-line react-hooks/immutability
         window.location.href = `mailto:?subject=${encodeURIComponent(
           "Invite to regio.is"
         )}&body=${encodeURIComponent(text)}`;

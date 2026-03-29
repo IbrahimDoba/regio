@@ -1,2 +1,1 @@
-class MatrixUserCollisionError(Exception):
-    pass
+# Matrix exceptions removed — no longer needed.

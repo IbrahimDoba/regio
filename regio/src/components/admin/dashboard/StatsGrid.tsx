@@ -85,11 +85,11 @@ export default function StatsGrid({ stats, isLoading }: StatsGridProps) {
         </div>
       </ContentCard>
 
-      {/* Regio Volume */}
+      {/* Garas Volume */}
       <ContentCard className="!p-5 flex items-center justify-between">
         <div>
           <p className="text-[#888] text-[12px] font-bold uppercase mb-1">
-            Total Regio Vol.
+            Total Garas Vol.
           </p>
           <div className="text-[28px] font-[800] text-[#333]">
             {parseFloat(stats.total_regio_volume).toFixed(0)}

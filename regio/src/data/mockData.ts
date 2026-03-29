@@ -41,14 +41,14 @@ export const uiTexts: { [key: string]: LangTexts } = {
         hintTags: 'Keywords to find your post easily. Press Enter or Comma.',
         hintTF: 'How much time do you charge compared to real time?',
         hintPI: 'Any extra costs or conditions?',
-        hintAmt: 'Split the price into Goods (Regio) and Time (Min).',
+        hintAmt: 'Split the price into Goods (Garas) and Time (Min).',
         hintRoute: 'Where do you start and end?',
         hintWP: 'Cities you pass through.',
         hintFreq: 'Is this a one-time trip or regular?',
         hintLog: 'Can you transport packages?',
         
         catOptions: {'green':'Offer Service', 'red':'Search Service', 'blue':'Sell Product', 'orange':'Search Product', 'purple':'Offer Rental', 'turquoise':'Ride Share', 'yellow':'Event'},
-        timeFactor: 'Time Factor', priceInfo: 'Price Info', priceInfoPh: 'Extra info about price...', amountRegio: 'Regio Amount', amountTime: 'Time (Min)', start: 'Start', dest: 'Dest', dateTime: 'Date/Time', costShare: 'Cost Share', loc: 'Location', fee: 'Fee', budget: 'Budget Idea', nationwide: 'Nationwide', duration: 'Duration',
+        timeFactor: 'Time Factor', priceInfo: 'Price Info', priceInfoPh: 'Extra info about price...', amountGaras: 'Garas Amount', amountTime: 'Time (Min)', start: 'Start', dest: 'Dest', dateTime: 'Date/Time', costShare: 'Cost Share', loc: 'Location', fee: 'Fee', budget: 'Budget Idea', nationwide: 'Nationwide', duration: 'Duration',
         waypoints: 'Waypoints', frequency: 'Frequency', oneTime: 'One-time', recurring: 'Recurring', days: 'Days', time: 'Time', addWaypoint: 'Add city...', transportGoods: 'Transport Goods?', maxDim: 'Max Dimensions / Weight',
 
         // Auth
@@ -75,14 +75,14 @@ export const uiTexts: { [key: string]: LangTexts } = {
         hintTags: 'Kulcsszavak a kereséshez. Enter vagy vessző.',
         hintTF: 'Mennyi időt számol fel a valós időhöz képest?',
         hintPI: 'További költségek vagy feltételek?',
-        hintAmt: 'Ossza meg az árat áruértékre (Regio) és időre (Perc).',
+        hintAmt: 'Ossza meg az árat áruértékre (Garas) és időre (Perc).',
         hintRoute: 'Honnan hová megy?',
         hintWP: 'Városok, amelyeken áthalad.',
         hintFreq: 'Egyszeri vagy rendszeres út?',
         hintLog: 'Tud csomagot szállítani?',
 
         catOptions: {'green':'Szolgáltatás kínál', 'red':'Szolgáltatás keres', 'blue':'Termék eladás', 'orange':'Termék keresés', 'purple':'Bérbeadás', 'turquoise':'Telekocsi', 'yellow':'Esemény'},
-        timeFactor: 'Időfaktor', priceInfo: 'Ár infó', priceInfoPh: 'További ár információ...', amountRegio: 'Regio összeg', amountTime: 'Idő (perc)', start: 'Indulás', dest: 'Cél', dateTime: 'Dátum/Idő', costShare: 'Költségmegosztás', loc: 'Helyszín', fee: 'Díj', budget: 'Költségkeret', nationwide: 'Országos', duration: 'Időtartam',
+        timeFactor: 'Időfaktor', priceInfo: 'Ár infó', priceInfoPh: 'További ár információ...', amountGaras: 'Garas összeg', amountTime: 'Idő (perc)', start: 'Indulás', dest: 'Cél', dateTime: 'Dátum/Idő', costShare: 'Költségmegosztás', loc: 'Helyszín', fee: 'Díj', budget: 'Költségkeret', nationwide: 'Országos', duration: 'Időtartam',
         waypoints: 'Köztes megállók', frequency: 'Gyakoriság', oneTime: 'Egyszeri', recurring: 'Rendszeres', days: 'Napok', time: 'Idő', addWaypoint: 'Város hozzáadása...', transportGoods: 'Csomagszállítás?', maxDim: 'Max méret / súly',
 
         // Auth
@@ -109,14 +109,14 @@ export const uiTexts: { [key: string]: LangTexts } = {
         hintTags: 'Stichworte für die Suche. Enter oder Komma drücken.',
         hintTF: 'Wieviel Zeit berechnest du im Vergleich zur Echtzeit?',
         hintPI: 'Zusatzkosten oder Bedingungen?',
-        hintAmt: 'Teile den Preis in Warenwert (Regio) und Zeitaufwand (Min).',
+        hintAmt: 'Teile den Preis in Warenwert (Garas) und Zeitaufwand (Min).',
         hintRoute: 'Start- und Zielort der Fahrt.',
         hintWP: 'Orte, an denen du vorbeikommst.',
         hintFreq: 'Ist das eine einmalige Fahrt oder regelmäßig?',
         hintLog: 'Kannst du Pakete mitnehmen?',
 
         catOptions: {'green':'Dienstleistung Bieten', 'red':'Dienstleistung Suchen', 'blue':'Produkt Verkaufen', 'orange':'Produkt Suchen', 'purple':'Verleih Bieten', 'turquoise':'Mitfahrgelegenheit', 'yellow':'Event / Kurs'},
-        timeFactor: 'Zeitfaktor', priceInfo: 'Anmerkungen zum Preis', priceInfoPh: 'Zusatzinfos zum Preis...', amountRegio: 'Regio Betrag', amountTime: 'Zeit (Min)', start: 'Start', dest: 'Ziel', dateTime: 'Datum/Zeit', costShare: 'Kostenbeteiligung', loc: 'Ort', fee: 'Gebühr', budget: 'Preisvorstellung', nationwide: 'Landesweit', duration: 'Dauer',
+        timeFactor: 'Zeitfaktor', priceInfo: 'Anmerkungen zum Preis', priceInfoPh: 'Zusatzinfos zum Preis...', amountGaras: 'Garas Betrag', amountTime: 'Zeit (Min)', start: 'Start', dest: 'Ziel', dateTime: 'Datum/Zeit', costShare: 'Kostenbeteiligung', loc: 'Ort', fee: 'Gebühr', budget: 'Preisvorstellung', nationwide: 'Landesweit', duration: 'Dauer',
         waypoints: 'Zwischenziele', frequency: 'Häufigkeit', oneTime: 'Einmalige', recurring: 'Regelmäßig', days: 'Tage', time: 'Uhrzeit', addWaypoint: 'Stadt hinzufügen...', transportGoods: 'Pakete/Güter transportieren?', maxDim: 'Max. Abmessungen / Gewicht',
 
         // Auth

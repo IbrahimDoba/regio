@@ -29,12 +29,6 @@ class User(SQLModel, table=True):
     email: EmailStr = Field(unique=True, max_length=255)
     password_hash: str
 
-    matrix_password: Optional[str] = Field(
-        default=None,
-        max_length=255,
-        description="Encrypted user password for logging into the matrix server for chat.",
-    )
-
     # Real Name Policy (Immutable)
     first_name: str = Field(max_length=100)
     middle_name: Optional[str] = Field(default=None, max_length=100)
@@ -85,6 +79,20 @@ class User(SQLModel, table=True):
         default_factory=lambda: datetime.now(timezone.utc),
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
+    )
+
+    # Matrix integration
+    matrix_user_id: Optional[str] = Field(
+        default=None,
+        unique=True,
+        nullable=True,
+        description="Matrix user ID, e.g. @immo_<uuid>:151.hu",
+    )
+    matrix_password: Optional[str] = Field(
+        default=None,
+        max_length=255,
+        nullable=True,
+        description="AES-256-CBC encrypted Matrix password",
     )
 
     # ORM relationships

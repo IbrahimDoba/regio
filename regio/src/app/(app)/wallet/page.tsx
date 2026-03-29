@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   FaWallet,
   FaQrcode,
@@ -8,11 +9,9 @@ import {
   FaCoins,
   FaArrowDown,
   FaArrowUp,
-  FaBuildingColumns,
-  FaCheck,
   FaPaperPlane,
   FaHandHoldingDollar,
-  FaXmark,
+  FaArrowLeft,
 } from "react-icons/fa6";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -29,6 +28,7 @@ import {
 import { TransactionPublic } from "@/lib/api/types";
 
 export default function WalletPage() {
+  const router = useRouter();
   const { t } = useLanguage();
   const [sendOpen, setSendOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
@@ -36,12 +36,12 @@ export default function WalletPage() {
 
   // Forms
   const [sendRecipient, setSendRecipient] = useState("");
-  const [sendRegio, setSendRegio] = useState("");
+  const [sendGaras, setSendGaras] = useState("");
   const [sendTime, setSendTime] = useState("");
   const [sendRef, setSendRef] = useState("");
 
   const [reqUser, setReqUser] = useState("");
-  const [reqRegio, setReqRegio] = useState("");
+  const [reqGaras, setReqGaras] = useState("");
   const [reqTime, setReqTime] = useState("");
   const [reqRef, setReqRef] = useState("");
 
@@ -71,7 +71,7 @@ export default function WalletPage() {
   };
 
   const handleSend = () => {
-    if (!sendRecipient || (!sendRegio && !sendTime)) {
+    if (!sendRecipient || (!sendGaras && !sendTime)) {
       alert("Please fill in recipient and amount.");
       return;
     }
@@ -79,7 +79,7 @@ export default function WalletPage() {
       transfer.mutate(
         {
           receiver_code: sendRecipient,
-          amount_regio: sendRegio || undefined,
+          amount_regio: sendGaras || undefined,
           amount_time: sendTime ? parseInt(sendTime) : undefined,
           reference: sendRef,
         },
@@ -88,13 +88,14 @@ export default function WalletPage() {
             alert("Transfer successful!");
             setSendOpen(false);
             setSendRecipient("");
-            setSendRegio("");
+            setSendGaras("");
             setSendTime("");
             setSendRef("");
           },
-          onError: (err: any) => {
+          onError: (err: unknown) => {
+            const error = err as { response?: { data?: { detail?: string } }; message?: string };
             alert(
-              "Transfer failed: " + (err?.response?.data?.detail || err.message)
+              "Transfer failed: " + (error?.response?.data?.detail || error.message || "Unknown error")
             );
           },
         }
@@ -103,14 +104,14 @@ export default function WalletPage() {
   };
 
   const handleCreateRequest = () => {
-    if (!reqUser || (!reqRegio && !reqTime)) {
+    if (!reqUser || (!reqGaras && !reqTime)) {
       alert("Please fill in user and amount.");
       return;
     }
     createRequest.mutate(
       {
         debtor_code: reqUser,
-        amount_regio: reqRegio || undefined,
+        amount_regio: reqGaras || undefined,
         amount_time: reqTime ? parseInt(reqTime) : undefined,
         description: reqRef,
       },
@@ -119,14 +120,15 @@ export default function WalletPage() {
           alert("Request sent!");
           setRequestOpen(false);
           setReqUser("");
-          setReqRegio("");
+          setReqGaras("");
           setReqTime("");
           setReqRef("");
           refetchOutgoing();
         },
-        onError: (err: any) => {
+        onError: (err: unknown) => {
+          const error = err as { response?: { data?: { detail?: string } }; message?: string };
           alert(
-            "Request failed: " + (err?.response?.data?.detail || err.message)
+            "Request failed: " + (error?.response?.data?.detail || error.message || "Unknown error")
           );
         },
       }
@@ -140,8 +142,10 @@ export default function WalletPage() {
           refetchIncoming();
           alert("Paid!");
         },
-        onError: (err: any) =>
-          alert("Failed: " + (err?.response?.data?.detail || err.message)),
+        onError: (err: unknown) => {
+          const error = err as { response?: { data?: { detail?: string } }; message?: string };
+          alert("Failed: " + (error?.response?.data?.detail || error.message || "Unknown error"));
+        },
       });
     }
   };
@@ -152,8 +156,10 @@ export default function WalletPage() {
         onSuccess: () => {
           refetchIncoming();
         },
-        onError: (err: any) =>
-          alert("Failed: " + (err?.response?.data?.detail || err.message)),
+        onError: (err: unknown) => {
+          const error = err as { response?: { data?: { detail?: string } }; message?: string };
+          alert("Failed: " + (error?.response?.data?.detail || error.message || "Unknown error"));
+        },
       });
     }
   };
@@ -164,8 +170,10 @@ export default function WalletPage() {
         onSuccess: () => {
           refetchOutgoing();
         },
-        onError: (err: any) =>
-          alert("Failed: " + (err?.response?.data?.detail || err.message)),
+        onError: (err: unknown) => {
+          const error = err as { response?: { data?: { detail?: string } }; message?: string };
+          alert("Failed: " + (error?.response?.data?.detail || error.message || "Unknown error"));
+        },
       });
     }
   };
@@ -185,8 +193,16 @@ export default function WalletPage() {
       {/* Header */}
       <header className="bg-white border-b border-[#eee] sticky top-0 z-100">
         <div className="flex justify-between items-center p-[15px]">
-          <div className="text-[20px] font-[800] text-[#333] flex items-center gap-[10px]">
-            <FaWallet className="text-[var(--color-nav-bg)]" /> My Wallet
+          <div className="flex items-center gap-[10px]">
+            <button
+              onClick={() => router.back()}
+              className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              <FaArrowLeft className="w-4 h-4" />
+            </button>
+            <div className="text-[20px] font-[800] text-[#333] flex items-center gap-[10px]">
+              <FaWallet className="text-[var(--color-nav-bg)]" /> My Wallet
+            </div>
           </div>
           <div className="cursor-pointer text-[#888] text-[20px]">
             <FaQrcode />
@@ -208,13 +224,13 @@ export default function WalletPage() {
         </div>
         <div className="flex-1 min-w-[160px] rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden bg-gradient-to-br from-[#4a90e2] to-[#0056b3]">
           <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px]">
-            Regio Account
+            Garas Account
           </div>
           <div className="text-[24px] font-[800] mb-[5px]">
             {balanceData ? balanceData.balance.regio : "..."}
           </div>
           <div className="text-[14px] font-[500] opacity-90">
-            Regio (HUF eq)
+            Garas (HUF eq)
           </div>
           <FaCoins className="absolute -right-[10px] -bottom-[10px] text-[80px] opacity-15 -rotate-12" />
         </div>
@@ -382,14 +398,14 @@ export default function WalletPage() {
           <div className="flex gap-[10px] mb-[12px]">
             <div className="flex-1">
               <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                Regio
+                Garas
               </label>
               <input
                 type="number"
                 className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
                 placeholder="0.00"
-                value={sendRegio}
-                onChange={(e) => setSendRegio(e.target.value)}
+                value={sendGaras}
+                onChange={(e) => setSendGaras(e.target.value)}
               />
             </div>
             <div className="flex-1">
@@ -453,14 +469,14 @@ export default function WalletPage() {
           <div className="flex gap-[10px] mb-[12px]">
             <div className="flex-1">
               <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                Regio
+                Garas
               </label>
               <input
                 type="number"
                 className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
                 placeholder="0.00"
-                value={reqRegio}
-                onChange={(e) => setReqRegio(e.target.value)}
+                value={reqGaras}
+                onChange={(e) => setReqGaras(e.target.value)}
               />
             </div>
             <div className="flex-1">

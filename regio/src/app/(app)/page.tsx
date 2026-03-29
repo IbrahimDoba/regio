@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { FaPlus } from "react-icons/fa6";
 import Header from "@/components/layout/Header";
 import FilterPanel from "@/components/feed/FilterPanel";
@@ -8,10 +9,12 @@ import FeedList from "@/components/feed/FeedList";
 import PreviewModal from "@/components/modals/PreviewModal";
 import CreateModal from "@/components/modals/CreateModal";
 import { ListingCategory, ListingPublic } from "@/lib/api/types";
-import { useFeed } from "@/lib/api/hooks/use-listings";
+import { useFeed, useCreateListingInquiry } from "@/lib/api";
+import { useRealTime } from "@/context/RealTimeContext";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
 
 export default function FeedPage() {
+  const router = useRouter();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   // Initialize with all categories
@@ -22,6 +25,47 @@ export default function FeedPage() {
   const [previewListing, setPreviewListing] = useState<ListingPublic | null>(
     null
   );
+
+  const { isConnected: isChatConnected, createListingRoom } = useRealTime();
+  const { mutateAsync: createListingInquiry } = useCreateListingInquiry();
+  const [isContacting, setIsContacting] = useState(false);
+
+  // Handle contact action - used by both FeedCard and PreviewModal
+  const handleContact = async (listing: ListingPublic) => {
+    if (isContacting) return;
+    setIsContacting(true);
+    try {
+      let roomId: string;
+      try {
+        const result = await createListingInquiry({
+          listing_id: listing.id,
+          listing_title: listing.title,
+          seller_user_code: listing.owner_code,
+        });
+        roomId = result.matrix_room_id;
+      } catch (backendErr) {
+        console.warn("Backend inquiry failed, trying context fallback:", backendErr);
+        roomId = await createListingRoom(listing.id, listing.title, listing.owner_code);
+      }
+      setPreviewListing(null);
+      const params = new URLSearchParams({
+        room: roomId,
+        name: listing.owner_name,
+        avatar: listing.owner_avatar || "",
+        listing: listing.title,
+      });
+      router.push(`/chat?${params.toString()}`);
+    } catch (error) {
+      console.error("Failed to start chat:", error);
+      alert(
+        isChatConnected
+          ? "Failed to start chat. Please try again."
+          : "Chat is not connected yet. Please wait a moment and try again."
+      );
+    } finally {
+      setIsContacting(false);
+    }
+  };
 
   // Fetch Feed
   const { data, isLoading } = useFeed({
@@ -71,12 +115,15 @@ export default function FeedPage() {
           activeFilters={activeFilters}
           searchQuery={searchQuery}
           onOpenPreview={setPreviewListing}
+          onContact={handleContact}
         />
       )}
 
       <PreviewModal
         listing={previewListing}
         onClose={() => setPreviewListing(null)}
+        isContacting={isContacting}
+        onContact={handleContact}
       />
 
       <CreateModal

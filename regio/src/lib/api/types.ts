@@ -68,6 +68,8 @@ export interface UserPublic {
   last_name: string;
   trust_level: TrustLevel;
   created_at: string;
+  is_system_admin?: boolean;
+  avatar_url?: string | null;
 }
 
 export interface UserRich {
@@ -310,7 +312,70 @@ export interface DisputePublic {
 
 export type DisputeAction = 'APPROVE' | 'REJECT';
 
+export type PaymentStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'DISPUTED';
+
 export interface DisputeResolveRequest {
   action: DisputeAction;
   reason: string;
+}
+
+// ============================================================================
+// Chat Types
+// ============================================================================
+
+export interface ListingInquiryRequest {
+  listing_id: string;
+  listing_title: string;
+  seller_user_code: string;
+}
+
+export interface RoomResponse {
+  matrix_room_id: string;
+}
+
+export interface ChatRoomSummary {
+  room_id: string;
+  matrix_room_id: string;
+  listing_id?: string | null;
+  room_name?: string | null;
+  partner_name: string;
+  partner_code: string;
+}
+
+export interface ChatRoomsResponse {
+  rooms: ChatRoomSummary[];
+}
+
+export interface MatrixTokenResponse {
+  matrix_user_id: string;
+  matrix_access_token: string;
+  matrix_homeserver: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  sender: string;
+  senderName: string;
+  content: string;
+  timestamp: number;
+  isOwn: boolean;
+  type: 'text' | 'payment_request' | 'system';
+  paymentRequest?: {
+    id: string;
+    amountGaras: number;
+    amountTime: number;
+    description: string;
+    status: 'pending' | 'paid' | 'denied';
+  };
+}
+
+export interface LocalNotification {
+  id: string;
+  type: "chat_message" | "system";
+  title: string;
+  message?: string;
+  room_id?: string;
+  sender_name?: string;
+  is_read: boolean;
+  created_at: string;
 }
