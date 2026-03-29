@@ -1,13 +1,17 @@
 "use client";
 
 /**
- * RealTimeContext — WebSocket-based chat context.
+ * RealTimeContext — Matrix SDK–based chat context.
+ *
+ * Maintains the same external interface as the previous WebSocket implementation
+ * so that all consumer components require no changes.
  *
  * Flow:
- * 1. connect() → validates auth token, fetches room list from REST
- * 2. joinRoom(roomId) → fetches message history via REST, opens WebSocket
- * 3. WS receives messages and typing events, updates state
- * 4. leaveRoom(roomId) → closes WebSocket
+ * 1. On mount, if Matrix credentials exist in Zustand store, re-init the SDK.
+ * 2. connect() — re-initializes the Matrix client using stored credentials.
+ * 3. joinRoom(roomId) — loads timeline history and marks room as active.
+ * 4. sendMessage(roomId, content) — sends a Matrix text event.
+ * 5. Matrix SDK events update rooms / messages / typing state.
  */
 
 import React, {
@@ -19,12 +23,16 @@ import React, {
   useEffect,
 } from "react";
 import type { ChatMessage } from "@/lib/api/types";
+import { useMatrixStore } from "@/store/matrixStore";
+import { initializeMatrixClient, disconnectMatrixClient } from "@/lib/matrixUtils";
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
 // ============================================================================
-// Types
+// Types (kept identical to the old WebSocket context for component compat)
 // ============================================================================
 
-// Kept for component compatibility — always an empty array in the WS implementation
 export interface ReadReceipt {
   event_id: string;
   room_id: string;
@@ -100,21 +108,10 @@ interface RealTimeContextType {
 }
 
 // ============================================================================
-// Constants
-// ============================================================================
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
-const LS_NOTIFICATIONS = "regio_notifications";
-
-// ============================================================================
 // Helpers
 // ============================================================================
 
-function getWsUrl(roomId: string, token: string): string {
-  const wsBase = API_URL.replace(/^http/, "ws");
-  return `${wsBase}/chats/ws/${roomId}?token=${encodeURIComponent(token)}`;
-}
+const LS_NOTIFICATIONS = "regio_notifications";
 
 function loadLS<T>(key: string, def: T): T {
   if (typeof window === "undefined") return def;
@@ -134,34 +131,37 @@ function saveLS(key: string, data: unknown) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function serverMsgToChatMessage(msg: Record<string, any>): ChatMessage {
-  // Normalize legacy "regio.payment_request" msgtype to "payment_request"
-  const rawType = (msg.message_type as string) || "text";
-  const normalizedType = rawType.replace("regio.", "");
+function matrixEventToChatMessage(event: any, myUserId: string): ChatMessage | null {
+  if (event.getType() !== "m.room.message") return null;
+  const content = event.getContent();
+  if (!content) return null;
 
-  let type: "text" | "payment_request" | "system" = "text";
-  if (normalizedType === "payment_request") type = "payment_request";
-  else if (normalizedType === "offer_accept" || normalizedType === "offer_reject")
-    type = "system";
+  const msgtype = content.msgtype as string;
+  if (msgtype !== "m.text" && msgtype !== "regio.payment_request") return null;
+
+  const sender = event.getSender() as string;
+  const isOwn = sender === myUserId;
+  const senderName = isOwn ? "Me" : (sender.split(":")[0].replace("@", "") || sender);
+
+  const isPayment = msgtype === "regio.payment_request";
 
   return {
-    id: msg.id,
-    sender: msg.is_own ? "me" : (msg.sender_name as string),
-    senderName: msg.is_own ? "Me" : (msg.sender_name as string),
-    content: msg.content as string,
-    timestamp: new Date(msg.created_at as string).getTime(),
-    isOwn: Boolean(msg.is_own),
-    type,
-    paymentRequest:
-      type === "payment_request" && msg.meta
-        ? {
-            id: (msg.meta.banking_request_id as string) || (msg.id as string),
-            amountRegio: (msg.meta.regio_amount as number) || 0,
-            amountTime: parseInt(String(msg.meta.time_amount || "0"), 10),
-            description: (msg.meta.description as string) || "",
-            status: (msg.meta.payment_status as "pending" | "paid" | "denied") || "pending",
-          }
-        : undefined,
+    id: event.getId() as string,
+    sender: isOwn ? "me" : sender,
+    senderName,
+    content: content.body as string,
+    timestamp: event.getTs() as number,
+    isOwn,
+    type: isPayment ? "payment_request" : "text",
+    paymentRequest: isPayment
+      ? {
+          id: (content.banking_request_id as string) || (event.getId() as string),
+          amountGaras: (content.regio_amount as number) || 0,
+          amountTime: parseInt(String(content.time_amount || "0"), 10),
+          description: (content.description as string) || "",
+          status: "pending",
+        }
+      : undefined,
   };
 }
 
@@ -172,33 +172,27 @@ function serverMsgToChatMessage(msg: Record<string, any>): ChatMessage {
 const RealTimeContext = createContext<RealTimeContextType | null>(null);
 
 export function RealTimeProvider({ children }: { children: React.ReactNode }) {
+  const { matrixUserId, matrixAccessToken, matrixHomeserver, matrixClient, setMatrixClient } =
+    useMatrixStore();
+
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
   const [notifications, setNotifications] = useState<LocalNotification[]>([]);
   const [rooms, setRooms] = useState<ChatRoomSummary[]>([]);
-  const [messagesByRoom, setMessagesByRoom] = useState<
-    Map<string, ChatMessage[]>
-  >(new Map());
-  const [typingByRoom, setTypingByRoom] = useState<Map<string, Set<string>>>(
-    new Map()
-  );
+  const [messagesByRoom, setMessagesByRoom] = useState<Map<string, ChatMessage[]>>(new Map());
+  const [typingByRoom, setTypingByRoom] = useState<Map<string, Set<string>>>(new Map());
 
-  const wsRef = useRef<WebSocket | null>(null);
   const currentRoomRef = useRef<string | null>(null);
-  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const reconnectDelayRef = useRef(1000);
-  const isConnectingRef = useRef(false);
-
+  // Partner codes from the DB — Matrix SDK has no knowledge of platform user_codes
+  const roomMetaRef = useRef<Map<string, { partnerCode: string; partnerName: string }>>(new Map());
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  // Load notifications from localStorage after mount (client-only, avoids SSR mismatch)
+  // Load notifications from localStorage after mount
   useEffect(() => {
     const stored = loadLS<LocalNotification[]>(LS_NOTIFICATIONS, []);
-    if (stored.length > 0) {
-      setNotifications(stored);
-    }
+    if (stored.length > 0) setNotifications(stored);
   }, []);
 
   useEffect(() => {
@@ -206,10 +200,10 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
   }, [notifications]);
 
   // ============================================================================
-  // Fetch rooms list via REST
+  // Fetch room metadata (partner codes) from our backend DB
   // ============================================================================
 
-  const fetchRooms = useCallback(async () => {
+  const fetchRoomMeta = useCallback(async () => {
     const token = localStorage.getItem("regio_access_token");
     if (!token) return;
     try {
@@ -218,191 +212,286 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
       });
       if (!resp.ok) return;
       const data = (await resp.json()) as {
-        rooms: {
-          room_id: string;
-          listing_title: string;
-          partner_name: string;
-          partner_code: string;
-          last_message?: string | null;
-          last_ts?: number | null;
-          unread_count?: number;
-        }[];
+        rooms: { room_id: string; partner_code: string; partner_name: string }[];
       };
-      setRooms(
-        (data.rooms || []).map((r) => ({
-          roomId: r.room_id,
-          name: r.listing_title || r.partner_name,
-          partnerCode: r.partner_code,
-          lastMessage: r.last_message ?? undefined,
-          lastTs: r.last_ts ?? undefined,
-          unreadCount: r.unread_count || 0,
-        }))
-      );
+      const map = new Map<string, { partnerCode: string; partnerName: string }>();
+      for (const r of data.rooms || []) {
+        map.set(r.room_id, { partnerCode: r.partner_code, partnerName: r.partner_name });
+      }
+      roomMetaRef.current = map;
     } catch {}
   }, []);
 
-  const refreshRooms = useCallback(async () => {
-    await fetchRooms();
-  }, [fetchRooms]);
+  // ============================================================================
+  // Sync rooms from SDK client
+  // ============================================================================
+
+  const syncRoomsFromClient = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (client: any) => {
+      if (!client) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sdkRooms: any[] = client.getRooms().filter(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (r: any) => r.getMyMembership() === "join"
+      );
+
+      const summaries: ChatRoomSummary[] = sdkRooms.map((room) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const timeline: any[] = room.getLiveTimeline().getEvents();
+        const lastMsgEvent = [...timeline]
+          .reverse()
+          .find(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (e: any) =>
+              e.getType() === "m.room.message" &&
+              e.getContent()?.msgtype === "m.text"
+          );
+
+        const meta = roomMetaRef.current.get(room.roomId as string);
+
+        return {
+          roomId: room.roomId as string,
+          name: (room.name as string) || meta?.partnerName || room.roomId,
+          partnerCode: meta?.partnerCode || "",
+          lastMessage: lastMsgEvent
+            ? (lastMsgEvent.getContent()?.body as string)
+            : undefined,
+          lastTs: lastMsgEvent ? (lastMsgEvent.getTs() as number) : undefined,
+          unreadCount: room.getUnreadNotificationCount() as number,
+        };
+      });
+
+      setRooms(summaries.sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0)));
+    },
+    []
+  );
 
   // ============================================================================
-  // Connect — validate auth, fetch rooms
+  // Register Matrix SDK event listeners
+  // ============================================================================
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const attachClientListeners = useCallback((client: any) => {
+    if (!client) return;
+
+    // Room.timeline — new message received
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    client.on("Room.timeline", (event: any, room: any, toStartOfTimeline: boolean) => {
+      if (toStartOfTimeline) return; // pagination from scrollback, handled in joinRoom
+      if (event.status !== null) return; // local echo — wait for server confirmation
+      if (!room) return;
+
+      // Payment status update event — not a chat message, just a state signal
+      if (event.getType() === "regio.payment_status") {
+        const c = event.getContent();
+        const bankingId = c.banking_request_id as string;
+        const newStatus = c.status as "paid" | "denied";
+        if (bankingId && newStatus) {
+          const roomId = room.roomId as string;
+          setMessagesByRoom((prev) => {
+            const newMap = new Map(prev);
+            const msgs = newMap.get(roomId) || [];
+            newMap.set(
+              roomId,
+              msgs.map((m) =>
+                m.paymentRequest?.id === bankingId
+                  ? { ...m, paymentRequest: { ...m.paymentRequest!, status: newStatus } }
+                  : m
+              )
+            );
+            return newMap;
+          });
+        }
+        return;
+      }
+
+      if (event.getType() !== "m.room.message") return;
+      const myId = client.getUserId() as string;
+      const msg = matrixEventToChatMessage(event, myId);
+      if (!msg) return;
+
+      const roomId = room.roomId as string;
+
+      setMessagesByRoom((prev) => {
+        const newMap = new Map(prev);
+        const existing = newMap.get(roomId) || [];
+        if (!existing.find((m) => m.id === msg.id)) {
+          newMap.set(roomId, [...existing, msg]);
+        }
+        return newMap;
+      });
+
+      setRooms((prev) =>
+        prev
+          .map((r) =>
+            r.roomId === roomId
+              ? {
+                  ...r,
+                  lastMessage: msg.content,
+                  lastTs: msg.timestamp,
+                  unreadCount:
+                    !msg.isOwn && currentRoomRef.current !== roomId
+                      ? (r.unreadCount || 0) + 1
+                      : r.unreadCount,
+                }
+              : r
+          )
+          .sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0))
+      );
+
+      // Notification for messages from others in non-active rooms
+      if (!msg.isOwn && currentRoomRef.current !== roomId) {
+        const notifId = `msg-${msg.id}`;
+        setNotifications((prev) => {
+          if (prev.find((n) => n.id === notifId)) return prev;
+          return [
+            {
+              id: notifId,
+              type: "chat_message",
+              title: `New message from ${msg.senderName}`,
+              message: msg.content.substring(0, 100),
+              room_id: roomId,
+              sender_name: msg.senderName,
+              is_read: false,
+              created_at: new Date().toISOString(),
+            },
+            ...prev,
+          ];
+        });
+      }
+    });
+
+    // sync state changes
+    client.on("sync", (state: string) => {
+      if (state === "PREPARED" || state === "SYNCING") {
+        setIsConnected(true);
+        setIsConnecting(false);
+        syncRoomsFromClient(client);
+      } else if (state === "ERROR" || state === "STOPPED") {
+        setIsConnected(false);
+      }
+    });
+
+    // Typing indicators
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    client.on("RoomMember.typing", (_event: any, member: any) => {
+      const roomId = member.roomId as string;
+      const displayName = (member.name || member.userId) as string;
+      const isTyping = member.typing as boolean;
+
+      setTypingByRoom((prev) => {
+        const newMap = new Map(prev);
+        const current = new Set(newMap.get(roomId) || []);
+        if (isTyping) {
+          current.add(displayName);
+        } else {
+          current.delete(displayName);
+        }
+        newMap.set(roomId, current);
+        return newMap;
+      });
+    });
+
+    // Room membership changes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    client.on("Room.myMembership", (_room: any, membership: string) => {
+      if (membership === "join") {
+        syncRoomsFromClient(client);
+      }
+    });
+  }, [syncRoomsFromClient]);
+
+  // ============================================================================
+  // Connect / Disconnect
   // ============================================================================
 
   const connect = useCallback(async () => {
-    if (isConnectingRef.current || isConnected) return;
-    isConnectingRef.current = true;
-    setIsConnecting(true);
-    setConnectionError(null);
+    if (isConnecting || isConnected) return;
 
     const token = localStorage.getItem("regio_access_token");
     if (!token) {
       setConnectionError("Please log in to use chat");
-      setIsConnecting(false);
-      isConnectingRef.current = false;
       return;
     }
 
+    setIsConnecting(true);
+    setConnectionError(null);
+
     try {
-      await fetchRooms();
-      setIsConnected(true);
+      // Pre-fetch partner codes from DB before syncing rooms
+      await fetchRoomMeta();
+
+      // If we already have a client in the store, reuse it
+      if (matrixClient) {
+        attachClientListeners(matrixClient);
+        syncRoomsFromClient(matrixClient);
+        setIsConnected(true);
+        setIsConnecting(false);
+        return;
+      }
+
+      // If we have stored credentials, re-init SDK
+      if (matrixUserId && matrixAccessToken && matrixHomeserver) {
+        const client = await initializeMatrixClient(
+          matrixUserId,
+          matrixAccessToken,
+          matrixHomeserver
+        );
+        attachClientListeners(client);
+        syncRoomsFromClient(client);
+        setIsConnected(true);
+      } else {
+        // No Matrix credentials yet — try to get them from the backend
+        const resp = await fetch(`${API_URL}/chats/matrix/token`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!resp.ok) {
+          setConnectionError("Could not initialize chat. Please try again.");
+          return;
+        }
+        const matrixData = (await resp.json()) as {
+          matrix_user_id: string;
+          matrix_access_token: string;
+          matrix_homeserver: string;
+        };
+        useMatrixStore.getState().setMatrixCredentials(
+          matrixData.matrix_user_id,
+          matrixData.matrix_access_token,
+          matrixData.matrix_homeserver
+        );
+        const client = await initializeMatrixClient(
+          matrixData.matrix_user_id,
+          matrixData.matrix_access_token,
+          matrixData.matrix_homeserver
+        );
+        attachClientListeners(client);
+        syncRoomsFromClient(client);
+        setIsConnected(true);
+      }
     } catch (err) {
-      setConnectionError(
-        err instanceof Error ? err.message : "Failed to connect"
-      );
+      setConnectionError(err instanceof Error ? err.message : "Failed to connect to chat");
     } finally {
       setIsConnecting(false);
-      isConnectingRef.current = false;
     }
-  }, [isConnected, fetchRooms]);
+  }, [
+    isConnected,
+    isConnecting,
+    matrixClient,
+    matrixUserId,
+    matrixAccessToken,
+    matrixHomeserver,
+    attachClientListeners,
+    syncRoomsFromClient,
+    fetchRoomMeta,
+  ]);
 
   const disconnect = useCallback(() => {
-    if (wsRef.current) {
-      wsRef.current.onclose = null;
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-    if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+    disconnectMatrixClient();
     setIsConnected(false);
     setIsConnecting(false);
     currentRoomRef.current = null;
-    isConnectingRef.current = false;
-  }, []);
-
-  // ============================================================================
-  // WebSocket management (one WS per open room)
-  // ============================================================================
-
-  const openWs = useCallback((roomId: string) => {
-    const token = localStorage.getItem("regio_access_token");
-    if (!token) return;
-
-    // Close existing WS before opening a new one
-    if (wsRef.current) {
-      wsRef.current.onclose = null;
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-
-    const ws = new WebSocket(getWsUrl(roomId, token));
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      reconnectDelayRef.current = 1000; // reset backoff on successful connect
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const data = JSON.parse(event.data) as Record<string, any>;
-
-        if (data.event === "typing") {
-          setTypingByRoom((prev) => {
-            const newMap = new Map(prev);
-            const current = new Set(newMap.get(roomId) || []);
-            if (data.is_typing) {
-              current.add(data.sender_name as string);
-            } else {
-              current.delete(data.sender_name as string);
-            }
-            newMap.set(roomId, current);
-            return newMap;
-          });
-          return;
-        }
-
-        if (data.event === "message") {
-          const msg = serverMsgToChatMessage(data);
-
-          setMessagesByRoom((prev) => {
-            const newMap = new Map(prev);
-            const existing = newMap.get(roomId) || [];
-            if (!existing.find((m) => m.id === msg.id)) {
-              newMap.set(roomId, [...existing, msg]);
-            }
-            return newMap;
-          });
-
-          // Keep room list sorted with latest message on top
-          // Also increment unread count for messages from others in non-active rooms
-          setRooms((prev) =>
-            prev
-              .map((r) =>
-                r.roomId === roomId
-                  ? {
-                      ...r,
-                      lastMessage: msg.content,
-                      lastTs: msg.timestamp,
-                      unreadCount:
-                        !msg.isOwn && currentRoomRef.current !== roomId
-                          ? (r.unreadCount || 0) + 1
-                          : r.unreadCount,
-                    }
-                  : r
-              )
-              .sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0))
-          );
-
-          // Create notification if not currently viewing this room
-          if (!msg.isOwn && currentRoomRef.current !== roomId) {
-            const notifId = `msg-${msg.id}`;
-            setNotifications((prev) => {
-              if (prev.find((n) => n.id === notifId)) return prev;
-              return [
-                {
-                  id: notifId,
-                  type: "chat_message",
-                  title: `New message from ${msg.senderName}`,
-                  message: msg.content.substring(0, 100),
-                  room_id: roomId,
-                  sender_name: msg.senderName,
-                  is_read: false,
-                  created_at: new Date().toISOString(),
-                },
-                ...prev,
-              ];
-            });
-          }
-        }
-      } catch {}
-    };
-
-    ws.onerror = () => {
-      // onclose will fire after onerror, reconnect handled there
-    };
-
-    ws.onclose = () => {
-      // Reconnect only if we're still supposed to be in this room
-      if (currentRoomRef.current === roomId) {
-        reconnectTimerRef.current = setTimeout(() => {
-          reconnectDelayRef.current = Math.min(
-            reconnectDelayRef.current * 2,
-            30000
-          );
-          openWs(roomId);
-        }, reconnectDelayRef.current);
-      }
-    };
   }, []);
 
   // ============================================================================
@@ -413,58 +502,63 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
     async (roomId: string) => {
       currentRoomRef.current = roomId;
 
-      // Mark notifications for this room as read
       setNotifications((prev) =>
         prev.map((n) => (n.room_id === roomId ? { ...n, is_read: true } : n))
       );
-
-      // Reset unread count for this room
       setRooms((prev) =>
         prev.map((r) => (r.roomId === roomId ? { ...r, unreadCount: 0 } : r))
       );
 
-      // Fetch message history
-      const token = localStorage.getItem("regio_access_token");
-      if (token) {
-        try {
-          const resp = await fetch(
-            `${API_URL}/chats/rooms/${roomId}/messages?limit=50`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (resp.ok) {
-            const data = (await resp.json()) as {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              messages: Record<string, any>[];
-            };
-            const messages = (data.messages || []).map(
-              serverMsgToChatMessage
-            );
-            setMessagesByRoom((prev) => {
-              const newMap = new Map(prev);
-              newMap.set(roomId, messages);
-              return newMap;
-            });
-          }
-        } catch {}
+      const client = matrixClient || useMatrixStore.getState().matrixClient;
+      if (!client) return;
+
+      const sdkRoom = client.getRoom(roomId);
+      if (!sdkRoom) return;
+
+      // Load scrollback (history)
+      try {
+        await client.scrollback(sdkRoom, 50);
+      } catch {
+        // ignore
       }
 
-      // Open WebSocket for real-time updates
-      openWs(roomId);
+      // Convert existing timeline events to ChatMessage
+      const myId = client.getUserId() as string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const events: any[] = sdkRoom.getLiveTimeline().getEvents();
+      const messages: ChatMessage[] = events
+        .map((e) => matrixEventToChatMessage(e, myId))
+        .filter((m): m is ChatMessage => m !== null);
+
+      // Apply payment status updates from history
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const e of events) {
+        if (e.getType() === "regio.payment_status") {
+          const c = e.getContent();
+          const bankingId = c.banking_request_id as string;
+          const newStatus = c.status as "paid" | "denied";
+          if (bankingId && newStatus) {
+            for (const msg of messages) {
+              if (msg.paymentRequest?.id === bankingId) {
+                msg.paymentRequest = { ...msg.paymentRequest, status: newStatus };
+              }
+            }
+          }
+        }
+      }
+
+      setMessagesByRoom((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(roomId, messages);
+        return newMap;
+      });
     },
-    [openWs]
+    [matrixClient]
   );
 
   const leaveRoom = useCallback((roomId: string) => {
     if (currentRoomRef.current === roomId) {
       currentRoomRef.current = null;
-      if (wsRef.current) {
-        wsRef.current.onclose = null;
-        wsRef.current.close();
-        wsRef.current = null;
-      }
-      if (reconnectTimerRef.current) {
-        clearTimeout(reconnectTimerRef.current);
-      }
     }
   }, []);
 
@@ -491,17 +585,18 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!resp.ok) {
-        const err = (await resp.json().catch(() => ({}))) as {
-          detail?: string;
-        };
+        const err = (await resp.json().catch(() => ({}))) as { detail?: string };
         throw new Error(err.detail || "Failed to create room");
       }
 
-      const data = (await resp.json()) as { room_id: string };
-      await fetchRooms();
-      return data.room_id;
+      const data = (await resp.json()) as { matrix_room_id: string };
+      // Refresh room meta + room list from SDK
+      await fetchRoomMeta();
+      const client = matrixClient || useMatrixStore.getState().matrixClient;
+      if (client) syncRoomsFromClient(client);
+      return data.matrix_room_id;
     },
-    [fetchRooms]
+    [matrixClient, syncRoomsFromClient, fetchRoomMeta]
   );
 
   // ============================================================================
@@ -515,29 +610,45 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
       msgType: string = "text",
       extraContent?: Record<string, unknown>
     ) => {
-      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-        throw new Error("Not connected to chat");
+      const client = matrixClient || useMatrixStore.getState().matrixClient;
+      if (!client) throw new Error("Matrix client not connected");
+
+      if (msgType === "payment_request" && extraContent) {
+        await client.sendEvent(roomId, "m.room.message", {
+          msgtype: "regio.payment_request",
+          body: content,
+          ...extraContent,
+        });
+      } else if (msgType === "payment_status" && extraContent) {
+        await client.sendEvent(roomId, "regio.payment_status", {
+          ...extraContent,
+        });
+      } else {
+        await client.sendTextMessage(roomId, content);
       }
-      wsRef.current.send(
-        JSON.stringify({
-          type: msgType,
-          content,
-          meta: extraContent || null,
-        })
-      );
     },
-    []
+    [matrixClient]
   );
 
-  const sendTyping = useCallback((_roomId: string, isTyping: boolean) => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-    wsRef.current.send(JSON.stringify({ type: "typing", is_typing: isTyping }));
-  }, []);
+  const sendTyping = useCallback(
+    (roomId: string, isTyping: boolean) => {
+      const client = matrixClient || useMatrixStore.getState().matrixClient;
+      if (!client) return;
+      client.sendTyping(roomId, isTyping, 3000).catch(() => {});
+    },
+    [matrixClient]
+  );
 
-  // Read receipts are handled server-side; no-op here
   const sendReadReceipt = useCallback(
-    (_roomId: string, _eventId: string) => {},
-    []
+    (roomId: string, eventId: string) => {
+      const client = matrixClient || useMatrixStore.getState().matrixClient;
+      if (!client) return;
+      const room = client.getRoom(roomId);
+      if (!room) return;
+      const event = room.findEventById(eventId);
+      if (event) client.sendReadReceipt(event).catch(() => {});
+    },
+    [matrixClient]
   );
 
   // ============================================================================
@@ -560,11 +671,39 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
-  // Pagination placeholder — can extend later
-  const loadEarlierMessages = useCallback(async (_roomId: string) => {}, []);
+  const loadEarlierMessages = useCallback(
+    async (roomId: string) => {
+      const client = matrixClient || useMatrixStore.getState().matrixClient;
+      if (!client) return;
+      const sdkRoom = client.getRoom(roomId);
+      if (!sdkRoom) return;
+      try {
+        await client.scrollback(sdkRoom, 30);
+        const myId = client.getUserId() as string;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const events: any[] = sdkRoom.getLiveTimeline().getEvents();
+        const messages = events
+          .map((e) => matrixEventToChatMessage(e, myId))
+          .filter((m): m is ChatMessage => m !== null);
+        setMessagesByRoom((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(roomId, messages);
+          return newMap;
+        });
+      } catch {
+        // ignore
+      }
+    },
+    [matrixClient]
+  );
+
+  const refreshRooms = useCallback(async () => {
+    const client = matrixClient || useMatrixStore.getState().matrixClient;
+    syncRoomsFromClient(client);
+  }, [matrixClient, syncRoomsFromClient]);
 
   const updatePaymentRequestStatus = useCallback(
-    (roomId: string, paymentRequestId: string, status: "pending" | "paid" | "denied") => {
+    (roomId: string, paymentRequestId: string, newStatus: "pending" | "paid" | "denied") => {
       setMessagesByRoom((prev) => {
         const newMap = new Map(prev);
         const msgs = newMap.get(roomId) || [];
@@ -572,7 +711,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
           roomId,
           msgs.map((m) =>
             m.paymentRequest?.id === paymentRequestId
-              ? { ...m, paymentRequest: { ...m.paymentRequest!, status } }
+              ? { ...m, paymentRequest: { ...m.paymentRequest!, status: newStatus } }
               : m
           )
         );
@@ -619,11 +758,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
       setConnectionError("Please log in to use chat");
     }
     return () => {
-      if (wsRef.current) {
-        wsRef.current.onclose = null;
-        wsRef.current.close();
-      }
-      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      // Don't stop the Matrix client on unmount — keep it running globally
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

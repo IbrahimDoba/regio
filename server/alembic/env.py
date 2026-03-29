@@ -35,6 +35,8 @@ from app.banking.models import Account, PaymentRequest, Transaction # noqa: F401
 from app.listings.models import Listing, Tag # noqa: F401
 from app.users.models import User # noqa: F401
 from app.auth.models import Invite # noqa: F401
+from app.chat.models import MatrixUserCredentials, MatrixRoom, MatrixRoomParticipant, MatrixRegistrationStats # noqa: F401
+from app.broadcast.models import Broadcast, UserBroadcast # noqa: F401
 
 # add your model's MetaData object here
 # for 'autogenerate' support

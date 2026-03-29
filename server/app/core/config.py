@@ -1,8 +1,10 @@
 from typing import Annotated, Any, Literal
 
 from pydantic import (
+    AliasChoices,
     AnyUrl,
     BeforeValidator,
+    Field,
     PostgresDsn,
     computed_field,
 )
@@ -35,9 +37,9 @@ class Settings(RegioBaseSettings):
     @property
     def all_cors_origins(self) -> list[str]:
         # return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
-        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
-            self.FRONTEND_HOST
-        ]
+        return [
+            str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS
+        ] + [self.FRONTEND_HOST]
 
     PROJECT_NAME: str
     POSTGRES_SERVER: str
@@ -64,6 +66,19 @@ class Settings(RegioBaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
+
+    # Matrix homeserver integration
+    # Accepts either MATRIX_HOMESERVER_URL or MATRIX_HOMESERVER env var
+    MATRIX_HOMESERVER: str = Field(
+        default="https://matrix.151.hu",
+        validation_alias=AliasChoices("MATRIX_HOMESERVER_URL", "MATRIX_HOMESERVER"),
+    )
+    MATRIX_DOMAIN: str = "151.hu"
+    MATRIX_REGISTRATION_TOKEN: str = ""
+    # Admin credentials — access token is fetched at runtime via login
+    MATRIX_ADMIN_USER: str = ""
+    MATRIX_ADMIN_PASSWORD: str = ""
+    MATRIX_ENCRYPTION_KEY: str = ""  # base64url-encoded 32-byte key
 
     # Initial super user config value
     SYSTEM_SINK_CODE: str

@@ -62,7 +62,7 @@ export interface LangTexts {
   timeFactor: string;
   priceInfo: string;
   priceInfoPh: string;
-  amountRegio: string;
+  amountGaras: string;
   amountTime: string;
   start: string;
   dest: string;

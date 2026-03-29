@@ -17,11 +17,11 @@ router = APIRouter()
     "/login/access-token",
     response_model=TokenResponse,
     responses={
-        status.HTTP_401_UNAUTHORIZED: {"description": "Incorrect email or password"},
-        status.HTTP_400_BAD_REQUEST: {"description": "Inactive user account"},
-        status.HTTP_403_FORBIDDEN: {
-            "description": "Account not verified"
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Incorrect email or password"
         },
+        status.HTTP_400_BAD_REQUEST: {"description": "Inactive user account"},
+        status.HTTP_403_FORBIDDEN: {"description": "Account not verified"},
     },
 )
 async def login_access_token(
@@ -38,7 +38,9 @@ async def login_access_token(
     - **password**: User's plain text password.
     """
 
-    token_data = await service.authenticate_user(form_data.username, form_data.password)
+    token_data = await service.authenticate_user(
+        form_data.username, form_data.password
+    )
 
     # Set the Refresh Token in the cookie
     set_refresh_cookie(response, token_data.refresh_token)
@@ -52,7 +54,9 @@ async def login_access_token(
     "/login/test-token",
     response_model=UserPublic,
     responses={
-        status.HTTP_401_UNAUTHORIZED: {"description": "Token is invalid or expired"}
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "Token is invalid or expired"
+        }
     },
 )
 async def test_token(current_user: CurrentUser) -> Any:

@@ -24,7 +24,9 @@ async def resource_conflict_handler(request: Request, exc: ResourceConflict):
     )
 
 
-async def invalid_user_request_handler(request: Request, exc: InvalidUserRequest):
+async def invalid_user_request_handler(
+    request: Request, exc: InvalidUserRequest
+):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": exc.detail},

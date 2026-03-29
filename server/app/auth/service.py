@@ -23,7 +23,11 @@ from app.auth.exceptions import (
 from app.auth.models import Invite
 from app.auth.schemas import InvitePublic, Token
 from app.auth.security import verify_password
-from app.auth.utils import create_access_token, create_refresh_token, decode_token
+from app.auth.utils import (
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+)
 from app.core.config import settings
 from app.users.enums import VerificationStatus
 from app.users.models import User
@@ -39,7 +43,9 @@ class AuthService:
 
     async def authenticate_user(self, email: str, password: str) -> Token:
         # Fetch User
-        result = await self.session.execute(select(User).where(User.email == email))
+        result = await self.session.execute(
+            select(User).where(User.email == email)
+        )
         user = result.scalar_one_or_none()
 
         # Verify Identity (Timing attack safe)
@@ -209,7 +215,9 @@ class AuthService:
         # Return the fresh list (which will pick up the 3 new ones due to order_by desc)
         return await self.get_user_invites(user_id)
 
-    async def consume_invite(self, code: str, consumer_id: uuid.UUID) -> Invite:
+    async def consume_invite(
+        self, code: str, consumer_id: uuid.UUID
+    ) -> Invite:
         """
         Validates, decrements, and links the invite code to the new user.
         """
@@ -235,7 +243,9 @@ class AuthService:
 
         return invite
 
-    async def create_user_invites(self, user_id: uuid.UUID, amount: int = 3) -> None:
+    async def create_user_invites(
+        self, user_id: uuid.UUID, amount: int = 3
+    ) -> None:
         """
         Generates welcome invites. Format: REGIO-AB-12345678 (Longer, harder to guess)
         """
@@ -254,7 +264,9 @@ class AuthService:
             )
             code = f"REGIO-{prefix}-{suffix}"
 
-            invite = Invite(code=code, owner_id=user_id, uses_left=1, max_uses=1)
+            invite = Invite(
+                code=code, owner_id=user_id, uses_left=1, max_uses=1
+            )
             self.session.add(invite)
 
         # Let the caller commit usually, but if called independently:

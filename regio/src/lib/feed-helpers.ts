@@ -59,43 +59,78 @@ export function getCategoryDetails(category: ListingCategory) {
   );
 }
 
-interface ListingAttributes {
+export interface ListingAttributes {
+  // OFFER_SERVICE
   time_factor?: number;
-  regio_amount?: number;
+  // SELL_PRODUCT
   time_amount?: number;
-  fee_regio?: number;
+  regio_amount?: number;
+  condition?: string;
+  stock?: number;
+  // OFFER_RENTAL
   fee_time?: number;
+  fee_regio?: number;
+  max_duration?: string;
+  deposit_required?: boolean;
+  // RIDE_SHARE
+  start?: string;
+  destination?: string;
+  departure_datetime?: string;
+  seats?: number;
+  price_time?: number;
+  price_garas?: number;
+  // EVENT_WORKSHOP
+  event_start_date?: string;
+  event_end_date?: string;
+  location?: string;
+  max_participants?: number;
+  // SEARCH_SERVICE / SEARCH_PRODUCT
+  deadline?: string;
+  // Global
+  price_notes?: string;
 }
 
 export function formatPrice(listing: ListingPublic): string {
   const attrs = listing.attributes as ListingAttributes | undefined;
   if (!attrs) return "";
 
-  if (listing.category === "OFFER_SERVICE") {
-    return attrs.time_factor ? `${attrs.time_factor}x Time` : "1.0x Time";
-  }
+  switch (listing.category) {
+    case "OFFER_SERVICE":
+      return `${attrs.time_factor ?? 1.0}x Time`;
 
-  if (listing.category === "SELL_PRODUCT") {
-    const parts = [];
-    if (attrs.regio_amount) parts.push(`${attrs.regio_amount} R`);
-    if (attrs.time_amount) parts.push(`${attrs.time_amount} Min`);
-    return parts.join(" + ");
-  }
+    case "SELL_PRODUCT": {
+      const parts = [];
+      if (attrs.time_amount) parts.push(`${attrs.time_amount} Min`);
+      if (attrs.regio_amount) parts.push(`${attrs.regio_amount} G`);
+      return parts.join(" + ") || "Negotiable";
+    }
 
-  if (listing.category === "RIDE_SHARE") {
-    // Rideshare attributes: start, destination (no price usually in attributes unless shared params?)
-    // Mock data had '30,00 R'.
-    // Schema doesn't strictly enforce price for rideshare in attributes, maybe just description.
-    // Use attributes if available or 'Contact for price'
-    return "Contact for details";
-  }
+    case "OFFER_RENTAL": {
+      const parts = [];
+      if (attrs.fee_time) parts.push(`${attrs.fee_time} Min`);
+      if (attrs.fee_regio) parts.push(`${attrs.fee_regio} G`);
+      return parts.join(" + ") || "Contact";
+    }
 
-  if (listing.category === "OFFER_RENTAL") {
-    const parts = [];
-    if (attrs.fee_regio) parts.push(`${attrs.fee_regio} R`);
-    if (attrs.fee_time) parts.push(`${attrs.fee_time} Min`);
-    return parts.length > 0 ? parts.join(" + ") : "Contact";
-  }
+    case "RIDE_SHARE": {
+      const parts = [];
+      if (attrs.price_time) parts.push(`${attrs.price_time} Min`);
+      if (attrs.price_garas) parts.push(`${attrs.price_garas} G`);
+      return parts.join(" + ") || "Contact for price";
+    }
 
-  return "";
+    case "EVENT_WORKSHOP": {
+      const parts = [];
+      if (attrs.price_time) parts.push(`${attrs.price_time} Min`);
+      if (attrs.price_garas) parts.push(`${attrs.price_garas} G`);
+      return parts.join(" + ") || "Free";
+    }
+
+    case "SEARCH_SERVICE":
+    case "SEARCH_PRODUCT":
+      return "Wanted";
+
+    default:
+      return "";
+  }
 }

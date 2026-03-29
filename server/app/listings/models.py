@@ -40,7 +40,9 @@ class Listing(SQLModel, table=True):
     __tablename__ = "listings"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    owner_id: uuid.UUID = Field(foreign_key="users.id", index=True, nullable=False)
+    owner_id: uuid.UUID = Field(
+        foreign_key="users.id", index=True, nullable=False
+    )
 
     category: ListingCategory = Field(index=True)
     status: ListingStatus = Field(default=ListingStatus.ACTIVE, index=True)

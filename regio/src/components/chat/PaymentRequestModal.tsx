@@ -4,7 +4,7 @@
  * Payment Request Modal Component
  *
  * Modal for creating a new payment request
- * Allows entering Regio amount, Time amount, and description
+ * Allows entering Garas amount, Time amount, and description
  */
 
 import React, { useState, useEffect } from 'react';
@@ -15,7 +15,7 @@ interface PaymentRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: {
-    amountRegio: number;
+    amountGaras: number;
     amountTime: number;
     description: string;
   }) => void;
@@ -26,7 +26,7 @@ export function PaymentRequestModal({
   onClose,
   onSubmit,
 }: PaymentRequestModalProps) {
-  const [amountRegio, setAmountRegio] = useState('');
+  const [amountGaras, setAmountGaras] = useState('');
   const [amountTime, setAmountTime] = useState('');
   const [description, setDescription] = useState('');
 
@@ -35,7 +35,7 @@ export function PaymentRequestModal({
     if (isOpen) {
       // Use requestAnimationFrame to avoid sync setState warning
       requestAnimationFrame(() => {
-        setAmountRegio('');
+        setAmountGaras('');
         setAmountTime('');
         setDescription('');
       });
@@ -69,7 +69,7 @@ export function PaymentRequestModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
-      amountRegio: parseFloat(amountRegio) || 0,
+      amountGaras: parseFloat(amountGaras) || 0,
       amountTime: parseInt(amountTime) || 0,
       description: description || 'Payment Request',
     });
@@ -101,14 +101,14 @@ export function PaymentRequestModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-                Regio
+                Garas
               </label>
               <input
                 type="number"
                 step="0.01"
                 min="0"
-                value={amountRegio}
-                onChange={(e) => setAmountRegio(e.target.value)}
+                value={amountGaras}
+                onChange={(e) => setAmountGaras(e.target.value)}
                 placeholder="0.00"
                 className={cn(
                   'w-full px-4 py-3 bg-white border border-gray-300 rounded-lg',
@@ -163,7 +163,7 @@ export function PaymentRequestModal({
               'transition-colors shadow-sm',
               'disabled:opacity-50 disabled:cursor-not-allowed'
             )}
-            disabled={!amountRegio && !amountTime}
+            disabled={!amountGaras && !amountTime}
           >
             Send Request
           </button>

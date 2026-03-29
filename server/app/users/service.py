@@ -18,7 +18,12 @@ from app.users.exceptions import (
     UserNotFound,
 )
 from app.users.models import User
-from app.users.schemas import UserAdminUpdate, UserCreate, UsersPublic, UserUpdate
+from app.users.schemas import (
+    UserAdminUpdate,
+    UserCreate,
+    UsersPublic,
+    UserUpdate,
+)
 from app.users.utils import generate_user_code
 
 
@@ -101,7 +106,10 @@ class UserService:
                 )
 
         statement = (
-            select(User).where(*base_filter).where(or_(*conditions)).limit(limit)
+            select(User)
+            .where(*base_filter)
+            .where(or_(*conditions))
+            .limit(limit)
         )
 
         results = await self.session.execute(statement)
@@ -171,7 +179,9 @@ class UserService:
             await self.session.rollback()
             raise e
 
-    async def update_user(self, user_id: uuid.UUID, user_in: UserUpdate) -> User:
+    async def update_user(
+        self, user_id: uuid.UUID, user_in: UserUpdate
+    ) -> User:
         """
         Standard user update. RESTRICTED: Cannot change names.
         """
@@ -226,7 +236,10 @@ class UserService:
 
         # Update verification fields (verified_by, verified_at)
         if "verification_status" in update_data:
-            if update_data["verification_status"] == VerificationStatus.VERIFIED:
+            if (
+                update_data["verification_status"]
+                == VerificationStatus.VERIFIED
+            ):
                 db_user.verified_by = current_admin
                 db_user.verified_at = datetime.now(timezone.utc)
         # NOTE: Updating verification_status of user in update_user is now deprecated, please use admin_service.verify_user. The UserAdminUpdate schema will be updated in the future.

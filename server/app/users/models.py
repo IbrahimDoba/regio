@@ -11,6 +11,7 @@ from app.users.enums import Language, TrustLevel, VerificationStatus
 if TYPE_CHECKING:
     from app.auth.models import Invite
     from app.banking.models import Account, PaymentRequest, Transaction
+    from app.broadcast.models import Broadcast, UserBroadcast
     from app.listings.models import Listing
 
 
@@ -49,7 +50,9 @@ class User(SQLModel, table=True):
     notif_newsletter: bool = Field(default=False)
 
     # Status
-    verification_status: VerificationStatus = Field(default=VerificationStatus.PENDING)
+    verification_status: VerificationStatus = Field(
+        default=VerificationStatus.PENDING
+    )
     verified_by_id: Optional[uuid.UUID] = Field(
         default=None,
         foreign_key="users.id",  # Pointing to self table
@@ -78,13 +81,28 @@ class User(SQLModel, table=True):
         sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
     )
 
+    # Matrix integration
+    matrix_user_id: Optional[str] = Field(
+        default=None,
+        unique=True,
+        nullable=True,
+        description="Matrix user ID, e.g. @immo_<uuid>:151.hu",
+    )
+    matrix_password: Optional[str] = Field(
+        default=None,
+        max_length=255,
+        nullable=True,
+        description="AES-256-CBC encrypted Matrix password",
+    )
+
     # ORM relationships
     verified_by: Optional["User"] = Relationship(
         back_populates="verified_users",
         sa_relationship_kwargs={"remote_side": "User.id", "lazy": "joined"},
     )
     verified_users: list["User"] = Relationship(
-        back_populates="verified_by", sa_relationship_kwargs={"lazy": "selectin"}
+        back_populates="verified_by",
+        sa_relationship_kwargs={"lazy": "selectin"},
     )
 
     listings: list["Listing"] = Relationship(back_populates="owner")
@@ -135,6 +153,24 @@ class User(SQLModel, table=True):
         sa_relationship_kwargs={
             "lazy": "selectin",
             "foreign_keys": "[PaymentRequest.debtor_id]",
+        },
+    )
+
+    # Broadcasts sent by this user (Admin)
+    sent_broadcasts: list["Broadcast"] = Relationship(
+        back_populates="sender",
+        sa_relationship_kwargs={
+            "lazy": "selectin",
+            "foreign_keys": "[Broadcast.sender_id]",
+        },
+    )
+
+    # Broadcasts received by this user (Inbox)
+    inbox_messages: list["UserBroadcast"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={
+            "lazy": "selectin",
+            "foreign_keys": "[UserBroadcast.user_id]",
         },
     )
 

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Regio App",
-  description: "Regio App Prototype",
+  title: "Garas App",
+  description: "Garas App Prototype",
 };
 
 import { LanguageProvider } from "@/context/LanguageContext";

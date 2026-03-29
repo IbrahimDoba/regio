@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 
 export interface PaymentRequestData {
   id: string;
-  amountRegio: number;
+  amountGaras: number;
   amountTime: number;
   description: string;
   status: 'pending' | 'paid' | 'denied';
@@ -34,13 +34,13 @@ export function PaymentRequestCard({
   onDeny,
   className,
 }: PaymentRequestCardProps) {
-  const { id, amountRegio, amountTime, description, status } = data;
+  const { id, amountGaras, amountTime, description, status } = data;
 
   const handlePay = () => onPay?.(id);
   const handleDeny = () => onDeny?.(id);
 
   // Format amounts
-  const formatRegio = (val: number) => val.toFixed(2);
+  const formatGaras = (val: number) => val.toFixed(2);
   const formatTime = (val: number) => {
     const hours = Math.floor(val / 60);
     const mins = val % 60;
@@ -80,9 +80,9 @@ export function PaymentRequestCard({
             </div>
             <div className="text-right">
               <div className="text-base font-bold text-gray-800">
-                {formatRegio(amountRegio)}
+                {formatGaras(amountGaras)}
               </div>
-              <div className="text-xs text-gray-500">Regio</div>
+              <div className="text-xs text-gray-500">Garas</div>
             </div>
           </div>
           <p className="text-xs text-gray-600 truncate">{description}</p>
@@ -128,9 +128,9 @@ export function PaymentRequestCard({
           </div>
           <div className="text-right">
             <div className="text-base font-bold text-gray-800">
-              {formatRegio(amountRegio)}
+              {formatGaras(amountGaras)}
             </div>
-            <div className="text-xs text-gray-500">Regio</div>
+            <div className="text-xs text-gray-500">Garas</div>
           </div>
         </div>
         <p className="text-xs text-gray-600 truncate">{description}</p>

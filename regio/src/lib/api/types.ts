@@ -330,25 +330,26 @@ export interface ListingInquiryRequest {
 }
 
 export interface RoomResponse {
-  room_id: string;
-  listing_title: string;
-  partner_name: string;
-  partner_code: string;
-  is_new: boolean;
+  matrix_room_id: string;
 }
 
 export interface ChatRoomSummary {
   room_id: string;
-  listing_title: string;
+  matrix_room_id: string;
+  listing_id?: string | null;
+  room_name?: string | null;
   partner_name: string;
   partner_code: string;
-  last_message?: string | null;
-  last_ts?: number | null;
-  unread_count: number;
 }
 
 export interface ChatRoomsResponse {
   rooms: ChatRoomSummary[];
+}
+
+export interface MatrixTokenResponse {
+  matrix_user_id: string;
+  matrix_access_token: string;
+  matrix_homeserver: string;
 }
 
 export interface ChatMessage {
@@ -361,7 +362,7 @@ export interface ChatMessage {
   type: 'text' | 'payment_request' | 'system';
   paymentRequest?: {
     id: string;
-    amountRegio: number;
+    amountGaras: number;
     amountTime: number;
     description: string;
     status: 'pending' | 'paid' | 'denied';
