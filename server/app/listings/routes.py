@@ -1,8 +1,9 @@
 import uuid
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Query, UploadFile, status
 
+from app.core.r2 import StorageServiceDep
 from app.listings.dependencies import ListingServiceDep
 from app.listings.enums import ListingCategory
 from app.listings.schemas import (
@@ -122,6 +123,43 @@ async def get_listing_by_id(
     return await service.format_listing(listing)
 
 
+@router.post(
+    "/{listing_id}/media",
+    response_model=ListingPublic,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "File type not allowed, size exceeded, or too many files."
+        },
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "User is not authenticated."
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "User does not own the listing."
+        },
+        status.HTTP_404_NOT_FOUND: {"description": "Listing not found."},
+    },
+)
+async def upload_listing_media(
+    listing_id: uuid.UUID,
+    files: List[UploadFile],
+    current_user: CurrentUser,
+    service: ListingServiceDep,
+    storage: StorageServiceDep,
+) -> Any:
+    """
+    Upload media files (images/PDFs) to a listing.
+
+    Accepts multiple files per request. Files are stored in S3 and their keys
+    are appended to the listing's media_urls array. Max 10 files per listing,
+    10MB per file. Allowed types: JPEG, PNG, WebP, GIF, PDF.
+    """
+    listing = await service.upload_media(
+        listing_id, current_user, files, storage
+    )
+    return await service.format_listing(listing)
+
+
 @router.delete(
     "/{listing_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -174,13 +212,15 @@ async def update_listing(
     update_data: ListingUpdate,
     current_user: CurrentUser,
     service: ListingServiceDep,
+    storage: StorageServiceDep,
 ) -> Any:
     """
     Edit an existing listing.
 
     Accepts partial updates. Only the owner can perform this action.
+    If media_urls is updated, any removed URLs will have their S3 objects deleted.
     """
     listing = await service.update_listing(
-        listing_id, current_user, update_data
+        listing_id, current_user, update_data, storage=storage
     )
     return await service.format_listing(listing)

@@ -1,12 +1,18 @@
 import uuid
 from typing import List, Optional
 
+from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlmodel import col, desc, func, or_, select
 
+from app.core.r2 import StorageService
 from app.listings.enums import ListingCategory, ListingStatus
-from app.listings.exceptions import ListingNotFound, ListingNotOwned
+from app.listings.exceptions import (
+    ListingNotFound,
+    ListingNotOwned,
+    MediaLimitExceeded,
+)
 from app.listings.models import Listing, Tag
 from app.listings.schemas import (
     FeedResponse,
@@ -16,6 +22,16 @@ from app.listings.schemas import (
 )
 from app.listings.utils import translate_text
 from app.users.models import User
+
+ALLOWED_MEDIA_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "application/pdf",
+}
+MAX_FILE_SIZE_MB = 1
+MAX_FILES_PER_LISTING = 5
 
 
 class ListingService:
@@ -87,10 +103,13 @@ class ListingService:
             description_en=d_en,
             description_de=d_de,
             description_hu=d_hu,
+            payment_notes=data.payment_notes,
             media_urls=data.media_urls,
             tags=final_tags,
             radius_km=data.radius_km,
-            attributes=data.attributes.model_dump(),
+            location_lat=data.location_lat,
+            location_lng=data.location_lng,
+            attributes=data.attributes.model_dump(exclude_none=True),
         )
 
         self.session.add(listing)
@@ -111,9 +130,12 @@ class ListingService:
             status=listing.status,
             title=listing.title_original,
             description=listing.description_original,
+            payment_notes=listing.payment_notes,
             media_urls=listing.media_urls,
             tags=listing.tags,
             radius_km=listing.radius_km,
+            location_lat=listing.location_lat,
+            location_lng=listing.location_lng,
             attributes=listing.attributes,
             created_at=listing.created_at,
         )
@@ -135,8 +157,12 @@ class ListingService:
         return listing
 
     async def update_listing(
-        self, listing_id: uuid.UUID, user: User, update_data: ListingUpdate
-    ) -> ListingPublic:
+        self,
+        listing_id: uuid.UUID,
+        user: User,
+        update_data: ListingUpdate,
+        storage: Optional[StorageService] = None,
+    ) -> Listing:
         listing = await self.get_listing(listing_id)
         if not listing:
             raise ListingNotFound()
@@ -159,6 +185,12 @@ class ListingService:
         if "description" in data:
             data["description_original"] = data.pop("description")
 
+        # Clean up removed media from S3
+        if "media_urls" in data and storage:
+            old_urls = listing.media_urls or []
+            new_urls = data["media_urls"] or []
+            await self._cleanup_removed_media(old_urls, new_urls, storage)
+
         listing.sqlmodel_update(data)
 
         self.session.add(listing)
@@ -166,6 +198,62 @@ class ListingService:
         await self.session.refresh(listing)
 
         return listing
+
+    async def upload_media(
+        self,
+        listing_id: uuid.UUID,
+        user: User,
+        files: List[UploadFile],
+        storage: StorageService,
+    ) -> Listing:
+        """Upload files to S3 and append keys to listing.media_urls."""
+        listing = await self.get_listing(listing_id)
+
+        if not (listing.owner.id == user.id or user.is_system_admin):
+            raise ListingNotOwned()
+
+        current_count = len(listing.media_urls or [])
+        if current_count + len(files) > MAX_FILES_PER_LISTING:
+            raise MediaLimitExceeded(
+                f"A listing can have at most {MAX_FILES_PER_LISTING} files. "
+                f"Currently has {current_count}, tried to add {len(files)}."
+            )
+
+        new_keys = []
+        for file in files:
+            if file.content_type not in ALLOWED_MEDIA_TYPES:
+                raise MediaLimitExceeded(
+                    f"File type '{file.content_type}' is not allowed. "
+                    f"Accepted: {', '.join(ALLOWED_MEDIA_TYPES)}"
+                )
+
+            size = await file.read()
+            if len(size) > MAX_FILE_SIZE_MB * 1024 * 1024:
+                raise MediaLimitExceeded(
+                    f"File '{file.filename}' exceeds the {MAX_FILE_SIZE_MB}MB limit."
+                )
+            await file.seek(0)
+
+            key = await storage.upload(file, folder=f"listings/{listing_id}")
+            new_keys.append(key)
+
+        listing.media_urls = (listing.media_urls or []) + new_keys
+        self.session.add(listing)
+        await self.session.commit()
+        await self.session.refresh(listing)
+
+        return listing
+
+    async def _cleanup_removed_media(
+        self,
+        old_urls: List[str],
+        new_urls: List[str],
+        storage: StorageService,
+    ) -> None:
+        """Delete S3 objects for media URLs that were removed from a listing."""
+        removed = set(old_urls) - set(new_urls)
+        for key in removed:
+            await storage.delete(key)
 
     async def delete_listing(
         self, listing_id: uuid.UUID, current_user: User
@@ -247,7 +335,6 @@ class ListingService:
             feed_items.append(
                 {
                     "id": listing.id,
-                    # "owner_id": listing.owner_id,
                     "owner_code": listing.owner.user_code,
                     "owner_name": listing.owner.full_name,
                     "owner_avatar": listing.owner.avatar_url,
@@ -255,9 +342,12 @@ class ListingService:
                     "status": listing.status,
                     "title": title,
                     "description": listing.description_original,  # TODO: Localize desc
+                    "payment_notes": listing.payment_notes,
                     "media_urls": listing.media_urls,
                     "tags": listing.tags,
                     "radius_km": listing.radius_km,
+                    "location_lat": listing.location_lat,
+                    "location_lng": listing.location_lng,
                     "attributes": listing.attributes,
                     "created_at": listing.created_at,
                 }
