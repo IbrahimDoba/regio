@@ -32,10 +32,12 @@ class AccountLimits(SQLModel):
         ..., description="Maximum allowed negative balance for Regio."
     )
     available_time: int = Field(
-        ..., description="How many more minutes can be spent before hitting the limit."
+        ...,
+        description="How many more minutes can be spent before hitting the limit.",
     )
     available_regio: Decimal = Field(
-        ..., description="How much more Regio can be spent before hitting the limit."
+        ...,
+        description="How much more Regio can be spent before hitting the limit.",
     )
 
 
@@ -95,19 +97,24 @@ class TransactionPublic(SQLModel):
         default=None, description="User provided note or system reference."
     )
     is_system_fee: bool = Field(
-        default=False, description="True if this was an automated system charge."
+        default=False,
+        description="True if this was an automated system charge.",
     )
 
 
 class TransactionMeta(SQLModel):
     page: int = Field(..., description="Current page number.")
     page_size: int = Field(..., description="Items per page.")
-    total_count: int = Field(..., description="Total number of transactions found.")
+    total_count: int = Field(
+        ..., description="Total number of transactions found."
+    )
     total_pages: int = Field(..., description="Total pages available.")
 
 
 class TransactionHistory(SQLModel):
-    data: List[TransactionPublic] = Field(..., description="List of transactions.")
+    data: List[TransactionPublic] = Field(
+        ..., description="List of transactions."
+    )
     meta: TransactionMeta = Field(..., description="Pagination metadata.")
 
 
@@ -139,12 +146,17 @@ class TransferRequest(SQLModel):
     receiver_code: str = Field(
         ..., description="User code of the recipient (e.g. B4444)."
     )
-    amount_time: int = Field(default=0, ge=0, description="Amount of minutes to send.")
+    amount_time: int = Field(
+        default=0, ge=0, description="Amount of minutes to send."
+    )
     amount_regio: Decimal = Field(
         default=Decimal("0.00"), ge=0, description="Amount of Regio to send."
     )
     reference: str = Field(
-        ..., min_length=1, max_length=140, description="Short note about the transfer."
+        ...,
+        min_length=1,
+        max_length=140,
+        description="Short note about the transfer.",
     )
 
     model_config = ConfigDict(
@@ -160,13 +172,18 @@ class TransferRequest(SQLModel):
 
 
 class PaymentRequestCreate(SQLModel):
-    debtor_code: str = Field(..., description="User code of the person who owes you.")
+    debtor_code: str = Field(
+        ..., description="User code of the person who owes you."
+    )
     amount_time: int = Field(default=0, ge=0, description="Minutes requested.")
     amount_regio: Decimal = Field(
         default=Decimal("0.00"), ge=0, description="Regio requested."
     )
     description: str = Field(
-        ..., min_length=1, max_length=140, description="Reason for the request."
+        ...,
+        min_length=1,
+        max_length=140,
+        description="Reason for the request.",
     )
 
     model_config = ConfigDict(

@@ -31,3 +31,19 @@ dev = [
     "ruff>=0.14.10",
     "tqdm>=4.67.1",
 ]
+
+[tool.pyright]
+include = ["app"]
+exclude = ["**/__pycache__", ".venv", "alembic"]
+venvPath = "."
+venv = ".venv"
+reportUnusedCallResult = false
+reportUnknownMemberType = false
+reportReturnType = "none"
+reportArgumentType = "none"
+reportOptionalMemberAccess = "none"
+reportMissingTypeStubs = "none"
+reportAttributeAccessIssue = "none"
+reportCallIssue = "none"
+reportIncompatibleVariableOverride = "none"
+reportOperatorIssue = "none"

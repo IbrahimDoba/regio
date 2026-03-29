@@ -9,7 +9,9 @@ from app.auth.config import auth_settings
 from app.core.config import settings
 
 
-def create_access_token(subject: str | Any, expires_delta: timedelta = None) -> str:
+def create_access_token(
+    subject: str | Any, expires_delta: timedelta = None
+) -> str:
     """
     Creates a short-lived JWT for API access.
     """
@@ -58,7 +60,9 @@ def decode_token(token: str) -> Dict[str, Any]:
     """
     Decodes a token to check claims. Verification handled by caller or library.
     """
-    return jwt.decode(token, settings.SECRET_KEY, algorithms=[auth_settings.ALGORITHM])
+    return jwt.decode(
+        token, settings.SECRET_KEY, algorithms=[auth_settings.ALGORITHM]
+    )
 
 
 def set_refresh_cookie(response: Response, refresh_token: str):

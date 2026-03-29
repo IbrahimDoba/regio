@@ -11,8 +11,12 @@ from app.users.enums import TrustLevel, VerificationStatus
 
 # DASHBOARD STATS
 class SystemStats(BaseModel):
-    total_users: int = Field(..., description="Total number of registered users.")
-    active_users: int = Field(..., description="Number of currently active users.")
+    total_users: int = Field(
+        ..., description="Total number of registered users."
+    )
+    active_users: int = Field(
+        ..., description="Number of currently active users."
+    )
     verification_pending_users: int = Field(
         ..., description="Users awaiting identity verification."
     )
@@ -22,7 +26,9 @@ class SystemStats(BaseModel):
     total_regio_volume: Decimal = Field(
         ..., description="Total volume of Regio currency in circulation."
     )
-    pending_disputes: int = Field(..., description="Count of unresolved disputes.")
+    pending_disputes: int = Field(
+        ..., description="Count of unresolved disputes."
+    )
 
 
 # USER MANAGEMENT
@@ -32,14 +38,24 @@ class UserAdminView(BaseModel):
     """
 
     # id: uuid.UUID
-    user_code: str = Field(..., description="Public user identifier (e.g. B4444).")
+    user_code: str = Field(
+        ..., description="Public user identifier (e.g. B4444)."
+    )
     email: str = Field(..., description="User's email address.")
-    full_name: str = Field(..., description="Concatenated first and last name.")
-    avatar_url: Optional[str] = Field(default=None, description="URL to profile image.")
+    full_name: str = Field(
+        ..., description="Concatenated first and last name."
+    )
+    avatar_url: Optional[str] = Field(
+        default=None, description="URL to profile image."
+    )
 
     role: str = Field(..., description="Role: 'User' or 'Admin'.")
-    trust_level: TrustLevel = Field(..., description="Current trust/reputation level.")
-    is_active: bool = Field(..., description="If False, user is banned/disabled.")
+    trust_level: TrustLevel = Field(
+        ..., description="Current trust/reputation level."
+    )
+    is_active: bool = Field(
+        ..., description="If False, user is banned/disabled."
+    )
     verification_status: VerificationStatus = Field(
         ..., description="Status of ID verification."
     )
@@ -52,7 +68,9 @@ class UserAdminView(BaseModel):
 
     # Financials
     balance_time: int = Field(..., description="Current Time Token balance.")
-    balance_regio: Decimal = Field(..., description="Current Regio Coin balance.")
+    balance_regio: Decimal = Field(
+        ..., description="Current Regio Coin balance."
+    )
 
     created_at: datetime = Field(..., description="Date of registration.")
 
@@ -77,15 +95,25 @@ class UserAdminView(BaseModel):
 
 
 class UserListResponse(BaseModel):
-    data: List[UserAdminView] = Field(..., description="List of rich user objects.")
-    count: int = Field(..., description="Total count of users matching the query.")
+    data: List[UserAdminView] = Field(
+        ..., description="List of rich user objects."
+    )
+    count: int = Field(
+        ..., description="Total count of users matching the query."
+    )
 
 
 # TAG MANAGEMENT
 class TagAdminUpdate(BaseModel):
-    name_de: Optional[str] = Field(default=None, description="German translation.")
-    name_en: Optional[str] = Field(default=None, description="English translation.")
-    name_hu: Optional[str] = Field(default=None, description="Hungarian translation.")
+    name_de: Optional[str] = Field(
+        default=None, description="German translation."
+    )
+    name_en: Optional[str] = Field(
+        default=None, description="English translation."
+    )
+    name_hu: Optional[str] = Field(
+        default=None, description="Hungarian translation."
+    )
     is_official: bool = Field(
         default=True, description="Set to True to approve a pending user tag."
     )
@@ -104,9 +132,15 @@ class TagAdminUpdate(BaseModel):
 class TagAdminView(BaseModel):
     id: int = Field(..., description="Unique Tag ID.")
     name: str = Field(..., description="Internal identifier/name.")
-    name_de: Optional[str] = Field(default=None, description="German translation.")
-    name_en: Optional[str] = Field(default=None, description="English translation.")
-    name_hu: Optional[str] = Field(default=None, description="Hungarian translation.")
+    name_de: Optional[str] = Field(
+        default=None, description="German translation."
+    )
+    name_en: Optional[str] = Field(
+        default=None, description="English translation."
+    )
+    name_hu: Optional[str] = Field(
+        default=None, description="Hungarian translation."
+    )
     is_official: bool = Field(
         ..., description="True if system approved, False if user suggested."
     )

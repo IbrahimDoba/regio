@@ -21,8 +21,12 @@ class ServiceAttributes(BaseModel):
 
 
 class ProductAttributes(BaseModel):
-    regio_amount: Optional[int] = Field(None, description="Price in Regio currency.")
-    time_amount: Optional[int] = Field(None, description="Price in Time currency.")
+    regio_amount: Optional[int] = Field(
+        None, description="Price in Regio currency."
+    )
+    time_amount: Optional[int] = Field(
+        None, description="Price in Time currency."
+    )
 
     @model_validator(mode="after")
     def check_price_exists(self) -> "ProductAttributes":
@@ -44,7 +48,9 @@ class RentalAttributes(BaseModel):
     @model_validator(mode="after")
     def check_fee_exists(self) -> "RentalAttributes":
         if self.fee_regio is None and self.fee_time is None:
-            raise ValueError("Rental must have a fee (either fee_regio or fee_time)")
+            raise ValueError(
+                "Rental must have a fee (either fee_regio or fee_time)"
+            )
         return self
 
 
@@ -88,7 +94,8 @@ class EventAttributes(BaseModel):
 
 class TagCreate(BaseModel):
     name: str = Field(
-        ..., description="The display name/text of the tag (e.g. 'plumbing', 'vegan')."
+        ...,
+        description="The display name/text of the tag (e.g. 'plumbing', 'vegan').",
     )
 
 
@@ -110,17 +117,22 @@ class ListingCreateBase(BaseModel):
     """Common fields shared by all listing types."""
 
     title: str = Field(
-        min_length=5, max_length=100, description="A concise headline for the listing."
+        min_length=5,
+        max_length=100,
+        description="A concise headline for the listing.",
     )
     description: str = Field(
-        min_length=20, description="Detailed explanation of the offering or request."
+        min_length=20,
+        description="Detailed explanation of the offering or request.",
     )
 
     media_urls: List[str] = Field(
-        default=[], description="List of image/PDF URLs associated with the listing."
+        default=[],
+        description="List of image/PDF URLs associated with the listing.",
     )
     tags: List[str] = Field(
-        default=[], description="List of tag strings to categorize the listing."
+        default=[],
+        description="List of tag strings to categorize the listing.",
     )
     radius_km: int = Field(
         default=10,
@@ -135,7 +147,9 @@ class CreateServiceListing(ListingCreateBase):
     category: Literal[ListingCategory.OFFER_SERVICE] = Field(
         ListingCategory.OFFER_SERVICE, description="Category: OFFER_SERVICE"
     )
-    attributes: ServiceAttributes = Field(..., description="Time factor settings.")
+    attributes: ServiceAttributes = Field(
+        ..., description="Time factor settings."
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -199,7 +213,9 @@ class CreateRentalListing(ListingCreateBase):
     category: Literal[ListingCategory.OFFER_RENTAL] = Field(
         ListingCategory.OFFER_RENTAL, description="Category: OFFER_RENTAL"
     )
-    attributes: RentalAttributes = Field(..., description="Rental fee structure.")
+    attributes: RentalAttributes = Field(
+        ..., description="Rental fee structure."
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -325,20 +341,26 @@ class ListingUpdate(BaseModel):
 
 class ListingPublic(BaseModel):
     id: uuid.UUID = Field(..., description="Unique ID of the listing.")
-    owner_code: str = Field(..., description="Code of the user who owns this listing.")
+    owner_code: str = Field(
+        ..., description="Code of the user who owns this listing."
+    )
     owner_name: str = Field(..., description="Display name of the owner.")
     owner_avatar: Optional[str] = Field(
         default=None, description="URL to the owner's avatar."
     )
 
-    category: ListingCategory = Field(..., description="Category of the listing.")
+    category: ListingCategory = Field(
+        ..., description="Category of the listing."
+    )
     status: ListingStatus = Field(
         ..., description="Current status (ACTIVE, SOLD, DELETED)."
     )
 
     # We return the localized version based on user pref
     title: str = Field(..., description="Localized title of the listing.")
-    description: str = Field(..., description="Localized description of the listing.")
+    description: str = Field(
+        ..., description="Localized description of the listing."
+    )
 
     media_urls: List[str] = Field(..., description="List of image URLs.")
     tags: List[str] = Field(..., description="List of associated tags.")

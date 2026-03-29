@@ -15,7 +15,9 @@ class Account(SQLModel, table=True):
     __tablename__ = "accounts"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    user_id: uuid.UUID = Field(foreign_key="users.id", index=True, nullable=False)
+    user_id: uuid.UUID = Field(
+        foreign_key="users.id", index=True, nullable=False
+    )
 
     type: Currency = Field(index=True)
 
@@ -103,7 +105,9 @@ class PaymentRequest(SQLModel, table=True):
     # ORM Relationships
     creditor: "User" = Relationship(
         back_populates="sent_requests",
-        sa_relationship_kwargs={"foreign_keys": "[PaymentRequest.creditor_id]"},
+        sa_relationship_kwargs={
+            "foreign_keys": "[PaymentRequest.creditor_id]"
+        },
     )
     debtor: "User" = Relationship(
         back_populates="received_requests",

@@ -15,7 +15,8 @@ class Token(SQLModel):
         default="bearer", description="Token type, currently 'bearer'."
     )
     refresh_token: Optional[str] = Field(
-        default=None, description="JWT refresh token string (stored in cookie)."
+        default=None,
+        description="JWT refresh token string (stored in cookie).",
     )
     expires_in: int = Field(..., description="Expiration time in seconds.")
 
@@ -27,7 +28,9 @@ class TokenResponse(SQLModel):
     """
 
     access_token: str = Field(..., description="The JWT access token.")
-    token_type: str = Field(default="bearer", description="The token type (Bearer).")
+    token_type: str = Field(
+        default="bearer", description="The token type (Bearer)."
+    )
     expires_in: int = Field(..., description="Expiration time in seconds.")
 
     model_config = ConfigDict(

@@ -37,9 +37,9 @@ class Settings(RegioBaseSettings):
     @property
     def all_cors_origins(self) -> list[str]:
         # return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
-        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
-            self.FRONTEND_HOST
-        ]
+        return [
+            str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS
+        ] + [self.FRONTEND_HOST]
 
     PROJECT_NAME: str
     POSTGRES_SERVER: str

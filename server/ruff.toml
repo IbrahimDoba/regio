@@ -30,7 +30,7 @@ exclude = [
 ]
 
 # Set the maximum line length and indent width
-line-length = 88
+line-length = 79
 indent-width = 4
 
 # Target Python 3.13

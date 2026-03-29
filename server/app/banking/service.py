@@ -45,14 +45,20 @@ class BankingService:
 
     # HELPERS
 
-    def _validate_transaction_amounts(self, amount_time: int, amount_regio: Decimal):
+    def _validate_transaction_amounts(
+        self, amount_time: int, amount_regio: Decimal
+    ):
         """Ensures positive amounts and basic sanity checks."""
         if amount_time < 0 or amount_regio < 0:
             raise InvalidTransactionAmount("Negative amounts are not allowed.")
         if amount_time == 0 and amount_regio == 0:
-            raise InvalidTransactionAmount("Transaction must have a value > 0.")
+            raise InvalidTransactionAmount(
+                "Transaction must have a value > 0."
+            )
 
-    def _calculate_new_trust_level(self, current_total_earned: int) -> TrustLevel:
+    def _calculate_new_trust_level(
+        self, current_total_earned: int
+    ) -> TrustLevel:
         for level, threshold in TRUST_UPGRADE_THRESHOLDS:
             if current_total_earned >= threshold:
                 return level
@@ -135,24 +141,34 @@ class BankingService:
         receiver = await self._get_user_by_code_or_fail(receiver_code)
 
         # Load Accounts
-        sender_time_acc = await self._get_account_or_fail(sender.id, Currency.TIME)
-        sender_regio_acc = await self._get_account_or_fail(sender.id, Currency.REGIO)
+        sender_time_acc = await self._get_account_or_fail(
+            sender.id, Currency.TIME
+        )
+        sender_regio_acc = await self._get_account_or_fail(
+            sender.id, Currency.REGIO
+        )
 
-        receiver_time_acc = await self._get_account_or_fail(receiver.id, Currency.TIME)
+        receiver_time_acc = await self._get_account_or_fail(
+            receiver.id, Currency.TIME
+        )
         receiver_regio_acc = await self._get_account_or_fail(
             receiver.id, Currency.REGIO
         )
 
         # Limit Checks (VERY IMPORTANT)
         if not skip_limit_check:
-            limits = TRUST_LIMITS.get(sender.trust_level, TRUST_LIMITS[TrustLevel.T1])
+            limits = TRUST_LIMITS.get(
+                sender.trust_level, TRUST_LIMITS[TrustLevel.T1]
+            )
             limit_time_min, limit_regio_min = limits
 
             potential_time_bal = sender_time_acc.balance_time - amount_time
             potential_regio_bal = sender_regio_acc.balance_regio - amount_regio
 
             if potential_time_bal < limit_time_min:
-                raise InsufficientFunds("TIME", potential_time_bal, limit_time_min)
+                raise InsufficientFunds(
+                    "TIME", potential_time_bal, limit_time_min
+                )
 
             if potential_regio_bal < limit_regio_min:
                 raise InsufficientFunds(
@@ -259,7 +275,11 @@ class BankingService:
         )
 
     async def get_transaction_history(
-        self, user: User, page: int = 1, page_size: int = 50, days: Optional[int] = None
+        self,
+        user: User,
+        page: int = 1,
+        page_size: int = 50,
+        days: Optional[int] = None,
     ) -> TransactionHistory:
         """
         Returns transaction history transformed for the specific viewer (user).
@@ -268,7 +288,10 @@ class BankingService:
 
         # Base filter condition
         conditions = [
-            or_(Transaction.sender_id == user.id, Transaction.receiver_id == user.id)
+            or_(
+                Transaction.sender_id == user.id,
+                Transaction.receiver_id == user.id,
+            )
         ]
 
         # Date filter
@@ -287,7 +310,8 @@ class BankingService:
             select(Transaction)
             .where(*conditions)
             .options(
-                selectinload(Transaction.sender), selectinload(Transaction.receiver)
+                selectinload(Transaction.sender),
+                selectinload(Transaction.receiver),
             )
             .order_by(Transaction.created_at.desc())
             .offset(skip)
@@ -332,7 +356,9 @@ class BankingService:
         time_acc = await self._get_account_or_fail(user.id, Currency.TIME)
         regio_acc = await self._get_account_or_fail(user.id, Currency.REGIO)
 
-        limits = TRUST_LIMITS.get(user.trust_level, TRUST_LIMITS[TrustLevel.T1])
+        limits = TRUST_LIMITS.get(
+            user.trust_level, TRUST_LIMITS[TrustLevel.T1]
+        )
         limit_time, limit_regio = limits
 
         return {
@@ -435,7 +461,9 @@ class BankingService:
         requests = (await self.session.execute(stmt)).scalars().all()
 
         # Map to schema
-        results = await self._map_payment_request_to_schema(requests, current_user)
+        results = await self._map_payment_request_to_schema(
+            requests, current_user
+        )
         return results
 
     async def get_outgoing_payment_requests(
@@ -448,13 +476,17 @@ class BankingService:
                 PaymentRequest.creditor_id == current_user.id,
                 PaymentRequest.status == PaymentStatus.PENDING,
             )
-            .options(selectinload(PaymentRequest.debtor))  # Load debtor for UI display
+            .options(
+                selectinload(PaymentRequest.debtor)
+            )  # Load debtor for UI display
             .order_by(PaymentRequest.created_at.desc())
         )
         requests = (await self.session.execute(stmt)).scalars().all()
 
         # Map to schema
-        results = await self._map_payment_request_to_schema(requests, current_user)
+        results = await self._map_payment_request_to_schema(
+            requests, current_user
+        )
         return results
 
     async def cancel_payment_request(
@@ -480,7 +512,10 @@ class BankingService:
         return req
 
     async def process_payment_request(
-        self, request_id: uuid.UUID, debtor_id: Optional[uuid.UUID], action: str
+        self,
+        request_id: uuid.UUID,
+        debtor_id: Optional[uuid.UUID],
+        action: str,
     ):
         stmt = select(PaymentRequest).where(PaymentRequest.id == request_id)
         req = (await self.session.execute(stmt)).scalar_one_or_none()
@@ -528,11 +563,15 @@ class BankingService:
     # CRON / SYSTEM JOBS
     # (Kept mostly same, just update to use new transfer_funds signature if needed)
     async def collect_monthly_fees(self):
-        stmt_sys = select(User).where(User.user_code == settings.SYSTEM_SINK_CODE)
+        stmt_sys = select(User).where(
+            User.user_code == settings.SYSTEM_SINK_CODE
+        )
         if not (await self.session.execute(stmt_sys)).scalar_one_or_none():
             raise Exception("System Sink User not found")
 
-        stmt_users = select(User).where(User.is_active, User.is_system_admin.is_(False))
+        stmt_users = select(User).where(
+            User.is_active, User.is_system_admin.is_(False)
+        )
         users = (await self.session.execute(stmt_users)).scalars().all()
 
         results = []
@@ -549,7 +588,11 @@ class BankingService:
                 results.append({"user": user.user_code, "status": "SUCCESS"})
             except Exception as e:
                 results.append(
-                    {"user": user.user_code, "status": "FAILED", "error": str(e)}
+                    {
+                        "user": user.user_code,
+                        "status": "FAILED",
+                        "error": str(e),
+                    }
                 )
         return results
 
@@ -563,7 +606,9 @@ class BankingService:
                 User.is_system_admin.is_(False),
             )
         )
-        hoarding_accounts = (await self.session.execute(statement)).scalars().all()
+        hoarding_accounts = (
+            (await self.session.execute(statement)).scalars().all()
+        )
 
         now = datetime.utcnow()
         processed_count = 0
@@ -580,7 +625,9 @@ class BankingService:
 
             taxable_amount = acc.balance_time - DEMURRAGE_THRESHOLD_MINUTES
             daily_rate = DEMURRAGE_RATE_ANNUAL / 365
-            demurrage_minutes = int(round(taxable_amount * daily_rate * days_elapsed))
+            demurrage_minutes = int(
+                round(taxable_amount * daily_rate * days_elapsed)
+            )
 
             if demurrage_minutes > 0:
                 try:
