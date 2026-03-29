@@ -20,7 +20,6 @@ from app.listings.schemas import (
     ListingPublic,
     ListingUpdate,
 )
-from app.listings.utils import translate_text
 from app.users.models import User
 
 ALLOWED_MEDIA_TYPES = {
@@ -81,28 +80,12 @@ class ListingService:
         # Process Tags
         final_tags = await self._process_tags(data.tags)
 
-        # Trigger Translation (Mocked Async)
-        # In real app, maybe background task
-        t_en = await translate_text(data.title, "en")
-        t_de = await translate_text(data.title, "de")
-        t_hu = await translate_text(data.title, "hu")
-
-        d_en = await translate_text(data.description, "en")
-        d_de = await translate_text(data.description, "de")
-        d_hu = await translate_text(data.description, "hu")
-
-        # Create Object
+        # Create listing — translations are handled async via BackgroundTasks
         listing = Listing(
             owner_id=user.id,
             category=data.category,
             title_original=data.title,
             description_original=data.description,
-            title_en=t_en,
-            title_de=t_de,
-            title_hu=t_hu,
-            description_en=d_en,
-            description_de=d_de,
-            description_hu=d_hu,
             payment_notes=data.payment_notes,
             media_urls=data.media_urls,
             tags=final_tags,

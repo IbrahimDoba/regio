@@ -1,9 +1,10 @@
 import uuid
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Query, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Query, UploadFile, status
 
 from app.core.r2 import StorageServiceDep
+from app.core.translate import TranslateService
 from app.listings.dependencies import ListingServiceDep
 from app.listings.enums import ListingCategory
 from app.listings.schemas import (
@@ -35,7 +36,10 @@ router = APIRouter()
     },
 )
 async def create_listing(
-    data: ListingCreate, current_user: CurrentUser, service: ListingServiceDep
+    data: ListingCreate,
+    current_user: CurrentUser,
+    service: ListingServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> Any:
     """
     Create a new listing.
@@ -43,6 +47,15 @@ async def create_listing(
     Validates the 'attributes' field dynamically based on the provided 'category'.
     """
     listing = await service.create_listing(current_user, data)
+
+    background_tasks.add_task(
+        TranslateService.translate_listing,
+        listing_id=listing.id,
+        title=data.title,
+        description=data.description,
+        origin_language=current_user.language,
+    )
+
     return await service.format_listing(listing)
 
 
@@ -213,6 +226,7 @@ async def update_listing(
     current_user: CurrentUser,
     service: ListingServiceDep,
     storage: StorageServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> Any:
     """
     Edit an existing listing.
@@ -223,4 +237,15 @@ async def update_listing(
     listing = await service.update_listing(
         listing_id, current_user, update_data, storage=storage
     )
+
+    # Re-translate only if title or description changed
+    if update_data.title is not None or update_data.description is not None:
+        background_tasks.add_task(
+            TranslateService.translate_listing,
+            listing_id=listing.id,
+            title=listing.title_original,
+            description=listing.description_original,
+            origin_language=current_user.language,
+        )
+
     return await service.format_listing(listing)
