@@ -1,7 +1,14 @@
 import uuid
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Query,
+    status,
+)
 
 from app.admin.dependencies import AdminServiceDep
 from app.admin.schemas import (
@@ -14,6 +21,8 @@ from app.admin.schemas import (
 )
 from app.banking.dependencies import get_banking_service
 from app.banking.service import BankingService
+from app.email.schemas import VerificationStatusEmailData
+from app.email.tasks import send_verification_status_email_task
 from app.users.dependencies import (
     CurrentUser,
     get_current_active_system_admin,
@@ -94,17 +103,33 @@ async def update_user_details(
     user_code: str,
     user_in: UserAdminUpdate,
     current_admin: CurrentUser,
+    background_tasks: BackgroundTasks,
     user_service: UserService = Depends(get_user_service),
 ) -> Any:
     """
     Force update a user's profile.
 
     Allows Admins to correct Real Names (immutable for users) or manually change
-    Trust Levels and Verification Status.
+    Trust Levels and Verification Status. If verification status is changed, the
+    user is notified by email.
     """
-    return await user_service.admin_update_user(
+    db_user = await user_service.admin_update_user(
         user_code, user_in, current_admin
     )
+
+    if user_in.verification_status is not None:
+        notifiable = {"VERIFIED", "REJECTED", "ACTION_REQUIRED"}
+        if user_in.verification_status in notifiable:
+            background_tasks.add_task(
+                send_verification_status_email_task,
+                VerificationStatusEmailData(
+                    user_first_name=db_user.first_name,
+                    user_email=db_user.email,
+                    new_status=user_in.verification_status,
+                ),
+            )
+
+    return db_user
 
 
 @router.patch(
@@ -120,12 +145,28 @@ async def update_user_details(
     operation_id="verify_user",
 )
 async def verify_user(
-    user_code: str, current_admin: CurrentUser, admin_service: AdminServiceDep
+    user_code: str,
+    current_admin: CurrentUser,
+    admin_service: AdminServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> Any:
     """
     Approve a user's status and set to VERIFIED.
+
+    Sends a congratulatory verification email to the user.
     """
-    return await admin_service.verify_user(user_code, current_admin)
+    db_user = await admin_service.verify_user(user_code, current_admin)
+
+    background_tasks.add_task(
+        send_verification_status_email_task,
+        VerificationStatusEmailData(
+            user_first_name=db_user.first_name,
+            user_email=db_user.email,
+            new_status="VERIFIED",
+        ),
+    )
+
+    return db_user
 
 
 @router.patch(

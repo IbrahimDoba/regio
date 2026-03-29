@@ -28,6 +28,8 @@ from app.banking.routes import router as banking_router
 from app.broadcast.exceptions import BroadcastNotFound
 from app.broadcast.handlers import broadcast_not_found_handler
 from app.broadcast.routes import router as broadcast_router
+from app.email.exceptions import EmailBaseException
+from app.email.handlers import email_error_handler
 from app.chat.routes import router as chat_router
 from app.core.config import settings
 from app.core.database import init_db, test_db_connection
@@ -131,6 +133,9 @@ app.add_exception_handler(BankingConflict, banking_conflict_handler)  # type: ig
 
 # Broadcast handlers
 app.add_exception_handler(BroadcastNotFound, broadcast_not_found_handler)  # type: ignore
+
+# Email handlers
+app.add_exception_handler(EmailBaseException, email_error_handler)  # type: ignore
 
 # Register the global catch-all last
 app.add_exception_handler(Exception, global_exception_handler)

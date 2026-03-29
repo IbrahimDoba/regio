@@ -79,6 +79,22 @@ class BroadcastService:
             created_at=broadcast.created_at,
         )
 
+    async def get_email_digest_recipients(
+        self, target_trust_levels: list[str] | None = None
+    ) -> list[tuple[str, str]]:
+        """
+        Return (first_name, email) pairs for users who have email digest
+        notifications enabled, optionally filtered by trust level.
+        """
+        stmt = select(User.first_name, User.email).where(
+            User.notif_email_digest.is_(True)
+        )
+        if target_trust_levels and len(target_trust_levels) > 0:
+            stmt = stmt.where(User.trust_level.in_(target_trust_levels))
+
+        result = await self.session.execute(stmt)
+        return result.all()
+
     async def get_user_inbox(
         self, user_id: UUID, limit: int = 50, offset: int = 0
     ) -> List[InboxItemResponse]:
