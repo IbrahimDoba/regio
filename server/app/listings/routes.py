@@ -56,7 +56,7 @@ async def create_listing(
         origin_language=current_user.language,
     )
 
-    return await service.format_listing(listing)
+    return await service.format_listing(listing, current_user.language)
 
 
 @router.get(
@@ -83,6 +83,9 @@ async def get_feed(
     offset: int = Query(
         0, ge=0, description="Pagination offset (skip N items)."
     ),
+    lang: str = Query(
+        "en", description="Language for localized content (en, de, hu)."
+    ),
 ) -> Any:
     """
     Main Feed.
@@ -90,7 +93,8 @@ async def get_feed(
     Supports filtering by multiple categories, tags, text search, and pagination.
     """
     return await service.get_feed(
-        categories=categories, search_query=q, tags=tags, offset=offset
+        categories=categories, search_query=q, tags=tags, offset=offset,
+        user_lang=lang,
     )
 
 
@@ -125,7 +129,11 @@ async def autocomplete_tags(q: str, service: ListingServiceDep) -> Any:
     },
 )
 async def get_listing_by_id(
-    service: ListingServiceDep, listing_id: uuid.UUID
+    service: ListingServiceDep,
+    listing_id: uuid.UUID,
+    lang: str = Query(
+        "en", description="Language for localized content (en, de, hu)."
+    ),
 ) -> Any:
     """
     Get a listing by its ID.
@@ -133,7 +141,7 @@ async def get_listing_by_id(
     Fetches the full details of a listing for display on its standalone page.
     """
     listing = await service.get_listing(listing_id)
-    return await service.format_listing(listing)
+    return await service.format_listing(listing, lang)
 
 
 @router.post(
@@ -170,7 +178,7 @@ async def upload_listing_media(
     listing = await service.upload_media(
         listing_id, current_user, files, storage
     )
-    return await service.format_listing(listing)
+    return await service.format_listing(listing, current_user.language)
 
 
 @router.delete(
@@ -248,4 +256,4 @@ async def update_listing(
             origin_language=current_user.language,
         )
 
-    return await service.format_listing(listing)
+    return await service.format_listing(listing, current_user.language)
