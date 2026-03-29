@@ -4,13 +4,82 @@ import React from "react";
 import { FaEnvelope } from "react-icons/fa6";
 import { ListingPublic } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
-import { getCategoryDetails, formatPrice } from "@/lib/feed-helpers";
+import { getCategoryDetails, formatPrice, ListingAttributes } from "@/lib/feed-helpers";
 
 interface PreviewModalProps {
   listing: ListingPublic | null;
   onClose: () => void;
   onContact?: (listing: ListingPublic) => void;
   isContacting?: boolean;
+}
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex justify-between items-start py-[8px] border-b border-[#f0f0f0] text-[13px]">
+      <span className="text-[#888] font-[600] shrink-0 mr-4">{label}</span>
+      <span className="text-[#333] font-[500] text-right">{value}</span>
+    </div>
+  );
+}
+
+function AttributeDetails({ listing }: { listing: ListingPublic }) {
+  const attrs = listing.attributes as ListingAttributes;
+  if (!attrs) return null;
+
+  const rows: React.ReactNode[] = [];
+
+  switch (listing.category) {
+    case "OFFER_SERVICE":
+      rows.push(<Row key="tf" label="Time Factor" value={`${attrs.time_factor ?? 1.0}x — final cost = hours worked × ${attrs.time_factor ?? 1.0}`} />);
+      break;
+
+    case "SELL_PRODUCT":
+      if (attrs.time_amount) rows.push(<Row key="ta" label="Price (Time)" value={`${attrs.time_amount} min`} />);
+      if (attrs.regio_amount) rows.push(<Row key="ra" label="Price (Garas)" value={`${attrs.regio_amount} G`} />);
+      if (attrs.condition) rows.push(<Row key="cond" label="Condition" value={attrs.condition} />);
+      if (attrs.stock) rows.push(<Row key="stock" label="Stock" value={attrs.stock} />);
+      break;
+
+    case "OFFER_RENTAL":
+      if (attrs.fee_time) rows.push(<Row key="ft" label="Handling Fee" value={`${attrs.fee_time} min`} />);
+      if (attrs.fee_regio) rows.push(<Row key="fr" label="Usage Fee (wear & tear)" value={`${attrs.fee_regio} G`} />);
+      if (attrs.max_duration) rows.push(<Row key="md" label="Max Duration" value={attrs.max_duration} />);
+      if (attrs.deposit_required != null) rows.push(<Row key="dep" label="Deposit Required" value={attrs.deposit_required ? "Yes" : "No"} />);
+      break;
+
+    case "RIDE_SHARE":
+      if (attrs.start) rows.push(<Row key="from" label="From" value={attrs.start} />);
+      if (attrs.destination) rows.push(<Row key="to" label="To" value={attrs.destination} />);
+      if (attrs.departure_datetime) rows.push(<Row key="dep" label="Departure" value={new Date(attrs.departure_datetime).toLocaleString()} />);
+      if (attrs.seats) rows.push(<Row key="seats" label="Seats Available" value={attrs.seats} />);
+      if (attrs.price_time) rows.push(<Row key="pt" label="Price / Seat (Time)" value={`${attrs.price_time} min`} />);
+      if (attrs.price_garas) rows.push(<Row key="pg" label="Price / Seat (Garas)" value={`${attrs.price_garas} G`} />);
+      break;
+
+    case "EVENT_WORKSHOP":
+      if (attrs.event_start_date) rows.push(<Row key="es" label="Starts" value={new Date(attrs.event_start_date).toLocaleString()} />);
+      if (attrs.event_end_date) rows.push(<Row key="ee" label="Ends" value={new Date(attrs.event_end_date).toLocaleString()} />);
+      if (attrs.location) rows.push(<Row key="loc" label="Location" value={attrs.location} />);
+      if (attrs.max_participants) rows.push(<Row key="mp" label="Max Participants" value={attrs.max_participants} />);
+      if (attrs.price_time) rows.push(<Row key="pt" label="Entry Fee (Time)" value={`${attrs.price_time} min`} />);
+      if (attrs.price_garas) rows.push(<Row key="pg" label="Material Fee (Garas)" value={`${attrs.price_garas} G`} />);
+      break;
+
+    case "SEARCH_SERVICE":
+    case "SEARCH_PRODUCT":
+      if (attrs.deadline) rows.push(<Row key="dl" label="Deadline" value={new Date(attrs.deadline).toLocaleDateString()} />);
+      break;
+  }
+
+  if (attrs.price_notes) rows.push(<Row key="pn" label="Price Notes" value={attrs.price_notes} />);
+
+  if (rows.length === 0) return null;
+
+  return (
+    <div className="mb-[20px] bg-[#fafafa] rounded-[6px] p-[10px] border border-[#eee]">
+      {rows}
+    </div>
+  );
 }
 
 export default function PreviewModal({ listing, onClose, onContact, isContacting }: PreviewModalProps) {
@@ -88,6 +157,9 @@ export default function PreviewModal({ listing, onClose, onContact, isContacting
           <div className="text-[15px] leading-[1.6] text-[#333] mb-[20px] whitespace-pre-wrap">
             {listing.description}
           </div>
+
+          {/* Category-specific attributes */}
+          <AttributeDetails listing={listing} />
         </div>
 
         {/* Footer */}

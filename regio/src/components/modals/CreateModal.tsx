@@ -19,28 +19,45 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
+  // Global — all categories
+  const [priceNotes, setPriceNotes] = useState("");
+
   // OFFER_SERVICE
   const [timeFactor, setTimeFactor] = useState(1.0);
 
   // SELL_PRODUCT
-  const [productGaras, setProductGaras] = useState("");
   const [productTime, setProductTime] = useState("");
+  const [productGaras, setProductGaras] = useState("");
+  const [productCondition, setProductCondition] = useState<"NEW" | "USED">("NEW");
+  const [productStock, setProductStock] = useState("");
 
   // OFFER_RENTAL
-  const [rentalFeeGaras, setRentalFeeGaras] = useState("");
   const [rentalFeeTime, setRentalFeeTime] = useState("");
+  const [rentalFeeGaras, setRentalFeeGaras] = useState("");
+  const [rentalMaxDuration, setRentalMaxDuration] = useState("");
+  const [rentalDeposit, setRentalDeposit] = useState(false);
 
   // RIDE_SHARE
   const [rideStart, setRideStart] = useState("");
   const [rideDestination, setRideDestination] = useState("");
+  const [rideDeparture, setRideDeparture] = useState("");
+  const [rideSeats, setRideSeats] = useState("");
+  const [ridePriceTime, setRidePriceTime] = useState("");
+  const [ridePriceGaras, setRidePriceGaras] = useState("");
 
   // EVENT_WORKSHOP
   const [eventStart, setEventStart] = useState("");
   const [eventEnd, setEventEnd] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
+  const [eventMaxParticipants, setEventMaxParticipants] = useState("");
+  const [eventPriceTime, setEventPriceTime] = useState("");
+  const [eventPriceGaras, setEventPriceGaras] = useState("");
 
-  // SEARCH_SERVICE / SEARCH_PRODUCT (optional budget)
-  const [maxBudgetTime, setMaxBudgetTime] = useState("");
-  const [maxBudgetGaras, setMaxBudgetGaras] = useState("");
+  // SEARCH_SERVICE
+  const [searchServiceDeadline, setSearchServiceDeadline] = useState("");
+
+  // SEARCH_PRODUCT
+  const [searchProductDeadline, setSearchProductDeadline] = useState("");
 
   const createMutation = useCreateListing();
 
@@ -62,32 +79,55 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   };
 
   const buildAttributes = (): Record<string, unknown> => {
+    const notes = priceNotes.trim() || undefined;
     switch (category) {
       case "OFFER_SERVICE":
-        return { time_factor: timeFactor };
+        return { time_factor: timeFactor, price_notes: notes };
       case "SEARCH_SERVICE":
-        return maxBudgetTime ? { max_budget_time: parseInt(maxBudgetTime) } : {};
+        return {
+          deadline: searchServiceDeadline || undefined,
+          price_notes: notes,
+        };
       case "SELL_PRODUCT":
         return {
+          time_amount: parseInt(productTime),
           regio_amount: productGaras ? parseInt(productGaras) : undefined,
-          time_amount: productTime ? parseInt(productTime) : undefined,
+          condition: productCondition,
+          stock: productStock ? parseInt(productStock) : undefined,
+          price_notes: notes,
         };
       case "SEARCH_PRODUCT":
         return {
-          max_budget_regio: maxBudgetGaras ? parseInt(maxBudgetGaras) : undefined,
-          max_budget_time: maxBudgetTime ? parseInt(maxBudgetTime) : undefined,
+          deadline: searchProductDeadline || undefined,
+          price_notes: notes,
         };
       case "OFFER_RENTAL":
         return {
-          fee_regio: rentalFeeGaras ? parseInt(rentalFeeGaras) : undefined,
           fee_time: rentalFeeTime ? parseInt(rentalFeeTime) : undefined,
+          fee_regio: rentalFeeGaras ? parseInt(rentalFeeGaras) : undefined,
+          max_duration: rentalMaxDuration || undefined,
+          deposit_required: rentalDeposit || undefined,
+          price_notes: notes,
         };
       case "RIDE_SHARE":
-        return { start: rideStart, destination: rideDestination };
+        return {
+          start: rideStart,
+          destination: rideDestination,
+          departure_datetime: rideDeparture || undefined,
+          seats: rideSeats ? parseInt(rideSeats) : undefined,
+          price_time: ridePriceTime ? parseInt(ridePriceTime) : undefined,
+          price_garas: ridePriceGaras ? parseInt(ridePriceGaras) : undefined,
+          price_notes: notes,
+        };
       case "EVENT_WORKSHOP":
         return {
           event_start_date: eventStart,
           event_end_date: eventEnd,
+          location: eventLocation || undefined,
+          max_participants: eventMaxParticipants ? parseInt(eventMaxParticipants) : undefined,
+          price_time: eventPriceTime ? parseInt(eventPriceTime) : undefined,
+          price_garas: eventPriceGaras ? parseInt(eventPriceGaras) : undefined,
+          price_notes: notes,
         };
       default:
         return {};
@@ -99,9 +139,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     if (!description || description.length < 20) return false;
     switch (category) {
       case "SELL_PRODUCT":
-        return !!(productGaras || productTime);
+        return !!(productTime && parseInt(productTime) > 0);
       case "OFFER_RENTAL":
-        return !!(rentalFeeGaras || rentalFeeTime);
+        return !!(rentalFeeTime || rentalFeeGaras);
       case "RIDE_SHARE":
         return rideStart.length >= 2 && rideDestination.length >= 2;
       case "EVENT_WORKSHOP":
@@ -128,6 +168,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
         setTitle("");
         setDescription("");
         setTags([]);
+        setPriceNotes("");
       },
     });
   };
@@ -201,9 +242,12 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
           {/* ── Category-specific fields ── */}
 
+          {/* OFFER_SERVICE */}
           {category === "OFFER_SERVICE" && (
             <div className={fieldClass}>
-              <label className={labelClass}>Time Factor</label>
+              <label className={labelClass}>
+                Time Factor <span className="text-[#999] font-normal">(0.25 – 3.0)</span>
+              </label>
               <input
                 type="range"
                 min="0.25"
@@ -214,153 +258,307 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 className="w-full cursor-pointer"
               />
               <div className="text-center text-[12px] font-bold text-[#666] mt-1">
-                {timeFactor}x
+                {timeFactor}x — final cost = hours worked × {timeFactor}
               </div>
             </div>
           )}
 
+          {/* SEARCH_SERVICE */}
           {category === "SEARCH_SERVICE" && (
             <div className={fieldClass}>
-              <label className={labelClass}>Max Budget (minutes, optional)</label>
+              <label className={labelClass}>Deadline (optional)</label>
               <input
-                type="number"
-                min="0"
-                value={maxBudgetTime}
-                onChange={(e) => setMaxBudgetTime(e.target.value)}
-                placeholder="e.g. 120"
+                type="date"
+                value={searchServiceDeadline}
+                onChange={(e) => setSearchServiceDeadline(e.target.value)}
                 className={inputClass}
               />
             </div>
           )}
 
+          {/* SELL_PRODUCT */}
           {category === "SELL_PRODUCT" && (
-            <div className={cn(fieldClass, "flex gap-4")}>
-              <div className="flex-1">
-                <label className={labelClass}>Price (Garas)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={productGaras}
-                  onChange={(e) => setProductGaras(e.target.value)}
-                  placeholder="0"
-                  className={inputClass}
-                />
+            <>
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={labelClass}>
+                    Price in Time (min) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={productTime}
+                    onChange={(e) => setProductTime(e.target.value)}
+                    placeholder="e.g. 30"
+                    className={inputClass}
+                  />
+                  <div className="text-[11px] text-[#888] mt-1">Required. Products must include labor.</div>
+                </div>
+                <div className="flex-1">
+                  <label className={labelClass}>Price in Garas (optional)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={productGaras}
+                    onChange={(e) => setProductGaras(e.target.value)}
+                    placeholder="e.g. 5"
+                    className={inputClass}
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <label className={labelClass}>Price (Minutes)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={productTime}
-                  onChange={(e) => setProductTime(e.target.value)}
-                  placeholder="0"
-                  className={inputClass}
-                />
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={labelClass}>Condition</label>
+                  <select
+                    className={inputClass}
+                    value={productCondition}
+                    onChange={(e) => setProductCondition(e.target.value as "NEW" | "USED")}
+                  >
+                    <option value="NEW">New</option>
+                    <option value="USED">Used</option>
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className={labelClass}>Stock / Quantity (optional)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={productStock}
+                    onChange={(e) => setProductStock(e.target.value)}
+                    placeholder="e.g. 3"
+                    className={inputClass}
+                  />
+                </div>
               </div>
-            </div>
+            </>
           )}
 
+          {/* SEARCH_PRODUCT */}
           {category === "SEARCH_PRODUCT" && (
-            <div className={cn(fieldClass, "flex gap-4")}>
-              <div className="flex-1">
-                <label className={labelClass}>Max Budget (Garas, optional)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={maxBudgetGaras}
-                  onChange={(e) => setMaxBudgetGaras(e.target.value)}
-                  placeholder="0"
-                  className={inputClass}
-                />
-              </div>
-              <div className="flex-1">
-                <label className={labelClass}>Max Budget (Min, optional)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={maxBudgetTime}
-                  onChange={(e) => setMaxBudgetTime(e.target.value)}
-                  placeholder="0"
-                  className={inputClass}
-                />
-              </div>
+            <div className={fieldClass}>
+              <label className={labelClass}>Deadline / Urgency (optional)</label>
+              <input
+                type="date"
+                value={searchProductDeadline}
+                onChange={(e) => setSearchProductDeadline(e.target.value)}
+                className={inputClass}
+              />
             </div>
           )}
 
+          {/* OFFER_RENTAL */}
           {category === "OFFER_RENTAL" && (
-            <div className={cn(fieldClass, "flex gap-4")}>
-              <div className="flex-1">
-                <label className={labelClass}>Fee (Garas)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={rentalFeeGaras}
-                  onChange={(e) => setRentalFeeGaras(e.target.value)}
-                  placeholder="0"
-                  className={inputClass}
-                />
+            <>
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={labelClass}>Handling Fee (minutes)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={rentalFeeTime}
+                    onChange={(e) => setRentalFeeTime(e.target.value)}
+                    placeholder="e.g. 5"
+                    className={inputClass}
+                  />
+                  <div className="text-[11px] text-[#888] mt-1">Effort to hand over</div>
+                </div>
+                <div className="flex-1">
+                  <label className={labelClass}>Usage Fee (Garas)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={rentalFeeGaras}
+                    onChange={(e) => setRentalFeeGaras(e.target.value)}
+                    placeholder="e.g. 2"
+                    className={inputClass}
+                  />
+                  <div className="text-[11px] text-[#888] mt-1">Wear & tear</div>
+                </div>
               </div>
-              <div className="flex-1">
-                <label className={labelClass}>Fee (Minutes)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={rentalFeeTime}
-                  onChange={(e) => setRentalFeeTime(e.target.value)}
-                  placeholder="0"
-                  className={inputClass}
-                />
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={labelClass}>Max Duration (optional)</label>
+                  <input
+                    type="text"
+                    value={rentalMaxDuration}
+                    onChange={(e) => setRentalMaxDuration(e.target.value)}
+                    placeholder="e.g. 1 week"
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex-1 flex items-center gap-2 pt-5">
+                  <input
+                    type="checkbox"
+                    id="deposit"
+                    checked={rentalDeposit}
+                    onChange={(e) => setRentalDeposit(e.target.checked)}
+                    className="w-4 h-4 cursor-pointer"
+                  />
+                  <label htmlFor="deposit" className={cn(labelClass, "mb-0 cursor-pointer")}>
+                    Deposit required
+                  </label>
+                </div>
               </div>
-            </div>
+            </>
           )}
 
+          {/* RIDE_SHARE */}
           {category === "RIDE_SHARE" && (
             <>
-              <div className={fieldClass}>
-                <label className={labelClass}>Starting Location</label>
-                <input
-                  type="text"
-                  value={rideStart}
-                  onChange={(e) => setRideStart(e.target.value)}
-                  placeholder="e.g. Munich"
-                  className={inputClass}
-                />
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={labelClass}>From</label>
+                  <input
+                    type="text"
+                    value={rideStart}
+                    onChange={(e) => setRideStart(e.target.value)}
+                    placeholder="e.g. Munich"
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className={labelClass}>To</label>
+                  <input
+                    type="text"
+                    value={rideDestination}
+                    onChange={(e) => setRideDestination(e.target.value)}
+                    placeholder="e.g. Berlin"
+                    className={inputClass}
+                  />
+                </div>
               </div>
-              <div className={fieldClass}>
-                <label className={labelClass}>Destination</label>
-                <input
-                  type="text"
-                  value={rideDestination}
-                  onChange={(e) => setRideDestination(e.target.value)}
-                  placeholder="e.g. Berlin"
-                  className={inputClass}
-                />
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={labelClass}>Departure Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    value={rideDeparture}
+                    onChange={(e) => setRideDeparture(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className={labelClass}>Available Seats</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={rideSeats}
+                    onChange={(e) => setRideSeats(e.target.value)}
+                    placeholder="e.g. 3"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={labelClass}>Price per Seat (minutes)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={ridePriceTime}
+                    onChange={(e) => setRidePriceTime(e.target.value)}
+                    placeholder="0"
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className={labelClass}>Price per Seat (Garas)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={ridePriceGaras}
+                    onChange={(e) => setRidePriceGaras(e.target.value)}
+                    placeholder="0"
+                    className={inputClass}
+                  />
+                </div>
               </div>
             </>
           )}
 
+          {/* EVENT_WORKSHOP */}
           {category === "EVENT_WORKSHOP" && (
             <>
-              <div className={fieldClass}>
-                <label className={labelClass}>Start Date & Time</label>
-                <input
-                  type="datetime-local"
-                  value={eventStart}
-                  onChange={(e) => setEventStart(e.target.value)}
-                  className={inputClass}
-                />
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={labelClass}>Start Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    value={eventStart}
+                    onChange={(e) => setEventStart(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className={labelClass}>End Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    value={eventEnd}
+                    onChange={(e) => setEventEnd(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
               </div>
-              <div className={fieldClass}>
-                <label className={labelClass}>End Date & Time</label>
-                <input
-                  type="datetime-local"
-                  value={eventEnd}
-                  onChange={(e) => setEventEnd(e.target.value)}
-                  className={inputClass}
-                />
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={labelClass}>Location</label>
+                  <input
+                    type="text"
+                    value={eventLocation}
+                    onChange={(e) => setEventLocation(e.target.value)}
+                    placeholder="e.g. Community Hall, Room 3"
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className={labelClass}>Max Participants (optional)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={eventMaxParticipants}
+                    onChange={(e) => setEventMaxParticipants(e.target.value)}
+                    placeholder="e.g. 20"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={labelClass}>Entry Fee (minutes)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={eventPriceTime}
+                    onChange={(e) => setEventPriceTime(e.target.value)}
+                    placeholder="0"
+                    className={inputClass}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className={labelClass}>Material Fee (Garas)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={eventPriceGaras}
+                    onChange={(e) => setEventPriceGaras(e.target.value)}
+                    placeholder="0"
+                    className={inputClass}
+                  />
+                </div>
               </div>
             </>
           )}
+
+          {/* Payment / Price Notes — all categories */}
+          <div className={fieldClass}>
+            <label className={labelClass}>Payment / Price Notes (optional)</label>
+            <textarea
+              className={cn(inputClass, "h-[60px] resize-none")}
+              placeholder="e.g. Material costs depend on brand. Price per day."
+              value={priceNotes}
+              onChange={(e) => setPriceNotes(e.target.value)}
+            />
+          </div>
 
           {/* Tags */}
           <div className={fieldClass}>
