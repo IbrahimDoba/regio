@@ -156,7 +156,7 @@ function matrixEventToChatMessage(event: any, myUserId: string): ChatMessage | n
     paymentRequest: isPayment
       ? {
           id: (content.banking_request_id as string) || (event.getId() as string),
-          amountRegio: (content.regio_amount as number) || 0,
+          amountGaras: (content.regio_amount as number) || 0,
           amountTime: parseInt(String(content.time_amount || "0"), 10),
           description: (content.description as string) || "",
           status: "pending",

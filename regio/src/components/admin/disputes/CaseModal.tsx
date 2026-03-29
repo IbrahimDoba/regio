@@ -89,7 +89,7 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
                 <p className="text-[14px] font-bold">{dispute.amount_time} minutes</p>
               </div>
               <div>
-                <p className="text-[11px] text-[#888] uppercase">Amount (Regio)</p>
+                <p className="text-[11px] text-[#888] uppercase">Amount (Garas)</p>
                 <p className="text-[14px] font-bold">{dispute.amount_regio} ℛ</p>
               </div>
             </div>

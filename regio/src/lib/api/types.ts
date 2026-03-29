@@ -362,7 +362,7 @@ export interface ChatMessage {
   type: 'text' | 'payment_request' | 'system';
   paymentRequest?: {
     id: string;
-    amountRegio: number;
+    amountGaras: number;
     amountTime: number;
     description: string;
     status: 'pending' | 'paid' | 'denied';

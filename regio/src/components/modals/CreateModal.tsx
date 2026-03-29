@@ -23,11 +23,11 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [timeFactor, setTimeFactor] = useState(1.0);
 
   // SELL_PRODUCT
-  const [productRegio, setProductRegio] = useState("");
+  const [productGaras, setProductGaras] = useState("");
   const [productTime, setProductTime] = useState("");
 
   // OFFER_RENTAL
-  const [rentalFeeRegio, setRentalFeeRegio] = useState("");
+  const [rentalFeeGaras, setRentalFeeGaras] = useState("");
   const [rentalFeeTime, setRentalFeeTime] = useState("");
 
   // RIDE_SHARE
@@ -40,7 +40,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
   // SEARCH_SERVICE / SEARCH_PRODUCT (optional budget)
   const [maxBudgetTime, setMaxBudgetTime] = useState("");
-  const [maxBudgetRegio, setMaxBudgetRegio] = useState("");
+  const [maxBudgetGaras, setMaxBudgetGaras] = useState("");
 
   const createMutation = useCreateListing();
 
@@ -69,17 +69,17 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
         return maxBudgetTime ? { max_budget_time: parseInt(maxBudgetTime) } : {};
       case "SELL_PRODUCT":
         return {
-          regio_amount: productRegio ? parseInt(productRegio) : undefined,
+          regio_amount: productGaras ? parseInt(productGaras) : undefined,
           time_amount: productTime ? parseInt(productTime) : undefined,
         };
       case "SEARCH_PRODUCT":
         return {
-          max_budget_regio: maxBudgetRegio ? parseInt(maxBudgetRegio) : undefined,
+          max_budget_regio: maxBudgetGaras ? parseInt(maxBudgetGaras) : undefined,
           max_budget_time: maxBudgetTime ? parseInt(maxBudgetTime) : undefined,
         };
       case "OFFER_RENTAL":
         return {
-          fee_regio: rentalFeeRegio ? parseInt(rentalFeeRegio) : undefined,
+          fee_regio: rentalFeeGaras ? parseInt(rentalFeeGaras) : undefined,
           fee_time: rentalFeeTime ? parseInt(rentalFeeTime) : undefined,
         };
       case "RIDE_SHARE":
@@ -99,9 +99,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     if (!description || description.length < 20) return false;
     switch (category) {
       case "SELL_PRODUCT":
-        return !!(productRegio || productTime);
+        return !!(productGaras || productTime);
       case "OFFER_RENTAL":
-        return !!(rentalFeeRegio || rentalFeeTime);
+        return !!(rentalFeeGaras || rentalFeeTime);
       case "RIDE_SHARE":
         return rideStart.length >= 2 && rideDestination.length >= 2;
       case "EVENT_WORKSHOP":
@@ -236,12 +236,12 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {category === "SELL_PRODUCT" && (
             <div className={cn(fieldClass, "flex gap-4")}>
               <div className="flex-1">
-                <label className={labelClass}>Price (Regio)</label>
+                <label className={labelClass}>Price (Garas)</label>
                 <input
                   type="number"
                   min="0"
-                  value={productRegio}
-                  onChange={(e) => setProductRegio(e.target.value)}
+                  value={productGaras}
+                  onChange={(e) => setProductGaras(e.target.value)}
                   placeholder="0"
                   className={inputClass}
                 />
@@ -263,12 +263,12 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {category === "SEARCH_PRODUCT" && (
             <div className={cn(fieldClass, "flex gap-4")}>
               <div className="flex-1">
-                <label className={labelClass}>Max Budget (Regio, optional)</label>
+                <label className={labelClass}>Max Budget (Garas, optional)</label>
                 <input
                   type="number"
                   min="0"
-                  value={maxBudgetRegio}
-                  onChange={(e) => setMaxBudgetRegio(e.target.value)}
+                  value={maxBudgetGaras}
+                  onChange={(e) => setMaxBudgetGaras(e.target.value)}
                   placeholder="0"
                   className={inputClass}
                 />
@@ -290,12 +290,12 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {category === "OFFER_RENTAL" && (
             <div className={cn(fieldClass, "flex gap-4")}>
               <div className="flex-1">
-                <label className={labelClass}>Fee (Regio)</label>
+                <label className={labelClass}>Fee (Garas)</label>
                 <input
                   type="number"
                   min="0"
-                  value={rentalFeeRegio}
-                  onChange={(e) => setRentalFeeRegio(e.target.value)}
+                  value={rentalFeeGaras}
+                  onChange={(e) => setRentalFeeGaras(e.target.value)}
                   placeholder="0"
                   className={inputClass}
                 />

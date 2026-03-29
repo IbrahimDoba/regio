@@ -106,7 +106,7 @@ export default function ChatPage() {
 
   // Handle sending a payment request
   const handleSendPaymentRequest = useCallback(
-    async (data: { amountRegio: number; amountTime: number; description: string }) => {
+    async (data: { amountGaras: number; amountTime: number; description: string }) => {
       if (!roomId) return;
       try {
         // Find the partner's user code to create a banking PaymentRequest
@@ -116,7 +116,7 @@ export default function ChatPage() {
         // Create a banking PaymentRequest so Pay/Deny can settle funds
         const bankingRequest = await bankingApi.createPaymentRequest({
           debtor_code: partnerCode,
-          amount_regio: String(data.amountRegio),
+          amount_regio: String(data.amountGaras),
           amount_time: data.amountTime,
           description: data.description,
         });
@@ -124,10 +124,10 @@ export default function ChatPage() {
         // Send the chat message with the banking_request_id in meta
         await sendMessage(
           roomId,
-          `Payment request: ${data.amountRegio} RGD (${data.amountTime} min) - ${data.description}`,
+          `Payment request: ${data.amountGaras} RGD (${data.amountTime} min) - ${data.description}`,
           "payment_request",
           {
-            regio_amount: data.amountRegio,
+            regio_amount: data.amountGaras,
             time_amount: String(data.amountTime),
             description: data.description,
             banking_request_id: bankingRequest.id,
