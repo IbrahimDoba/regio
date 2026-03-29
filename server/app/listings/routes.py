@@ -1,9 +1,10 @@
 import uuid
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Query, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Query, UploadFile, status
 
 from app.core.r2 import StorageServiceDep
+from app.core.translate import TranslateService
 from app.listings.dependencies import ListingServiceDep
 from app.listings.enums import ListingCategory
 from app.listings.schemas import (
@@ -35,7 +36,10 @@ router = APIRouter()
     },
 )
 async def create_listing(
-    data: ListingCreate, current_user: CurrentUser, service: ListingServiceDep
+    data: ListingCreate,
+    current_user: CurrentUser,
+    service: ListingServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> Any:
     """
     Create a new listing.
@@ -43,7 +47,16 @@ async def create_listing(
     Validates the 'attributes' field dynamically based on the provided 'category'.
     """
     listing = await service.create_listing(current_user, data)
-    return await service.format_listing(listing)
+
+    background_tasks.add_task(
+        TranslateService.translate_listing,
+        listing_id=listing.id,
+        title=data.title,
+        description=data.description,
+        origin_language=current_user.language,
+    )
+
+    return await service.format_listing(listing, current_user.language)
 
 
 @router.get(
@@ -70,6 +83,9 @@ async def get_feed(
     offset: int = Query(
         0, ge=0, description="Pagination offset (skip N items)."
     ),
+    lang: str = Query(
+        "en", description="Language for localized content (en, de, hu)."
+    ),
 ) -> Any:
     """
     Main Feed.
@@ -77,7 +93,8 @@ async def get_feed(
     Supports filtering by multiple categories, tags, text search, and pagination.
     """
     return await service.get_feed(
-        categories=categories, search_query=q, tags=tags, offset=offset
+        categories=categories, search_query=q, tags=tags, offset=offset,
+        user_lang=lang,
     )
 
 
@@ -112,7 +129,11 @@ async def autocomplete_tags(q: str, service: ListingServiceDep) -> Any:
     },
 )
 async def get_listing_by_id(
-    service: ListingServiceDep, listing_id: uuid.UUID
+    service: ListingServiceDep,
+    listing_id: uuid.UUID,
+    lang: str = Query(
+        "en", description="Language for localized content (en, de, hu)."
+    ),
 ) -> Any:
     """
     Get a listing by its ID.
@@ -120,7 +141,7 @@ async def get_listing_by_id(
     Fetches the full details of a listing for display on its standalone page.
     """
     listing = await service.get_listing(listing_id)
-    return await service.format_listing(listing)
+    return await service.format_listing(listing, lang)
 
 
 @router.post(
@@ -157,7 +178,7 @@ async def upload_listing_media(
     listing = await service.upload_media(
         listing_id, current_user, files, storage
     )
-    return await service.format_listing(listing)
+    return await service.format_listing(listing, current_user.language)
 
 
 @router.delete(
@@ -213,6 +234,7 @@ async def update_listing(
     current_user: CurrentUser,
     service: ListingServiceDep,
     storage: StorageServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> Any:
     """
     Edit an existing listing.
@@ -223,4 +245,15 @@ async def update_listing(
     listing = await service.update_listing(
         listing_id, current_user, update_data, storage=storage
     )
-    return await service.format_listing(listing)
+
+    # Re-translate only if title or description changed
+    if update_data.title is not None or update_data.description is not None:
+        background_tasks.add_task(
+            TranslateService.translate_listing,
+            listing_id=listing.id,
+            title=listing.title_original,
+            description=listing.description_original,
+            origin_language=current_user.language,
+        )
+
+    return await service.format_listing(listing, current_user.language)
