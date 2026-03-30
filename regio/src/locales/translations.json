@@ -1,0 +1,490 @@
+{
+  "auth": {
+    "login": {
+      "section_title": "Login Data",
+      "email_label": "Email Address",
+      "password_label": "Password",
+      "submit_loading": "Logging in...",
+      "submit": "Login",
+      "toggle_to_register": "No account? Use an invite code to join",
+      "error_invalid": "Invalid email or password"
+    },
+    "register": {
+      "section_title": "Invite Required",
+      "invite_placeholder": "REGIO-XXXX",
+      "real_name_notice": "Real name required",
+      "first_name_label": "First Name",
+      "last_name_label": "Last Name",
+      "email_label": "Email",
+      "password_label": "Create Password",
+      "password_placeholder": "Min. 8 chars",
+      "terms_checkbox": "I agree to terms and conditions",
+      "submit_loading": "Creating account...",
+      "submit": "Create Account",
+      "toggle_to_login": "Already have an account? Login"
+    },
+    "no_code_modal": {
+      "title": "Don't have an invite code?",
+      "request_community": "Request one from community",
+      "apply_access": "Apply for early access"
+    }
+  },
+
+  "feed": {
+    "header": {
+      "subtitle": "All current offers and searches",
+      "hint": "Scroll through or use search or filter with the red button"
+    },
+    "filter_button": "Filter",
+    "loading": "Loading listings...",
+    "error_chat_start": "Failed to start chat. Please try again.",
+    "error_chat_not_connected": "Chat is not connected yet. Please wait a moment and try again."
+  },
+
+  "feed_card": {
+    "region_label": "Region",
+    "region_unit": "km",
+    "read_more": "Read More >",
+    "contact_button": "Contact"
+  },
+
+  "filter_panel": {
+    "search_placeholder": "Search..."
+  },
+
+  "category_labels": {
+    "OFFER_SERVICE": "Offer Service",
+    "SEARCH_SERVICE": "Search Service",
+    "SELL_PRODUCT": "Sell Product",
+    "SEARCH_PRODUCT": "Search Product",
+    "OFFER_RENTAL": "Offer Rental",
+    "RIDE_SHARE": "Ride Share",
+    "EVENT_WORKSHOP": "Event / Workshop"
+  },
+
+  "preview_modal": {
+    "price_label": "Value / Price:",
+    "contact_button": "Contact",
+    "contact_loading": "Starting chat...",
+    "attributes": {
+      "time_factor": "Time Factor",
+      "price_time": "Price (Time)",
+      "price_garas": "Price (Garas)",
+      "condition": "Condition",
+      "stock": "Stock",
+      "handling_fee": "Handling Fee",
+      "usage_fee": "Usage Fee (wear & tear)",
+      "max_duration": "Max Duration",
+      "deposit_required": "Deposit Required",
+      "deposit_yes": "Yes",
+      "deposit_no": "No",
+      "from": "From",
+      "to": "To",
+      "departure": "Departure",
+      "seats_available": "Seats Available",
+      "price_per_seat_time": "Price / Seat (Time)",
+      "price_per_seat_garas": "Price / Seat (Garas)",
+      "starts": "Starts",
+      "ends": "Ends",
+      "location": "Location",
+      "max_participants": "Max Participants",
+      "entry_fee_time": "Entry Fee (Time)",
+      "material_fee_garas": "Material Fee (Garas)",
+      "deadline": "Deadline",
+      "needed_by": "Needed By",
+      "price_notes": "Price Notes"
+    }
+  },
+
+  "create_modal": {
+    "title": "Create New Listing",
+    "category_label": "Category",
+    "title_label": "Title",
+    "title_placeholder": "What are you offering or looking for?",
+    "title_counter": "{count}/100",
+    "description_label": "Description",
+    "description_placeholder": "Describe your listing in detail... (min 20 characters)",
+    "price_notes_label": "Payment / Price Notes (optional)",
+    "price_notes_placeholder": "e.g. Material costs depend on brand. Price per day.",
+    "tags_label": "Tags",
+    "tags_placeholder": "Add tag, press Enter...",
+    "cancel_button": "Cancel",
+    "submit_button": "Create Listing",
+    "submit_loading": "Creating...",
+    "error_failed": "Failed to create listing. Please check all fields and try again.",
+
+    "offer_service": {
+      "time_factor_label": "Time Factor",
+      "time_factor_hint": "(0.25 – 3.0)",
+      "time_factor_description": "{factor}x — final cost = hours worked × {factor}"
+    },
+    "search_service": {
+      "deadline_label": "Deadline (optional)"
+    },
+    "sell_product": {
+      "price_time_label": "Price in Time (min)",
+      "price_time_placeholder": "e.g. 30",
+      "price_time_required_hint": "Required. Products must include labor.",
+      "price_garas_label": "Price in Garas (optional)",
+      "price_garas_placeholder": "e.g. 5",
+      "condition_label": "Condition",
+      "condition_new": "New",
+      "condition_used": "Used",
+      "stock_label": "Stock / Quantity (optional)",
+      "stock_placeholder": "e.g. 3"
+    },
+    "search_product": {
+      "deadline_label": "Deadline / Urgency (optional)"
+    },
+    "offer_rental": {
+      "handling_fee_label": "Handling Fee (minutes)",
+      "handling_fee_placeholder": "e.g. 5",
+      "handling_fee_hint": "Effort to hand over",
+      "usage_fee_label": "Usage Fee (Garas)",
+      "usage_fee_placeholder": "e.g. 2",
+      "usage_fee_hint": "Wear & tear",
+      "max_duration_label": "Max Duration (optional)",
+      "max_duration_placeholder": "e.g. 1 week",
+      "deposit_label": "Deposit required"
+    },
+    "ride_share": {
+      "from_label": "From",
+      "from_placeholder": "e.g. Munich",
+      "to_label": "To",
+      "to_placeholder": "e.g. Berlin",
+      "departure_label": "Departure Date & Time",
+      "seats_label": "Available Seats",
+      "seats_placeholder": "e.g. 3",
+      "price_time_label": "Price per Seat (minutes)",
+      "price_garas_label": "Price per Seat (Garas)"
+    },
+    "event_workshop": {
+      "start_label": "Start Date & Time",
+      "end_label": "End Date & Time",
+      "location_label": "Location",
+      "location_placeholder": "e.g. Community Hall, Room 3",
+      "max_participants_label": "Max Participants (optional)",
+      "max_participants_placeholder": "e.g. 20",
+      "entry_fee_label": "Entry Fee (minutes)",
+      "material_fee_label": "Material Fee (Garas)"
+    }
+  },
+
+  "chat": {
+    "page": {
+      "header": "Messages",
+      "connecting": "Connecting...",
+      "loading_with_room": "Connecting to chat...",
+      "loading_no_room": "Loading chat...",
+      "no_conversations": "No conversations yet",
+      "no_conversations_hint": "Tap \"Contact\" on a listing to start chatting.",
+      "error_title": "Connection Error",
+      "error_description": "Failed to connect to chat server",
+      "retry_button": "Try Again",
+      "reconnecting": "Reconnecting..."
+    },
+    "header": {
+      "typing_one": "{name} is typing...",
+      "typing_two": "{name1} and {name2} are typing...",
+      "typing_many": "{count} people are typing...",
+      "online": "Online",
+      "re_listing": "Re: {listing}"
+    },
+    "message_list": {
+      "encrypted_notice": "Messages are end-to-end encrypted.",
+      "empty": "No messages yet. Start the conversation!",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "read_by": "Read by {count} user(s)",
+      "delivered": "Delivered"
+    },
+    "message_input": {
+      "placeholder": "Message..."
+    },
+    "action_sheet": {
+      "title": "Actions",
+      "request_payment": "Request Payment",
+      "send_photo": "Send Photo",
+      "share_location": "Share Location",
+      "cancel": "Cancel"
+    },
+    "payment_request_modal": {
+      "title": "Request Payment",
+      "garas_label": "Garas",
+      "garas_placeholder": "0.00",
+      "time_label": "Time (Min)",
+      "time_placeholder": "0",
+      "description_label": "Description",
+      "description_placeholder": "e.g. Material costs",
+      "submit_button": "Send Request"
+    }
+  },
+
+  "wallet": {
+    "header": "My Wallet",
+    "time_account": "Time Account",
+    "time_unit": "Hours : Min",
+    "garas_account": "Garas Account",
+    "garas_unit": "Garas (HUF eq)",
+    "open_requests": "Open Requests",
+    "action_needed": "Action needed",
+    "incoming_request": "Incoming Request",
+    "outgoing_request": "Outgoing Request",
+    "from": "From: {name}",
+    "to": "To: {name}",
+    "ref": "Ref: {ref}",
+    "no_ref": "No ref",
+    "deny_button": "Deny",
+    "confirm_pay_button": "Confirm Pay",
+    "cancel_request_button": "Cancel Request",
+    "send_button": "Send",
+    "request_button": "Request",
+    "send_form": {
+      "title": "Send Payment",
+      "recipient_label": "Recipient Code",
+      "recipient_placeholder": "User Code (e.g. A1B2C)",
+      "garas_label": "Garas",
+      "garas_placeholder": "0.00",
+      "time_label": "Time (Min)",
+      "time_placeholder": "0",
+      "reference_label": "Reference",
+      "reference_placeholder": "Reason...",
+      "submit_button": "Confirm Transfer",
+      "submit_loading": "Sending..."
+    },
+    "request_form": {
+      "title": "Request Payment",
+      "from_label": "From User Code",
+      "from_placeholder": "User Code...",
+      "reason_label": "Reason",
+      "submit_button": "Send Request"
+    },
+    "transactions": {
+      "header": "Transactions",
+      "empty": "No transactions found.",
+      "no_reference": "No specific reference",
+      "detail_modal": {
+        "partner": "Partner",
+        "reference": "Reference",
+        "transaction_id": "Transaction ID",
+        "close_button": "Close"
+      }
+    }
+  },
+
+  "profile": {
+    "header": "My Profile",
+    "trust_level": "Trust Level:",
+    "tabs": {
+      "personal": "Personal",
+      "account": "Account",
+      "trust_invites": "Trust & Invites"
+    },
+    "personal_tab": {
+      "base_data_section": "Base Data (Fixed)",
+      "first_name_label": "First Name",
+      "last_name_label": "Last Name",
+      "public_info_section": "Public Info",
+      "location_label": "Location (City / Zip)",
+      "location_placeholder": "e.g. New York, 10001",
+      "location_hint": "Used to calculate distances in the feed.",
+      "language_label": "Language",
+      "language_en": "English (GB)",
+      "language_de": "Deutsch",
+      "language_hu": "Magyar",
+      "bio_label": "About me (Bio)",
+      "bio_placeholder": "Tell us about yourself...",
+      "save_button": "Save Changes",
+      "save_loading": "Saving..."
+    },
+    "account_tab": {
+      "login_section": "Login Data",
+      "email_label": "Email Address",
+      "change_password_button": "Change Password",
+      "notifications_section": "Notifications",
+      "email_digest": "Email Digest",
+      "instant_push": "Instant Push",
+      "newsletter": "Newsletter",
+      "save_button": "Save Settings",
+      "logout_button": "Log Out"
+    },
+    "trust_tab": {
+      "verification_section": "Verification Status",
+      "trust_level": "Trust Level: {value}",
+      "member_since": "Member since {date}",
+      "verified_message": "Your identity has been confirmed. This gives you full access to trading and inviting friends.",
+      "invites_section": "Invite Friends",
+      "manage_invites_button": "Manage Invites",
+      "manage_invites_hint": "Click to manage your invites",
+      "invites_reputation_hint": "Inviting active members earns you reputation points."
+    }
+  },
+
+  "notifications": {
+    "header": "Notifications",
+    "mark_all_read": "Mark all read",
+    "tab_all": "All ({count})",
+    "tab_unread": "Unread ({count})",
+    "empty": "No notifications.",
+    "section_messages": "Messages",
+    "section_activity": "Activity"
+  },
+
+  "invite": {
+    "header": "Invite Friends",
+    "codes_available": "{count} / 3",
+    "codes_label": "Codes available",
+    "request_button": "Request New Codes",
+    "request_loading": "Requesting...",
+    "why_invite_title": "Why invite?",
+    "why_invite_body": "We want to build a strong, trusted community. Please invite only people who are genuinely interested in local exchange and fair economy. Quality over quantity.",
+    "step1_label": "1. Select a Code",
+    "code_used": "Used",
+    "code_available": "Available",
+    "no_codes": "No invites found. Request new ones above.",
+    "step2_label": "2. Choose a Message",
+    "message_standard": "Standard",
+    "message_community": "Community Focus",
+    "message_short": "Short & Direct",
+    "message_help": "Help & Support",
+    "step3_label": "3. Share Now",
+    "share_all": "Share (All Apps)",
+    "share_whatsapp": "WhatsApp",
+    "share_telegram": "Telegram",
+    "share_facebook": "Facebook",
+    "share_email": "Email"
+  },
+
+  "verification": {
+    "title": "Verification Pending",
+    "description": "Welcome to the community! To ensure trust and safety, we verify every member personally via a short video call.",
+    "step_register": "Register",
+    "step_video_call": "Video Call",
+    "step_active": "Active",
+    "next_step": "Next Step",
+    "call_notice": "Please schedule a 2-minute call with a moderator to activate your account.",
+    "book_button": "Book Appointment",
+    "data_notice": "Your data is secure and will only be used for verification.",
+    "logout_button": "Log Out"
+  },
+
+  "admin": {
+    "sidebar": {
+      "brand": "ADMIN",
+      "user_management": "User Management",
+      "tag_management": "Tag Management",
+      "disputes": "Disputes",
+      "broadcasts": "Broadcasts",
+      "super_admin": "Super Admin"
+    },
+    "header": {
+      "user_management": "User Management",
+      "tag_management": "Tag Management",
+      "disputes": "Disputes",
+      "broadcasts": "Broadcasts",
+      "default": "Admin Dashboard"
+    },
+    "stats": {
+      "total_users": "Total Users",
+      "active_pending": "Active / Pending",
+      "time_volume": "Total Time Volume",
+      "time_unit": "hrs",
+      "garas_volume": "Total Garas Vol.",
+      "action_required": "Action Required",
+      "disputes": "Disputes"
+    },
+    "users": {
+      "search_placeholder": "Search User (ID, Name, Email)...",
+      "table_title": "User List & Balances",
+      "empty": "No users found",
+      "loading": "Loading users...",
+      "error": "Error loading users",
+      "table": {
+        "col_name": "Name",
+        "col_role": "Role",
+        "col_trust": "Trust",
+        "col_garas_balance": "Garas Bal.",
+        "col_time_balance": "Time Bal.",
+        "col_status": "Status",
+        "col_action": "Action",
+        "status_pending": "Pending Verify",
+        "status_active": "Active",
+        "verify_button": "Verify",
+        "edit_button": "Edit"
+      },
+      "edit_modal": {
+        "title": "Edit User: {name}",
+        "trust_label": "Trust Level (Manual Override)",
+        "trust_t1": "T1 Beginner",
+        "trust_t2": "T2 Active",
+        "trust_t3": "T3 Trusted",
+        "trust_t4": "T4 Professional",
+        "trust_t5": "T5 Ambassador",
+        "trust_t6": "T6 Legend",
+        "verification_label": "Verification Status",
+        "verification_pending": "Pending",
+        "verification_verified": "Verified",
+        "account_label": "Account Status",
+        "account_active": "Active",
+        "account_banned": "Banned",
+        "cancel_button": "Cancel",
+        "save_button": "Save Changes"
+      }
+    },
+    "disputes": {
+      "header": "Open Conflicts",
+      "col_case_id": "Case ID",
+      "col_creditor": "Creditor (Requesting)",
+      "col_debtor": "Debtor (Owes)",
+      "col_reason": "Reason Snippet",
+      "col_status": "Status",
+      "col_controls": "Controls",
+      "empty": "No pending disputes",
+      "manage_button": "Manage Case",
+      "loading": "Loading disputes...",
+      "case_modal": {
+        "title": "Case: {id}... - Dispute",
+        "creditor_statement": "Statement by {name} (Creditor)",
+        "no_description": "No description provided",
+        "details_section": "Case Details",
+        "creditor_label": "Creditor (Requesting)",
+        "debtor_label": "Debtor (Owes)",
+        "amount_time_label": "Amount (Time)",
+        "amount_time_unit": "minutes",
+        "amount_garas_label": "Amount (Garas)",
+        "consent_section": "Arbitration Consent Status",
+        "consent_description": "To view the private chat history and intervene, we need active consent from both parties to lift E2E privacy for this case.",
+        "consent_granted": "Granted: Today, {time}",
+        "consent_waiting": "Waiting for response...",
+        "request_consent_button": "Request Consent & Info from {name}",
+        "consent_sent": "Request Sent to {name}",
+        "resolution_label": "Admin Resolution Note (Optional)",
+        "resolution_placeholder": "Provide a reason for your decision...",
+        "reject_button": "Reject Claim",
+        "refund_button": "Issue Refund (Force)"
+      }
+    },
+    "tags": {
+      "pending_title": "Pending User Tags (Require Translation)",
+      "col_original": "Original Input",
+      "col_de": "DE (German)",
+      "col_en": "EN (English)",
+      "col_hu": "HU (Hungarian)",
+      "col_action": "Action",
+      "placeholder_de": "German...",
+      "placeholder_en": "English...",
+      "placeholder_hu": "Hungarian...",
+      "add_button": "Add",
+      "pending_empty": "No pending tags",
+      "library_title": "Global Tag Library (Active)",
+      "col_tag_id": "Tag ID",
+      "library_empty": "No official tags",
+      "loading": "Loading tags...",
+      "delete_confirm": "Are you sure you want to delete this tag?",
+      "approve_success": "Tag approved successfully!",
+      "approve_error": "Failed to approve tag",
+      "delete_success": "Tag deleted successfully!",
+      "delete_error": "Failed to delete tag"
+    }
+  }
+}

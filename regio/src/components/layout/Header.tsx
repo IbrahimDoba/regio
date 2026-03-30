@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { FaArrowRightArrowLeft, FaFilter, FaRegCircleUser } from "react-icons/fa6";
+import { FaFilter, FaRegCircleUser } from "react-icons/fa6";
+import Image from "next/image";
 
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -22,9 +23,7 @@ export default function Header({ isFilterOpen, toggleFilter, children, count, to
   return (
     <header className="bg-[var(--white)] border-b border-[#eee] sticky top-0 z-100">
       <div className="flex justify-between items-center p-[10px_15px]">
-        <div className="flex items-center gap-[5px] text-[24px] font-[900] color-[#1a3b15] tracking-[-1px] text-[#1a3b15]">
-          <FaArrowRightArrowLeft className="text-[18px]" /> REGIO
-        </div>
+        <Image src="/logo-S.png" alt="REGIO" width={100} height={36} priority />
         <div className="flex items-center gap-[10px]">
           <button 
             onClick={toggleFilter}

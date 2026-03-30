@@ -22,7 +22,9 @@ import React, {
   useRef,
   useEffect,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ChatMessage } from "@/lib/api/types";
+import { queryKeys } from "@/lib/api/query-keys";
 import { useMatrixStore } from "@/store/matrixStore";
 import { initializeMatrixClient, disconnectMatrixClient } from "@/lib/matrixUtils";
 
@@ -141,7 +143,7 @@ function matrixEventToChatMessage(event: any, myUserId: string): ChatMessage | n
 
   const sender = event.getSender() as string;
   const isOwn = sender === myUserId;
-  const senderName = isOwn ? "Me" : (sender.split(":")[0].replace("@", "") || sender);
+  const senderName = isOwn ? "Me" : (event.sender?.name || sender.split(":")[0].replace("@", "") || sender);
 
   const isPayment = msgtype === "regio.payment_request";
 
@@ -174,6 +176,7 @@ const RealTimeContext = createContext<RealTimeContextType | null>(null);
 export function RealTimeProvider({ children }: { children: React.ReactNode }) {
   const { matrixUserId, matrixAccessToken, matrixHomeserver, matrixClient, setMatrixClient } =
     useMatrixStore();
+  const queryClient = useQueryClient();
 
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -185,19 +188,44 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
   const [typingByRoom, setTypingByRoom] = useState<Map<string, Set<string>>>(new Map());
 
   const currentRoomRef = useRef<string | null>(null);
+  // Set to true once the Matrix client fires its first PREPARED sync — used to
+  // distinguish historical timeline events (initial sync replay) from truly new
+  // incoming messages so we don't generate stale notifications on startup.
+  const initialSyncDoneRef = useRef(false);
   // Partner codes from the DB — Matrix SDK has no knowledge of platform user_codes
   const roomMetaRef = useRef<Map<string, { partnerCode: string; partnerName: string }>>(new Map());
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  // Load notifications from localStorage after mount
+  // Load notifications from localStorage after mount — only keep last 24 h to
+  // avoid surfacing old chat history as "new" notifications on every app open.
   useEffect(() => {
     const stored = loadLS<LocalNotification[]>(LS_NOTIFICATIONS, []);
-    if (stored.length > 0) setNotifications(stored);
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const recent = stored.filter(
+      (n) => new Date(n.created_at).getTime() > cutoff
+    );
+    if (recent.length > 0) setNotifications(recent);
   }, []);
 
+  // Persist notifications to localStorage AND React Query cache so any
+  // component can subscribe to the cache and get instant updates.
   useEffect(() => {
     saveLS(LS_NOTIFICATIONS, notifications);
-  }, [notifications]);
+    queryClient.setQueryData(queryKeys.chat.notifications(), notifications);
+  }, [notifications, queryClient]);
+
+  // Mirror room list into cache — chat page and nav badges read from here.
+  useEffect(() => {
+    queryClient.setQueryData(queryKeys.chat.rooms(), rooms);
+  }, [rooms, queryClient]);
+
+  // Mirror per-room messages into cache — chat page reads from here so
+  // messages survive page navigation without re-calling joinRoom.
+  useEffect(() => {
+    for (const [roomId, messages] of messagesByRoom) {
+      queryClient.setQueryData(queryKeys.chat.messages(roomId), messages);
+    }
+  }, [messagesByRoom, queryClient]);
 
   // ============================================================================
   // Fetch room metadata (partner codes) from our backend DB
@@ -250,6 +278,10 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
 
         const meta = roomMetaRef.current.get(room.roomId as string);
 
+        // If the user currently has this room open, treat it as fully read
+        // even if the Matrix SDK hasn't processed our read receipt yet.
+        const isCurrentRoom = currentRoomRef.current === (room.roomId as string);
+
         return {
           roomId: room.roomId as string,
           name: (room.name as string) || meta?.partnerName || room.roomId,
@@ -258,7 +290,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
             ? (lastMsgEvent.getContent()?.body as string)
             : undefined,
           lastTs: lastMsgEvent ? (lastMsgEvent.getTs() as number) : undefined,
-          unreadCount: room.getUnreadNotificationCount() as number,
+          unreadCount: isCurrentRoom ? 0 : (room.getUnreadNotificationCount() as number),
         };
       });
 
@@ -340,8 +372,16 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
           .sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0))
       );
 
-      // Notification for messages from others in non-active rooms
-      if (!msg.isOwn && currentRoomRef.current !== roomId) {
+      // If this room is currently open, immediately send a read receipt so the
+      // Matrix server clears the unread counter for this new live message too.
+      if (currentRoomRef.current === roomId) {
+        client.sendReadReceipt(event).catch(() => {});
+      }
+
+      // Notification for messages from others in non-active rooms.
+      // Guard: skip until initial sync is PREPARED so we don't re-notify for
+      // historical messages that the SDK replays during startup.
+      if (!msg.isOwn && currentRoomRef.current !== roomId && initialSyncDoneRef.current) {
         const notifId = `msg-${msg.id}`;
         setNotifications((prev) => {
           if (prev.find((n) => n.id === notifId)) return prev;
@@ -365,6 +405,9 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
     // sync state changes
     client.on("sync", (state: string) => {
       if (state === "PREPARED" || state === "SYNCING") {
+        // Mark initial sync complete so Room.timeline knows subsequent events
+        // are truly new (not historical replay from the initial sync batch).
+        initialSyncDoneRef.current = true;
         setIsConnected(true);
         setIsConnecting(false);
         syncRoomsFromClient(client);
@@ -492,6 +535,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
     setIsConnected(false);
     setIsConnecting(false);
     currentRoomRef.current = null;
+    initialSyncDoneRef.current = false;
   }, []);
 
   // ============================================================================
@@ -552,6 +596,17 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
         newMap.set(roomId, messages);
         return newMap;
       });
+
+      // Send a read receipt for the last message event so the Matrix SDK
+      // clears its internal unread counter. Without this, syncRoomsFromClient
+      // keeps reading a non-zero getUnreadNotificationCount() on every sync.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const lastReadableEvent = [...events].reverse().find((e: any) =>
+        e.getType() === "m.room.message"
+      );
+      if (lastReadableEvent) {
+        client.sendReadReceipt(lastReadableEvent).catch(() => {});
+      }
     },
     [matrixClient]
   );

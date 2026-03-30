@@ -94,6 +94,7 @@ export const queryKeys = {
     rooms: () => [...queryKeys.chat.all(), 'rooms'] as const,
     room: (roomId: string) => [...queryKeys.chat.all(), 'room', roomId] as const,
     messages: (roomId: string) => [...queryKeys.chat.room(roomId), 'messages'] as const,
+    notifications: () => [...queryKeys.chat.all(), 'notifications'] as const,
   },
 
   // ============================================================================

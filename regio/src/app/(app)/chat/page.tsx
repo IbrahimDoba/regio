@@ -26,6 +26,7 @@ import {
 import { useRealTime } from "@/context/RealTimeContext";
 import { useAuth } from "@/context/AuthContext";
 import { bankingApi } from "@/lib/api/modules/banking";
+import { useRoomMessages } from "@/lib/api/hooks/use-chat";
 import { queryKeys } from "@/lib/api/query-keys";
 import { FaRegComments, FaArrowLeft } from "react-icons/fa6";
 
@@ -52,15 +53,15 @@ export default function ChatPage() {
     leaveRoom,
     sendMessage,
     sendTyping,
-    getMessagesForRoom,
     getReadReceiptsForMessage,
     getTypingUsers,
     rooms,
     updatePaymentRequestStatus,
   } = useRealTime();
 
-  // Local state
-  const messages = roomId ? getMessagesForRoom(roomId) : [];
+  // Messages from React Query cache — persists across page navigation and
+  // updates instantly when RealTimeContext pushes new events via setQueryData.
+  const { data: messages = [] } = useRoomMessages(roomId);
   const typingUsers = roomId ? getTypingUsers(roomId) : [];
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);

@@ -98,25 +98,25 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
         };
       case "SEARCH_PRODUCT":
         return {
-          deadline: searchProductDeadline || undefined,
+          urgency_deadline: searchProductDeadline || undefined,
           price_notes: notes,
         };
       case "OFFER_RENTAL":
         return {
-          fee_time: rentalFeeTime ? parseInt(rentalFeeTime) : undefined,
-          fee_regio: rentalFeeGaras ? parseInt(rentalFeeGaras) : undefined,
-          max_duration: rentalMaxDuration || undefined,
+          handling_fee_time: rentalFeeTime ? parseInt(rentalFeeTime) : undefined,
+          usage_fee_regio: rentalFeeGaras ? parseInt(rentalFeeGaras) : undefined,
+          max_rental_duration: rentalMaxDuration || undefined,
           deposit_required: rentalDeposit || undefined,
           price_notes: notes,
         };
       case "RIDE_SHARE":
         return {
-          start: rideStart,
-          destination: rideDestination,
+          from_location: rideStart,
+          to_location: rideDestination,
           departure_datetime: rideDeparture || undefined,
-          seats: rideSeats ? parseInt(rideSeats) : undefined,
+          seats_available: rideSeats ? parseInt(rideSeats) : undefined,
           price_time: ridePriceTime ? parseInt(ridePriceTime) : undefined,
-          price_garas: ridePriceGaras ? parseInt(ridePriceGaras) : undefined,
+          price_regio: ridePriceGaras ? parseInt(ridePriceGaras) : undefined,
           price_notes: notes,
         };
       case "EVENT_WORKSHOP":
@@ -126,7 +126,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           location: eventLocation || undefined,
           max_participants: eventMaxParticipants ? parseInt(eventMaxParticipants) : undefined,
           price_time: eventPriceTime ? parseInt(eventPriceTime) : undefined,
-          price_garas: eventPriceGaras ? parseInt(eventPriceGaras) : undefined,
+          price_regio: eventPriceGaras ? parseInt(eventPriceGaras) : undefined,
           price_notes: notes,
         };
       default:

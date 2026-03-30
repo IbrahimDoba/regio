@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { FaShieldHalved, FaUsers, FaTags, FaGavel, FaBullhorn } from 'react-icons/fa6';
+import { FaUsers, FaTags, FaGavel, FaBullhorn } from 'react-icons/fa6';
+import Image from 'next/image';
 
 const navItems = [
   {
@@ -68,9 +69,11 @@ export default function AdminSidebar() {
   return (
     <div className="w-[260px] bg-[#1a3b15] text-[#e0e0e0] flex flex-col shadow-[2px_0_10px_rgba(0,0,0,0.1)]">
       {/* Brand */}
-      <div className="p-5 text-[24px] font-[900] text-white tracking-[-1px] border-b border-[rgba(255,255,255,0.1)] flex items-center gap-[10px]">
-        <FaShieldHalved className="text-[#8cb348]" />
-        <span>ADMIN</span>
+      <div className="p-5 border-b border-[rgba(255,255,255,0.1)] flex items-center gap-[10px]">
+        <div className="bg-white rounded-[6px] px-[6px] py-[3px]">
+          <Image src="/logo-S.png" alt="REGIO" width={80} height={29} />
+        </div>
+        <span className="text-[13px] font-bold text-[#8cb348] uppercase tracking-widest">Admin</span>
       </div>
 
       {/* Navigation Menu */}

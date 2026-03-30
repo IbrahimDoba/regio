@@ -62,32 +62,34 @@ export function getCategoryDetails(category: ListingCategory) {
 export interface ListingAttributes {
   // OFFER_SERVICE
   time_factor?: number;
+  location?: string;
   // SELL_PRODUCT
   time_amount?: number;
   regio_amount?: number;
   condition?: string;
   stock?: number;
   // OFFER_RENTAL
-  fee_time?: number;
-  fee_regio?: number;
-  max_duration?: string;
+  handling_fee_time?: number;
+  usage_fee_regio?: number;
+  max_rental_duration?: string;
   deposit_required?: boolean;
   // RIDE_SHARE
-  start?: string;
-  destination?: string;
+  from_location?: string;
+  to_location?: string;
   departure_datetime?: string;
-  seats?: number;
+  seats_available?: number;
   price_time?: number;
-  price_garas?: number;
+  price_regio?: number;
   // EVENT_WORKSHOP
   event_start_date?: string;
   event_end_date?: string;
-  location?: string;
+  event_location?: string;
   max_participants?: number;
-  // SEARCH_SERVICE / SEARCH_PRODUCT
+  price_regio_event?: number; // aliased below via price_regio
+  // SEARCH_SERVICE
   deadline?: string;
-  // Global
-  price_notes?: string;
+  // SEARCH_PRODUCT
+  urgency_deadline?: string;
 }
 
 export function formatPrice(listing: ListingPublic): string {
@@ -107,22 +109,22 @@ export function formatPrice(listing: ListingPublic): string {
 
     case "OFFER_RENTAL": {
       const parts = [];
-      if (attrs.fee_time) parts.push(`${attrs.fee_time} Min`);
-      if (attrs.fee_regio) parts.push(`${attrs.fee_regio} G`);
+      if (attrs.handling_fee_time) parts.push(`${attrs.handling_fee_time} Min`);
+      if (attrs.usage_fee_regio) parts.push(`${attrs.usage_fee_regio} G`);
       return parts.join(" + ") || "Contact";
     }
 
     case "RIDE_SHARE": {
       const parts = [];
       if (attrs.price_time) parts.push(`${attrs.price_time} Min`);
-      if (attrs.price_garas) parts.push(`${attrs.price_garas} G`);
+      if (attrs.price_regio) parts.push(`${attrs.price_regio} G`);
       return parts.join(" + ") || "Contact for price";
     }
 
     case "EVENT_WORKSHOP": {
       const parts = [];
       if (attrs.price_time) parts.push(`${attrs.price_time} Min`);
-      if (attrs.price_garas) parts.push(`${attrs.price_garas} G`);
+      if (attrs.price_regio) parts.push(`${attrs.price_regio} G`);
       return parts.join(" + ") || "Free";
     }
 

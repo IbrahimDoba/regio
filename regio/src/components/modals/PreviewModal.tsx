@@ -41,19 +41,19 @@ function AttributeDetails({ listing }: { listing: ListingPublic }) {
       break;
 
     case "OFFER_RENTAL":
-      if (attrs.fee_time) rows.push(<Row key="ft" label="Handling Fee" value={`${attrs.fee_time} min`} />);
-      if (attrs.fee_regio) rows.push(<Row key="fr" label="Usage Fee (wear & tear)" value={`${attrs.fee_regio} G`} />);
-      if (attrs.max_duration) rows.push(<Row key="md" label="Max Duration" value={attrs.max_duration} />);
+      if (attrs.handling_fee_time) rows.push(<Row key="ft" label="Handling Fee" value={`${attrs.handling_fee_time} min`} />);
+      if (attrs.usage_fee_regio) rows.push(<Row key="fr" label="Usage Fee (wear & tear)" value={`${attrs.usage_fee_regio} G`} />);
+      if (attrs.max_rental_duration) rows.push(<Row key="md" label="Max Duration" value={attrs.max_rental_duration} />);
       if (attrs.deposit_required != null) rows.push(<Row key="dep" label="Deposit Required" value={attrs.deposit_required ? "Yes" : "No"} />);
       break;
 
     case "RIDE_SHARE":
-      if (attrs.start) rows.push(<Row key="from" label="From" value={attrs.start} />);
-      if (attrs.destination) rows.push(<Row key="to" label="To" value={attrs.destination} />);
+      if (attrs.from_location) rows.push(<Row key="from" label="From" value={attrs.from_location} />);
+      if (attrs.to_location) rows.push(<Row key="to" label="To" value={attrs.to_location} />);
       if (attrs.departure_datetime) rows.push(<Row key="dep" label="Departure" value={new Date(attrs.departure_datetime).toLocaleString()} />);
-      if (attrs.seats) rows.push(<Row key="seats" label="Seats Available" value={attrs.seats} />);
+      if (attrs.seats_available) rows.push(<Row key="seats" label="Seats Available" value={attrs.seats_available} />);
       if (attrs.price_time) rows.push(<Row key="pt" label="Price / Seat (Time)" value={`${attrs.price_time} min`} />);
-      if (attrs.price_garas) rows.push(<Row key="pg" label="Price / Seat (Garas)" value={`${attrs.price_garas} G`} />);
+      if (attrs.price_regio) rows.push(<Row key="pg" label="Price / Seat (Garas)" value={`${attrs.price_regio} G`} />);
       break;
 
     case "EVENT_WORKSHOP":
@@ -62,12 +62,15 @@ function AttributeDetails({ listing }: { listing: ListingPublic }) {
       if (attrs.location) rows.push(<Row key="loc" label="Location" value={attrs.location} />);
       if (attrs.max_participants) rows.push(<Row key="mp" label="Max Participants" value={attrs.max_participants} />);
       if (attrs.price_time) rows.push(<Row key="pt" label="Entry Fee (Time)" value={`${attrs.price_time} min`} />);
-      if (attrs.price_garas) rows.push(<Row key="pg" label="Material Fee (Garas)" value={`${attrs.price_garas} G`} />);
+      if (attrs.price_regio) rows.push(<Row key="pg" label="Material Fee (Garas)" value={`${attrs.price_regio} G`} />);
       break;
 
     case "SEARCH_SERVICE":
-    case "SEARCH_PRODUCT":
       if (attrs.deadline) rows.push(<Row key="dl" label="Deadline" value={new Date(attrs.deadline).toLocaleDateString()} />);
+      break;
+
+    case "SEARCH_PRODUCT":
+      if (attrs.urgency_deadline) rows.push(<Row key="dl" label="Needed By" value={new Date(attrs.urgency_deadline).toLocaleDateString()} />);
       break;
   }
 

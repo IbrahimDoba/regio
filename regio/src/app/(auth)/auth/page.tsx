@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { FaArrowRightArrowLeft, FaEnvelope, FaLock, FaTicket, FaCircleInfo, FaUsers, FaPenNib, FaSpinner } from "react-icons/fa6";
+import { FaEnvelope, FaLock, FaTicket, FaCircleInfo, FaUsers, FaPenNib, FaSpinner } from "react-icons/fa6";
+import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRegisterUser } from "@/lib/api";
@@ -134,8 +135,8 @@ export default function AuthPage() {
 
       {/* Hero */}
       <div className="p-[20px_20px_40px_20px] text-center">
-        <div className="text-[40px] font-[900] text-[#1a3b15] tracking-[-2px] mb-[10px] inline-flex items-center gap-[10px]">
-          <FaArrowRightArrowLeft className="text-[#d32f2f] text-[32px]" /> REGIO
+        <div className="mb-[10px] flex justify-center">
+          <Image src="/logo-M.png" alt="REGIO" width={160} height={58} priority />
         </div>
         <div className="text-[16px] text-[#666] max-w-[280px] mx-auto leading-[1.4] whitespace-pre-line">
           {t.subtitle}

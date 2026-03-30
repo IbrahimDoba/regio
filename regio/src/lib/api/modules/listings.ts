@@ -34,9 +34,10 @@ export const getFeed = async (params?: FeedParams): Promise<FeedResponse> => {
 /**
  * Get a single listing by ID
  */
-export const getListing = async (listingId: string): Promise<ListingPublic> => {
+export const getListing = async (listingId: string, lang?: string): Promise<ListingPublic> => {
   const response = await apiClient.get<ListingPublic>(
-    API_ENDPOINTS.LISTINGS.BY_ID(listingId)
+    API_ENDPOINTS.LISTINGS.BY_ID(listingId),
+    { params: lang ? { lang } : undefined }
   );
   return response.data;
 };

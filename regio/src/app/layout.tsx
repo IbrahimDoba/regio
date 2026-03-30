@@ -2,8 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Garas App",
-  description: "Garas App Prototype",
+  title: "REGIO",
+  description: "Local exchange platform — community currency and time credits",
+  icons: {
+    icon: "/logo-S.png",
+    apple: "/logo-S.png",
+  },
 };
 
 import { LanguageProvider } from "@/context/LanguageContext";

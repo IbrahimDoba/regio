@@ -254,6 +254,7 @@ export interface FeedParams {
   tags?: string[];
   q?: string | null;
   offset?: number;
+  lang?: string; // ISO code sent to backend for localised content: 'en' | 'de' | 'hu'
 }
 
 export interface FeedResponse {
