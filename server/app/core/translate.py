@@ -77,7 +77,9 @@ class TranslateService:
         """
         origin_language = origin_language.upper()
         if origin_language not in SUPPORTED_LANGUAGES:
-            logger.error(f"Unsupported language '{origin_language}' for listing {listing_id}")
+            logger.error(
+                f"Unsupported language '{origin_language}' for listing {listing_id}"
+            )
             return
 
         if not client:
@@ -89,7 +91,9 @@ class TranslateService:
                 title, description, origin_language
             )
         except Exception:
-            logger.exception(f"Translation API failed for listing {listing_id}")
+            logger.exception(
+                f"Translation API failed for listing {listing_id}"
+            )
             return
 
         # Build update fields: original text maps to its own lang, translations fill the rest
@@ -103,14 +107,12 @@ class TranslateService:
             title_translations = translations.get("title", {})
             desc_translations = translations.get("description", {})
 
-            update_data[f"title_{lang.lower()}"] = (
-                title_translations.get(lang)
-                or title_translations.get(lang.lower(), "")
-            )
-            update_data[f"description_{lang.lower()}"] = (
-                desc_translations.get(lang)
-                or desc_translations.get(lang.lower(), "")
-            )
+            update_data[f"title_{lang.lower()}"] = title_translations.get(
+                lang
+            ) or title_translations.get(lang.lower(), "")
+            update_data[f"description_{lang.lower()}"] = desc_translations.get(
+                lang
+            ) or desc_translations.get(lang.lower(), "")
 
         # Persist with a fresh session
         async with AsyncSessionLocal() as session:
@@ -119,7 +121,9 @@ class TranslateService:
             )
             listing = result.scalar_one_or_none()
             if not listing:
-                logger.error(f"Listing {listing_id} not found for translation update")
+                logger.error(
+                    f"Listing {listing_id} not found for translation update"
+                )
                 return
 
             for field, value in update_data.items():

@@ -15,12 +15,10 @@ from sqlmodel import select
 
 from app.auth import models as auth_models  # noqa: F401
 from app.auth.security import get_password_hash
-
-# Imports to solve circular dependency error on startup
 from app.banking import models as banking_models  # noqa: F401
-from app.chat import models as chat_models  # noqa: F401
 from app.banking.service import BankingService
 from app.broadcast import models as broadcast_models  # noqa: F401
+from app.chat import models as chat_models  # noqa: F401
 from app.core.config import settings
 from app.listings import models as listing_models  # noqa: F401
 from app.users.config import user_settings
