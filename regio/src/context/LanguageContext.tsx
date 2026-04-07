@@ -1,30 +1,50 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { uiTexts } from '@/data/mockData';
-import { LangTexts } from '@/lib/types';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import translationsEn from '@/locales/translations.json';
+import translationsDe from '@/locales/translations_de.json';
+import translationsHu from '@/locales/translations_hu.json';
 
-type Language = 'GB' | 'HU' | 'DE';
+export type Language = 'GB' | 'HU' | 'DE';
+export type Translations = typeof translationsEn;
+
+const TRANSLATIONS: Record<Language, Translations> = {
+  GB: translationsEn,
+  DE: translationsDe as Translations,
+  HU: translationsHu as Translations,
+};
+
+const STORAGE_KEY = 'regio_language';
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: LangTexts;
+  t: Translations;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('GB');
+  const [language, setLanguageState] = useState<Language>('GB');
 
-  const value = {
-    language,
-    setLanguage,
-    t: uiTexts[language]
+  // Restore persisted language on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = localStorage.getItem(STORAGE_KEY) as Language | null;
+    if (stored && stored in TRANSLATIONS) {
+      setLanguageState(stored);
+    }
+  }, []);
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, lang);
+    }
   };
 
   return (
-    <LanguageContext.Provider value={value}>
+    <LanguageContext.Provider value={{ language, setLanguage, t: TRANSLATIONS[language] }}>
       {children}
     </LanguageContext.Provider>
   );

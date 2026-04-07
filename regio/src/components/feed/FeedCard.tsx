@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ListingPublic } from "@/lib/api/types";
 import { getCategoryDetails, formatPrice } from "@/lib/feed-helpers";
+import { useLanguage } from "@/context/LanguageContext";
 
 const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
   "fa-screwdriver-wrench": <FaScrewdriverWrench />,
@@ -33,6 +34,7 @@ interface FeedCardProps {
 
 export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCardProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useLanguage();
 
   const { color, icon, label, colorVar } = getCategoryDetails(listing.category);
   const priceDisplay = formatPrice(listing);
@@ -75,7 +77,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCard
                     {listing.owner_name}
                   </div>
                   <div className="text-[11px] text-[#777] whitespace-nowrap">
-                    Region {listing.radius_km}km
+                    {t.feed_card.region_label} {listing.radius_km}{t.feed_card.region_unit}
                   </div>
                 </div>
                 {listing.owner_avatar ? (
@@ -105,8 +107,8 @@ export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCard
               onClick={() => setIsOpen(!isOpen)}
             />
             <div className="text-[11px] text-[#444] font-[500] inline-flex items-center gap-[6px] h-full">
-              <FaLocationDot className="text-[#555] text-[14px]" /> Region{" "}
-              {listing.radius_km}km
+              <FaLocationDot className="text-[#555] text-[14px]" /> {t.feed_card.region_label}{" "}
+              {listing.radius_km}{t.feed_card.region_unit}
             </div>
           </div>
           <div className="flex gap-[5px] items-center">
@@ -117,6 +119,19 @@ export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCard
         {/* Details (Expandable) */}
         {isOpen && (
           <div className="animate-in fade-in duration-300 block">
+            {/* Image thumbnails */}
+            {listing.media_urls.length > 0 && (
+              <div className="flex gap-[6px] overflow-x-auto pt-[8px] pb-[6px] border-b border-[var(--grey-line)]">
+                {listing.media_urls.map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt=""
+                    className="h-[64px] w-[64px] object-cover rounded-[3px] shrink-0 border border-[#eee]"
+                  />
+                ))}
+              </div>
+            )}
             <div className="text-[13px] text-[#444] leading-[1.5em] mb-[10px] pt-[10px] h-[4.5em] overflow-hidden line-clamp-3">
               {listing.description}
             </div>
@@ -124,7 +139,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCard
               className="text-[11px] underline float-right cursor-pointer ml-[5px] mt-[2px] text-[var(--color-text-main)]"
               onClick={() => onOpenPreview(listing)}
             >
-              Read More &gt;
+              {t.feed_card.read_more}
             </div>
 
             <div className="flex justify-between items-center pt-[10px] border-t border-[var(--grey-line)] clear-both">
@@ -141,7 +156,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCard
                   className={`text-white border-none p-[8px_20px] rounded-[3px] text-[13px] font-[700] cursor-pointer hover:brightness-110 transition-all`}
                   style={{ backgroundColor: colorVar }}
                 >
-                  Contact
+                  {t.feed_card.contact_button}
                 </button>
               </div>
             </div>

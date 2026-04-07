@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { FaSpinner } from "react-icons/fa6";
+import { FaSpinner, FaImage, FaXmark } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingCategory, ListingCreate } from "@/lib/api/types";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
 import { useCreateListing } from "@/lib/api/hooks/use-listings";
+import { uploadMedia } from "@/lib/api/modules/listings";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -60,6 +62,11 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [searchProductDeadline, setSearchProductDeadline] = useState("");
 
   const createMutation = useCreateListing();
+  const { t } = useLanguage();
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   if (!isOpen) return null;
 
@@ -151,6 +158,31 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const incoming = Array.from(e.target.files || []).filter(
+      f => f.size <= 1 * 1024 * 1024
+    );
+    const combined = [...selectedFiles, ...incoming].slice(0, 5);
+    setSelectedFiles(combined);
+    setPreviewUrls(combined.map(f => URL.createObjectURL(f)));
+    e.target.value = "";
+  };
+
+  const removeFile = (index: number) => {
+    const next = selectedFiles.filter((_, i) => i !== index);
+    setSelectedFiles(next);
+    setPreviewUrls(next.map(f => URL.createObjectURL(f)));
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setTags([]);
+    setPriceNotes("");
+    setSelectedFiles([]);
+    setPreviewUrls([]);
+  };
+
   const handleSubmit = () => {
     if (!isValid()) return;
 
@@ -163,12 +195,17 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     };
 
     createMutation.mutate(payload, {
-      onSuccess: () => {
+      onSuccess: async (createdListing) => {
+        if (selectedFiles.length > 0) {
+          setIsUploading(true);
+          try {
+            await uploadMedia(createdListing.id, selectedFiles);
+          } finally {
+            setIsUploading(false);
+          }
+        }
+        resetForm();
         onClose();
-        setTitle("");
-        setDescription("");
-        setTags([]);
-        setPriceNotes("");
       },
     });
   };
@@ -183,7 +220,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
       <div className="w-[95%] max-w-[460px] h-[90vh] bg-white rounded-[8px] p-0 overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
         <div className="p-[15px] border-b border-[#eee] flex justify-between items-center bg-[#f9f9f9]">
           <div className="text-[18px] font-[700] text-[#333]">
-            Create New Listing
+            {t.create_modal.title}
           </div>
           <div
             className="text-[28px] text-[#999] cursor-pointer leading-none hover:text-[#333]"
@@ -196,7 +233,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
         <div className="p-[20px] overflow-y-auto flex-grow">
           {/* Category */}
           <div className={fieldClass}>
-            <label className={labelClass}>Category</label>
+            <label className={labelClass}>{t.create_modal.category_label}</label>
             <select
               className={inputClass}
               value={category}
@@ -212,29 +249,29 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
           {/* Title */}
           <div className={fieldClass}>
-            <label className={labelClass}>Title</label>
+            <label className={labelClass}>{t.create_modal.title_label}</label>
             <input
               type="text"
               className={cn(
                 inputClass,
                 title.length >= 80 ? "border-[var(--color-red-search)]" : ""
               )}
-              placeholder="What are you offering or looking for?"
+              placeholder={t.create_modal.title_placeholder}
               maxLength={100}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
             <div className="float-right text-[11px] text-[#888] mt-[4px]">
-              {title.length}/100
+              {t.create_modal.title_counter.replace('{count}', String(title.length))}
             </div>
           </div>
 
           {/* Description */}
           <div className={fieldClass}>
-            <label className={labelClass}>Description</label>
+            <label className={labelClass}>{t.create_modal.description_label}</label>
             <textarea
               className={cn(inputClass, "h-[80px] resize-none")}
-              placeholder="Describe your listing in detail... (min 20 characters)"
+              placeholder={t.create_modal.description_placeholder}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -246,7 +283,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {category === "OFFER_SERVICE" && (
             <div className={fieldClass}>
               <label className={labelClass}>
-                Time Factor <span className="text-[#999] font-normal">(0.25 – 3.0)</span>
+                {t.create_modal.offer_service.time_factor_label} <span className="text-[#999] font-normal">{t.create_modal.offer_service.time_factor_hint}</span>
               </label>
               <input
                 type="range"
@@ -258,7 +295,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 className="w-full cursor-pointer"
               />
               <div className="text-center text-[12px] font-bold text-[#666] mt-1">
-                {timeFactor}x — final cost = hours worked × {timeFactor}
+                {t.create_modal.offer_service.time_factor_description.replace('{factor}', String(timeFactor))}
               </div>
             </div>
           )}
@@ -266,7 +303,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {/* SEARCH_SERVICE */}
           {category === "SEARCH_SERVICE" && (
             <div className={fieldClass}>
-              <label className={labelClass}>Deadline (optional)</label>
+              <label className={labelClass}>{t.create_modal.search_service.deadline_label}</label>
               <input
                 type="date"
                 value={searchServiceDeadline}
@@ -282,50 +319,50 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
                   <label className={labelClass}>
-                    Price in Time (min) <span className="text-red-500">*</span>
+                    {t.create_modal.sell_product.price_time_label} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
                     min="1"
                     value={productTime}
                     onChange={(e) => setProductTime(e.target.value)}
-                    placeholder="e.g. 30"
+                    placeholder={t.create_modal.sell_product.price_time_placeholder}
                     className={inputClass}
                   />
-                  <div className="text-[11px] text-[#888] mt-1">Required. Products must include labor.</div>
+                  <div className="text-[11px] text-[#888] mt-1">{t.create_modal.sell_product.price_time_required_hint}</div>
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>Price in Garas (optional)</label>
+                  <label className={labelClass}>{t.create_modal.sell_product.price_garas_label}</label>
                   <input
                     type="number"
                     min="0"
                     value={productGaras}
                     onChange={(e) => setProductGaras(e.target.value)}
-                    placeholder="e.g. 5"
+                    placeholder={t.create_modal.sell_product.price_garas_placeholder}
                     className={inputClass}
                   />
                 </div>
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>Condition</label>
+                  <label className={labelClass}>{t.create_modal.sell_product.condition_label}</label>
                   <select
                     className={inputClass}
                     value={productCondition}
                     onChange={(e) => setProductCondition(e.target.value as "NEW" | "USED")}
                   >
-                    <option value="NEW">New</option>
-                    <option value="USED">Used</option>
+                    <option value="NEW">{t.create_modal.sell_product.condition_new}</option>
+                    <option value="USED">{t.create_modal.sell_product.condition_used}</option>
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>Stock / Quantity (optional)</label>
+                  <label className={labelClass}>{t.create_modal.sell_product.stock_label}</label>
                   <input
                     type="number"
                     min="1"
                     value={productStock}
                     onChange={(e) => setProductStock(e.target.value)}
-                    placeholder="e.g. 3"
+                    placeholder={t.create_modal.sell_product.stock_placeholder}
                     className={inputClass}
                   />
                 </div>
@@ -336,7 +373,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {/* SEARCH_PRODUCT */}
           {category === "SEARCH_PRODUCT" && (
             <div className={fieldClass}>
-              <label className={labelClass}>Deadline / Urgency (optional)</label>
+              <label className={labelClass}>{t.create_modal.search_product.deadline_label}</label>
               <input
                 type="date"
                 value={searchProductDeadline}
@@ -351,38 +388,38 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>Handling Fee (minutes)</label>
+                  <label className={labelClass}>{t.create_modal.offer_rental.handling_fee_label}</label>
                   <input
                     type="number"
                     min="0"
                     value={rentalFeeTime}
                     onChange={(e) => setRentalFeeTime(e.target.value)}
-                    placeholder="e.g. 5"
+                    placeholder={t.create_modal.offer_rental.handling_fee_placeholder}
                     className={inputClass}
                   />
-                  <div className="text-[11px] text-[#888] mt-1">Effort to hand over</div>
+                  <div className="text-[11px] text-[#888] mt-1">{t.create_modal.offer_rental.handling_fee_hint}</div>
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>Usage Fee (Garas)</label>
+                  <label className={labelClass}>{t.create_modal.offer_rental.usage_fee_label}</label>
                   <input
                     type="number"
                     min="0"
                     value={rentalFeeGaras}
                     onChange={(e) => setRentalFeeGaras(e.target.value)}
-                    placeholder="e.g. 2"
+                    placeholder={t.create_modal.offer_rental.usage_fee_placeholder}
                     className={inputClass}
                   />
-                  <div className="text-[11px] text-[#888] mt-1">Wear & tear</div>
+                  <div className="text-[11px] text-[#888] mt-1">{t.create_modal.offer_rental.usage_fee_hint}</div>
                 </div>
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>Max Duration (optional)</label>
+                  <label className={labelClass}>{t.create_modal.offer_rental.max_duration_label}</label>
                   <input
                     type="text"
                     value={rentalMaxDuration}
                     onChange={(e) => setRentalMaxDuration(e.target.value)}
-                    placeholder="e.g. 1 week"
+                    placeholder={t.create_modal.offer_rental.max_duration_placeholder}
                     className={inputClass}
                   />
                 </div>
@@ -395,7 +432,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                     className="w-4 h-4 cursor-pointer"
                   />
                   <label htmlFor="deposit" className={cn(labelClass, "mb-0 cursor-pointer")}>
-                    Deposit required
+                    {t.create_modal.offer_rental.deposit_label}
                   </label>
                 </div>
               </div>
@@ -407,29 +444,29 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>From</label>
+                  <label className={labelClass}>{t.create_modal.ride_share.from_label}</label>
                   <input
                     type="text"
                     value={rideStart}
                     onChange={(e) => setRideStart(e.target.value)}
-                    placeholder="e.g. Munich"
+                    placeholder={t.create_modal.ride_share.from_placeholder}
                     className={inputClass}
                   />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>To</label>
+                  <label className={labelClass}>{t.create_modal.ride_share.to_label}</label>
                   <input
                     type="text"
                     value={rideDestination}
                     onChange={(e) => setRideDestination(e.target.value)}
-                    placeholder="e.g. Berlin"
+                    placeholder={t.create_modal.ride_share.to_placeholder}
                     className={inputClass}
                   />
                 </div>
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>Departure Date & Time</label>
+                  <label className={labelClass}>{t.create_modal.ride_share.departure_label}</label>
                   <input
                     type="datetime-local"
                     value={rideDeparture}
@@ -438,20 +475,20 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>Available Seats</label>
+                  <label className={labelClass}>{t.create_modal.ride_share.seats_label}</label>
                   <input
                     type="number"
                     min="1"
                     value={rideSeats}
                     onChange={(e) => setRideSeats(e.target.value)}
-                    placeholder="e.g. 3"
+                    placeholder={t.create_modal.ride_share.seats_placeholder}
                     className={inputClass}
                   />
                 </div>
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>Price per Seat (minutes)</label>
+                  <label className={labelClass}>{t.create_modal.ride_share.price_time_label}</label>
                   <input
                     type="number"
                     min="0"
@@ -462,7 +499,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>Price per Seat (Garas)</label>
+                  <label className={labelClass}>{t.create_modal.ride_share.price_garas_label}</label>
                   <input
                     type="number"
                     min="0"
@@ -481,7 +518,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>Start Date & Time</label>
+                  <label className={labelClass}>{t.create_modal.event_workshop.start_label}</label>
                   <input
                     type="datetime-local"
                     value={eventStart}
@@ -490,7 +527,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>End Date & Time</label>
+                  <label className={labelClass}>{t.create_modal.event_workshop.end_label}</label>
                   <input
                     type="datetime-local"
                     value={eventEnd}
@@ -501,30 +538,30 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>Location</label>
+                  <label className={labelClass}>{t.create_modal.event_workshop.location_label}</label>
                   <input
                     type="text"
                     value={eventLocation}
                     onChange={(e) => setEventLocation(e.target.value)}
-                    placeholder="e.g. Community Hall, Room 3"
+                    placeholder={t.create_modal.event_workshop.location_placeholder}
                     className={inputClass}
                   />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>Max Participants (optional)</label>
+                  <label className={labelClass}>{t.create_modal.event_workshop.max_participants_label}</label>
                   <input
                     type="number"
                     min="1"
                     value={eventMaxParticipants}
                     onChange={(e) => setEventMaxParticipants(e.target.value)}
-                    placeholder="e.g. 20"
+                    placeholder={t.create_modal.event_workshop.max_participants_placeholder}
                     className={inputClass}
                   />
                 </div>
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>Entry Fee (minutes)</label>
+                  <label className={labelClass}>{t.create_modal.event_workshop.entry_fee_label}</label>
                   <input
                     type="number"
                     min="0"
@@ -535,7 +572,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>Material Fee (Garas)</label>
+                  <label className={labelClass}>{t.create_modal.event_workshop.material_fee_label}</label>
                   <input
                     type="number"
                     min="0"
@@ -551,10 +588,10 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
           {/* Payment / Price Notes — all categories */}
           <div className={fieldClass}>
-            <label className={labelClass}>Payment / Price Notes (optional)</label>
+            <label className={labelClass}>{t.create_modal.price_notes_label}</label>
             <textarea
               className={cn(inputClass, "h-[60px] resize-none")}
-              placeholder="e.g. Material costs depend on brand. Price per day."
+              placeholder={t.create_modal.price_notes_placeholder}
               value={priceNotes}
               onChange={(e) => setPriceNotes(e.target.value)}
             />
@@ -562,7 +599,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
           {/* Tags */}
           <div className={fieldClass}>
-            <label className={labelClass}>Tags</label>
+            <label className={labelClass}>{t.create_modal.tags_label}</label>
             <div className="border border-[#ccc] rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]">
               {tags.map((tag, i) => (
                 <div
@@ -581,7 +618,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <input
                 type="text"
                 className="border-none outline-none bg-transparent text-[14px] flex-grow p-[5px]"
-                placeholder="Add tag, press Enter..."
+                placeholder={t.create_modal.tags_placeholder}
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleTagKeyDown}
@@ -589,9 +626,50 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             </div>
           </div>
 
+          {/* Photos */}
+          <div className={fieldClass}>
+            <label className={labelClass}>{t.create_modal.images_label}</label>
+            <p className="text-[11px] text-[#888] mb-[8px]">{t.create_modal.images_hint}</p>
+
+            {previewUrls.length > 0 && (
+              <div className="flex gap-[8px] flex-wrap mb-[10px]">
+                {previewUrls.map((url, i) => (
+                  <div key={i} className="relative w-[80px] h-[80px]">
+                    <img
+                      src={url}
+                      alt=""
+                      className="w-full h-full object-cover rounded-[4px] border border-[#ddd]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeFile(i)}
+                      className="absolute -top-[6px] -right-[6px] w-[18px] h-[18px] bg-[#333] text-white rounded-full text-[10px] flex items-center justify-center hover:bg-[#555]"
+                    >
+                      <FaXmark />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {selectedFiles.length < 5 && (
+              <label className="inline-flex items-center gap-[6px] cursor-pointer bg-[#f0f0f0] border border-[#ccc] rounded-[4px] px-[12px] py-[8px] text-[13px] text-[#555] hover:bg-[#e8e8e8] transition-colors">
+                <FaImage className="text-[14px]" />
+                {t.create_modal.images_add}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+              </label>
+            )}
+          </div>
+
           {createMutation.isError && (
             <p className="text-[12px] text-red-500 mt-1">
-              Failed to create listing. Please check all fields and try again.
+              {t.create_modal.error_failed}
             </p>
           )}
         </div>
@@ -603,17 +681,21 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               onClick={onClose}
               disabled={createMutation.isPending}
             >
-              Cancel
+              {t.create_modal.cancel_button}
             </button>
             <button
               className="flex-1 p-[12px] border-none rounded-[4px] font-bold cursor-pointer bg-[var(--color-green-offer)] text-white flex justify-center items-center gap-2 disabled:opacity-50"
               onClick={handleSubmit}
-              disabled={createMutation.isPending || !isValid()}
+              disabled={createMutation.isPending || isUploading || !isValid()}
             >
-              {createMutation.isPending && (
+              {(createMutation.isPending || isUploading) && (
                 <FaSpinner className="animate-spin" />
               )}
-              {createMutation.isPending ? "Creating..." : "Create Listing"}
+              {isUploading
+                ? t.create_modal.images_uploading
+                : createMutation.isPending
+                ? t.create_modal.submit_loading
+                : t.create_modal.submit_button}
             </button>
           </div>
         </div>

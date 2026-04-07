@@ -9,6 +9,7 @@ import { usersApi } from './users';
 import { bankingApi } from './banking';
 import { listingsApi } from './listings';
 import { adminApi } from './admin';
+import { broadcastsApi } from './broadcasts';
 import * as chatApi from './chat';
 
 // Export individual modules
@@ -17,6 +18,7 @@ export { usersApi } from './users';
 export { bankingApi } from './banking';
 export { listingsApi } from './listings';
 export { adminApi } from './admin';
+export { broadcastsApi } from './broadcasts';
 export * as chatApi from './chat';
 
 // Export all API functions in a single object for convenience
@@ -26,6 +28,7 @@ export const api = {
   banking: bankingApi,
   listings: listingsApi,
   admin: adminApi,
+  broadcasts: broadcastsApi,
   chat: chatApi,
 } as const;
 
@@ -43,6 +46,9 @@ export * from './listings';
 
 // Re-export from admin
 export * from './admin';
+
+// Re-export from broadcasts
+export * from './broadcasts';
 
 // Re-export from chat
 export * from './chat';

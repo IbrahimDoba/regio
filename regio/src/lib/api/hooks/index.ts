@@ -21,3 +21,6 @@ export * from './use-admin';
 
 // Chat hooks
 export * from './use-chat';
+
+// Broadcast hooks
+export * from './use-broadcasts';

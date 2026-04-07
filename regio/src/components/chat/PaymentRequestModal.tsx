@@ -10,6 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaXmark } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface PaymentRequestModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export function PaymentRequestModal({
   onClose,
   onSubmit,
 }: PaymentRequestModalProps) {
+  const { t } = useLanguage();
   const [amountGaras, setAmountGaras] = useState('');
   const [amountTime, setAmountTime] = useState('');
   const [description, setDescription] = useState('');
@@ -86,7 +88,7 @@ export function PaymentRequestModal({
       <div className="w-full max-w-[480px] bg-white rounded-t-2xl shadow-2xl animate-slide-up">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h3 className="font-bold text-gray-800">Request Payment</h3>
+          <h3 className="font-bold text-gray-800">{t.chat.payment_request_modal.title}</h3>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -101,7 +103,7 @@ export function PaymentRequestModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-                Garas
+                {t.chat.payment_request_modal.garas_label}
               </label>
               <input
                 type="number"
@@ -109,7 +111,7 @@ export function PaymentRequestModal({
                 min="0"
                 value={amountGaras}
                 onChange={(e) => setAmountGaras(e.target.value)}
-                placeholder="0.00"
+                placeholder={t.chat.payment_request_modal.garas_placeholder}
                 className={cn(
                   'w-full px-4 py-3 bg-white border border-gray-300 rounded-lg',
                   'text-base text-gray-900 placeholder-gray-400',
@@ -119,14 +121,14 @@ export function PaymentRequestModal({
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-                Time (Min)
+                {t.chat.payment_request_modal.time_label}
               </label>
               <input
                 type="number"
                 min="0"
                 value={amountTime}
                 onChange={(e) => setAmountTime(e.target.value)}
-                placeholder="0"
+                placeholder={t.chat.payment_request_modal.time_placeholder}
                 className={cn(
                   'w-full px-4 py-3 bg-white border border-gray-300 rounded-lg',
                   'text-base text-gray-900 placeholder-gray-400',
@@ -139,13 +141,13 @@ export function PaymentRequestModal({
           {/* Description Input */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-              Description
+              {t.chat.payment_request_modal.description_label}
             </label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Material costs"
+              placeholder={t.chat.payment_request_modal.description_placeholder}
               className={cn(
                 'w-full px-4 py-3 bg-white border border-gray-300 rounded-lg',
                 'text-base text-gray-900 placeholder-gray-400',
@@ -165,7 +167,7 @@ export function PaymentRequestModal({
             )}
             disabled={!amountGaras && !amountTime}
           >
-            Send Request
+            {t.chat.payment_request_modal.submit_button}
           </button>
         </form>
       </div>

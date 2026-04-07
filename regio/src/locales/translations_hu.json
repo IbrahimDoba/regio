@@ -1,0 +1,481 @@
+{
+  "auth": {
+    "login": {
+      "section_title": "Belépési adatok",
+      "email_label": "E-mail cím",
+      "password_label": "Jelszó",
+      "submit_loading": "Bejelentkezés...",
+      "submit": "Belépés",
+      "toggle_to_register": "Nincs még fiókod? Használj meghívót",
+      "error_invalid": "Érvénytelen e-mail vagy jelszó"
+    },
+    "register": {
+      "section_title": "Meghívó szükséges",
+      "invite_placeholder": "REGIO-XXXX",
+      "real_name_notice": "Valódi név megadása kötelező",
+      "first_name_label": "Keresztnév",
+      "last_name_label": "Vezetéknév",
+      "email_label": "E-mail",
+      "password_label": "Jelszó létrehozása",
+      "password_placeholder": "Min. 8 karakter",
+      "terms_checkbox": "Elfogadom a felhasználási feltételeket",
+      "submit_loading": "Fiók létrehozása...",
+      "submit": "Regisztráció",
+      "toggle_to_login": "Már van fiókod? Lépj be itt"
+    },
+    "no_code_modal": {
+      "title": "Nincs meghívókódod?",
+      "request_community": "Kérj egyet a közösségtől",
+      "apply_access": "Jelentkezés korai hozzáférésre"
+    }
+  },
+  "feed": {
+    "header": {
+      "subtitle": "Aktuális ajánlatok és keresések",
+      "hint": "Böngéssz a listában, vagy használd a keresőt és a szűrőt a piros gombbal"
+    },
+    "filter_button": "Szűrő",
+    "loading": "Hirdetések betöltése...",
+    "error_chat_start": "Nem sikerült elindítani a chatet. Próbáld újra.",
+    "error_chat_not_connected": "A chat még nem csatlakozott. Várj egy pillanatot."
+  },
+  "feed_card": {
+    "region_label": "Régió",
+    "region_unit": "km",
+    "read_more": "Részletek >",
+    "contact_button": "Kapcsolat"
+  },
+  "filter_panel": {
+    "search_placeholder": "Keresés..."
+  },
+  "category_labels": {
+    "OFFER_SERVICE": "Szolgáltatást kínál",
+    "SEARCH_SERVICE": "Szolgáltatást keres",
+    "SELL_PRODUCT": "Terméket kínál",
+    "SEARCH_PRODUCT": "Terméket keres",
+    "OFFER_RENTAL": "Kölcsönzés",
+    "RIDE_SHARE": "Telekocsi",
+    "EVENT_WORKSHOP": "Esemény / Workshop"
+  },
+  "preview_modal": {
+    "price_label": "Érték / Ár:",
+    "contact_button": "Kapcsolat",
+    "contact_loading": "Chat indítása...",
+    "attributes": {
+      "time_factor": "Idő-szorzó",
+      "price_time": "Ár (Idő)",
+      "price_garas": "Ár (Garas)",
+      "condition": "Állapot",
+      "stock": "Készlet",
+      "handling_fee": "Kezelési díj",
+      "usage_fee": "Használati díj (amortizáció)",
+      "max_duration": "Max. időtartam",
+      "deposit_required": "Kaució szükséges",
+      "deposit_yes": "Igen",
+      "deposit_no": "Nem",
+      "from": "Innen",
+      "to": "Ide",
+      "departure": "Indulás",
+      "seats_available": "Szabad helyek",
+      "price_per_seat_time": "Ár / hely (Idő)",
+      "price_per_seat_garas": "Ár / hely (Garas)",
+      "starts": "Kezdés",
+      "ends": "Vége",
+      "location": "Helyszín",
+      "max_participants": "Max. résztvevő",
+      "entry_fee_time": "Belépő (Idő)",
+      "material_fee_garas": "Anyagköltség (Garas)",
+      "deadline": "Határidő",
+      "needed_by": "Szükséges eddig",
+      "price_notes": "Ár részletei"
+    }
+  },
+  "create_modal": {
+    "title": "Új hirdetés létrehozása",
+    "category_label": "Kategória",
+    "title_label": "Cím",
+    "title_placeholder": "Mit kínálsz vagy mit keresel?",
+    "title_counter": "{count}/100",
+    "description_label": "Leírás",
+    "description_placeholder": "Részletezd a hirdetésed... (min. 20 karakter)",
+    "price_notes_label": "Fizetési / Ár megjegyzések (opcionális)",
+    "price_notes_placeholder": "pl. Az anyagköltség márkától függ. Napi díj.",
+    "tags_label": "Címkék",
+    "tags_placeholder": "Címke hozzáadása, majd Enter...",
+    "cancel_button": "Mégsem",
+    "submit_button": "Hirdetés közzététele",
+    "submit_loading": "Létrehozás...",
+    "error_failed": "Hiba történt. Ellenőrizd a mezőket.",
+    "images_label": "Fotók",
+    "images_hint": "Legfeljebb 5 kép, egyenként max. 1MB (JPEG, PNG, WebP)",
+    "images_add": "Fotók hozzáadása",
+    "images_uploading": "Fotók feltöltése...",
+    "offer_service": {
+      "time_factor_label": "Idő-szorzó",
+      "time_factor_hint": "(0.25 – 3.0)",
+      "time_factor_description": "{factor}x — végső költség = munkaóra × {factor}"
+    },
+    "search_service": {
+      "deadline_label": "Határidő (opcionális)"
+    },
+    "sell_product": {
+      "price_time_label": "Ár időben (perc)",
+      "price_time_placeholder": "pl. 30",
+      "price_time_required_hint": "Kötelező. A termékeknek tartalmazniuk kell az élőmunkát.",
+      "price_garas_label": "Ár Garasban (opcionális)",
+      "price_garas_placeholder": "pl. 5",
+      "condition_label": "Állapot",
+      "condition_new": "Új",
+      "condition_used": "Használt",
+      "stock_label": "Készlet / Mennyiség (opcionális)",
+      "stock_placeholder": "pl. 3"
+    },
+    "search_product": {
+      "deadline_label": "Határidő / Sürgősség (opcionális)"
+    },
+    "offer_rental": {
+      "handling_fee_label": "Kezelési idő (perc)",
+      "handling_fee_placeholder": "pl. 5",
+      "handling_fee_hint": "Az átadás-átvétel ideje",
+      "usage_fee_label": "Használati díj (Garas)",
+      "usage_fee_placeholder": "pl. 2",
+      "usage_fee_hint": "Kopás / elhasználódás",
+      "max_duration_label": "Max. időtartam (opcionális)",
+      "max_duration_placeholder": "pl. 1 hét",
+      "deposit_label": "Kaució szükséges"
+    },
+    "ride_share": {
+      "from_label": "Innen",
+      "from_placeholder": "pl. Budapest",
+      "to_label": "Ide",
+      "to_placeholder": "pl. Szeged",
+      "departure_label": "Indulás ideje",
+      "seats_label": "Szabad helyek",
+      "seats_placeholder": "pl. 3",
+      "price_time_label": "Ár / hely (perc)",
+      "price_garas_label": "Ár / hely (Garas)"
+    },
+    "event_workshop": {
+      "start_label": "Kezdés időpontja",
+      "end_label": "Befejezés időpontja",
+      "location_label": "Helyszín",
+      "location_placeholder": "pl. Közösségi ház, 3-as terem",
+      "max_participants_label": "Max. résztvevő (opcionális)",
+      "max_participants_placeholder": "pl. 20",
+      "entry_fee_label": "Belépő (perc)",
+      "material_fee_label": "Anyagköltség (Garas)"
+    }
+  },
+  "chat": {
+    "page": {
+      "header": "Üzenetek",
+      "connecting": "Csatlakozás...",
+      "loading_with_room": "Belépés a chatbe...",
+      "loading_no_room": "Chat betöltése...",
+      "no_conversations": "Még nincsenek beszélgetéseid",
+      "no_conversations_hint": "Koppints a „Kapcsolat” gombra egy hirdetésnél.",
+      "error_title": "Kapcsolati hiba",
+      "error_description": "Nem sikerült csatlakozni a szerverhez",
+      "retry_button": "Próbáld újra",
+      "reconnecting": "Újracsatlakozás..."
+    },
+    "header": {
+      "typing_one": "{name} éppen ír...",
+      "typing_two": "{name1} és {name2} éppen ír...",
+      "typing_many": "{count} ember ír...",
+      "online": "Online",
+      "re_listing": "Re: {listing}"
+    },
+    "message_list": {
+      "encrypted_notice": "Az üzenetek végpontok közötti titkosítással védettek.",
+      "empty": "Még nincs üzenet. Kezdeményezz beszélgetést!",
+      "today": "Ma",
+      "yesterday": "Tegnap",
+      "read_by": "{count} felhasználó olvasta",
+      "delivered": "Kézbesítve"
+    },
+    "message_input": {
+      "placeholder": "Üzenet..."
+    },
+    "action_sheet": {
+      "title": "Műveletek",
+      "request_payment": "Fizetés kérése",
+      "send_photo": "Fotó küldése",
+      "share_location": "Helyszín megosztása",
+      "cancel": "Mégsem"
+    },
+    "payment_request_modal": {
+      "title": "Fizetés kérése",
+      "garas_label": "Garas",
+      "garas_placeholder": "0.00",
+      "time_label": "Idő (Perc)",
+      "time_placeholder": "0",
+      "description_label": "Leírás",
+      "description_placeholder": "pl. Anyagköltség",
+      "submit_button": "Kérés küldése"
+    }
+  },
+  "wallet": {
+    "header": "Pénztárcám",
+    "time_account": "Idő-számla",
+    "time_unit": "Óra : Perc",
+    "garas_account": "Garas-számla",
+    "garas_unit": "Garas (HUF egyenérték)",
+    "open_requests": "Nyitott kérések",
+    "action_needed": "Teendőd van",
+    "incoming_request": "Bejövő kérés",
+    "outgoing_request": "Kimenő kérés",
+    "from": "Feladó: {name}",
+    "to": "Címzett: {name}",
+    "ref": "Tárgy: {ref}",
+    "no_ref": "Nincs megjegyzés",
+    "deny_button": "Elutasít",
+    "confirm_pay_button": "Fizetés megerősítése",
+    "cancel_request_button": "Kérés törlése",
+    "send_button": "Küldés",
+    "request_button": "Kérés",
+    "send_form": {
+      "title": "Fizetés küldése",
+      "recipient_label": "Címzett kódja",
+      "recipient_placeholder": "Felhasználói kód (pl. A1B2C)",
+      "garas_label": "Garas",
+      "garas_placeholder": "0.00",
+      "time_label": "Idő (Perc)",
+      "time_placeholder": "0",
+      "reference_label": "Közlemény",
+      "reference_placeholder": "Indoklás...",
+      "submit_button": "Utalás megerősítése",
+      "submit_loading": "Küldés..."
+    },
+    "request_form": {
+      "title": "Fizetés kérése",
+      "from_label": "Felhasználó kódja",
+      "from_placeholder": "Felhasználói kód...",
+      "reason_label": "Indoklás",
+      "submit_button": "Kérés küldése"
+    },
+    "transactions": {
+      "header": "Tranzakciók",
+      "empty": "Nincsenek tranzakciók.",
+      "no_reference": "Nincs közlemény",
+      "detail_modal": {
+        "partner": "Partner",
+        "reference": "Közlemény",
+        "transaction_id": "Tranzakció azonosító",
+        "close_button": "Bezárás"
+      }
+    }
+  },
+  "profile": {
+    "header": "Profilom",
+    "trust_level": "Bizalmi szint:",
+    "tabs": {
+      "personal": "Személyes",
+      "account": "Fiók",
+      "trust_invites": "Bizalom és Meghívók"
+    },
+    "personal_tab": {
+      "base_data_section": "Alapadatok (Fix)",
+      "first_name_label": "Keresztnév",
+      "last_name_label": "Vezetéknév",
+      "public_info_section": "Nyilvános adatok",
+      "location_label": "Helyszín (Város / Ir.szám)",
+      "location_placeholder": "pl. Budapest, 1051",
+      "location_hint": "A távolságok kiszámításához használjuk.",
+      "language_label": "Nyelv",
+      "language_en": "English (GB)",
+      "language_de": "Deutsch",
+      "language_hu": "Magyar",
+      "bio_label": "Rólam",
+      "bio_placeholder": "Mesélj magadról pár szót...",
+      "save_button": "Módosítások mentése",
+      "save_loading": "Mentés..."
+    },
+    "account_tab": {
+      "login_section": "Belépési adatok",
+      "email_label": "E-mail cím",
+      "change_password_button": "Jelszó módosítása",
+      "notifications_section": "Értesítések",
+      "email_digest": "E-mail összefoglaló",
+      "instant_push": "Azonnali Push értesítés",
+      "newsletter": "Hírlevél",
+      "save_button": "Beállítások mentése",
+      "logout_button": "Kijelentkezés"
+    },
+    "trust_tab": {
+      "verification_section": "Ellenőrzési állapot",
+      "trust_level": "Bizalmi szint: {value}",
+      "member_since": "Tag ezóta: {date}",
+      "verified_message": "Személyazonosságod megerősítve. Teljes hozzáférésed van a cserekereskedelemhez és a meghívókhoz.",
+      "invites_section": "Barátok meghívása",
+      "manage_invites_button": "Meghívók kezelése",
+      "manage_invites_hint": "Kattints ide a meghívóid kezeléséhez",
+      "invites_reputation_hint": "Aktív tagok meghívásával hírnév-pontokat szerezhetsz."
+    }
+  },
+  "notifications": {
+    "header": "Értesítések",
+    "mark_all_read": "Összes olvasottnak jelölése",
+    "tab_all": "Összes ({count})",
+    "tab_unread": "Olvasatlan ({count})",
+    "empty": "Nincsenek értesítéseid.",
+    "section_messages": "Üzenetek",
+    "section_activity": "Aktivitás",
+    "section_broadcasts": "Hirdetmények"
+  },
+  "invite": {
+    "header": "Barátok meghívása",
+    "codes_available": "{count} / 3",
+    "codes_label": "Elérhető kódok",
+    "request_button": "Új kódok kérése",
+    "request_loading": "Kérés folyamatban...",
+    "why_invite_title": "Miért hívj meg másokat?",
+    "why_invite_body": "Egy erős és bizalomra épülő közösséget építünk. Kérünk, csak olyanokat hívj meg, akiket valóban érdekel a helyi cserekereskedelem és a méltányos gazdaság. Minőség a mennyiség előtt.",
+    "step1_label": "1. Válassz egy kódot",
+    "code_used": "Felhasználva",
+    "code_available": "Szabad",
+    "no_codes": "Nincsenek meghívóid. Kérj újakat fent.",
+    "step2_label": "2. Válassz üzenetet",
+    "message_standard": "Általános",
+    "message_community": "Közösségi fókusz",
+    "message_short": "Rövid és tömör",
+    "message_help": "Segítség és támogatás",
+    "step3_label": "3. Oszd meg most",
+    "share_all": "Megosztás (összes app)",
+    "share_whatsapp": "WhatsApp",
+    "share_telegram": "Telegram",
+    "share_facebook": "Facebook",
+    "share_email": "E-mail"
+  },
+  "verification": {
+    "title": "Ellenőrzés folyamatban",
+    "description": "Üdvözlünk a közösségben! A biztonság és bizalom érdekében minden tagot személyesen igazolunk egy rövid videóhívás keretében.",
+    "step_register": "Regisztráció",
+    "step_video_call": "Videóhívás",
+    "step_active": "Aktív",
+    "next_step": "Következő lépés",
+    "call_notice": "Kérünk, foglalj időpontot egy 2 perces hívásra egy moderátorral a fiókod aktiválásához.",
+    "book_button": "Időpontfoglalás",
+    "data_notice": "Adataid biztonságban vannak, csak az ellenőrzéshez használjuk őket.",
+    "logout_button": "Kijelentkezés"
+  },
+  "admin": {
+    "sidebar": {
+      "brand": "ADMIN",
+      "user_management": "Felhasználók kezelése",
+      "tag_management": "Címkék kezelése",
+      "disputes": "Konfliktusok",
+      "broadcasts": "Üzenetszórás",
+      "super_admin": "Super Admin"
+    },
+    "header": {
+      "user_management": "Felhasználók kezelése",
+      "tag_management": "Címkék kezelése",
+      "disputes": "Konfliktusok",
+      "broadcasts": "Üzenetszórás",
+      "default": "Admin Vezérlőpult"
+    },
+    "stats": {
+      "total_users": "Összes felhasználó",
+      "active_pending": "Aktív / Függőben",
+      "time_volume": "Összesített időforgalom",
+      "time_unit": "óra",
+      "garas_volume": "Összesített Garas-forgalom",
+      "action_required": "Teendő szükséges",
+      "disputes": "Konfliktusok"
+    },
+    "users": {
+      "search_placeholder": "Keresés (ID, Név, E-mail)...",
+      "table_title": "Felhasználók és egyenlegek",
+      "empty": "Nincs találat",
+      "loading": "Betöltés...",
+      "error": "Hiba a betöltéskor",
+      "table": {
+        "col_name": "Név",
+        "col_role": "Szerepkör",
+        "col_trust": "Bizalom",
+        "col_garas_balance": "Garas egyenleg",
+        "col_time_balance": "Idő egyenleg",
+        "col_status": "Állapot",
+        "col_action": "Művelet",
+        "status_pending": "Ellenőrzésre vár",
+        "status_active": "Aktív",
+        "verify_button": "Igazolás",
+        "edit_button": "Szerkesztés"
+      },
+      "edit_modal": {
+        "title": "Szerkesztés: {name}",
+        "trust_label": "Bizalmi szint (Kézi felülbírálás)",
+        "trust_t1": "T1 Újonc",
+        "trust_t2": "T2 Aktív Tag",
+        "trust_t3": "T3 Bizalmi Tag",
+        "trust_t4": "T4 Mester",
+        "trust_t5": "T5 Nagykövet",
+        "trust_t6": "T6 Legenda",
+        "verification_label": "Ellenőrzési állapot",
+        "verification_pending": "Függőben",
+        "verification_verified": "Igazolt",
+        "account_label": "Fiók állapota",
+        "account_active": "Aktív",
+        "account_banned": "Kitiltva",
+        "cancel_button": "Mégsem",
+        "save_button": "Mentés"
+      }
+    },
+    "disputes": {
+      "header": "Nyitott konfliktusok",
+      "col_case_id": "Ügyszám",
+      "col_creditor": "Hitelező (Kérő)",
+      "col_debtor": "Adós (Fizető)",
+      "col_reason": "Indoklás (részlet)",
+      "col_status": "Állapot",
+      "col_controls": "Kezelés",
+      "empty": "Nincs függőben lévő ügy",
+      "manage_button": "Ügy kezelése",
+      "loading": "Konfliktusok betöltése...",
+      "case_modal": {
+        "title": "Ügy: {id}... - Konfliktus",
+        "creditor_statement": "{name} nyilatkozata (Hitelező)",
+        "no_description": "Nincs leírás megadva",
+        "details_section": "Ügy részletei",
+        "creditor_label": "Hitelező (Kérő)",
+        "debtor_label": "Adós (Fizető)",
+        "amount_time_label": "Összeg (Idő)",
+        "amount_time_unit": "perc",
+        "amount_garas_label": "Összeg (Garas)",
+        "consent_section": "Döntőbírósági hozzájárulás",
+        "consent_description": "A privát chat előzmények megtekintéséhez mindkét fél aktív beleegyezése szükséges a titkosítás feloldásához ennél az ügynél.",
+        "consent_granted": "Megadva: Ma, {time}",
+        "consent_waiting": "Várakozás válaszra...",
+        "request_consent_button": "Hozzájárulás és infó kérése: {name}",
+        "consent_sent": "Kérés elküldve: {name}",
+        "resolution_label": "Adminisztrátori döntés (opcionális)",
+        "resolution_placeholder": "Indokold meg a döntésed...",
+        "reject_button": "Követelés elutasítása",
+        "refund_button": "Visszatérítés kényszerítése"
+      }
+    },
+    "tags": {
+      "pending_title": "Függőben lévő címkék (Fordítás szükséges)",
+      "col_original": "Eredeti bevitel",
+      "col_de": "DE (Német)",
+      "col_en": "EN (Angol)",
+      "col_hu": "HU (Magyar)",
+      "col_action": "Művelet",
+      "placeholder_de": "Német...",
+      "placeholder_en": "Angol...",
+      "placeholder_hu": "Magyar...",
+      "add_button": "Hozzáadás",
+      "pending_empty": "Nincsenek függő címkék",
+      "library_title": "Globális címketár (Aktív)",
+      "col_tag_id": "Címke ID",
+      "library_empty": "Nincsenek hivatalos címkék",
+      "loading": "Betöltés...",
+      "delete_confirm": "Biztosan törölni akarod ezt a címkét?",
+      "approve_success": "Címke jóváhagyva!",
+      "approve_error": "Hiba a jóváhagyáskor",
+      "delete_success": "Címke törölve!",
+      "delete_error": "Hiba a törléskor"
+    }
+  }
+}

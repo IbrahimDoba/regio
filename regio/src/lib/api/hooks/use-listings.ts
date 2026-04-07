@@ -122,6 +122,25 @@ export function useUpdateListing() {
 }
 
 /**
+ * Hook to upload media files to an existing listing
+ */
+export function useUploadListingMedia() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ listingId, files }: { listingId: string; files: File[] }) =>
+      listingsApi.uploadMedia(listingId, files),
+    onSuccess: (updatedListing) => {
+      queryClient.setQueryData(
+        queryKeys.listings.detail(updatedListing.id),
+        updatedListing
+      );
+      queryClient.invalidateQueries({ queryKey: queryKeys.listings.lists() });
+    },
+  });
+}
+
+/**
  * Hook to delete a listing
  */
 export function useDeleteListing() {

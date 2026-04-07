@@ -15,6 +15,7 @@ import {
   FaXmark,
 } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ActionSheetProps {
   isOpen: boolean;
@@ -55,6 +56,8 @@ export function ActionSheet({
     }
   };
 
+  const { t } = useLanguage();
+
   if (!isOpen) return null;
 
   return (
@@ -68,12 +71,12 @@ export function ActionSheet({
           'p-5 animate-slide-up shadow-2xl'
         )}
       >
-        <h3 className="font-bold text-gray-800 mb-4">Actions</h3>
+        <h3 className="font-bold text-gray-800 mb-4">{t.chat.action_sheet.title}</h3>
 
         <div className="space-y-1">
           <ActionItem
             icon={<FaHandHoldingDollar className="w-5 h-5" />}
-            label="Request Payment"
+            label={t.chat.action_sheet.request_payment}
             onClick={() => {
               onClose();
               onRequestPayment();
@@ -81,7 +84,7 @@ export function ActionSheet({
           />
           <ActionItem
             icon={<FaImage className="w-5 h-5" />}
-            label="Send Photo"
+            label={t.chat.action_sheet.send_photo}
             onClick={() => {
               onClose();
               onSendPhoto?.();
@@ -89,7 +92,7 @@ export function ActionSheet({
           />
           <ActionItem
             icon={<FaLocationDot className="w-5 h-5" />}
-            label="Share Location"
+            label={t.chat.action_sheet.share_location}
             onClick={() => {
               onClose();
               onShareLocation?.();
@@ -101,7 +104,7 @@ export function ActionSheet({
           onClick={onClose}
           className="w-full mt-4 py-3 text-gray-500 font-medium hover:bg-gray-50 rounded-lg transition-colors"
         >
-          Cancel
+          {t.chat.action_sheet.cancel}
         </button>
       </div>
 

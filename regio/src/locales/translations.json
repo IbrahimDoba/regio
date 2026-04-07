@@ -112,6 +112,10 @@
     "submit_button": "Create Listing",
     "submit_loading": "Creating...",
     "error_failed": "Failed to create listing. Please check all fields and try again.",
+    "images_label": "Photos",
+    "images_hint": "Up to 5 images, max 1MB each (JPEG, PNG, WebP)",
+    "images_add": "Add Photos",
+    "images_uploading": "Uploading photos...",
 
     "offer_service": {
       "time_factor_label": "Time Factor",
@@ -327,7 +331,8 @@
     "tab_unread": "Unread ({count})",
     "empty": "No notifications.",
     "section_messages": "Messages",
-    "section_activity": "Activity"
+    "section_activity": "Activity",
+    "section_broadcasts": "Broadcasts"
   },
 
   "invite": {

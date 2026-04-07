@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { FaBell, FaBullhorn, FaCoins, FaClock, FaUserPlus, FaArrowLeft } from "react-icons/fa6";
 import { FaRegComments, FaRegBellSlash, FaMessage } from "react-icons/fa6";
 import { useRealTime, type LocalNotification } from "@/context/RealTimeContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useBroadcastInbox, useMarkBroadcastRead } from "@/lib/api/hooks/use-broadcasts";
+import type { BroadcastMessage } from "@/lib/api/types";
 
 // Icon mapping based on notification type
 const getNotificationIcon = (type: string) => {
@@ -43,51 +46,64 @@ const formatRelativeTime = (dateString: string) => {
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const { notifications, unreadCount, markNotificationAsRead, markAllNotificationsAsRead } = useRealTime();
+  const { data: broadcastInbox = [] } = useBroadcastInbox();
+  const { mutate: markBroadcastRead } = useMarkBroadcastRead();
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
   const [isLoading, setIsLoading] = useState(false);
+
+  const unreadBroadcasts = broadcastInbox.filter((b) => !b.is_read).length;
+  const totalUnread = unreadCount + unreadBroadcasts;
 
   // Filter notifications based on active tab
   const filteredNotifications = notifications.filter((item) => {
     if (activeTab === "unread") return !item.is_read;
     return true;
   });
+  const filteredBroadcasts = broadcastInbox.filter((item) => {
+    if (activeTab === "unread") return !item.is_read;
+    return true;
+  });
 
-  // Separate into inbox (chat) and activity (other) for display
-  const inboxItems = filteredNotifications.filter(
-    (item) => item.type === "chat_message"
-  );
-  const activityItems = filteredNotifications.filter(
-    (item) => item.type !== "chat_message"
-  );
+  // Separate chat vs activity
+  const inboxItems = filteredNotifications.filter((item) => item.type === "chat_message");
+  const activityItems = filteredNotifications.filter((item) => item.type !== "chat_message");
 
-  // Handle notification click
+  // Handle chat notification click
   const handleNotificationClick = async (item: LocalNotification) => {
-    // Mark as read
     if (!item.is_read) {
       await markNotificationAsRead(item.id);
     }
-
-    // Navigate based on type
     if (item.room_id) {
-      // It's a chat notification - navigate to chat
       const params = new URLSearchParams({
         room: item.room_id,
         name: item.sender_name || "Chat",
       });
       router.push(`/chat?${params.toString()}`);
     }
-    // Add more navigation logic for other notification types as needed
+  };
+
+  // Handle broadcast click
+  const handleBroadcastClick = (item: BroadcastMessage) => {
+    if (!item.is_read) {
+      markBroadcastRead(item.id);
+    }
+    if (item.link) {
+      window.open(item.link, "_blank", "noopener,noreferrer");
+    }
   };
 
   // Handle mark all as read
   const handleMarkAllRead = async () => {
     setIsLoading(true);
     await markAllNotificationsAsRead();
+    // Mark all unread broadcasts as read
+    broadcastInbox.filter((b) => !b.is_read).forEach((b) => markBroadcastRead(b.id));
     setIsLoading(false);
   };
 
-  // Render notification item
+  // Render chat/activity notification item
   const renderNotificationItem = (item: LocalNotification) => {
     const { icon, className } = getNotificationIcon(item.type);
     const isUnread = !item.is_read;
@@ -118,6 +134,42 @@ export default function NotificationsPage() {
     );
   };
 
+  // Render broadcast item
+  const renderBroadcastItem = (item: BroadcastMessage) => {
+    const isUnread = !item.is_read;
+
+    return (
+      <li
+        key={item.id}
+        className={`flex gap-[15px] p-[15px] border-b border-[#f5f5f5] cursor-pointer transition-colors relative hover:bg-[#fafafa] ${
+          isUnread ? "bg-[#fff8e1]" : "bg-white"
+        }`}
+        onClick={() => handleBroadcastClick(item)}
+      >
+        <div className="w-[40px] h-[40px] rounded-full flex justify-center items-center text-[18px] shrink-0 bg-[#fff3e0] text-[#f57c00]">
+          <FaBullhorn />
+        </div>
+        <div className="flex-grow flex flex-col justify-center">
+          <div className="text-[14px] font-[600] text-[#222] mb-[3px]">{item.title}</div>
+          <div className="text-[13px] text-[#666] leading-[1.3] line-clamp-2">{item.body}</div>
+          {item.link && (
+            <div className="text-[11px] text-[#1e88e5] mt-[3px] truncate">{item.link}</div>
+          )}
+          <div className="flex justify-between items-center mt-[6px] text-[11px] text-[#999]">
+            <span>Broadcast</span>
+            <span>{formatRelativeTime(item.sent_at)}</span>
+          </div>
+        </div>
+        {isUnread && (
+          <div className="absolute top-[15px] right-[15px] w-[8px] h-[8px] rounded-full bg-[#f57c00]"></div>
+        )}
+      </li>
+    );
+  };
+
+  const hasAnyItems =
+    filteredNotifications.length > 0 || filteredBroadcasts.length > 0;
+
   return (
     <div className="bg-[var(--bg-app)] min-h-screen pb-[70px] flex flex-col">
       {/* Header */}
@@ -130,20 +182,20 @@ export default function NotificationsPage() {
             >
               <FaArrowLeft className="w-4 h-4" />
             </button>
-            <FaBell className="text-[var(--color-nav-bg)]" /> Notifications
-            {unreadCount > 0 && (
+            <FaBell className="text-[var(--color-nav-bg)]" /> {t.notifications.header}
+            {totalUnread > 0 && (
               <span className="bg-[var(--color-green-offer)] text-white text-[12px] font-[600] px-[8px] py-[2px] rounded-full">
-                {unreadCount}
+                {totalUnread}
               </span>
             )}
           </div>
-          {unreadCount > 0 && (
+          {totalUnread > 0 && (
             <button
               className="text-[12px] text-[var(--color-green-offer)] font-[600] cursor-pointer disabled:opacity-50"
               onClick={handleMarkAllRead}
               disabled={isLoading}
             >
-              {isLoading ? "..." : "Mark all read"}
+              {isLoading ? "..." : t.notifications.mark_all_read}
             </button>
           )}
         </div>
@@ -159,7 +211,7 @@ export default function NotificationsPage() {
           }`}
           onClick={() => setActiveTab("all")}
         >
-          All ({notifications.length})
+          {t.notifications.tab_all.replace('{count}', String(notifications.length + broadcastInbox.length))}
         </div>
         <div
           className={`flex-1 text-center p-[15px] text-[13px] font-[600] text-[#666] cursor-pointer border-b-[3px] transition-all ${
@@ -169,24 +221,34 @@ export default function NotificationsPage() {
           }`}
           onClick={() => setActiveTab("unread")}
         >
-          Unread ({unreadCount})
+          {t.notifications.tab_unread.replace('{count}', String(totalUnread))}
         </div>
       </div>
 
       {/* List Content */}
       <div className="flex-grow overflow-y-auto">
-        {filteredNotifications.length === 0 ? (
+        {!hasAnyItems ? (
           <div className="text-center p-[40px_20px] text-[#999]">
             <FaRegBellSlash className="text-[40px] mb-[10px] opacity-30 mx-auto" />
-            <p>No notifications.</p>
+            <p>{t.notifications.empty}</p>
           </div>
         ) : (
           <>
+            {/* Broadcasts Section */}
+            {filteredBroadcasts.length > 0 && (
+              <>
+                <div className="px-[15px] py-[10px] bg-[#f5f5f5] text-[12px] font-[600] text-[#666] uppercase tracking-wide">
+                  {t.notifications.section_broadcasts}
+                </div>
+                <ul className="list-none p-0">{filteredBroadcasts.map(renderBroadcastItem)}</ul>
+              </>
+            )}
+
             {/* Chat Notifications Section */}
             {inboxItems.length > 0 && (
               <>
                 <div className="px-[15px] py-[10px] bg-[#f5f5f5] text-[12px] font-[600] text-[#666] uppercase tracking-wide">
-                  Messages
+                  {t.notifications.section_messages}
                 </div>
                 <ul className="list-none p-0">{inboxItems.map(renderNotificationItem)}</ul>
               </>
@@ -196,7 +258,7 @@ export default function NotificationsPage() {
             {activityItems.length > 0 && (
               <>
                 <div className="px-[15px] py-[10px] bg-[#f5f5f5] text-[12px] font-[600] text-[#666] uppercase tracking-wide">
-                  Activity
+                  {t.notifications.section_activity}
                 </div>
                 <ul className="list-none p-0">{activityItems.map(renderNotificationItem)}</ul>
               </>

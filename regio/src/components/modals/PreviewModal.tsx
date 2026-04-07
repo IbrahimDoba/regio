@@ -5,6 +5,8 @@ import { FaEnvelope } from "react-icons/fa6";
 import { ListingPublic } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { getCategoryDetails, formatPrice, ListingAttributes } from "@/lib/feed-helpers";
+import { useLanguage } from "@/context/LanguageContext";
+import type { Translations } from "@/context/LanguageContext";
 
 interface PreviewModalProps {
   listing: ListingPublic | null;
@@ -22,7 +24,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function AttributeDetails({ listing }: { listing: ListingPublic }) {
+function AttributeDetails({ listing, a }: { listing: ListingPublic; a: Translations["preview_modal"]["attributes"] }) {
   const attrs = listing.attributes as ListingAttributes;
   if (!attrs) return null;
 
@@ -30,51 +32,51 @@ function AttributeDetails({ listing }: { listing: ListingPublic }) {
 
   switch (listing.category) {
     case "OFFER_SERVICE":
-      rows.push(<Row key="tf" label="Time Factor" value={`${attrs.time_factor ?? 1.0}x — final cost = hours worked × ${attrs.time_factor ?? 1.0}`} />);
+      rows.push(<Row key="tf" label={a.time_factor} value={`${attrs.time_factor ?? 1.0}x — final cost = hours worked × ${attrs.time_factor ?? 1.0}`} />);
       break;
 
     case "SELL_PRODUCT":
-      if (attrs.time_amount) rows.push(<Row key="ta" label="Price (Time)" value={`${attrs.time_amount} min`} />);
-      if (attrs.regio_amount) rows.push(<Row key="ra" label="Price (Garas)" value={`${attrs.regio_amount} G`} />);
-      if (attrs.condition) rows.push(<Row key="cond" label="Condition" value={attrs.condition} />);
-      if (attrs.stock) rows.push(<Row key="stock" label="Stock" value={attrs.stock} />);
+      if (attrs.time_amount) rows.push(<Row key="ta" label={a.price_time} value={`${attrs.time_amount} min`} />);
+      if (attrs.regio_amount) rows.push(<Row key="ra" label={a.price_garas} value={`${attrs.regio_amount} G`} />);
+      if (attrs.condition) rows.push(<Row key="cond" label={a.condition} value={attrs.condition} />);
+      if (attrs.stock) rows.push(<Row key="stock" label={a.stock} value={attrs.stock} />);
       break;
 
     case "OFFER_RENTAL":
-      if (attrs.handling_fee_time) rows.push(<Row key="ft" label="Handling Fee" value={`${attrs.handling_fee_time} min`} />);
-      if (attrs.usage_fee_regio) rows.push(<Row key="fr" label="Usage Fee (wear & tear)" value={`${attrs.usage_fee_regio} G`} />);
-      if (attrs.max_rental_duration) rows.push(<Row key="md" label="Max Duration" value={attrs.max_rental_duration} />);
-      if (attrs.deposit_required != null) rows.push(<Row key="dep" label="Deposit Required" value={attrs.deposit_required ? "Yes" : "No"} />);
+      if (attrs.handling_fee_time) rows.push(<Row key="ft" label={a.handling_fee} value={`${attrs.handling_fee_time} min`} />);
+      if (attrs.usage_fee_regio) rows.push(<Row key="fr" label={a.usage_fee} value={`${attrs.usage_fee_regio} G`} />);
+      if (attrs.max_rental_duration) rows.push(<Row key="md" label={a.max_duration} value={attrs.max_rental_duration} />);
+      if (attrs.deposit_required != null) rows.push(<Row key="dep" label={a.deposit_required} value={attrs.deposit_required ? a.deposit_yes : a.deposit_no} />);
       break;
 
     case "RIDE_SHARE":
-      if (attrs.from_location) rows.push(<Row key="from" label="From" value={attrs.from_location} />);
-      if (attrs.to_location) rows.push(<Row key="to" label="To" value={attrs.to_location} />);
-      if (attrs.departure_datetime) rows.push(<Row key="dep" label="Departure" value={new Date(attrs.departure_datetime).toLocaleString()} />);
-      if (attrs.seats_available) rows.push(<Row key="seats" label="Seats Available" value={attrs.seats_available} />);
-      if (attrs.price_time) rows.push(<Row key="pt" label="Price / Seat (Time)" value={`${attrs.price_time} min`} />);
-      if (attrs.price_regio) rows.push(<Row key="pg" label="Price / Seat (Garas)" value={`${attrs.price_regio} G`} />);
+      if (attrs.from_location) rows.push(<Row key="from" label={a.from} value={attrs.from_location} />);
+      if (attrs.to_location) rows.push(<Row key="to" label={a.to} value={attrs.to_location} />);
+      if (attrs.departure_datetime) rows.push(<Row key="dep" label={a.departure} value={new Date(attrs.departure_datetime).toLocaleString()} />);
+      if (attrs.seats_available) rows.push(<Row key="seats" label={a.seats_available} value={attrs.seats_available} />);
+      if (attrs.price_time) rows.push(<Row key="pt" label={a.price_per_seat_time} value={`${attrs.price_time} min`} />);
+      if (attrs.price_regio) rows.push(<Row key="pg" label={a.price_per_seat_garas} value={`${attrs.price_regio} G`} />);
       break;
 
     case "EVENT_WORKSHOP":
-      if (attrs.event_start_date) rows.push(<Row key="es" label="Starts" value={new Date(attrs.event_start_date).toLocaleString()} />);
-      if (attrs.event_end_date) rows.push(<Row key="ee" label="Ends" value={new Date(attrs.event_end_date).toLocaleString()} />);
-      if (attrs.location) rows.push(<Row key="loc" label="Location" value={attrs.location} />);
-      if (attrs.max_participants) rows.push(<Row key="mp" label="Max Participants" value={attrs.max_participants} />);
-      if (attrs.price_time) rows.push(<Row key="pt" label="Entry Fee (Time)" value={`${attrs.price_time} min`} />);
-      if (attrs.price_regio) rows.push(<Row key="pg" label="Material Fee (Garas)" value={`${attrs.price_regio} G`} />);
+      if (attrs.event_start_date) rows.push(<Row key="es" label={a.starts} value={new Date(attrs.event_start_date).toLocaleString()} />);
+      if (attrs.event_end_date) rows.push(<Row key="ee" label={a.ends} value={new Date(attrs.event_end_date).toLocaleString()} />);
+      if (attrs.location) rows.push(<Row key="loc" label={a.location} value={attrs.location} />);
+      if (attrs.max_participants) rows.push(<Row key="mp" label={a.max_participants} value={attrs.max_participants} />);
+      if (attrs.price_time) rows.push(<Row key="pt" label={a.entry_fee_time} value={`${attrs.price_time} min`} />);
+      if (attrs.price_regio) rows.push(<Row key="pg" label={a.material_fee_garas} value={`${attrs.price_regio} G`} />);
       break;
 
     case "SEARCH_SERVICE":
-      if (attrs.deadline) rows.push(<Row key="dl" label="Deadline" value={new Date(attrs.deadline).toLocaleDateString()} />);
+      if (attrs.deadline) rows.push(<Row key="dl" label={a.deadline} value={new Date(attrs.deadline).toLocaleDateString()} />);
       break;
 
     case "SEARCH_PRODUCT":
-      if (attrs.urgency_deadline) rows.push(<Row key="dl" label="Needed By" value={new Date(attrs.urgency_deadline).toLocaleDateString()} />);
+      if (attrs.urgency_deadline) rows.push(<Row key="dl" label={a.needed_by} value={new Date(attrs.urgency_deadline).toLocaleDateString()} />);
       break;
   }
 
-  if (attrs.price_notes) rows.push(<Row key="pn" label="Price Notes" value={attrs.price_notes} />);
+  if (attrs.price_notes) rows.push(<Row key="pn" label={a.price_notes} value={attrs.price_notes} />);
 
   if (rows.length === 0) return null;
 
@@ -86,6 +88,7 @@ function AttributeDetails({ listing }: { listing: ListingPublic }) {
 }
 
 export default function PreviewModal({ listing, onClose, onContact, isContacting }: PreviewModalProps) {
+  const { t } = useLanguage();
   if (!listing) return null;
 
   const { color, icon, label, colorVar } = getCategoryDetails(listing.category);
@@ -132,7 +135,7 @@ export default function PreviewModal({ listing, onClose, onContact, isContacting
                 <div className="font-bold text-[#333]">
                   {listing.owner_name}
                 </div>
-                <div>Region {listing.radius_km}km</div>
+                <div>{t.feed_card.region_label} {listing.radius_km}{t.feed_card.region_unit}</div>
               </div>
             </div>
             <div className="text-right">
@@ -161,8 +164,23 @@ export default function PreviewModal({ listing, onClose, onContact, isContacting
             {listing.description}
           </div>
 
+          {/* Image Gallery */}
+          {listing.media_urls.length > 0 && (
+            <div className="flex gap-[8px] overflow-x-auto pb-[4px] mb-[20px]">
+              {listing.media_urls.map((url, i) => (
+                <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                  <img
+                    src={url}
+                    alt={`Photo ${i + 1}`}
+                    className="h-[160px] w-auto rounded-[6px] object-cover border border-[#eee] hover:opacity-90 transition-opacity"
+                  />
+                </a>
+              ))}
+            </div>
+          )}
+
           {/* Category-specific attributes */}
-          <AttributeDetails listing={listing} />
+          <AttributeDetails listing={listing} a={t.preview_modal.attributes} />
         </div>
 
         {/* Footer */}
@@ -170,7 +188,7 @@ export default function PreviewModal({ listing, onClose, onContact, isContacting
           {priceDisplay && (
             <div className="bg-[#f0f7e6] p-[15px] rounded-[6px] flex justify-between items-center mb-[10px] border border-[#dcebc0]">
               <span className="text-[12px] text-[#666] font-[600]">
-                Value / Price:
+                {t.preview_modal.price_label}
               </span>
               <span className="text-[18px] font-[800] text-[var(--color-green-offer)]">
                 {priceDisplay}
@@ -186,11 +204,11 @@ export default function PreviewModal({ listing, onClose, onContact, isContacting
             {isContacting ? (
               <>
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Starting chat...
+                {t.preview_modal.contact_loading}
               </>
             ) : (
               <>
-                <FaEnvelope /> Contact
+                <FaEnvelope /> {t.preview_modal.contact_button}
               </>
             )}
           </button>

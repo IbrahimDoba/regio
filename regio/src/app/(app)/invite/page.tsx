@@ -13,11 +13,11 @@ import {
   FaFacebook,
   FaRegEnvelope,
 } from "react-icons/fa6";
-import { useLanguage } from "@/context/LanguageContext";
 import {
   useUserInvites,
   useRequestNewInvites,
 } from "@/lib/api/hooks/use-users";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function InvitePage() {
   const { t } = useLanguage();
@@ -56,19 +56,19 @@ export default function InvitePage() {
 
   const templates = [
     {
-      title: "Standard",
+      title: t.invite.message_standard,
       text: "Hey! Join me on regio.is to trade services and goods locally. It's invite-only. Here is your code: %CODE%",
     },
     {
-      title: "Community Focus",
+      title: t.invite.message_community,
       text: "I found a great community for fair local trade called regio.is. I think you'd fit in perfectly! Join us with: %CODE%",
     },
     {
-      title: "Short & Direct",
+      title: t.invite.message_short,
       text: "Here is your access code for regio.is: %CODE%",
     },
     {
-      title: "Help & Support",
+      title: t.invite.message_help,
       text: "Let's help each other in the neighborhood. regio.is makes it easy to swap time and goods. Join with: %CODE%",
     },
   ];
@@ -140,8 +140,7 @@ export default function InvitePage() {
       <header className="bg-white border-b border-[#eee] sticky top-0 z-100">
         <div className="flex justify-between items-center p-[15px]">
           <div className="text-[20px] font-[800] text-[#333] flex items-center gap-[10px]">
-            <FaTicket className="text-[var(--color-green-offer)]" /> Invite
-            Friends
+            <FaTicket className="text-[var(--color-green-offer)]" /> {t.invite.header}
           </div>
           <div
             className="cursor-pointer text-[#888] text-[20px]"
@@ -155,10 +154,10 @@ export default function InvitePage() {
       {/* Hero */}
       <div className="bg-gradient-to-br from-[#8cb348] to-[#5e8e3e] text-white p-[25px_20px] text-center rounded-b-[20px] mb-[15px] shadow-md relative overflow-hidden">
         <div className="text-[32px] font-[800] mb-[5px] relative z-10">
-          {availableCount} / 3
+          {t.invite.codes_available.replace('{count}', String(availableCount))}
         </div>
         <div className="text-[14px] opacity-95 relative z-10">
-          Codes available
+          {t.invite.codes_label}
         </div>
         <button
           className="mt-4 bg-white/20 hover:bg-white/30 text-white text-xs py-1 px-3 rounded-full relative z-10 transition-colors"
@@ -166,25 +165,23 @@ export default function InvitePage() {
           disabled={requestInvitesMutation.isPending}
         >
           {requestInvitesMutation.isPending
-            ? "Requesting..."
-            : "Request New Codes"}
+            ? t.invite.request_loading
+            : t.invite.request_button}
         </button>
       </div>
 
       {/* Mission */}
       <div className="m-[0_20px_20px_20px] p-[15px] bg-[#f0f7e6] border-l-[4px] border-l-[var(--color-green-offer)] rounded-[4px] text-[13px] text-[#555] leading-[1.5]">
         <span className="font-[700] text-[var(--color-nav-bg)] mb-[5px] block">
-          Why invite?
+          {t.invite.why_invite_title}
         </span>
-        We want to build a strong, trusted community. Please invite only people
-        who are genuinely interested in local exchange and fair economy. Quality
-        over quantity.
+        {t.invite.why_invite_body}
       </div>
 
       <div className="px-[20px]">
         {/* 1. Code Selection */}
         <div className="text-[14px] font-[700] text-[#888] uppercase tracking-[0.5px] mb-[10px] mt-[10px]">
-          1. Select a Code
+          {t.invite.step1_label}
         </div>
 
         {invites?.map((c) => (
@@ -212,7 +209,7 @@ export default function InvitePage() {
                   c.is_used ? "text-[#999]" : "text-[var(--color-green-offer)]"
                 }`}
               >
-                {c.is_used ? "Used" : "Available"}
+                {c.is_used ? t.invite.code_used : t.invite.code_available}
               </span>
             </div>
             {c.is_used ? (
@@ -227,13 +224,13 @@ export default function InvitePage() {
 
         {!invites?.length && (
           <div className="text-center text-gray-500 py-4">
-            No invites found. Request new ones above.
+            {t.invite.no_codes}
           </div>
         )}
 
         {/* 2. Text Selection */}
         <div className="text-[14px] font-[700] text-[#888] uppercase tracking-[0.5px] mb-[10px] mt-[20px]">
-          2. Choose a Message
+          {t.invite.step2_label}
         </div>
 
         {templates.map((t, i) => (
@@ -261,38 +258,38 @@ export default function InvitePage() {
 
         {/* 3. Share Action */}
         <div className="bg-white border border-[#e0e0e0] rounded-[12px] p-[20px] mt-[25px] mb-[30px] text-center">
-          <div className="text-[16px] font-[700] mb-[15px]">3. Share Now</div>
+          <div className="text-[16px] font-[700] mb-[15px]">{t.invite.step3_label}</div>
 
           <div className="grid grid-cols-2 gap-[10px]">
             <button
               className="col-span-2 p-[14px] rounded-[6px] border-none text-white font-[600] text-[14px] cursor-pointer flex items-center justify-center gap-[8px] bg-[#333]"
               onClick={() => share("native")}
             >
-              <FaShareNodes /> Share (All Apps)
+              <FaShareNodes /> {t.invite.share_all}
             </button>
             <button
               className="p-[12px] rounded-[6px] border-none text-white font-[600] text-[13px] cursor-pointer flex items-center justify-center gap-[8px] bg-[#25D366]"
               onClick={() => share("whatsapp")}
             >
-              <FaWhatsapp /> WhatsApp
+              <FaWhatsapp /> {t.invite.share_whatsapp}
             </button>
             <button
               className="p-[12px] rounded-[6px] border-none text-white font-[600] text-[13px] cursor-pointer flex items-center justify-center gap-[8px] bg-[#0088cc]"
               onClick={() => share("telegram")}
             >
-              <FaTelegram /> Telegram
+              <FaTelegram /> {t.invite.share_telegram}
             </button>
             <button
               className="p-[12px] rounded-[6px] border-none text-white font-[600] text-[13px] cursor-pointer flex items-center justify-center gap-[8px] bg-[#1877f2]"
               onClick={() => share("facebook")}
             >
-              <FaFacebook /> Facebook
+              <FaFacebook /> {t.invite.share_facebook}
             </button>
             <button
               className="p-[12px] rounded-[6px] border-none text-white font-[600] text-[13px] cursor-pointer flex items-center justify-center gap-[8px] bg-[#777]"
               onClick={() => share("email")}
             >
-              <FaRegEnvelope /> Email
+              <FaRegEnvelope /> {t.invite.share_email}
             </button>
           </div>
         </div>

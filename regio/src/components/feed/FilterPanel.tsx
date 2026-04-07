@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ListingCategory } from "@/lib/api/types";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface FilterItem {
   category: ListingCategory;
@@ -56,6 +57,7 @@ export default function FilterPanel({
   searchQuery,
   setSearchQuery,
 }: FilterPanelProps) {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   return (
@@ -63,7 +65,7 @@ export default function FilterPanel({
       <input
         type="text"
         className="w-full p-[10px] border border-[#ccc] rounded-[5px] mb-[10px] bg-[var(--input-bg)]"
-        placeholder="Search..."
+        placeholder={t.filter_panel.search_placeholder}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
@@ -83,7 +85,7 @@ export default function FilterPanel({
               style={{
                 backgroundColor: isActive ? CATEGORY_CONFIG[f.category].colorVar : undefined,
               }}
-              title={f.label}
+              title={t.category_labels[f.category]}
             >
               {ICON_MAP[f.icon]}
             </div>

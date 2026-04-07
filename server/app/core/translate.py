@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 SUPPORTED_LANGUAGES = {"EN", "DE", "HU"}
 
-client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY) if settings.OPENAI_API_KEY else None
 
 
 class TranslateService:
@@ -78,6 +78,10 @@ class TranslateService:
         origin_language = origin_language.upper()
         if origin_language not in SUPPORTED_LANGUAGES:
             logger.error(f"Unsupported language '{origin_language}' for listing {listing_id}")
+            return
+
+        if not client:
+            logger.warning("OPENAI_API_KEY not set — skipping translation")
             return
 
         try:

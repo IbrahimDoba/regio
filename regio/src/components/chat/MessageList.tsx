@@ -13,6 +13,7 @@ import { PaymentRequestCard } from './PaymentRequestCard';
 import type { ChatMessage } from '@/lib/api/types';
 import type { ReadReceipt } from '@/context/RealTimeContext';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -34,22 +35,15 @@ function formatTime(timestamp: number): string {
 /**
  * Format date for date separators
  */
-function formatDate(timestamp: number): string {
+function formatDate(timestamp: number, todayLabel: string, yesterdayLabel: string): string {
   const date = new Date(timestamp);
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  if (date.toDateString() === today.toDateString()) {
-    return 'Today';
-  }
-  if (date.toDateString() === yesterday.toDateString()) {
-    return 'Yesterday';
-  }
-  return date.toLocaleDateString([], {
-    month: 'short',
-    day: 'numeric',
-  });
+  if (date.toDateString() === today.toDateString()) return todayLabel;
+  if (date.toDateString() === yesterday.toDateString()) return yesterdayLabel;
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
 /**
@@ -77,6 +71,7 @@ export function MessageList({
   onDenyRequest,
   getReadReceipts,
 }: MessageListProps) {
+  const { t } = useLanguage();
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -107,7 +102,7 @@ export function MessageList({
         <div className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5">
           <FaLock className="w-3 h-3 text-gray-500" />
           <span className="text-xs text-gray-600">
-            Messages are end-to-end encrypted.
+            {t.chat.message_list.encrypted_notice}
           </span>
         </div>
       </div>
@@ -116,7 +111,7 @@ export function MessageList({
       {messages.length === 0 && (
         <div className="flex-1 flex items-center justify-center min-h-[200px]">
           <p className="text-gray-500 text-sm text-center">
-            No messages yet.<br />Start the conversation!
+            {t.chat.message_list.empty}
           </p>
         </div>
       )}
@@ -128,7 +123,7 @@ export function MessageList({
           <div className="flex justify-center my-2">
             <div className="bg-green-100/90 backdrop-blur-sm px-3 py-1 rounded-full">
               <span className="text-xs font-semibold text-gray-600">
-                {formatDate(dateMessages[0].timestamp)}
+                {formatDate(dateMessages[0].timestamp, t.chat.message_list.today, t.chat.message_list.yesterday)}
               </span>
             </div>
           </div>

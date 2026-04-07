@@ -1,0 +1,481 @@
+{
+  "auth": {
+    "login": {
+      "section_title": "Login-Daten",
+      "email_label": "E-Mail-Adresse",
+      "password_label": "Passwort",
+      "submit_loading": "Anmeldung läuft...",
+      "submit": "Einloggen",
+      "toggle_to_register": "Noch kein Konto? Nutze einen Einladungscode",
+      "error_invalid": "Ungültige E-Mail oder Passwort"
+    },
+    "register": {
+      "section_title": "Einladung erforderlich",
+      "invite_placeholder": "REGIO-XXXX",
+      "real_name_notice": "Echtname erforderlich",
+      "first_name_label": "Vorname",
+      "last_name_label": "Nachname",
+      "email_label": "E-Mail",
+      "password_label": "Passwort erstellen",
+      "password_placeholder": "Min. 8 Zeichen",
+      "terms_checkbox": "Ich akzeptiere die Nutzungsbedingungen",
+      "submit_loading": "Konto wird erstellt...",
+      "submit": "Konto erstellen",
+      "toggle_to_login": "Bereits registriert? Hier einloggen"
+    },
+    "no_code_modal": {
+      "title": "Du hast keinen Code?",
+      "request_community": "Frage in der Community nach",
+      "apply_access": "Frühzeitigen Zugang beantragen"
+    }
+  },
+  "feed": {
+    "header": {
+      "subtitle": "Alle aktuellen Angebote und Gesuche",
+      "hint": "Scrolle durch oder nutze die Suche/Filter mit dem roten Button"
+    },
+    "filter_button": "Filter",
+    "loading": "Anzeigen werden geladen...",
+    "error_chat_start": "Chat konnte nicht gestartet werden. Bitte versuche es erneut.",
+    "error_chat_not_connected": "Chat noch nicht verbunden. Bitte kurz warten."
+  },
+  "feed_card": {
+    "region_label": "Region",
+    "region_unit": "km",
+    "read_more": "Mehr lesen >",
+    "contact_button": "Kontakt"
+  },
+  "filter_panel": {
+    "search_placeholder": "Suchen..."
+  },
+  "category_labels": {
+    "OFFER_SERVICE": "Dienstleistung anbieten",
+    "SEARCH_SERVICE": "Dienstleistung suchen",
+    "SELL_PRODUCT": "Produkt verkaufen",
+    "SEARCH_PRODUCT": "Produkt suchen",
+    "OFFER_RENTAL": "Verleih / Vermietung",
+    "RIDE_SHARE": "Mitfahrgelegenheit",
+    "EVENT_WORKSHOP": "Event / Workshop"
+  },
+  "preview_modal": {
+    "price_label": "Wert / Preis:",
+    "contact_button": "Kontakt",
+    "contact_loading": "Chat wird gestartet...",
+    "attributes": {
+      "time_factor": "Zeitfaktor",
+      "price_time": "Preis (Zeit)",
+      "price_garas": "Preis (Garas)",
+      "condition": "Zustand",
+      "stock": "Bestand",
+      "handling_fee": "Aufwandsentschädigung",
+      "usage_fee": "Nutzungsgebühr (Verschleiß)",
+      "max_duration": "Max. Dauer",
+      "deposit_required": "Kaution erforderlich",
+      "deposit_yes": "Ja",
+      "deposit_no": "Nein",
+      "from": "Von",
+      "to": "Nach",
+      "departure": "Abfahrt",
+      "seats_available": "Freie Plätze",
+      "price_per_seat_time": "Preis / Platz (Zeit)",
+      "price_per_seat_garas": "Preis / Platz (Garas)",
+      "starts": "Beginn",
+      "ends": "Ende",
+      "location": "Ort",
+      "max_participants": "Max. Teilnehmer",
+      "entry_fee_time": "Teilnahmegebühr (Zeit)",
+      "material_fee_garas": "Materialkosten (Garas)",
+      "deadline": "Frist",
+      "needed_by": "Benötigt bis",
+      "price_notes": "Preis-Details"
+    }
+  },
+  "create_modal": {
+    "title": "Neue Anzeige erstellen",
+    "category_label": "Kategorie",
+    "title_label": "Titel",
+    "title_placeholder": "Was bietest du an oder was suchst du?",
+    "title_counter": "{count}/100",
+    "description_label": "Beschreibung",
+    "description_placeholder": "Beschreibe dein Angebot im Detail... (min. 20 Zeichen)",
+    "price_notes_label": "Zahlung / Preis-Details (optional)",
+    "price_notes_placeholder": "z.B. Materialkosten hängen von der Marke ab. Preis pro Tag.",
+    "tags_label": "Tags",
+    "tags_placeholder": "Tag hinzufügen, Enter drücken...",
+    "cancel_button": "Abbrechen",
+    "submit_button": "Anzeige erstellen",
+    "submit_loading": "Wird erstellt...",
+    "error_failed": "Erstellung fehlgeschlagen. Bitte Felder prüfen.",
+    "images_label": "Fotos",
+    "images_hint": "Bis zu 5 Bilder, max. 1MB je Datei (JPEG, PNG, WebP)",
+    "images_add": "Fotos hinzufügen",
+    "images_uploading": "Fotos werden hochgeladen...",
+    "offer_service": {
+      "time_factor_label": "Zeitfaktor",
+      "time_factor_hint": "(0.25 – 3.0)",
+      "time_factor_description": "{factor}x — Endkosten = Arbeitsstunden × {factor}"
+    },
+    "search_service": {
+      "deadline_label": "Frist (optional)"
+    },
+    "sell_product": {
+      "price_time_label": "Preis in Zeit (Min)",
+      "price_time_placeholder": "z.B. 30",
+      "price_time_required_hint": "Erforderlich. Produkte müssen Arbeitszeit enthalten.",
+      "price_garas_label": "Preis in Garas (optional)",
+      "price_garas_placeholder": "z.B. 5",
+      "condition_label": "Zustand",
+      "condition_new": "Neu",
+      "condition_used": "Gebraucht",
+      "stock_label": "Bestand / Menge (optional)",
+      "stock_placeholder": "z.B. 3"
+    },
+    "search_product": {
+      "deadline_label": "Frist / Dringlichkeit (optional)"
+    },
+    "offer_rental": {
+      "handling_fee_label": "Aufwand Übergabe (Minuten)",
+      "handling_fee_placeholder": "z.B. 5",
+      "handling_fee_hint": "Zeitaufwand für die Übergabe",
+      "usage_fee_label": "Nutzungsgebühr (Garas)",
+      "usage_fee_placeholder": "z.B. 2",
+      "usage_fee_hint": "Abnutzung / Verschleiß",
+      "max_duration_label": "Max. Dauer (optional)",
+      "max_duration_placeholder": "z.B. 1 Woche",
+      "deposit_label": "Kaution erforderlich"
+    },
+    "ride_share": {
+      "from_label": "Abfahrt von",
+      "from_placeholder": "z.B. München",
+      "to_label": "Zielort",
+      "to_placeholder": "z.B. Berlin",
+      "departure_label": "Datum & Uhrzeit Abfahrt",
+      "seats_label": "Verfügbare Plätze",
+      "seats_placeholder": "z.B. 3",
+      "price_time_label": "Preis pro Platz (Minuten)",
+      "price_garas_label": "Preis pro Platz (Garas)"
+    },
+    "event_workshop": {
+      "start_label": "Beginn (Datum & Zeit)",
+      "end_label": "Ende (Datum & Zeit)",
+      "location_label": "Ort",
+      "location_placeholder": "z.B. Gemeindesaal, Raum 3",
+      "max_participants_label": "Max. Teilnehmer (optional)",
+      "max_participants_placeholder": "z.B. 20",
+      "entry_fee_label": "Teilnahmegebühr (Minuten)",
+      "material_fee_label": "Materialkosten (Garas)"
+    }
+  },
+  "chat": {
+    "page": {
+      "header": "Nachrichten",
+      "connecting": "Verbindung wird hergestellt...",
+      "loading_with_room": "Chat wird geladen...",
+      "loading_no_room": "Lade Chat-Übersicht...",
+      "no_conversations": "Noch keine Gespräche",
+      "no_conversations_hint": "Tippe bei einer Anzeige auf „Kontakt“, um zu chatten.",
+      "error_title": "Verbindungsfehler",
+      "error_description": "Verbindung zum Chat-Server fehlgeschlagen",
+      "retry_button": "Erneut versuchen",
+      "reconnecting": "Verbindung wird wiederhergestellt..."
+    },
+    "header": {
+      "typing_one": "{name} schreibt...",
+      "typing_two": "{name1} und {name2} schreiben...",
+      "typing_many": "{count} Personen schreiben...",
+      "online": "Online",
+      "re_listing": "Re: {listing}"
+    },
+    "message_list": {
+      "encrypted_notice": "Nachrichten sind Ende-zu-Ende verschlüsselt.",
+      "empty": "Noch keine Nachrichten. Schreib das erste Wort!",
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "read_by": "Gelesen von {count} Nutzer(n)",
+      "delivered": "Zugestellt"
+    },
+    "message_input": {
+      "placeholder": "Nachricht..."
+    },
+    "action_sheet": {
+      "title": "Aktionen",
+      "request_payment": "Zahlung anfordern",
+      "send_photo": "Foto senden",
+      "share_location": "Standort teilen",
+      "cancel": "Abbrechen"
+    },
+    "payment_request_modal": {
+      "title": "Zahlung anfordern",
+      "garas_label": "Garas",
+      "garas_placeholder": "0.00",
+      "time_label": "Zeit (Min)",
+      "time_placeholder": "0",
+      "description_label": "Beschreibung",
+      "description_placeholder": "z.B. Materialkosten",
+      "submit_button": "Anforderung senden"
+    }
+  },
+  "wallet": {
+    "header": "Mein Wallet",
+    "time_account": "Zeitkonto",
+    "time_unit": "Stunden : Min",
+    "garas_account": "Garas-Konto",
+    "garas_unit": "Garas (HUF Äquiv.)",
+    "open_requests": "Offene Anforderungen",
+    "action_needed": "Aktion erforderlich",
+    "incoming_request": "Eingehende Anforderung",
+    "outgoing_request": "Ausgehende Anforderung",
+    "from": "Von: {name}",
+    "to": "An: {name}",
+    "ref": "Betreff: {ref}",
+    "no_ref": "Kein Betreff",
+    "deny_button": "Ablehnen",
+    "confirm_pay_button": "Zahlung bestätigen",
+    "cancel_request_button": "Anforderung stornieren",
+    "send_button": "Senden",
+    "request_button": "Anfordern",
+    "send_form": {
+      "title": "Zahlung senden",
+      "recipient_label": "Empfänger-Code",
+      "recipient_placeholder": "Nutzer-Code (z.B. A1B2C)",
+      "garas_label": "Garas",
+      "garas_placeholder": "0.00",
+      "time_label": "Zeit (Min)",
+      "time_placeholder": "0",
+      "reference_label": "Verwendungszweck",
+      "reference_placeholder": "Grund...",
+      "submit_button": "Überweisung bestätigen",
+      "submit_loading": "Wird gesendet..."
+    },
+    "request_form": {
+      "title": "Zahlung anfordern",
+      "from_label": "Von Nutzer-Code",
+      "from_placeholder": "Nutzer-Code...",
+      "reason_label": "Grund",
+      "submit_button": "Anforderung senden"
+    },
+    "transactions": {
+      "header": "Transaktionen",
+      "empty": "Keine Transaktionen gefunden.",
+      "no_reference": "Kein spezieller Betreff",
+      "detail_modal": {
+        "partner": "Partner",
+        "reference": "Betreff",
+        "transaction_id": "Transaktions-ID",
+        "close_button": "Schließen"
+      }
+    }
+  },
+  "profile": {
+    "header": "Mein Profil",
+    "trust_level": "Vertrauensstufe:",
+    "tabs": {
+      "personal": "Persönlich",
+      "account": "Konto",
+      "trust_invites": "Vertrauen & Einladungen"
+    },
+    "personal_tab": {
+      "base_data_section": "Basisdaten (Fixiert)",
+      "first_name_label": "Vorname",
+      "last_name_label": "Nachname",
+      "public_info_section": "Öffentliche Infos",
+      "location_label": "Standort (Stadt / PLZ)",
+      "location_placeholder": "z.B. Budapest, 1051",
+      "location_hint": "Wird für die Distanzberechnung im Feed genutzt.",
+      "language_label": "Sprache",
+      "language_en": "English (GB)",
+      "language_de": "Deutsch",
+      "language_hu": "Magyar",
+      "bio_label": "Über mich (Bio)",
+      "bio_placeholder": "Erzähl uns etwas über dich...",
+      "save_button": "Änderungen speichern",
+      "save_loading": "Wird gespeichert..."
+    },
+    "account_tab": {
+      "login_section": "Login-Daten",
+      "email_label": "E-Mail-Adresse",
+      "change_password_button": "Passwort ändern",
+      "notifications_section": "Benachrichtigungen",
+      "email_digest": "E-Mail-Zusammenfassung",
+      "instant_push": "Sofortige Push-Nachricht",
+      "newsletter": "Newsletter",
+      "save_button": "Einstellungen speichern",
+      "logout_button": "Abmelden"
+    },
+    "trust_tab": {
+      "verification_section": "Verifizierungs-Status",
+      "trust_level": "Vertrauensstufe: {value}",
+      "member_since": "Mitglied seit {date}",
+      "verified_message": "Deine Identität wurde bestätigt. Du hast vollen Zugriff auf den Handel und Einladungen.",
+      "invites_section": "Freunde einladen",
+      "manage_invites_button": "Einladungen verwalten",
+      "manage_invites_hint": "Hier klicken, um deine Einladungen zu verwalten",
+      "invites_reputation_hint": "Das Einladen aktiver Mitglieder steigert deine Reputation."
+    }
+  },
+  "notifications": {
+    "header": "Benachrichtigungen",
+    "mark_all_read": "Alle als gelesen markieren",
+    "tab_all": "Alle ({count})",
+    "tab_unread": "Ungelesen ({count})",
+    "empty": "Keine Benachrichtigungen.",
+    "section_messages": "Nachrichten",
+    "section_activity": "Aktivität",
+    "section_broadcasts": "Ankündigungen"
+  },
+  "invite": {
+    "header": "Freunde einladen",
+    "codes_available": "{count} / 3",
+    "codes_label": "Verfügbare Codes",
+    "request_button": "Neue Codes anfordern",
+    "request_loading": "Wird angefordert...",
+    "why_invite_title": "Warum einladen?",
+    "why_invite_body": "Wir möchten eine starke, vertrauensvolle Community aufbauen. Bitte lade nur Menschen ein, die wirklich an lokalem Austausch und fairer Wirtschaft interessiert sind. Qualität vor Quantität.",
+    "step1_label": "1. Wähle einen Code",
+    "code_used": "Benutzt",
+    "code_available": "Verfügbar",
+    "no_codes": "Keine Einladungen gefunden. Fordere oben neue an.",
+    "step2_label": "2. Wähle eine Nachricht",
+    "message_standard": "Standard",
+    "message_community": "Community-Fokus",
+    "message_short": "Kurz & Direkt",
+    "message_help": "Hilfe & Support",
+    "step3_label": "3. Jetzt teilen",
+    "share_all": "Teilen (Alle Apps)",
+    "share_whatsapp": "WhatsApp",
+    "share_telegram": "Telegram",
+    "share_facebook": "Facebook",
+    "share_email": "E-Mail"
+  },
+  "verification": {
+    "title": "Verifizierung ausstehend",
+    "description": "Willkommen in der Community! Um Vertrauen zu gewährleisten, verifizieren wir jedes Mitglied persönlich per Video-Call.",
+    "step_register": "Registrieren",
+    "step_video_call": "Video-Anruf",
+    "step_active": "Aktiv",
+    "next_step": "Nächster Schritt",
+    "call_notice": "Bitte vereinbare einen 2-minütigen Termin mit einem Moderator, um dein Konto freizuschalten.",
+    "book_button": "Termin buchen",
+    "data_notice": "Deine Daten sind sicher und werden nur für die Verifizierung verwendet.",
+    "logout_button": "Abmelden"
+  },
+  "admin": {
+    "sidebar": {
+      "brand": "ADMIN",
+      "user_management": "Nutzerverwaltung",
+      "tag_management": "Tag-Management",
+      "disputes": "Konflikte",
+      "broadcasts": "Rundnachrichten",
+      "super_admin": "Super Admin"
+    },
+    "header": {
+      "user_management": "Nutzerverwaltung",
+      "tag_management": "Tag-Management",
+      "disputes": "Konflikte",
+      "broadcasts": "Rundnachrichten",
+      "default": "Admin Dashboard"
+    },
+    "stats": {
+      "total_users": "Nutzer gesamt",
+      "active_pending": "Aktiv / Ausstehend",
+      "time_volume": "Zeitvolumen gesamt",
+      "time_unit": "Std",
+      "garas_volume": "Garasvolumen gesamt",
+      "action_required": "Handlungsbedarf",
+      "disputes": "Konflikte"
+    },
+    "users": {
+      "search_placeholder": "Nutzer suchen (ID, Name, E-Mail)...",
+      "table_title": "Nutzerliste & Kontostände",
+      "empty": "Keine Nutzer gefunden",
+      "loading": "Lade Nutzer...",
+      "error": "Fehler beim Laden der Nutzer",
+      "table": {
+        "col_name": "Name",
+        "col_role": "Rolle",
+        "col_trust": "Vertrauen",
+        "col_garas_balance": "Garas-Stand",
+        "col_time_balance": "Zeit-Stand",
+        "col_status": "Status",
+        "col_action": "Aktion",
+        "status_pending": "Wartet auf Verif.",
+        "status_active": "Aktiv",
+        "verify_button": "Verifizieren",
+        "edit_button": "Edit"
+      },
+      "edit_modal": {
+        "title": "Nutzer bearbeiten: {name}",
+        "trust_label": "Vertrauensstufe (Manueller Override)",
+        "trust_t1": "T1 Neuling",
+        "trust_t2": "T2 Macher",
+        "trust_t3": "T3 Vertrauensperson",
+        "trust_t4": "T4 Profi",
+        "trust_t5": "T5 Botschafter",
+        "trust_t6": "T6 Legende",
+        "verification_label": "Verifizierungs-Status",
+        "verification_pending": "Ausstehend",
+        "verification_verified": "Verifiziert",
+        "account_label": "Konto-Status",
+        "account_active": "Aktiv",
+        "account_banned": "Gesperrt",
+        "cancel_button": "Abbrechen",
+        "save_button": "Änderungen speichern"
+      }
+    },
+    "disputes": {
+      "header": "Offene Konflikte",
+      "col_case_id": "Fall-ID",
+      "col_creditor": "Gläubiger (Anforderer)",
+      "col_debtor": "Schuldner (Zahler)",
+      "col_reason": "Grund-Auszug",
+      "col_status": "Status",
+      "col_controls": "Steuerung",
+      "empty": "Keine offenen Konflikte",
+      "manage_button": "Fall bearbeiten",
+      "loading": "Lade Konflikte...",
+      "case_modal": {
+        "title": "Fall: {id}... - Konflikt",
+        "creditor_statement": "Statement von {name} (Gläubiger)",
+        "no_description": "Keine Beschreibung vorhanden",
+        "details_section": "Falldetails",
+        "creditor_label": "Gläubiger (Anforderer)",
+        "debtor_label": "Schuldner (Zahler)",
+        "amount_time_label": "Betrag (Zeit)",
+        "amount_time_unit": "Minuten",
+        "amount_garas_label": "Betrag (Garas)",
+        "consent_section": "Zustimmungsstatus Schlichtung",
+        "consent_description": "Um den privaten Chatverlauf einzusehen, benötigen wir die aktive Zustimmung beider Parteien zur Aufhebung der E2E-Privatsphäre für diesen Fall.",
+        "consent_granted": "Zustimmung erteilt: Heute, {time}",
+        "consent_waiting": "Warte auf Antwort...",
+        "request_consent_button": "Zustimmung & Infos anfordern von {name}",
+        "consent_sent": "Anfrage gesendet an {name}",
+        "resolution_label": "Admin-Entscheidungsnotiz (Optional)",
+        "resolution_placeholder": "Begründe deine Entscheidung...",
+        "reject_button": "Forderung ablehnen",
+        "refund_button": "Erstattung erzwingen"
+      }
+    },
+    "tags": {
+      "pending_title": "Ausstehende Tags (Übersetzung nötig)",
+      "col_original": "Original-Input",
+      "col_de": "DE (Deutsch)",
+      "col_en": "EN (Englisch)",
+      "col_hu": "HU (Ungarisch)",
+      "col_action": "Aktion",
+      "placeholder_de": "Deutsch...",
+      "placeholder_en": "Englisch...",
+      "placeholder_hu": "Ungarisch...",
+      "add_button": "Hinzufügen",
+      "pending_empty": "Keine ausstehenden Tags",
+      "library_title": "Globale Tag-Bibliothek (Aktiv)",
+      "col_tag_id": "Tag-ID",
+      "library_empty": "Keine offiziellen Tags",
+      "loading": "Lade Tags...",
+      "delete_confirm": "Möchtest du diesen Tag wirklich löschen?",
+      "approve_success": "Tag erfolgreich freigegeben!",
+      "approve_error": "Fehler bei Freigabe",
+      "delete_success": "Tag gelöscht!",
+      "delete_error": "Fehler beim Löschen"
+    }
+  }
+}

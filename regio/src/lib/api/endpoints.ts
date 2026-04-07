@@ -60,6 +60,7 @@ export const API_ENDPOINTS = {
     FEED: '/listings/feed',
     TAGS: '/listings/tags',
     BY_ID: (listingId: string) => `/listings/${listingId}`,
+    MEDIA: (listingId: string) => `/listings/${listingId}/media`,
   },
 
   // ============================================================================
@@ -70,6 +71,15 @@ export const API_ENDPOINTS = {
     INQUIRY: '/chats/rooms/inquiry',
     MATRIX_REGISTER: '/chats/matrix/register',
     MATRIX_TOKEN: '/chats/matrix/token',
+  },
+
+  // ============================================================================
+  // Broadcast Endpoints
+  // ============================================================================
+  BROADCASTS: {
+    SEND: '/broadcasts/send',
+    INBOX: '/broadcasts/inbox',
+    READ: (messageId: string) => `/broadcasts/${messageId}/read`,
   },
 
   // ============================================================================

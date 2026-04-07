@@ -81,7 +81,7 @@ class Settings(RegioBaseSettings):
     MATRIX_ENCRYPTION_KEY: str = ""  # base64url-encoded 32-byte key
 
     # OpenAI
-    OPENAI_API_KEY: str
+    OPENAI_API_KEY: str = ""
     # Initial super user config value
     SYSTEM_SINK_CODE: str
     SYSTEM_SINK_FIRST_NAME: str

@@ -90,6 +90,8 @@ export interface ListingAttributes {
   deadline?: string;
   // SEARCH_PRODUCT
   urgency_deadline?: string;
+  // shared
+  price_notes?: string;
 }
 
 export function formatPrice(listing: ListingPublic): string {

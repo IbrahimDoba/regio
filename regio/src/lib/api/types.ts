@@ -321,6 +321,26 @@ export interface DisputeResolveRequest {
 }
 
 // ============================================================================
+// Broadcast Types
+// ============================================================================
+
+export interface BroadcastMessage {
+  id: string;
+  title: string;
+  body: string;
+  link?: string | null;
+  sent_at: string;
+  is_read: boolean;
+}
+
+export interface BroadcastSend {
+  trust_levels: string[];
+  title: string;
+  body: string;
+  link?: string | null;
+}
+
+// ============================================================================
 // Chat Types
 // ============================================================================
 

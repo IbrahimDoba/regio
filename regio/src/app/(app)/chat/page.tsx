@@ -29,11 +29,13 @@ import { bankingApi } from "@/lib/api/modules/banking";
 import { useRoomMessages } from "@/lib/api/hooks/use-chat";
 import { queryKeys } from "@/lib/api/query-keys";
 import { FaRegComments, FaArrowLeft } from "react-icons/fa6";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   // URL parameters for contextual chat
   const roomId = searchParams.get("room");
@@ -219,7 +221,7 @@ export default function ChatPage() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">{roomId ? "Connecting to chat..." : "Loading chat..."}</p>
+            <p className="text-gray-600">{roomId ? t.chat.page.loading_with_room : t.chat.page.loading_no_room}</p>
           </div>
         </div>
       </div>
@@ -239,9 +241,9 @@ export default function ChatPage() {
             <FaArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Messages</h1>
+            <h1 className="text-xl font-bold text-gray-900">{t.chat.page.header}</h1>
             {isConnecting && (
-              <p className="text-xs text-gray-400">Connecting...</p>
+              <p className="text-xs text-gray-400">{t.chat.page.connecting}</p>
             )}
           </div>
         </header>
@@ -253,9 +255,9 @@ export default function ChatPage() {
               <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-4">
                 <FaRegComments className="text-2xl text-green-700" />
               </div>
-              <h2 className="text-base font-semibold text-gray-800 mb-2">No conversations yet</h2>
+              <h2 className="text-base font-semibold text-gray-800 mb-2">{t.chat.page.no_conversations}</h2>
               <p className="text-sm text-gray-500">
-                Tap &ldquo;Contact&rdquo; on a listing to start chatting.
+                {t.chat.page.no_conversations_hint}
               </p>
             </div>
           ) : (
@@ -314,9 +316,9 @@ export default function ChatPage() {
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">⚠️</span>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Connection Error</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">{t.chat.page.error_title}</h2>
             <p className="text-gray-600 text-sm mb-4">
-              {displayError || "Failed to connect to chat server"}
+              {displayError || t.chat.page.error_description}
             </p>
             <button
               onClick={() => {
@@ -325,7 +327,7 @@ export default function ChatPage() {
               }}
               className="px-4 py-2 bg-green-700 text-white rounded-lg font-medium hover:bg-green-800 transition-colors"
             >
-              Try Again
+              {t.chat.page.retry_button}
             </button>
           </div>
         </div>
@@ -346,7 +348,7 @@ export default function ChatPage() {
       {/* Connection Status */}
       {!isConnected && (
         <div className="bg-yellow-100 px-4 py-2 text-xs text-yellow-800 text-center">
-          Reconnecting...
+          {t.chat.page.reconnecting}
         </div>
       )}
 

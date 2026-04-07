@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   FaWallet,
   FaQrcode,
@@ -13,7 +14,6 @@ import {
   FaHandHoldingDollar,
   FaArrowLeft,
 } from "react-icons/fa6";
-import { useLanguage } from "@/context/LanguageContext";
 import {
   useBalance,
   useHistory,
@@ -201,7 +201,7 @@ export default function WalletPage() {
               <FaArrowLeft className="w-4 h-4" />
             </button>
             <div className="text-[20px] font-[800] text-[#333] flex items-center gap-[10px]">
-              <FaWallet className="text-[var(--color-nav-bg)]" /> My Wallet
+              <FaWallet className="text-[var(--color-nav-bg)]" /> {t.wallet.header}
             </div>
           </div>
           <div className="cursor-pointer text-[#888] text-[20px]">
@@ -214,23 +214,23 @@ export default function WalletPage() {
       <div className="p-[15px] flex gap-[10px] overflow-x-auto pb-[5px]">
         <div className="flex-1 min-w-[160px] rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden bg-gradient-to-br from-[#8cb348] to-[#5e8e3e]">
           <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px]">
-            Time Account
+            {t.wallet.time_account}
           </div>
           <div className="text-[24px] font-[800] mb-[5px]">
             {balanceData ? formatTime(balanceData.balance.time) : "..."}
           </div>
-          <div className="text-[14px] font-[500] opacity-90">Hours : Min</div>
+          <div className="text-[14px] font-[500] opacity-90">{t.wallet.time_unit}</div>
           <FaClock className="absolute -right-[10px] -bottom-[10px] text-[80px] opacity-15 -rotate-12" />
         </div>
         <div className="flex-1 min-w-[160px] rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden bg-gradient-to-br from-[#4a90e2] to-[#0056b3]">
           <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px]">
-            Garas Account
+            {t.wallet.garas_account}
           </div>
           <div className="text-[24px] font-[800] mb-[5px]">
             {balanceData ? balanceData.balance.regio : "..."}
           </div>
           <div className="text-[14px] font-[500] opacity-90">
-            Garas (HUF eq)
+            {t.wallet.garas_unit}
           </div>
           <FaCoins className="absolute -right-[10px] -bottom-[10px] text-[80px] opacity-15 -rotate-12" />
         </div>
@@ -240,9 +240,9 @@ export default function WalletPage() {
       {requestsCount > 0 && (
         <div className="px-[15px] mb-[10px]">
           <div className="text-[12px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[10px] flex justify-between items-center">
-            Open Requests
+            {t.wallet.open_requests}
             <span className="bg-[#f57c00] text-white p-[2px_6px] rounded-[10px] text-[10px]">
-              {requestsCount} Action needed
+              {requestsCount} {t.wallet.action_needed}
             </span>
           </div>
 
@@ -253,16 +253,16 @@ export default function WalletPage() {
               className="bg-white border border-[#e0e0e0] border-l-[4px] border-l-[#f57c00] rounded-[6px] p-[12px] mb-[10px] shadow-sm"
             >
               <div className="flex justify-between mb-[5px] text-[11px] text-[#666]">
-                <span>Incoming Request</span>
+                <span>{t.wallet.incoming_request}</span>
                 <span>{new Date(req.created_at).toLocaleDateString()}</span>
               </div>
               <div className="flex justify-between items-center mb-[10px]">
                 <div>
                   <div className="font-bold text-[14px] text-[#333]">
-                    From: {req.creditor_name}
+                    {t.wallet.from.replace('{name}', req.creditor_name)}
                   </div>
                   <div className="text-[12px] text-[#666]">
-                    Ref: {req.description || "No ref"}
+                    {t.wallet.ref.replace('{ref}', req.description || t.wallet.no_ref)}
                   </div>
                 </div>
                 <div className="flex gap-[5px] flex-col items-end">
@@ -283,7 +283,7 @@ export default function WalletPage() {
                   className="flex-1 p-[8px] rounded-[4px] border border-[#ddd] bg-[#f5f5f5] text-[#333] text-[12px] font-[600] cursor-pointer"
                   onClick={() => handleRejectRequest(req.id)}
                 >
-                  Deny
+                  {t.wallet.deny_button}
                 </button>
                 <button
                   className="flex-1 p-[8px] rounded-[4px] border-none bg-[var(--color-green-offer)] text-white text-[12px] font-[600] cursor-pointer"
@@ -294,7 +294,7 @@ export default function WalletPage() {
                     )
                   }
                 >
-                  Confirm Pay
+                  {t.wallet.confirm_pay_button}
                 </button>
               </div>
             </div>
@@ -307,16 +307,16 @@ export default function WalletPage() {
               className="bg-white border border-[#e0e0e0] border-l-[4px] border-l-[#999] rounded-[6px] p-[12px] mb-[10px] shadow-sm"
             >
               <div className="flex justify-between mb-[5px] text-[11px] text-[#666]">
-                <span>Outgoing Request</span>
+                <span>{t.wallet.outgoing_request}</span>
                 <span>{new Date(req.created_at).toLocaleDateString()}</span>
               </div>
               <div className="flex justify-between items-center mb-[10px]">
                 <div>
                   <div className="font-bold text-[14px] text-[#333]">
-                    To: {req.debtor_name}
+                    {t.wallet.to.replace('{name}', req.debtor_name)}
                   </div>
                   <div className="text-[12px] text-[#666]">
-                    Ref: {req.description || "No ref"}
+                    {t.wallet.ref.replace('{ref}', req.description || t.wallet.no_ref)}
                   </div>
                 </div>
                 <div className="flex gap-[5px] flex-col items-end">
@@ -337,7 +337,7 @@ export default function WalletPage() {
                   className="w-full p-[8px] rounded-[4px] border border-[#ddd] bg-[#f5f5f5] text-[#666] text-[12px] font-[600] cursor-pointer"
                   onClick={() => handleCancelRequest(req.id)}
                 >
-                  Cancel Request
+                  {t.wallet.cancel_request_button}
                 </button>
               </div>
             </div>
@@ -356,7 +356,7 @@ export default function WalletPage() {
           onClick={() => toggleForm("send")}
         >
           <FaPaperPlane className="text-[20px] text-[var(--color-nav-bg)]" />
-          <span className="text-[12px] font-bold text-[#555]">Send</span>
+          <span className="text-[12px] font-bold text-[#555]">{t.wallet.send_button}</span>
         </div>
         <div
           className={`flex-1 bg-white border rounded-[8px] p-[12px] text-center cursor-pointer transition-all shadow-sm flex flex-col items-center gap-[5px] hover:-translate-y-[2px] hover:bg-[#f9f9f9] ${
@@ -367,7 +367,7 @@ export default function WalletPage() {
           onClick={() => toggleForm("request")}
         >
           <FaHandHoldingDollar className="text-[20px] text-[var(--color-nav-bg)]" />
-          <span className="text-[12px] font-bold text-[#555]">Request</span>
+          <span className="text-[12px] font-bold text-[#555]">{t.wallet.request_button}</span>
         </div>
       </div>
 
@@ -381,16 +381,16 @@ export default function WalletPage() {
       >
         <div className="p-[20px]">
           <div className="text-[14px] font-bold mb-[15px] text-[#333] border-b-[2px] border-[var(--color-green-offer)] inline-block pb-[2px]">
-            Send Payment
+            {t.wallet.send_form.title}
           </div>
           <div className="mb-[12px]">
             <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-              Recipient Code
+              {t.wallet.send_form.recipient_label}
             </label>
             <input
               type="text"
               className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-              placeholder="User Code (e.g. A1B2C)"
+              placeholder={t.wallet.send_form.recipient_placeholder}
               value={sendRecipient}
               onChange={(e) => setSendRecipient(e.target.value)}
             />
@@ -398,24 +398,24 @@ export default function WalletPage() {
           <div className="flex gap-[10px] mb-[12px]">
             <div className="flex-1">
               <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                Garas
+                {t.wallet.send_form.garas_label}
               </label>
               <input
                 type="number"
                 className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-                placeholder="0.00"
+                placeholder={t.wallet.send_form.garas_placeholder}
                 value={sendGaras}
                 onChange={(e) => setSendGaras(e.target.value)}
               />
             </div>
             <div className="flex-1">
               <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                Time (Min)
+                {t.wallet.send_form.time_label}
               </label>
               <input
                 type="number"
                 className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-                placeholder="0"
+                placeholder={t.wallet.send_form.time_placeholder}
                 value={sendTime}
                 onChange={(e) => setSendTime(e.target.value)}
               />
@@ -423,12 +423,12 @@ export default function WalletPage() {
           </div>
           <div className="mb-[12px]">
             <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-              Reference
+              {t.wallet.send_form.reference_label}
             </label>
             <input
               type="text"
               className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-              placeholder="Reason..."
+              placeholder={t.wallet.send_form.reference_placeholder}
               value={sendRef}
               onChange={(e) => setSendRef(e.target.value)}
             />
@@ -438,7 +438,7 @@ export default function WalletPage() {
             onClick={handleSend}
             disabled={transfer.isPending}
           >
-            {transfer.isPending ? "Sending..." : "Confirm Transfer"}
+            {transfer.isPending ? t.wallet.send_form.submit_loading : t.wallet.send_form.submit_button}
           </button>
         </div>
       </div>
@@ -452,16 +452,16 @@ export default function WalletPage() {
       >
         <div className="p-[20px]">
           <div className="text-[14px] font-bold mb-[15px] text-[#333] border-b-[2px] border-[#4285f4] inline-block pb-[2px]">
-            Request Payment
+            {t.wallet.request_form.title}
           </div>
           <div className="mb-[12px]">
             <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-              From User Code
+              {t.wallet.request_form.from_label}
             </label>
             <input
               type="text"
               className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-              placeholder="User Code..."
+              placeholder={t.wallet.request_form.from_placeholder}
               value={reqUser}
               onChange={(e) => setReqUser(e.target.value)}
             />
@@ -469,24 +469,24 @@ export default function WalletPage() {
           <div className="flex gap-[10px] mb-[12px]">
             <div className="flex-1">
               <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                Garas
+                {t.wallet.send_form.garas_label}
               </label>
               <input
                 type="number"
                 className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-                placeholder="0.00"
+                placeholder={t.wallet.send_form.garas_placeholder}
                 value={reqGaras}
                 onChange={(e) => setReqGaras(e.target.value)}
               />
             </div>
             <div className="flex-1">
               <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                Time (Min)
+                {t.wallet.send_form.time_label}
               </label>
               <input
                 type="number"
                 className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-                placeholder="0"
+                placeholder={t.wallet.send_form.time_placeholder}
                 value={reqTime}
                 onChange={(e) => setReqTime(e.target.value)}
               />
@@ -494,7 +494,7 @@ export default function WalletPage() {
           </div>
           <div className="mb-[12px]">
             <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-              Reason
+              {t.wallet.request_form.reason_label}
             </label>
             <input
               type="text"
@@ -509,7 +509,7 @@ export default function WalletPage() {
             onClick={handleCreateRequest}
             disabled={createRequest.isPending}
           >
-            {createRequest.isPending ? "Sending..." : "Send Request"}
+            {createRequest.isPending ? t.wallet.send_form.submit_loading : t.wallet.request_form.submit_button}
           </button>
         </div>
       </div>
@@ -518,7 +518,7 @@ export default function WalletPage() {
       <div className="flex-grow bg-white pt-0">
         <div className="p-[15px] bg-[#fafafa] border-b border-[#eee] flex justify-between items-center">
           <span className="text-[14px] font-bold text-[#555] uppercase tracking-[0.5px]">
-            Transactions
+            {t.wallet.transactions.header}
           </span>
         </div>
 
@@ -543,7 +543,7 @@ export default function WalletPage() {
                   {tx.other_party_name}
                 </div>
                 <span className="text-[12px] text-[#888] whitespace-nowrap overflow-hidden text-ellipsis block">
-                  {tx.reference || "No specific reference"}
+                  {tx.reference || t.wallet.transactions.no_reference}
                 </span>
                 <div className="text-[11px] text-[#aaa] mt-[2px]">
                   {new Date(tx.date).toLocaleDateString()}
@@ -577,7 +577,7 @@ export default function WalletPage() {
           ))}
           {!historyData?.data.length && (
             <div className="p-4 text-center text-gray-500">
-              No transactions found.
+              {t.wallet.transactions.empty}
             </div>
           )}
         </ul>
@@ -632,15 +632,15 @@ export default function WalletPage() {
             </div>
 
             <div className="flex justify-between border-b border-[#eee] py-[10px] text-[14px]">
-              <span className="text-[#888]">Partner</span>
+              <span className="text-[#888]">{t.wallet.transactions.detail_modal.partner}</span>
               <span className="font-[600]">{selectedTx.other_party_name}</span>
             </div>
             <div className="flex justify-between border-b border-[#eee] py-[10px] text-[14px]">
-              <span className="text-[#888]">Reference</span>
+              <span className="text-[#888]">{t.wallet.transactions.detail_modal.reference}</span>
               <span className="font-[600]">{selectedTx.reference || "-"}</span>
             </div>
             <div className="flex justify-between border-b border-[#eee] py-[10px] text-[14px]">
-              <span className="text-[#888]">Transaction ID</span>
+              <span className="text-[#888]">{t.wallet.transactions.detail_modal.transaction_id}</span>
               <span className="font-[600]">
                 #{selectedTx.id.substring(0, 8)}
               </span>
@@ -650,7 +650,7 @@ export default function WalletPage() {
               className="mt-[20px] w-full p-[12px] bg-[#eee] border-none rounded-[8px] font-bold text-[#333] cursor-pointer"
               onClick={() => setSelectedTx(null)}
             >
-              Close
+              {t.wallet.transactions.detail_modal.close_button}
             </button>
           </div>
         </div>

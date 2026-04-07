@@ -9,62 +9,16 @@ import { FaUsers, FaTags, FaGavel, FaBullhorn } from 'react-icons/fa6';
 import Image from 'next/image';
 
 const navItems = [
-  {
-    id: 'users',
-    icon: FaUsers,
-    labelKey: 'adminUsers',
-    href: '/admin/users',
-  },
-  {
-    id: 'tags',
-    icon: FaTags,
-    labelKey: 'adminTags',
-    href: '/admin/tags',
-  },
-  {
-    id: 'disputes',
-    icon: FaGavel,
-    labelKey: 'adminDisputes',
-    href: '/admin/disputes',
-  },
-  {
-    id: 'broadcast',
-    icon: FaBullhorn,
-    labelKey: 'adminBroadcast',
-    href: '/admin/broadcast',
-  },
+  { id: 'users',     icon: FaUsers,    labelKey: 'user_management', href: '/admin/users' },
+  { id: 'tags',      icon: FaTags,     labelKey: 'tag_management',  href: '/admin/tags' },
+  { id: 'disputes',  icon: FaGavel,    labelKey: 'disputes',        href: '/admin/disputes' },
+  { id: 'broadcast', icon: FaBullhorn, labelKey: 'broadcasts',      href: '/admin/broadcast' },
 ];
-
-// Temporary translations - will be added to LanguageContext later
-const adminTranslations = {
-  GB: {
-    adminUsers: 'User Management',
-    adminTags: 'Tag Management',
-    adminDisputes: 'Disputes',
-    adminBroadcast: 'Broadcasts',
-    superAdmin: 'Super Admin',
-  },
-  DE: {
-    adminUsers: 'Benutzerverwaltung',
-    adminTags: 'Tag-Verwaltung',
-    adminDisputes: 'Konflikte',
-    adminBroadcast: 'Rundruf',
-    superAdmin: 'Super Admin',
-  },
-  HU: {
-    adminUsers: 'Felhasználók',
-    adminTags: 'Címkék',
-    adminDisputes: 'Viták',
-    adminBroadcast: 'Körlevél',
-    superAdmin: 'Szuper Admin',
-  },
-};
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { language } = useLanguage();
-  const t = adminTranslations[language];
+  const { t } = useLanguage();
 
   return (
     <div className="w-[260px] bg-[#1a3b15] text-[#e0e0e0] flex flex-col shadow-[2px_0_10px_rgba(0,0,0,0.1)]">
@@ -73,7 +27,7 @@ export default function AdminSidebar() {
         <div className="bg-white rounded-[6px] px-[6px] py-[3px]">
           <Image src="/logo-S.png" alt="REGIO" width={80} height={29} />
         </div>
-        <span className="text-[13px] font-bold text-[#8cb348] uppercase tracking-widest">Admin</span>
+        <span className="text-[13px] font-bold text-[#8cb348] uppercase tracking-widest">{t.admin.sidebar.brand}</span>
       </div>
 
       {/* Navigation Menu */}
@@ -81,6 +35,7 @@ export default function AdminSidebar() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
+          const label = t.admin.sidebar[item.labelKey as keyof typeof t.admin.sidebar];
 
           return (
             <Link
@@ -90,15 +45,11 @@ export default function AdminSidebar() {
                 p-[15px_20px] cursor-pointer flex items-center gap-3
                 text-[15px] font-medium transition-all
                 hover:bg-[rgba(255,255,255,0.05)] hover:text-white
-                ${
-                  isActive
-                    ? 'bg-[#2e5c25] text-white border-r-4 border-[#8cb348]'
-                    : ''
-                }
+                ${isActive ? 'bg-[#2e5c25] text-white border-r-4 border-[#8cb348]' : ''}
               `}
             >
               <Icon className="text-[18px]" />
-              <span>{t[item.labelKey as keyof typeof t]}</span>
+              <span>{label}</span>
             </Link>
           );
         })}
@@ -113,7 +64,7 @@ export default function AdminSidebar() {
         />
         <div>
           <div className="font-bold">{user ? `${user.first_name} ${user.last_name}` : 'Admin'}</div>
-          <div className="text-[11px] opacity-70">{t.superAdmin}</div>
+          <div className="text-[11px] opacity-70">{t.admin.sidebar.super_admin}</div>
         </div>
       </div>
     </div>

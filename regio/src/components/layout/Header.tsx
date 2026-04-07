@@ -15,7 +15,7 @@ interface HeaderProps {
 }
 
 export default function Header({ isFilterOpen, toggleFilter, children, count, total }: HeaderProps) {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const [isLangOpen, setIsLangOpen] = React.useState(false);
 
   const flags: { [key: string]: string } = { 'GB': '🇬🇧', 'HU': '🇭🇺', 'DE': '🇩🇪' };
@@ -29,7 +29,7 @@ export default function Header({ isFilterOpen, toggleFilter, children, count, to
             onClick={toggleFilter}
             className="bg-[var(--color-red-search)] text-white border-none py-[6px] px-[15px] rounded-[4px] font-bold flex items-center gap-[5px] text-[14px] cursor-pointer transition-colors hover:brightness-110"
           >
-            <FaFilter /> <span>Filter</span>
+            <FaFilter /> <span>{t.feed.filter_button}</span>
           </button>
           
           {/* Language Dropdown */}
@@ -68,10 +68,10 @@ export default function Header({ isFilterOpen, toggleFilter, children, count, to
 
       <div className="text-center pb-[10px] border-t border-[#f9f9f9] pt-[5px]">
         <div className="text-[16px] font-[700] text-[var(--color-text-main)]">
-          <span>All current offers and searches</span> [ <span>{count}</span> / <span>{total}</span> ]
+          <span>{t.feed.header.subtitle}</span> [ <span>{count}</span> / <span>{total}</span> ]
         </div>
         <div className="text-[11px] text-[#777] mt-[2px]">
-          Scroll through or use search or filter with the red button
+          {t.feed.header.hint}
         </div>
       </div>
     </header>

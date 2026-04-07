@@ -20,7 +20,7 @@ import {
 } from "@/lib/api/hooks/use-users";
 
 export default function ProfilePage() {
-  const { t, language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"personal" | "account" | "trust">(
     "personal"
   );
@@ -97,8 +97,7 @@ export default function ProfilePage() {
       <header className="bg-white border-b border-[#eee] sticky top-0 z-100">
         <div className="flex justify-between items-center p-[15px]">
           <div className="text-[20px] font-[800] text-[#333] flex items-center gap-[10px]">
-            <FaUserGear className="text-[var(--color-green-offer)]" /> My
-            Profile
+            <FaUserGear className="text-[var(--color-green-offer)]" /> {t.profile.header}
           </div>
           <div
             className="cursor-pointer text-[#888] text-[20px]"
@@ -126,7 +125,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="inline-flex items-center gap-[5px] bg-[#e8f5e9] text-[var(--color-green-offer)] p-[4px_10px] rounded-[15px] text-[11px] font-bold mb-[15px]">
-          <FaShieldHalved /> Trust Level: {user.trust_level}
+          <FaShieldHalved /> {t.profile.trust_level} {user.trust_level}
         </div>
 
         <div className="bg-white border border-dashed border-[#ccc] inline-flex items-center gap-[10px] p-[8px_15px] rounded-[6px] mx-auto">
@@ -156,7 +155,7 @@ export default function ProfilePage() {
           }`}
           onClick={() => setActiveTab("personal")}
         >
-          Personal
+          {t.profile.tabs.personal}
         </div>
         <div
           className={`flex-1 text-center p-[15px] text-[13px] font-[600] text-[#666] cursor-pointer border-b-[3px] transition-all ${
@@ -166,7 +165,7 @@ export default function ProfilePage() {
           }`}
           onClick={() => setActiveTab("account")}
         >
-          Account
+          {t.profile.tabs.account}
         </div>
         <div
           className={`flex-1 text-center p-[15px] text-[13px] font-[600] text-[#666] cursor-pointer border-b-[3px] transition-all ${
@@ -176,7 +175,7 @@ export default function ProfilePage() {
           }`}
           onClick={() => setActiveTab("trust")}
         >
-          Trust & Invites
+          {t.profile.tabs.trust_invites}
         </div>
       </div>
 
@@ -185,11 +184,11 @@ export default function ProfilePage() {
         {activeTab === "personal" && (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[10px] border-b border-[#eee] pb-[5px]">
-              Base Data (Fixed)
+              {t.profile.personal_tab.base_data_section}
             </div>
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
-                First Name
+                {t.profile.personal_tab.first_name_label}
               </label>
               <input
                 type="text"
@@ -200,7 +199,7 @@ export default function ProfilePage() {
             </div>
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
-                Last Name
+                {t.profile.personal_tab.last_name_label}
               </label>
               <input
                 type="text"
@@ -211,50 +210,50 @@ export default function ProfilePage() {
             </div>
 
             <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[30px] border-b border-[#eee] pb-[5px]">
-              Public Info
+              {t.profile.personal_tab.public_info_section}
             </div>
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
-                Location (City / Zip)
+                {t.profile.personal_tab.location_label}
               </label>
               <input
                 type="text"
                 className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g. New York, 10001"
+                placeholder={t.profile.personal_tab.location_placeholder}
               />
               <small className="text-[#888] text-[10px]">
-                Used to calculate distances in the feed.
+                {t.profile.personal_tab.location_hint}
               </small>
             </div>
 
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
-                Language
+                {t.profile.personal_tab.language_label}
               </label>
               <select
                 className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as "GB" | "DE" | "HU")}
               >
-                <option value="GB">English (GB)</option>
-                <option value="DE">Deutsch</option>
-                <option value="HU">Magyar</option>
+                <option value="GB">{t.profile.personal_tab.language_en}</option>
+                <option value="DE">{t.profile.personal_tab.language_de}</option>
+                <option value="HU">{t.profile.personal_tab.language_hu}</option>
               </select>
             </div>
 
             {/* Bio is not in UserUpdate/UserPublic currently. Hidden or using a placeholder. */}
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
-                About me (Bio)
+                {t.profile.personal_tab.bio_label}
               </label>
               <textarea
                 className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
                 rows={4}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                placeholder="Tell us about yourself..."
+                placeholder={t.profile.personal_tab.bio_placeholder}
               ></textarea>
             </div>
 
@@ -264,10 +263,10 @@ export default function ProfilePage() {
               disabled={updateUser.isPending}
             >
               {updateUser.isPending ? (
-                "Saving..."
+                t.profile.personal_tab.save_loading
               ) : (
                 <>
-                  <FaFloppyDisk /> Save Changes
+                  <FaFloppyDisk /> {t.profile.personal_tab.save_button}
                 </>
               )}
             </button>
@@ -277,11 +276,11 @@ export default function ProfilePage() {
         {activeTab === "account" && (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[10px] border-b border-[#eee] pb-[5px]">
-              Login Data
+              {t.profile.account_tab.login_section}
             </div>
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
-                Email Address
+                {t.profile.account_tab.email_label}
               </label>
               <input
                 type="email"
@@ -295,15 +294,15 @@ export default function ProfilePage() {
                 Password
               </label>
               <button className="w-full p-[10px] bg-white border border-[#ccc] rounded-[6px] cursor-pointer text-[14px]">
-                Change Password
+                {t.profile.account_tab.change_password_button}
               </button>
             </div>
 
             <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[30px] border-b border-[#eee] pb-[5px]">
-              Notifications
+              {t.profile.account_tab.notifications_section}
             </div>
 
-            {["Email Digest", "Instant Push", "Newsletter"].map((label, i) => (
+            {[t.profile.account_tab.email_digest, t.profile.account_tab.instant_push, t.profile.account_tab.newsletter].map((label, i) => (
               <div
                 key={i}
                 className="flex justify-between items-center mb-[15px] py-[10px] border-b border-[#f5f5f5]"
@@ -328,7 +327,7 @@ export default function ProfilePage() {
             ))}
 
             <button className="w-full p-[14px] bg-[var(--color-green-offer)] text-white border-none rounded-[6px] text-[14px] font-bold cursor-pointer mt-[10px] flex justify-center items-center gap-[8px]">
-              <FaFloppyDisk /> Save Settings
+              <FaFloppyDisk /> {t.profile.account_tab.save_button}
             </button>
 
             <div className="mt-[40px] text-center">
@@ -336,7 +335,7 @@ export default function ProfilePage() {
                 className="bg-none border-none text-[#d32f2f] font-bold cursor-pointer"
                 onClick={() => (window.location.href = "/auth")}
               >
-                Log Out
+                {t.profile.account_tab.logout_button}
               </button>
             </div>
           </div>
@@ -345,7 +344,7 @@ export default function ProfilePage() {
         {activeTab === "trust" && (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[10px] border-b border-[#eee] pb-[5px]">
-              Verification Status
+              {t.profile.trust_tab.verification_section}
             </div>
             <div
               className="bg-white p-[15px] rounded-[8px] border border-[#eee] mb-[20px] cursor-pointer"
@@ -355,22 +354,20 @@ export default function ProfilePage() {
                 <FaVideo className="text-[var(--color-green-offer)] text-[20px]" />
                 <div>
                   <div className="font-bold">
-                    Trust Level: {user.trust_level}
+                    {t.profile.trust_tab.trust_level.replace('{value}', String(user.trust_level))}
                   </div>
                   <div className="text-[12px] text-[#888]">
-                    Member since{" "}
-                    {new Date(user.created_at).toLocaleDateString()}
+                    {t.profile.trust_tab.member_since.replace('{date}', new Date(user.created_at).toLocaleDateString())}
                   </div>
                 </div>
               </div>
               <div className="text-[12px] text-[#555] leading-[1.4]">
-                Your identity has been confirmed. This gives you full access to
-                trading and inviting friends.
+                {t.profile.trust_tab.verified_message}
               </div>
             </div>
 
             <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[10px] border-b border-[#eee] pb-[5px]">
-              Invite Friends
+              {t.profile.trust_tab.invites_section}
             </div>
             <div
               className="bg-[#f0f7e6] border border-[#dcedc8] rounded-[8px] p-[15px] flex justify-between items-center cursor-pointer"
@@ -378,16 +375,16 @@ export default function ProfilePage() {
             >
               <div>
                 <div className="font-bold text-[var(--color-nav-bg)]">
-                  Manage Invites
+                  {t.profile.trust_tab.manage_invites_button}
                 </div>
                 <div className="text-[12px] text-[#666]">
-                  Click to manage your invites
+                  {t.profile.trust_tab.manage_invites_hint}
                 </div>
               </div>
               <FaChevronRight className="text-[#ccc]" />
             </div>
             <div className="mt-[10px] text-[11px] text-[#888] text-center">
-              Inviting active members earns you reputation points.
+              {t.profile.trust_tab.invites_reputation_hint}
             </div>
           </div>
         )}

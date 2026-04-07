@@ -10,6 +10,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FaPlus, FaPaperPlane } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface MessageInputProps {
   onSend: (message: string) => void;
@@ -24,8 +25,10 @@ export function MessageInput({
   onTyping,
   onOpenActions,
   disabled = false,
-  placeholder = 'Message...',
+  placeholder,
 }: MessageInputProps) {
+  const { t } = useLanguage();
+  const resolvedPlaceholder = placeholder ?? t.chat.message_input.placeholder;
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const hasTypedRef = useRef(false);
@@ -107,7 +110,7 @@ export function MessageInput({
           value={message}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           disabled={disabled}
           rows={1}
           className={cn(

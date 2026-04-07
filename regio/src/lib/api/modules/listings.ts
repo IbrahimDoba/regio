@@ -77,6 +77,20 @@ export const deleteListing = async (listingId: string): Promise<void> => {
 };
 
 /**
+ * Upload media files to an existing listing
+ */
+export const uploadMedia = async (listingId: string, files: File[]): Promise<ListingPublic> => {
+  const formData = new FormData();
+  files.forEach(file => formData.append('files', file));
+  const response = await apiClient.post<ListingPublic>(
+    API_ENDPOINTS.LISTINGS.MEDIA(listingId),
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return response.data;
+};
+
+/**
  * Search tags for autocomplete
  */
 export const searchTags = async (q: string): Promise<TagPublic[]> => {
@@ -100,4 +114,5 @@ export const listingsApi = {
   updateListing,
   deleteListing,
   searchTags,
+  uploadMedia,
 } as const;

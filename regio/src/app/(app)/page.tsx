@@ -12,6 +12,7 @@ import { ListingCategory, ListingPublic } from "@/lib/api/types";
 import { useFeed, useCreateListingInquiry } from "@/lib/api";
 import { useRealTime } from "@/context/RealTimeContext";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function FeedPage() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function FeedPage() {
     null
   );
 
+  const { t } = useLanguage();
   const { isConnected: isChatConnected, createListingRoom } = useRealTime();
   const { mutateAsync: createListingInquiry } = useCreateListingInquiry();
   const [isContacting, setIsContacting] = useState(false);
@@ -59,8 +61,8 @@ export default function FeedPage() {
       console.error("Failed to start chat:", error);
       alert(
         isChatConnected
-          ? "Failed to start chat. Please try again."
-          : "Chat is not connected yet. Please wait a moment and try again."
+          ? t.feed.error_chat_start
+          : t.feed.error_chat_not_connected
       );
     } finally {
       setIsContacting(false);
@@ -108,7 +110,7 @@ export default function FeedPage() {
       </Header>
 
       {isLoading ? (
-        <div className="p-4 text-center text-gray-500">Loading listings...</div>
+        <div className="p-4 text-center text-gray-500">{t.feed.loading}</div>
       ) : (
         <FeedList
           listings={listings}

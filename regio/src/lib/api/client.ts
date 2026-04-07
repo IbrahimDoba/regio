@@ -69,6 +69,19 @@ const apiClient: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true, // Important for HttpOnly cookies (refresh token)
+  // FastAPI expects repeated query params for lists: ?categories=A&categories=B
+  // Axios default serializes arrays as categories[]=A which FastAPI ignores.
+  paramsSerializer: (params) => {
+    const result = new URLSearchParams();
+    for (const [key, val] of Object.entries(params)) {
+      if (Array.isArray(val)) {
+        val.forEach((v) => result.append(key, String(v)));
+      } else if (val !== undefined && val !== null) {
+        result.append(key, String(val));
+      }
+    }
+    return result.toString();
+  },
 });
 
 // ============================================================================
