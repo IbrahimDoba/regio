@@ -95,7 +95,6 @@ class BroadcastService:
         result = await self.session.execute(stmt)
         return result.all()
 
-
     async def get_user_inbox(
         self, user_id: UUID, limit: int = 50, offset: int = 0
     ) -> List[InboxItemResponse]:

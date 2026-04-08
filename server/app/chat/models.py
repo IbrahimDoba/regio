@@ -32,7 +32,9 @@ class MatrixRoom(SQLModel, table=True):
     __tablename__ = "matrix_rooms"
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    matrix_room_id: str = Field(unique=True, index=True)  # e.g. !abcdefg:151.hu
+    matrix_room_id: str = Field(
+        unique=True, index=True
+    )  # e.g. !abcdefg:151.hu
     listing_id: Optional[uuid.UUID] = Field(default=None, index=True)
     room_name: Optional[str] = Field(default=None, max_length=255)
     created_by_id: uuid.UUID = Field(foreign_key="users.id")

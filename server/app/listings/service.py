@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlmodel import col, desc, func, or_, select
 
-from app.core.r2 import StorageService
+from app.core.file_storage import LocalStorageService
 from app.listings.enums import ListingCategory, ListingStatus
 from app.listings.exceptions import (
     ListingNotFound,
@@ -29,7 +29,6 @@ ALLOWED_MEDIA_TYPES = {
     "image/gif",
     "application/pdf",
 }
-MAX_FILE_SIZE_MB = 1
 MAX_FILES_PER_LISTING = 5
 
 
@@ -37,7 +36,10 @@ def _localize(listing: Listing, lang: str) -> tuple[str, str]:
     """Pick the best title and description for the given language, falling back to original."""
     lang = lang.lower()
     title = getattr(listing, f"title_{lang}", None) or listing.title_original
-    description = getattr(listing, f"description_{lang}", None) or listing.description_original
+    description = (
+        getattr(listing, f"description_{lang}", None)
+        or listing.description_original
+    )
     return title, description
 
 
@@ -157,7 +159,7 @@ class ListingService:
         listing_id: uuid.UUID,
         user: User,
         update_data: ListingUpdate,
-        storage: Optional[StorageService] = None,
+        storage: Optional[LocalStorageService] = None,
     ) -> Listing:
         listing = await self.get_listing(listing_id)
         if not listing:
@@ -198,7 +200,7 @@ class ListingService:
         listing_id: uuid.UUID,
         user: User,
         files: List[UploadFile],
-        storage: StorageService,
+        storage: LocalStorageService,
     ) -> Listing:
         """Upload files to S3 and append keys to listing.media_urls."""
         listing = await self.get_listing(listing_id)
@@ -221,13 +223,6 @@ class ListingService:
                     f"Accepted: {', '.join(ALLOWED_MEDIA_TYPES)}"
                 )
 
-            size = await file.read()
-            if len(size) > MAX_FILE_SIZE_MB * 1024 * 1024:
-                raise MediaLimitExceeded(
-                    f"File '{file.filename}' exceeds the {MAX_FILE_SIZE_MB}MB limit."
-                )
-            await file.seek(0)
-
             key = await storage.upload(file, folder=f"listings/{listing_id}")
             new_keys.append(key)
 
@@ -242,7 +237,7 @@ class ListingService:
         self,
         old_urls: List[str],
         new_urls: List[str],
-        storage: StorageService,
+        storage: LocalStorageService,
     ) -> None:
         """Delete S3 objects for media URLs that were removed from a listing."""
         removed = set(old_urls) - set(new_urls)

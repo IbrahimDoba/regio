@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -151,7 +151,7 @@ class TagAdminView(BaseModel):
 
 # DISPUTES
 class DisputeAction(BaseModel):
-    action: str = Field(
+    action: Literal["APPROVE", "REJECT"] = Field(
         ...,
         description="Resolution action: 'APPROVE' (force transaction) or 'REJECT' (cancel transaction).",
     )
@@ -179,6 +179,9 @@ class DisputePublic(BaseModel):
     amount_regio: Decimal
     status: PaymentStatus
     description: Optional[str]
+    dispute_reason: Optional[str]
+    dispute_raised_at: Optional[datetime]
+    dispute_admin_note: Optional[str]
     created_at: datetime
 
 

@@ -71,7 +71,9 @@ class Settings(RegioBaseSettings):
     # Accepts either MATRIX_HOMESERVER_URL or MATRIX_HOMESERVER env var
     MATRIX_HOMESERVER: str = Field(
         default="https://matrix.151.hu",
-        validation_alias=AliasChoices("MATRIX_HOMESERVER_URL", "MATRIX_HOMESERVER"),
+        validation_alias=AliasChoices(
+            "MATRIX_HOMESERVER_URL", "MATRIX_HOMESERVER"
+        ),
     )
     MATRIX_DOMAIN: str = "151.hu"
     MATRIX_REGISTRATION_TOKEN: str = ""

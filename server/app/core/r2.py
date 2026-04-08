@@ -1,4 +1,7 @@
+import asyncio
+import tempfile
 import uuid
+from pathlib import Path
 from typing import Annotated, AsyncGenerator
 
 import aioboto3
@@ -8,6 +11,9 @@ from fastapi import Depends, UploadFile
 
 from app.core.config import settings
 from app.core.exceptions import FileUploadError
+
+# Cap concurrent GhostScript processes to avoid resource exhaustion under load
+_GS_SEMAPHORE = asyncio.Semaphore(4)
 
 # Global session — reused across requests for connection pooling
 session = aioboto3.Session(
@@ -22,6 +28,66 @@ class StorageService:
     def __init__(self, client: AioBaseClient):
         self.client = client
         self.bucket = settings.R2_BUCKET_NAME
+
+    async def _compress(self, data: bytes, content_type: str) -> bytes:
+        """
+        Compress raw bytes using GhostScript and return the compressed result.
+
+        PDFs are compressed with pdfwrite (all pages preserved).
+        Images are converted to a compressed JPEG.
+
+        Uses temp files internally. Falls back to original bytes on any failure.
+        """
+        suffix = ".pdf" if content_type == "application/pdf" else ".img"
+
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as src_f:
+            src_path = Path(src_f.name)
+            src_f.write(data)
+
+        if content_type == "application/pdf":
+            dst_path = src_path.with_suffix(".out.pdf")
+            cmd = [
+                "gs",
+                "-dBATCH",
+                "-dNOPAUSE",
+                "-dQUIET",
+                "-sDEVICE=pdfwrite",
+                "-dCompatibilityLevel=1.4",
+                "-dPDFSETTINGS=/ebook",
+                f"-sOutputFile={dst_path}",
+                str(src_path),
+            ]
+        else:
+            dst_path = src_path.with_suffix(".out.jpg")
+            cmd = [
+                "gs",
+                "-dBATCH",
+                "-dNOPAUSE",
+                "-dQUIET",
+                "-sDEVICE=jpeg",
+                "-dJPEGQ=75",
+                "-r150",
+                f"-sOutputFile={dst_path}",
+                str(src_path),
+            ]
+
+        try:
+            async with _GS_SEMAPHORE:
+                proc = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.DEVNULL,
+                    stderr=asyncio.subprocess.DEVNULL,
+                )
+                await proc.wait()
+
+            if proc.returncode == 0 and dst_path.exists():
+                return dst_path.read_bytes()
+            return data  # fallback: keep original
+        except Exception:
+            return data  # fallback: keep original
+        finally:
+            src_path.unlink(missing_ok=True)
+            dst_path.unlink(missing_ok=True)
 
     async def upload(
         self, file: UploadFile, folder: str, filename: str | None = None
@@ -51,13 +117,20 @@ class StorageService:
         key = f"{clean_folder}/{final_name}"
 
         await file.seek(0)
+        content_type = file.content_type or "application/octet-stream"
+        raw = await file.read()
+        compressed = await self._compress(raw, content_type)
+
+        # GhostScript always outputs JPEG for non-PDF files
+        if content_type not in ("application/pdf", "application/octet-stream"):
+            content_type = "image/jpeg"
 
         try:
             await self.client.put_object(  # type: ignore
                 Bucket=self.bucket,
                 Key=key,
-                Body=file.file,
-                ContentType=file.content_type or "application/octet-stream",
+                Body=compressed,
+                ContentType=content_type,
             )
         except ClientError as e:
             raise FileUploadError(str(e))

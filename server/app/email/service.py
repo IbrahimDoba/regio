@@ -1,16 +1,20 @@
 import logging
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
 import aiosmtplib
-from jinja2 import Environment, FileSystemLoader
+import css_inline
+from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
 from app.email.config import email_settings
 from app.email.exceptions import EmailSendFailed, EmailTemplateNotFound
 from app.email.schemas import (
     BroadcastDigestEmailData,
+    DisputeResolvedEmailData,
     EmailMessage,
+    PaymentRequestRejectedEmailData,
     VerificationEmailData,
     VerificationStatusEmailData,
 )
@@ -35,16 +39,19 @@ class EmailService:
             loader=FileSystemLoader(str(TEMPLATE_DIR)),
             autoescape=True,
         )
+        self._logo_m = (TEMPLATE_DIR / "logo-M.png").read_bytes()
+        self._logo_s = (TEMPLATE_DIR / "logo-S.png").read_bytes()
 
     def _render_template(self, template_name: str, context: dict) -> str:
-        """Render a Jinja2 template file to an HTML string."""
+        """Render a Jinja2 template to an HTML string with all CSS inlined."""
         try:
             template = self.jinja_env.get_template(template_name)
-        except Exception:
+        except TemplateNotFound:
             raise EmailTemplateNotFound(
                 f"Template '{template_name}' not found."
             )
-        return template.render(**context)
+        html = template.render(**context)
+        return css_inline.inline(html)
 
     async def _send(self, message: EmailMessage) -> None:
         """
@@ -53,14 +60,25 @@ class EmailService:
         Constructs a MIME multipart message with HTML (and optional plain text)
         parts and delivers it via the configured SMTP server.
         """
-        msg = MIMEMultipart("alternative")
+        alternative = MIMEMultipart("alternative")
+        if message.plain_body:
+            alternative.attach(MIMEText(message.plain_body, "plain"))
+        alternative.attach(MIMEText(message.html_body, "html"))
+
+        if message.inline_images:
+            msg = MIMEMultipart("related")
+            msg.attach(alternative)
+            for cid, data in message.inline_images.items():
+                img = MIMEImage(data)
+                img.add_header("Content-ID", f"<{cid}>")
+                img.add_header("Content-Disposition", "inline", filename=cid)
+                msg.attach(img)
+        else:
+            msg = alternative
+
         msg["From"] = self.config.SMTP_FROM_ADDRESS
         msg["To"] = message.to
         msg["Subject"] = message.subject
-
-        if message.plain_body:
-            msg.attach(MIMEText(message.plain_body, "plain"))
-        msg.attach(MIMEText(message.html_body, "html"))
 
         try:
             await aiosmtplib.send(
@@ -87,6 +105,7 @@ class EmailService:
             to=data.user_email,
             subject="Welcome to Regio — Book Your Verification Call",
             html_body=html,
+            inline_images={"logo": self._logo_m},
         )
         await self._send(message)
 
@@ -106,6 +125,42 @@ class EmailService:
             to=data.user_email,
             subject=subject_map.get(data.new_status, "Regio Account Update"),
             html_body=html,
+            inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_payment_request_rejected_email(
+        self, data: PaymentRequestRejectedEmailData
+    ) -> None:
+        """Notify the creditor that their payment request was declined by the debtor."""
+        html = self._render_template(
+            "request_rejected.html", data.model_dump()
+        )
+        message = EmailMessage(
+            to=data.user_email,
+            subject="Your Payment Request Was Declined — Regio",
+            html_body=html,
+            inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_dispute_resolved_email(
+        self, data: DisputeResolvedEmailData
+    ) -> None:
+        """Notify a user (creditor or debtor) that their dispute has been resolved."""
+        subject = (
+            "Your Dispute Has Been Resolved — Regio"
+            if data.is_creditor
+            else "Payment Dispute Update — Regio"
+        )
+        html = self._render_template(
+            "dispute_resolved.html", data.model_dump()
+        )
+        message = EmailMessage(
+            to=data.user_email,
+            subject=subject,
+            html_body=html,
+            inline_images={"logo": self._logo_m},
         )
         await self._send(message)
 
@@ -120,6 +175,7 @@ class EmailService:
             to=data.user_email,
             subject=f"Regio Update: {data.broadcast_title}",
             html_body=html,
+            inline_images={"logo": self._logo_s},
         )
         await self._send(message)
 

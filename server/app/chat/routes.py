@@ -4,7 +4,6 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.chat.matrix_service import (
     ensure_matrix_user,
-    get_matrix_access_token,
     get_or_create_inquiry_room,
     get_user_rooms,
 )
@@ -33,7 +32,9 @@ async def matrix_register(current_user: CurrentUser, db: SessionDep):
     Called when a user opens the chat for the first time.
     Provisions a Matrix account if one doesn't exist yet.
     """
-    matrix_user_id, access_token = await ensure_matrix_user(current_user.id, db)
+    matrix_user_id, access_token = await ensure_matrix_user(
+        current_user.id, db
+    )
     return MatrixTokenResponse(
         matrix_user_id=matrix_user_id,
         matrix_access_token=access_token,
@@ -53,7 +54,9 @@ async def get_matrix_token(current_user: CurrentUser, db: SessionDep):
     currently authenticated platform user.  Provisions a Matrix account
     lazily if needed.
     """
-    matrix_user_id, access_token = await ensure_matrix_user(current_user.id, db)
+    matrix_user_id, access_token = await ensure_matrix_user(
+        current_user.id, db
+    )
     return MatrixTokenResponse(
         matrix_user_id=matrix_user_id,
         matrix_access_token=access_token,

@@ -83,3 +83,11 @@ class BankingConflict(BankingBaseException):
 
 class TransactionConflict(BankingConflict):
     detail = "Transaction conflict detected. Please retry."
+
+
+class DisputeAlreadyRaised(BankingConflict):
+    detail = "A dispute has already been raised for this payment request"
+
+
+class DisputeNotAllowed(BankingBadRequest):
+    detail = "Disputes can only be raised on rejected payment requests"

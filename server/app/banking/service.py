@@ -17,6 +17,8 @@ from app.banking.constants import (
 from app.banking.enums import Currency, PaymentStatus, TransactionType
 from app.banking.exceptions import (
     AccountNotFound,
+    DisputeAlreadyRaised,
+    DisputeNotAllowed,
     InsufficientFunds,
     InvalidPaymentAction,
     InvalidPaymentRequestStatus,
@@ -438,6 +440,9 @@ class BankingService:
                     amount_regio=r.amount_regio,
                     description=r.description,
                     status=r.status,
+                    dispute_raised=r.dispute_raised,
+                    dispute_reason=r.dispute_reason,
+                    dispute_raised_at=r.dispute_raised_at,
                     created_at=r.created_at,
                 )
             )
@@ -469,12 +474,14 @@ class BankingService:
     async def get_outgoing_payment_requests(
         self, current_user: User
     ) -> List[PaymentRequest]:
-        """Requests where the user is the CREDITOR (waiting for payment)."""
+        """Requests where the user is the CREDITOR (waiting for payment or rejected)."""
         stmt = (
             select(PaymentRequest)
             .where(
                 PaymentRequest.creditor_id == current_user.id,
-                PaymentRequest.status == PaymentStatus.PENDING,
+                PaymentRequest.status.in_(
+                    [PaymentStatus.PENDING, PaymentStatus.REJECTED]
+                ),
             )
             .options(
                 selectinload(PaymentRequest.debtor)
@@ -488,6 +495,59 @@ class BankingService:
             requests, current_user
         )
         return results
+
+    async def get_payment_request_with_users(
+        self, request_id: uuid.UUID
+    ) -> PaymentRequest:
+        """Load a payment request with creditor and debtor relationships eagerly loaded."""
+        stmt = (
+            select(PaymentRequest)
+            .where(PaymentRequest.id == request_id)
+            .options(
+                selectinload(PaymentRequest.creditor),
+                selectinload(PaymentRequest.debtor),
+            )
+        )
+        req = (await self.session.execute(stmt)).scalar_one_or_none()
+        if not req:
+            raise PaymentRequestNotFound()
+        return req
+
+    async def raise_dispute(
+        self,
+        request_id: uuid.UUID,
+        creditor_id: uuid.UUID,
+        reason: Optional[str],
+    ) -> PaymentRequest:
+        """Allow the creditor to contest a rejected payment request."""
+        stmt = (
+            select(PaymentRequest)
+            .where(PaymentRequest.id == request_id)
+            .options(
+                selectinload(PaymentRequest.creditor),
+                selectinload(PaymentRequest.debtor),
+            )
+        )
+        req = (await self.session.execute(stmt)).scalar_one_or_none()
+
+        if not req:
+            raise PaymentRequestNotFound()
+
+        if req.creditor_id != creditor_id:
+            raise UnauthorizedPaymentRequestAccess()
+
+        if req.status != PaymentStatus.REJECTED:
+            raise DisputeNotAllowed()
+
+        if req.dispute_raised:
+            raise DisputeAlreadyRaised()
+
+        req.dispute_raised = True
+        req.dispute_reason = reason
+        req.dispute_raised_at = datetime.now(timezone.utc)
+        self.session.add(req)
+        await self.session.commit()
+        return req
 
     async def cancel_payment_request(
         self, request_id: uuid.UUID, creditor_id: uuid.UUID
@@ -516,32 +576,45 @@ class BankingService:
         request_id: uuid.UUID,
         debtor_id: Optional[uuid.UUID],
         action: str,
+        admin_note: Optional[str] = None,
     ):
-        stmt = select(PaymentRequest).where(PaymentRequest.id == request_id)
+        stmt = (
+            select(PaymentRequest)
+            .where(PaymentRequest.id == request_id)
+            .with_for_update()  # row-level lock: prevents concurrent resolutions
+        )
         req = (await self.session.execute(stmt)).scalar_one_or_none()
 
         if not req:
             raise PaymentRequestNotFound()
 
-        if req.status != PaymentStatus.PENDING:
-            raise InvalidPaymentRequestStatus(req.status)
+        is_admin = debtor_id is None
 
-        # Permission Check (debtor_id is None if Admin)
-        if debtor_id and req.debtor_id != debtor_id:
-            raise UnauthorizedPaymentRequestAccess()
+        if is_admin:
+            # Admin can only act on actively disputed (rejected + flagged) requests
+            if not req.dispute_raised or req.status != PaymentStatus.REJECTED:
+                raise InvalidPaymentRequestStatus(req.status)
+            if admin_note:
+                req.dispute_admin_note = admin_note
+        else:
+            if req.status != PaymentStatus.PENDING:
+                raise InvalidPaymentRequestStatus(req.status)
+            if req.debtor_id != debtor_id:
+                raise UnauthorizedPaymentRequestAccess()
 
         if action == "REJECT":
-            req.status = PaymentStatus.REJECTED
+            # Debtor rejects → REJECTED; Admin sides with debtor → CANCELLED
+            req.status = (
+                PaymentStatus.CANCELLED if is_admin else PaymentStatus.REJECTED
+            )
             self.session.add(req)
             await self.session.commit()
             return req
 
         elif action == "APPROVE":
-            # Need to fetch codes for transfer function
             creditor = await self.session.get(User, req.creditor_id)
             debtor = await self.session.get(User, req.debtor_id)
 
-            # This might raise InsufficientFunds, which is good
             tx = await self.transfer_funds(
                 sender_code=debtor.user_code,
                 receiver_code=creditor.user_code,
@@ -549,7 +622,7 @@ class BankingService:
                 amount_regio=req.amount_regio,
                 reference=f"Payment Req: {req.description or 'Confirmed'}",
                 payment_request_id=req.id,
-                skip_limit_check=False,
+                skip_limit_check=is_admin,  # admin overrides bypass limit checks
             )
 
             req.status = PaymentStatus.EXECUTED

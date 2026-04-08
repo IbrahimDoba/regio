@@ -138,6 +138,16 @@ class PaymentRequestPublic(SQLModel):
     status: PaymentStatus = Field(
         ..., description="PENDING, APPROVED, REJECTED, CANCELLED."
     )
+    dispute_raised: bool = Field(
+        default=False,
+        description="True if the creditor has contested the rejection.",
+    )
+    dispute_reason: Optional[str] = Field(
+        default=None, description="Creditor's reason for disputing."
+    )
+    dispute_raised_at: Optional[datetime] = Field(
+        default=None, description="When the creditor raised the dispute."
+    )
     created_at: datetime = Field(..., description="Creation timestamp.")
 
 
@@ -194,6 +204,14 @@ class PaymentRequestCreate(SQLModel):
                 "description": "Lunch split",
             }
         }
+    )
+
+
+class DisputeCreate(SQLModel):
+    reason: Optional[str] = Field(
+        default=None,
+        max_length=500,
+        description="Optional explanation of why you are contesting the rejection.",
     )
 
 

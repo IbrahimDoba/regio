@@ -21,8 +21,14 @@ from app.admin.schemas import (
 )
 from app.banking.dependencies import get_banking_service
 from app.banking.service import BankingService
-from app.email.schemas import VerificationStatusEmailData
-from app.email.tasks import send_verification_status_email_task
+from app.email.schemas import (
+    DisputeResolvedEmailData,
+    VerificationStatusEmailData,
+)
+from app.email.tasks import (
+    send_dispute_resolved_email_task,
+    send_verification_status_email_task,
+)
 from app.users.dependencies import (
     CurrentUser,
     get_current_active_system_admin,
@@ -314,16 +320,57 @@ async def list_pending_disputes(admin_service: AdminServiceDep) -> Any:
 async def resolve_dispute(
     request_id: uuid.UUID,
     action_in: DisputeAction,
+    background_tasks: BackgroundTasks,
+    admin_service: AdminServiceDep,
     banking_service: BankingService = Depends(get_banking_service),
 ) -> Any:
     """
     Resolve a dispute.
 
     - **APPROVE**: Overrides the debtor's rejection and executes the payment.
-    - **REJECT**: Cancels the payment request permanently.
+    - **REJECT**: Cancels the payment request permanently (sides with debtor).
+
+    Both parties are notified by email on resolution.
     """
-    return await banking_service.process_payment_request(
+    # Load dispute info for notifications before processing
+    dispute = await admin_service.get_dispute_by_id(request_id)
+    creditor = dispute.creditor
+    debtor = dispute.debtor
+
+    await banking_service.process_payment_request(
         request_id=request_id,
         debtor_id=None,  # None signals Admin Override
         action=action_in.action,
+        admin_note=action_in.reason,
     )
+
+    outcome = "APPROVED" if action_in.action == "APPROVE" else "CANCELLED"
+
+    background_tasks.add_task(
+        send_dispute_resolved_email_task,
+        DisputeResolvedEmailData(
+            user_first_name=creditor.first_name,
+            user_email=creditor.email,
+            is_creditor=True,
+            outcome=outcome,
+            admin_note=action_in.reason,
+            amount_time=dispute.amount_time,
+            amount_regio=float(dispute.amount_regio),
+            description=dispute.description,
+        ),
+    )
+    background_tasks.add_task(
+        send_dispute_resolved_email_task,
+        DisputeResolvedEmailData(
+            user_first_name=debtor.first_name,
+            user_email=debtor.email,
+            is_creditor=False,
+            outcome=outcome,
+            admin_note=action_in.reason,
+            amount_time=dispute.amount_time,
+            amount_regio=float(dispute.amount_regio),
+            description=dispute.description,
+        ),
+    )
+
+    return {"detail": f"Dispute {outcome.lower()}. Both parties notified."}

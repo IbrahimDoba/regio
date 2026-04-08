@@ -15,6 +15,7 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+
 async def matrix_fetch(
     endpoint: str,
     method: str = "GET",
@@ -63,7 +64,9 @@ async def matrix_fetch(
     return response.json()
 
 
-async def register_matrix_user_uia(username: str, password: str) -> dict[str, Any]:
+async def register_matrix_user_uia(
+    username: str, password: str
+) -> dict[str, Any]:
     """
     Register a new Matrix user using the 3-step UIA flow:
       1. Initial POST → get session ID
@@ -169,7 +172,9 @@ async def login_matrix_user(username: str, password: str) -> dict[str, Any]:
         },
         "password": password,
     }
-    data = await matrix_fetch("/_matrix/client/v3/login", method="POST", body=body)
+    data = await matrix_fetch(
+        "/_matrix/client/v3/login", method="POST", body=body
+    )
     return {
         "user_id": data["user_id"],
         "access_token": data["access_token"],

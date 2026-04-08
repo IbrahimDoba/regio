@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import List
@@ -16,6 +17,7 @@ from app.admin.schemas import (
     UserListResponse,
 )
 from app.banking.enums import Currency, PaymentStatus
+from app.banking.exceptions import PaymentRequestNotFound
 from app.banking.models import Account, PaymentRequest
 from app.listings.enums import ListingStatus
 from app.listings.exceptions import TagNotFound
@@ -58,7 +60,8 @@ class AdminService:
 
         pending = await self.session.execute(
             select(func.count(PaymentRequest.id)).where(
-                PaymentRequest.status == PaymentStatus.PENDING
+                PaymentRequest.dispute_raised.is_(True),
+                PaymentRequest.status == PaymentStatus.REJECTED,
             )
         )
 
@@ -274,7 +277,10 @@ class AdminService:
     async def get_pending_disputes(self) -> List[DisputePublic]:
         stmt = (
             select(PaymentRequest)
-            .where(PaymentRequest.status == PaymentStatus.PENDING)
+            .where(
+                PaymentRequest.dispute_raised.is_(True),
+                PaymentRequest.status == PaymentStatus.REJECTED,
+            )
             .options(
                 selectinload(PaymentRequest.creditor),
                 selectinload(PaymentRequest.debtor),
@@ -297,7 +303,25 @@ class AdminService:
                     amount_regio=r.amount_regio,
                     status=r.status,
                     description=r.description,
+                    dispute_reason=r.dispute_reason,
+                    dispute_raised_at=r.dispute_raised_at,
+                    dispute_admin_note=r.dispute_admin_note,
                     created_at=r.created_at,
                 )
             )
         return mapped
+
+    async def get_dispute_by_id(self, request_id: uuid.UUID) -> PaymentRequest:
+        """Load a disputed payment request with user relationships for notification purposes."""
+        stmt = (
+            select(PaymentRequest)
+            .where(PaymentRequest.id == request_id)
+            .options(
+                selectinload(PaymentRequest.creditor),
+                selectinload(PaymentRequest.debtor),
+            )
+        )
+        req = (await self.session.execute(stmt)).scalar_one_or_none()
+        if not req:
+            raise PaymentRequestNotFound()
+        return req

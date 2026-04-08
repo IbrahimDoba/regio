@@ -28,12 +28,12 @@ from app.banking.routes import router as banking_router
 from app.broadcast.exceptions import BroadcastNotFound
 from app.broadcast.handlers import broadcast_not_found_handler
 from app.broadcast.routes import router as broadcast_router
-from app.email.exceptions import EmailBaseException
-from app.email.handlers import email_error_handler
 from app.chat.routes import router as chat_router
 from app.core.config import settings
 from app.core.database import init_db, test_db_connection
 from app.core.handlers import global_exception_handler
+from app.email.exceptions import EmailBaseException
+from app.email.handlers import email_error_handler
 from app.listings.exceptions import (
     InvalidListingData,
     ListingNotFound,

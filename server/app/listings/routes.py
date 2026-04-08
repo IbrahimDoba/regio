@@ -3,7 +3,7 @@ from typing import Any, List, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Query, UploadFile, status
 
-from app.core.r2 import StorageServiceDep
+from app.core.file_storage import StorageServiceDep
 from app.core.translate import TranslateService
 from app.listings.dependencies import ListingServiceDep
 from app.listings.enums import ListingCategory
@@ -93,7 +93,10 @@ async def get_feed(
     Supports filtering by multiple categories, tags, text search, and pagination.
     """
     return await service.get_feed(
-        categories=categories, search_query=q, tags=tags, offset=offset,
+        categories=categories,
+        search_query=q,
+        tags=tags,
+        offset=offset,
         user_lang=lang,
     )
 
