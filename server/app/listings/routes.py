@@ -3,7 +3,7 @@ from typing import Any, List, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Query, UploadFile, status
 
-from app.core.r2 import StorageServiceDep
+from app.core.file_storage import StorageServiceDep
 from app.core.translate import TranslateService
 from app.listings.dependencies import ListingServiceDep
 from app.listings.enums import ListingCategory
