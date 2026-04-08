@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import List
 
@@ -7,6 +8,8 @@ from app.email.schemas import (
     VerificationStatusEmailData,
 )
 from app.email.service import email_service
+
+_BROADCAST_SEMAPHORE = asyncio.Semaphore(10)
 
 logger = logging.getLogger(__name__)
 
@@ -36,12 +39,15 @@ async def send_verification_status_email_task(
 async def send_broadcast_digest_emails_task(
     recipients: List[BroadcastDigestEmailData],
 ) -> None:
-    """Background task: send broadcast digest to multiple users."""
-    for recipient in recipients:
-        try:
-            await email_service.send_broadcast_digest_email(recipient)
-        except Exception as e:
-            logger.error(
-                f"Background broadcast digest failed for "
-                f"{recipient.user_email}: {e}"
-            )
+    """Background task: send broadcast digest to multiple users concurrently."""
+    async def _send_one(data: BroadcastDigestEmailData) -> None:
+        async with _BROADCAST_SEMAPHORE:
+            try:
+                await email_service.send_broadcast_digest_email(data)
+            except Exception as e:
+                logger.error(
+                    f"Background broadcast digest failed for "
+                    f"{data.user_email}: {e}"
+                )
+
+    await asyncio.gather(*(_send_one(r) for r in recipients))

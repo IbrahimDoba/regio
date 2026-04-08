@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class EmailMessage(BaseModel):
@@ -10,6 +10,8 @@ class EmailMessage(BaseModel):
     subject: str
     html_body: str
     plain_body: Optional[str] = None
+    # CID → raw bytes for inline images referenced as cid:<key> in the HTML
+    inline_images: dict[str, bytes] = Field(default_factory=dict)
 
 
 class VerificationEmailData(BaseModel):
