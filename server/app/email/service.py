@@ -12,7 +12,9 @@ from app.email.config import email_settings
 from app.email.exceptions import EmailSendFailed, EmailTemplateNotFound
 from app.email.schemas import (
     BroadcastDigestEmailData,
+    DisputeResolvedEmailData,
     EmailMessage,
+    PaymentRequestRejectedEmailData,
     VerificationEmailData,
     VerificationStatusEmailData,
 )
@@ -122,6 +124,37 @@ class EmailService:
         message = EmailMessage(
             to=data.user_email,
             subject=subject_map.get(data.new_status, "Regio Account Update"),
+            html_body=html,
+            inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_payment_request_rejected_email(
+        self, data: PaymentRequestRejectedEmailData
+    ) -> None:
+        """Notify the creditor that their payment request was declined by the debtor."""
+        html = self._render_template("request_rejected.html", data.model_dump())
+        message = EmailMessage(
+            to=data.user_email,
+            subject="Your Payment Request Was Declined — Regio",
+            html_body=html,
+            inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_dispute_resolved_email(
+        self, data: DisputeResolvedEmailData
+    ) -> None:
+        """Notify a user (creditor or debtor) that their dispute has been resolved."""
+        subject = (
+            "Your Dispute Has Been Resolved — Regio"
+            if data.is_creditor
+            else "Payment Dispute Update — Regio"
+        )
+        html = self._render_template("dispute_resolved.html", data.model_dump())
+        message = EmailMessage(
+            to=data.user_email,
+            subject=subject,
             html_body=html,
             inline_images={"logo": self._logo_m},
         )

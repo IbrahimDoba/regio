@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #1a1a1a; }
+    .container { max-width: 580px; margin: 20px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .header { padding: 40px 20px; text-align: center; background-color: #ffffff; }
+    .logo { max-width: 200px; height: auto; }
+    .status-bar { height: 6px; width: 100%; background-color: #C1272D; }
+    .body { padding: 0 40px 40px; line-height: 1.6; font-size: 18px; }
+    h2 { font-size: 20px; margin-bottom: 15px; color: #1a1a1a; font-weight: 600; }
+    .info-box { background-color: #f9f9f9; border-left: 4px solid #C1272D; padding: 20px; margin: 20px 0; border-radius: 4px; font-size: 17px; }
+    .cta { display: inline-block; padding: 14px 28px; background-color: #3D633D; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; font-size: 17px; }
+    .footer { padding: 40px; text-align: center; font-size: 13px; color: #ffffff; background-color: #1a1a1a; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="cid:logo" alt="REGIO" class="logo">
+    </div>
+
+    <div class="status-bar"></div>
+
+    <div class="body">
+      <h2>Hey {{ user_first_name }},</h2>
+      <p><strong>{{ debtor_name }}</strong> has declined your payment request.</p>
+
+      <div class="info-box">
+        {% if description %}<strong>Request:</strong> {{ description }}<br>{% endif %}
+        <strong>Amount:</strong>
+        {% if amount_time > 0 %}{{ amount_time }} min{% endif %}
+        {% if amount_time > 0 and amount_regio > 0 %} + {% endif %}
+        {% if amount_regio > 0 %}{{ amount_regio }} Regio{% endif %}
+      </div>
+
+      <p>If you believe this is a mistake, you can raise a dispute and an admin will review it.</p>
+    </div>
+
+    <div class="footer">
+      <strong>REGIO</strong> is a non-profit project by <strong>151 CONCEPTS</strong><br>
+      Báta, 7149, Hungary | Tax ID: HU48374642
+      <br><br>
+      You're receiving this because a payment request you sent was declined.
+    </div>
+  </div>
+</body>
+</html>

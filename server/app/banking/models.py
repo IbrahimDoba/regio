@@ -88,6 +88,14 @@ class PaymentRequest(SQLModel, table=True):
     # Links to the executed transaction
     transaction_id: Optional[uuid.UUID] = Field(default=None)
 
+    # Dispute fields — set by the creditor after debtor rejection
+    dispute_raised: bool = Field(default=False)
+    dispute_reason: Optional[str] = Field(default=None)
+    dispute_raised_at: Optional[datetime] = Field(
+        default=None, sa_type=DateTime(timezone=True)
+    )
+    dispute_admin_note: Optional[str] = Field(default=None)
+
     reminder_sent_at: Optional[datetime] = Field(
         default=None, sa_type=DateTime(timezone=True)
     )

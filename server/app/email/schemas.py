@@ -39,3 +39,27 @@ class BroadcastDigestEmailData(BaseModel):
     broadcast_title: str
     broadcast_body: str
     broadcast_link: Optional[str] = None
+
+
+class PaymentRequestRejectedEmailData(BaseModel):
+    """Notify the creditor that the debtor has rejected their payment request."""
+
+    user_first_name: str
+    user_email: EmailStr
+    debtor_name: str
+    amount_time: int
+    amount_regio: float
+    description: Optional[str] = None
+
+
+class DisputeResolvedEmailData(BaseModel):
+    """Data for rendering the dispute resolution notification email."""
+
+    user_first_name: str
+    user_email: EmailStr
+    is_creditor: bool          # True = creditor, False = debtor
+    outcome: str               # "APPROVED" or "CANCELLED"
+    admin_note: Optional[str] = None
+    amount_time: int
+    amount_regio: float
+    description: Optional[str] = None

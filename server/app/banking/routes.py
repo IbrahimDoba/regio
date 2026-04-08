@@ -1,11 +1,12 @@
 import uuid
 from typing import Any, List
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, BackgroundTasks, Query, status
 
 from app.banking.dependencies import BankingServiceDep
 from app.banking.schemas import (
     BalanceResponse,
+    DisputeCreate,
     PaymentRequestCreate,
     PaymentRequestPublic,
     TransactionHistory,
@@ -13,6 +14,8 @@ from app.banking.schemas import (
     TransferRequest,
 )
 from app.core.schemas import Message
+from app.email.schemas import PaymentRequestRejectedEmailData
+from app.email.tasks import send_payment_request_rejected_email_task
 from app.users.dependencies import CurrentUser
 
 router = APIRouter()
@@ -178,14 +181,71 @@ async def reject_payment_request(
     request_id: uuid.UUID,
     current_user: CurrentUser,
     service: BankingServiceDep,
+    background_tasks: BackgroundTasks,
 ) -> Message:
     """
-    Decline a received request.
+    Decline a received request. The creditor is notified by email.
     """
+    # Load relationships before processing so we can notify the creditor
+    req = await service.get_payment_request_with_users(request_id)
     await service.process_payment_request(
         request_id=request_id, debtor_id=current_user.id, action="REJECT"
     )
+    background_tasks.add_task(
+        send_payment_request_rejected_email_task,
+        PaymentRequestRejectedEmailData(
+            user_first_name=req.creditor.first_name,
+            user_email=req.creditor.email,
+            debtor_name=current_user.full_name,
+            amount_time=req.amount_time,
+            amount_regio=float(req.amount_regio),
+            description=req.description,
+        ),
+    )
     return Message(message="Request rejected")
+
+
+@router.post(
+    "/requests/{request_id}/dispute",
+    response_model=PaymentRequestPublic,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Request is not in a rejected state or dispute already raised."
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "Only the creditor can raise a dispute."
+        },
+        status.HTTP_404_NOT_FOUND: {"description": "Request not found."},
+    },
+)
+async def raise_dispute(
+    request_id: uuid.UUID,
+    data: DisputeCreate,
+    current_user: CurrentUser,
+    service: BankingServiceDep,
+) -> Any:
+    """
+    Contest a rejected payment request and escalate it to admin review.
+
+    Only the creditor can raise a dispute, and only on requests the debtor has rejected.
+    The dispute will appear in the admin queue for resolution.
+    """
+    req = await service.raise_dispute(request_id, current_user.id, data.reason)
+    return PaymentRequestPublic(
+        id=req.id,
+        creditor_code=req.creditor.user_code,
+        creditor_name=req.creditor.full_name,
+        debtor_code=req.debtor.user_code,
+        debtor_name=req.debtor.full_name,
+        amount_time=req.amount_time,
+        amount_regio=req.amount_regio,
+        description=req.description,
+        status=req.status,
+        dispute_raised=req.dispute_raised,
+        dispute_reason=req.dispute_reason,
+        dispute_raised_at=req.dispute_raised_at,
+        created_at=req.created_at,
+    )
 
 
 @router.post(

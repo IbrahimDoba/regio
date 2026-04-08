@@ -4,6 +4,8 @@ from typing import List
 
 from app.email.schemas import (
     BroadcastDigestEmailData,
+    DisputeResolvedEmailData,
+    PaymentRequestRejectedEmailData,
     VerificationEmailData,
     VerificationStatusEmailData,
 )
@@ -33,6 +35,30 @@ async def send_verification_status_email_task(
     except Exception as e:
         logger.error(
             f"Background verification email failed for {data.user_email}: {e}"
+        )
+
+
+async def send_payment_request_rejected_email_task(
+    data: PaymentRequestRejectedEmailData,
+) -> None:
+    """Background task: notify creditor their payment request was rejected."""
+    try:
+        await email_service.send_payment_request_rejected_email(data)
+    except Exception as e:
+        logger.error(
+            f"Background rejection email failed for {data.user_email}: {e}"
+        )
+
+
+async def send_dispute_resolved_email_task(
+    data: DisputeResolvedEmailData,
+) -> None:
+    """Background task: notify a user of a dispute resolution outcome."""
+    try:
+        await email_service.send_dispute_resolved_email(data)
+    except Exception as e:
+        logger.error(
+            f"Background dispute resolved email failed for {data.user_email}: {e}"
         )
 
 
