@@ -10,6 +10,9 @@ from app.core.exceptions import FileUploadError
 # Resolves to <server_root>/data/
 BASE_DIR = Path(__file__).resolve().parents[2] / "data"
 
+# Cap concurrent GhostScript processes to avoid resource exhaustion under load
+_GS_SEMAPHORE = asyncio.Semaphore(5)
+
 
 class LocalStorageService:
     """Service for handling local filesystem storage operations."""
@@ -31,7 +34,10 @@ class LocalStorageService:
         if content_type == "application/pdf":
             tmp = path.with_suffix(".gs_tmp.pdf")
             cmd = [
-                "gs", "-dBATCH", "-dNOPAUSE", "-dQUIET",
+                "gs",
+                "-dBATCH",
+                "-dNOPAUSE",
+                "-dQUIET",
                 "-sDEVICE=pdfwrite",
                 "-dCompatibilityLevel=1.4",
                 "-dPDFSETTINGS=/ebook",
@@ -43,7 +49,10 @@ class LocalStorageService:
             # All images → compressed JPEG
             tmp = path.with_suffix(".gs_tmp.jpg")
             cmd = [
-                "gs", "-dBATCH", "-dNOPAUSE", "-dQUIET",
+                "gs",
+                "-dBATCH",
+                "-dNOPAUSE",
+                "-dQUIET",
                 "-sDEVICE=jpeg",
                 "-dJPEGQ=75",
                 "-r150",
@@ -53,12 +62,13 @@ class LocalStorageService:
             final_path = path.with_suffix(".jpg")
 
         try:
-            proc = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.DEVNULL,
-                stderr=asyncio.subprocess.DEVNULL,
-            )
-            await proc.wait()
+            async with _GS_SEMAPHORE:
+                proc = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.DEVNULL,
+                    stderr=asyncio.subprocess.DEVNULL,
+                )
+                await proc.wait()
 
             if proc.returncode == 0 and tmp.exists():
                 if content_type == "application/pdf":
@@ -111,7 +121,8 @@ class LocalStorageService:
         await file.seek(0)
 
         try:
-            dest_path.write_bytes(await file.read())
+            data = await file.read()
+            await asyncio.to_thread(dest_path.write_bytes, data)
         except Exception as e:
             raise FileUploadError(str(e))
 
@@ -121,17 +132,24 @@ class LocalStorageService:
 
         return f"{clean_folder}/{final_path.name}"
 
+    def _safe_path(self, key: str) -> Path | None:
+        """Resolve key to an absolute path and verify it stays within base_dir."""
+        resolved = (self.base_dir / key).resolve()
+        if not resolved.is_relative_to(self.base_dir.resolve()):
+            return None
+        return resolved
+
     async def get_bytes(self, key: str | None) -> bytes | None:
         """Read a file from local storage and return raw bytes. Returns None if not found."""
         if not key:
             return None
 
-        path = self.base_dir / key
-        if not path.exists():
+        path = self._safe_path(key)
+        if path is None or not path.exists():
             return None
 
         try:
-            return path.read_bytes()
+            return await asyncio.to_thread(path.read_bytes)
         except Exception as e:
             raise FileUploadError(str(e))
 
@@ -140,8 +158,12 @@ class LocalStorageService:
         if not key:
             return False
 
+        path = self._safe_path(key)
+        if path is None:
+            return False
+
         try:
-            (self.base_dir / key).unlink(missing_ok=True)
+            await asyncio.to_thread(path.unlink, True)  # missing_ok=True
             return True
         except Exception:
             return False
@@ -155,4 +177,6 @@ def get_storage_service() -> LocalStorageService:
     return LocalStorageService()
 
 
-StorageServiceDep = Annotated[LocalStorageService, Depends(get_storage_service)]
+StorageServiceDep = Annotated[
+    LocalStorageService, Depends(get_storage_service)
+]
