@@ -133,7 +133,9 @@ class EmailService:
         self, data: PaymentRequestRejectedEmailData
     ) -> None:
         """Notify the creditor that their payment request was declined by the debtor."""
-        html = self._render_template("request_rejected.html", data.model_dump())
+        html = self._render_template(
+            "request_rejected.html", data.model_dump()
+        )
         message = EmailMessage(
             to=data.user_email,
             subject="Your Payment Request Was Declined — Regio",
@@ -151,7 +153,9 @@ class EmailService:
             if data.is_creditor
             else "Payment Dispute Update — Regio"
         )
-        html = self._render_template("dispute_resolved.html", data.model_dump())
+        html = self._render_template(
+            "dispute_resolved.html", data.model_dump()
+        )
         message = EmailMessage(
             to=data.user_email,
             subject=subject,

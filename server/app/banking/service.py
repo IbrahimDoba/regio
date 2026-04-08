@@ -604,7 +604,9 @@ class BankingService:
 
         if action == "REJECT":
             # Debtor rejects → REJECTED; Admin sides with debtor → CANCELLED
-            req.status = PaymentStatus.CANCELLED if is_admin else PaymentStatus.REJECTED
+            req.status = (
+                PaymentStatus.CANCELLED if is_admin else PaymentStatus.REJECTED
+            )
             self.session.add(req)
             await self.session.commit()
             return req

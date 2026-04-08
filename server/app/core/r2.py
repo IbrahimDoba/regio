@@ -47,7 +47,10 @@ class StorageService:
         if content_type == "application/pdf":
             dst_path = src_path.with_suffix(".out.pdf")
             cmd = [
-                "gs", "-dBATCH", "-dNOPAUSE", "-dQUIET",
+                "gs",
+                "-dBATCH",
+                "-dNOPAUSE",
+                "-dQUIET",
                 "-sDEVICE=pdfwrite",
                 "-dCompatibilityLevel=1.4",
                 "-dPDFSETTINGS=/ebook",
@@ -57,7 +60,10 @@ class StorageService:
         else:
             dst_path = src_path.with_suffix(".out.jpg")
             cmd = [
-                "gs", "-dBATCH", "-dNOPAUSE", "-dQUIET",
+                "gs",
+                "-dBATCH",
+                "-dNOPAUSE",
+                "-dQUIET",
                 "-sDEVICE=jpeg",
                 "-dJPEGQ=75",
                 "-r150",

@@ -93,7 +93,10 @@ async def get_feed(
     Supports filtering by multiple categories, tags, text search, and pagination.
     """
     return await service.get_feed(
-        categories=categories, search_query=q, tags=tags, offset=offset,
+        categories=categories,
+        search_query=q,
+        tags=tags,
+        offset=offset,
         user_lang=lang,
     )
 

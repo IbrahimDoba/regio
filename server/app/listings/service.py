@@ -36,7 +36,10 @@ def _localize(listing: Listing, lang: str) -> tuple[str, str]:
     """Pick the best title and description for the given language, falling back to original."""
     lang = lang.lower()
     title = getattr(listing, f"title_{lang}", None) or listing.title_original
-    description = getattr(listing, f"description_{lang}", None) or listing.description_original
+    description = (
+        getattr(listing, f"description_{lang}", None)
+        or listing.description_original
+    )
     return title, description
 
 

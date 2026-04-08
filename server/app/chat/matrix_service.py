@@ -80,7 +80,9 @@ async def ensure_matrix_user(
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     # Already registered?
     if user.matrix_user_id:
@@ -133,7 +135,9 @@ async def get_matrix_access_token(user_id: uuid.UUID, db: AsyncSession) -> str:
     Tries cached credentials first; falls back to a fresh login.
     """
     result = await db.execute(
-        select(MatrixUserCredentials).where(MatrixUserCredentials.user_id == user_id)
+        select(MatrixUserCredentials).where(
+            MatrixUserCredentials.user_id == user_id
+        )
     )
     creds = result.scalar_one_or_none()
 
@@ -200,7 +204,9 @@ async def get_or_create_inquiry_room(
 
     if existing_participant:
         room_result = await db.execute(
-            select(MatrixRoom).where(MatrixRoom.id == existing_participant.room_id)
+            select(MatrixRoom).where(
+                MatrixRoom.id == existing_participant.room_id
+            )
         )
         room = room_result.scalar_one_or_none()
         if room:
@@ -251,7 +257,9 @@ async def get_or_create_inquiry_room(
     return matrix_room_id
 
 
-async def get_user_rooms(user_id: uuid.UUID, db: AsyncSession) -> list[dict[str, Any]]:
+async def get_user_rooms(
+    user_id: uuid.UUID, db: AsyncSession
+) -> list[dict[str, Any]]:
     """
     Return a summary of all Matrix rooms the user participates in.
     """
@@ -280,14 +288,18 @@ async def get_user_rooms(user_id: uuid.UUID, db: AsyncSession) -> list[dict[str,
         partner_code = ""
         if partner_row:
             _, partner_user = partner_row
-            partner_name = f"{partner_user.first_name} {partner_user.last_name}".strip()
+            partner_name = (
+                f"{partner_user.first_name} {partner_user.last_name}".strip()
+            )
             partner_code = partner_user.user_code
 
         rooms.append(
             {
                 "room_id": room.matrix_room_id,
                 "matrix_room_id": room.matrix_room_id,
-                "listing_id": str(room.listing_id) if room.listing_id else None,
+                "listing_id": str(room.listing_id)
+                if room.listing_id
+                else None,
                 "room_name": room.room_name or partner_name,
                 "partner_name": partner_name,
                 "partner_code": partner_code,

@@ -57,8 +57,8 @@ class DisputeResolvedEmailData(BaseModel):
 
     user_first_name: str
     user_email: EmailStr
-    is_creditor: bool          # True = creditor, False = debtor
-    outcome: str               # "APPROVED" or "CANCELLED"
+    is_creditor: bool  # True = creditor, False = debtor
+    outcome: str  # "APPROVED" or "CANCELLED"
     admin_note: Optional[str] = None
     amount_time: int
     amount_regio: float

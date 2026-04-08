@@ -21,7 +21,10 @@ from app.admin.schemas import (
 )
 from app.banking.dependencies import get_banking_service
 from app.banking.service import BankingService
-from app.email.schemas import DisputeResolvedEmailData, VerificationStatusEmailData
+from app.email.schemas import (
+    DisputeResolvedEmailData,
+    VerificationStatusEmailData,
+)
 from app.email.tasks import (
     send_dispute_resolved_email_task,
     send_verification_status_email_task,

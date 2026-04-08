@@ -66,6 +66,7 @@ async def send_broadcast_digest_emails_task(
     recipients: List[BroadcastDigestEmailData],
 ) -> None:
     """Background task: send broadcast digest to multiple users concurrently."""
+
     async def _send_one(data: BroadcastDigestEmailData) -> None:
         async with _BROADCAST_SEMAPHORE:
             try:

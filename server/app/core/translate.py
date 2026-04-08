@@ -13,7 +13,11 @@ logger = logging.getLogger(__name__)
 
 SUPPORTED_LANGUAGES = {"EN", "DE", "HU"}
 
-client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY) if settings.OPENAI_API_KEY else None
+client = (
+    AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+    if settings.OPENAI_API_KEY
+    else None
+)
 
 
 class TranslateService:
