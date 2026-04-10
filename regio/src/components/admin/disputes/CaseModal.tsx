@@ -14,6 +14,9 @@ interface DisputePublic {
   status: string;
   description: string | null;
   created_at: string;
+  dispute_reason: string | null;
+  dispute_raised_at: string | null;
+  dispute_admin_note: string | null;
 }
 
 interface CaseModalProps {
@@ -58,15 +61,32 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
 
         {/* Body */}
         <div className="p-[30px] overflow-y-auto">
-          {/* Creditor Statement */}
+          {/* Creditor Dispute Statement */}
           <div className="bg-white border border-[#eee] p-5 rounded-md mb-5">
             <span className="text-[12px] font-bold text-[#888] uppercase mb-[10px] block border-b border-[#eee] pb-[5px]">
-              Statement by {dispute.creditor_name} (Creditor)
+              Dispute Statement by {dispute.creditor_name}
+              {dispute.dispute_raised_at && (
+                <span className="ml-2 font-normal normal-case text-[11px] text-[#aaa]">
+                  — raised {new Date(dispute.dispute_raised_at).toLocaleString()}
+                </span>
+              )}
             </span>
-            <p className="text-[14px] text-[#333] leading-[1.5] italic bg-[#f9f9f9] p-[10px] border-l-[3px] border-[#ccc]">
-              {dispute.description || 'No description provided'}
+            <p className="text-[14px] text-[#333] leading-[1.5] italic bg-[#fff8e1] p-[10px] border-l-[3px] border-[#f9a825]">
+              {dispute.dispute_reason || 'No dispute reason provided'}
             </p>
           </div>
+
+          {/* Original Payment Request Description */}
+          {dispute.description && (
+            <div className="bg-white border border-[#eee] p-5 rounded-md mb-5">
+              <span className="text-[12px] font-bold text-[#888] uppercase mb-[10px] block border-b border-[#eee] pb-[5px]">
+                Original Request Description
+              </span>
+              <p className="text-[14px] text-[#333] leading-[1.5] italic bg-[#f9f9f9] p-[10px] border-l-[3px] border-[#ccc]">
+                {dispute.description}
+              </p>
+            </div>
+          )}
 
           {/* Case Details */}
           <div className="bg-white border border-[#eee] p-5 rounded-md mb-5">

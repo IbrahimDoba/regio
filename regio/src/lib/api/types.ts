@@ -189,6 +189,9 @@ export interface PaymentRequestPublic {
   description: string | null;
   status: PaymentRequestStatus;
   created_at: string;
+  dispute_raised: boolean;
+  dispute_reason: string | null;
+  dispute_raised_at: string | null;
 }
 
 export interface PaymentRequestCreate {
@@ -196,6 +199,10 @@ export interface PaymentRequestCreate {
   amount_time?: number;
   amount_regio?: string;
   description?: string | null;
+}
+
+export interface DisputeCreate {
+  reason?: string;
 }
 
 // ============================================================================
@@ -309,6 +316,9 @@ export interface DisputePublic {
   status: PaymentRequestStatus;
   description: string | null;
   created_at: string;
+  dispute_reason: string | null;
+  dispute_raised_at: string | null;
+  dispute_admin_note: string | null;
 }
 
 export type DisputeAction = 'APPROVE' | 'REJECT';
@@ -380,13 +390,14 @@ export interface ChatMessage {
   content: string;
   timestamp: number;
   isOwn: boolean;
-  type: 'text' | 'payment_request' | 'system';
+  type: 'text' | 'payment_request' | 'system' | 'image';
+  imageUrl?: string;
   paymentRequest?: {
     id: string;
     amountGaras: number;
     amountTime: number;
     description: string;
-    status: 'pending' | 'paid' | 'denied';
+    status: 'pending' | 'paid' | 'denied' | 'disputed';
   };
 }
 

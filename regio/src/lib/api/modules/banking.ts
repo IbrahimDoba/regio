@@ -13,6 +13,7 @@ import type {
   TransactionPublic,
   PaymentRequestCreate,
   PaymentRequestPublic,
+  DisputeCreate,
   Message,
 } from '../types';
 
@@ -133,6 +134,20 @@ export const cancelPaymentRequest = async (requestId: string): Promise<Message> 
   return response.data;
 };
 
+/**
+ * Raise a dispute on a rejected payment request (creditor only)
+ */
+export const raiseDispute = async (
+  requestId: string,
+  data: DisputeCreate
+): Promise<Message> => {
+  const response = await apiClient.post<Message>(
+    API_ENDPOINTS.BANKING.REQUESTS.DISPUTE(requestId),
+    data
+  );
+  return response.data;
+};
+
 // ============================================================================
 // Export
 // ============================================================================
@@ -147,4 +162,5 @@ export const bankingApi = {
   confirmPaymentRequest,
   rejectPaymentRequest,
   cancelPaymentRequest,
+  raiseDispute,
 } as const;

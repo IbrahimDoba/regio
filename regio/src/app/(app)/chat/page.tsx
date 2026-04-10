@@ -54,6 +54,7 @@ export default function ChatPage() {
     joinRoom,
     leaveRoom,
     sendMessage,
+    uploadImage,
     sendTyping,
     getReadReceiptsForMessage,
     getTypingUsers,
@@ -70,6 +71,7 @@ export default function ChatPage() {
   const [localError, setLocalError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getApiErrorMessage = (err: unknown, fallback: string): string => {
     const axiosErr = err as AxiosError<{ detail?: string }>;
@@ -176,6 +178,44 @@ export default function ChatPage() {
       }
     },
     [roomId, updatePaymentRequestStatus, sendMessage, queryClient]
+  );
+
+  // Handle raising a dispute on a rejected payment request (creditor only)
+  const handleDisputeRequest = useCallback(
+    async (requestId: string) => {
+      if (!roomId) return;
+      const reason = window.prompt("Optionally provide a reason for raising this dispute (max 500 chars):");
+      if (reason === null) return; // user cancelled
+      try {
+        await bankingApi.raiseDispute(requestId, { reason: reason || undefined });
+        updatePaymentRequestStatus(roomId, requestId, "disputed");
+        await sendMessage(roomId, "", "payment_status", { banking_request_id: requestId, status: "disputed" });
+        queryClient.invalidateQueries({ queryKey: queryKeys.banking.paymentRequests.all() });
+      } catch (err) {
+        setActionError(getApiErrorMessage(err, "Failed to raise dispute"));
+      }
+    },
+    [roomId, updatePaymentRequestStatus, sendMessage, queryClient]
+  );
+
+  // Handle photo upload — triggers hidden file input
+  const handleSendPhoto = useCallback(() => {
+    setIsActionSheetOpen(false);
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileSelected = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !roomId) return;
+      e.target.value = ""; // allow re-selecting the same file
+      try {
+        await uploadImage(roomId, file);
+      } catch (err) {
+        setActionError(err instanceof Error ? err.message : "Failed to send photo");
+      }
+    },
+    [roomId, uploadImage]
   );
 
   // Handle typing indicator
@@ -371,6 +411,7 @@ export default function ChatPage() {
           messages={messages}
           onPayRequest={handlePayRequest}
           onDenyRequest={handleDenyRequest}
+          onDisputeRequest={handleDisputeRequest}
           getReadReceipts={handleGetReadReceipts}
         />
       </div>
@@ -392,10 +433,7 @@ export default function ChatPage() {
         isOpen={isActionSheetOpen}
         onClose={() => setIsActionSheetOpen(false)}
         onRequestPayment={() => setIsPaymentModalOpen(true)}
-        onSendPhoto={() => {
-          // TODO: Implement photo upload
-          console.log("Send photo");
-        }}
+        onSendPhoto={handleSendPhoto}
         onShareLocation={() => {
           // TODO: Implement location sharing
           console.log("Share location");
@@ -407,6 +445,15 @@ export default function ChatPage() {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         onSubmit={handleSendPaymentRequest}
+      />
+
+      {/* Hidden file input for photo upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileSelected}
       />
     </div>
   );

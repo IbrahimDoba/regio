@@ -80,7 +80,7 @@ export default function FilterPanel({
                 "w-[40px] h-[40px] rounded-full border-[2px] border-[#eee] flex justify-center items-center text-[16px] cursor-pointer transition-all duration-200",
                 isActive
                   ? "border-transparent text-white scale-110"
-                  : "bg-white text-[#ccc]"
+                  : "bg-white text-black"
               )}
               style={{
                 backgroundColor: isActive ? CATEGORY_CONFIG[f.category].colorVar : undefined,

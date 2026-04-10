@@ -13,6 +13,8 @@ import {
   FaPaperPlane,
   FaHandHoldingDollar,
   FaArrowLeft,
+  FaTriangleExclamation,
+  FaCircleCheck,
 } from "react-icons/fa6";
 import {
   useBalance,
@@ -24,8 +26,69 @@ import {
   useConfirmPaymentRequest,
   useRejectPaymentRequest,
   useCancelPaymentRequest,
+  useRaiseDispute,
 } from "@/lib/api/hooks/use-banking";
 import { TransactionPublic } from "@/lib/api/types";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Format minutes into H:MM, correctly handling negative balances.
+ * e.g. -90 → "-1:30", 90 → "1:30"
+ */
+function formatTime(minutes: number): string {
+  const isNegative = minutes < 0;
+  const abs = Math.abs(minutes);
+  const h = Math.floor(abs / 60);
+  const m = abs % 60;
+  const formatted = `${h}:${m.toString().padStart(2, "0")}`;
+  return isNegative ? `-${formatted}` : formatted;
+}
+
+/** Extract a human-readable message from an API error response. */
+function getErrorMessage(err: unknown): string {
+  const e = err as { response?: { data?: { detail?: string | { msg: string }[] } }; message?: string };
+  const detail = e?.response?.data?.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail) && detail.length > 0) {
+    // Pydantic validation error array → pick first message
+    return detail.map((d) => d.msg).join(", ");
+  }
+  return e?.message || "An unexpected error occurred.";
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inline Error / Success Banner
+// ─────────────────────────────────────────────────────────────────────────────
+
+function InlineError({ message, onDismiss }: { message: string; onDismiss?: () => void }) {
+  return (
+    <div className="flex items-start gap-2 bg-[#ffebee] border border-[#ffcdd2] rounded-[4px] p-[8px_10px] text-[12px] text-[#c62828] mt-[8px]">
+      <FaTriangleExclamation className="shrink-0 mt-[1px]" />
+      <span className="flex-1">{message}</span>
+      {onDismiss && (
+        <button onClick={onDismiss} className="shrink-0 font-bold text-[#c62828] opacity-60 hover:opacity-100">
+          ×
+        </button>
+      )}
+    </div>
+  );
+}
+
+function InlineSuccess({ message }: { message: string }) {
+  return (
+    <div className="flex items-center gap-2 bg-[#e8f5e9] border border-[#c8e6c9] rounded-[4px] p-[8px_10px] text-[12px] text-[#2e7d32] mt-[8px]">
+      <FaCircleCheck className="shrink-0" />
+      <span>{message}</span>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Page
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function WalletPage() {
   const router = useRouter();
@@ -34,163 +97,243 @@ export default function WalletPage() {
   const [requestOpen, setRequestOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionPublic | null>(null);
 
-  // Forms
+  // ── Send form state ──────────────────────────────────────────────────────
   const [sendRecipient, setSendRecipient] = useState("");
   const [sendGaras, setSendGaras] = useState("");
   const [sendTime, setSendTime] = useState("");
   const [sendRef, setSendRef] = useState("");
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [sendSuccess, setSendSuccess] = useState(false);
 
+  // ── Request form state ───────────────────────────────────────────────────
   const [reqUser, setReqUser] = useState("");
   const [reqGaras, setReqGaras] = useState("");
   const [reqTime, setReqTime] = useState("");
-  const [reqRef, setReqRef] = useState("");
+  const [reqDesc, setReqDesc] = useState("");
+  const [reqError, setReqError] = useState<string | null>(null);
+  const [reqSuccess, setReqSuccess] = useState(false);
 
-  // Queries
+  // ── Action-level error (confirm/reject/cancel on individual requests) ────
+  const [actionError, setActionError] = useState<{ id: string; msg: string } | null>(null);
+
+  // ── Queries ──────────────────────────────────────────────────────────────
   const { data: balanceData } = useBalance();
   const { data: historyData } = useHistory();
-  const { data: incomingRequests, refetch: refetchIncoming } =
-    useIncomingPaymentRequests();
-  const { data: outgoingRequests, refetch: refetchOutgoing } =
-    useOutgoingPaymentRequests();
+  const { data: incomingRequests, refetch: refetchIncoming } = useIncomingPaymentRequests();
+  const { data: outgoingRequests, refetch: refetchOutgoing } = useOutgoingPaymentRequests();
 
-  // Mutations
+  // ── Mutations ────────────────────────────────────────────────────────────
   const transfer = useTransferFunds();
   const createRequest = useCreatePaymentRequest();
   const confirmRequest = useConfirmPaymentRequest();
   const rejectRequest = useRejectPaymentRequest();
   const cancelRequest = useCancelPaymentRequest();
+  const raiseDisputeMutation = useRaiseDispute();
+
+  // ── Derived values ───────────────────────────────────────────────────────
+  const pendingOutgoing = outgoingRequests?.filter((r) => r.status === "PENDING") ?? [];
+  const rejectedOutgoing = outgoingRequests?.filter((r) => r.status === "REJECTED") ?? [];
+  const requestsCount =
+    (incomingRequests?.length ?? 0) + pendingOutgoing.length + rejectedOutgoing.length;
+
+  const availableTime = balanceData?.limits.available_time ?? 0;
+  const availableGaras = balanceData?.limits.available_regio ?? "0.00";
+  const isTimeNegative = (balanceData?.balance.time ?? 0) < 0;
+  const isGarasNegative = parseFloat(String(balanceData?.balance.regio ?? "0")) < 0;
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Form toggling
+  // ─────────────────────────────────────────────────────────────────────────
 
   const toggleForm = (type: "send" | "request") => {
     if (type === "send") {
-      setSendOpen(!sendOpen);
+      setSendOpen((o) => !o);
       setRequestOpen(false);
+      setSendError(null);
+      setSendSuccess(false);
     } else {
-      setRequestOpen(!requestOpen);
+      setRequestOpen((o) => !o);
       setSendOpen(false);
+      setReqError(null);
+      setReqSuccess(false);
     }
   };
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Send transfer
+  // ─────────────────────────────────────────────────────────────────────────
 
   const handleSend = () => {
-    if (!sendRecipient || (!sendGaras && !sendTime)) {
-      alert("Please fill in recipient and amount.");
-      return;
-    }
-    if (confirm(`Send funds to ${sendRecipient}?`)) {
-      transfer.mutate(
-        {
-          receiver_code: sendRecipient,
-          amount_regio: sendGaras || undefined,
-          amount_time: sendTime ? parseInt(sendTime) : undefined,
-          reference: sendRef,
-        },
-        {
-          onSuccess: () => {
-            alert("Transfer successful!");
-            setSendOpen(false);
-            setSendRecipient("");
-            setSendGaras("");
-            setSendTime("");
-            setSendRef("");
-          },
-          onError: (err: unknown) => {
-            const error = err as { response?: { data?: { detail?: string } }; message?: string };
-            alert(
-              "Transfer failed: " + (error?.response?.data?.detail || error.message || "Unknown error")
-            );
-          },
-        }
-      );
-    }
-  };
+    setSendError(null);
+    setSendSuccess(false);
 
-  const handleCreateRequest = () => {
-    if (!reqUser || (!reqGaras && !reqTime)) {
-      alert("Please fill in user and amount.");
+    // Client-side validation
+    if (!sendRecipient.trim()) {
+      setSendError("Recipient user code is required.");
       return;
     }
-    createRequest.mutate(
+    const parsedGaras = parseFloat(sendGaras);
+    const parsedTime = parseInt(sendTime, 10);
+    const hasGaras = sendGaras !== "" && !isNaN(parsedGaras) && parsedGaras > 0;
+    const hasTime = sendTime !== "" && !isNaN(parsedTime) && parsedTime > 0;
+    if (!hasGaras && !hasTime) {
+      setSendError("Enter a valid amount for Time (minutes) or Garas — at least one must be greater than 0.");
+      return;
+    }
+    if (!sendRef.trim()) {
+      setSendError("A reference note is required (e.g. 'For the gardening help').");
+      return;
+    }
+
+    if (!confirm(`Send to ${sendRecipient}?`)) return;
+
+    transfer.mutate(
       {
-        debtor_code: reqUser,
-        amount_regio: reqGaras || undefined,
-        amount_time: reqTime ? parseInt(reqTime) : undefined,
-        description: reqRef,
+        receiver_code: sendRecipient.trim(),
+        amount_regio: hasGaras ? String(parsedGaras) : undefined,
+        amount_time: hasTime ? parsedTime : undefined,
+        reference: sendRef.trim(),
       },
       {
         onSuccess: () => {
-          alert("Request sent!");
-          setRequestOpen(false);
-          setReqUser("");
-          setReqGaras("");
-          setReqTime("");
-          setReqRef("");
-          refetchOutgoing();
+          setSendSuccess(true);
+          setSendRecipient("");
+          setSendGaras("");
+          setSendTime("");
+          setSendRef("");
+          // Close form after a short delay so user sees success state
+          setTimeout(() => {
+            setSendOpen(false);
+            setSendSuccess(false);
+          }, 1500);
         },
-        onError: (err: unknown) => {
-          const error = err as { response?: { data?: { detail?: string } }; message?: string };
-          alert(
-            "Request failed: " + (error?.response?.data?.detail || error.message || "Unknown error")
-          );
+        onError: (err) => {
+          setSendError(getErrorMessage(err));
         },
       }
     );
   };
 
-  const handleConfirmRequest = (id: string, amount: string) => {
-    if (confirm(`Pay ${amount}?`)) {
-      confirmRequest.mutate(id, {
-        onSuccess: () => {
-          refetchIncoming();
-          alert("Paid!");
-        },
-        onError: (err: unknown) => {
-          const error = err as { response?: { data?: { detail?: string } }; message?: string };
-          alert("Failed: " + (error?.response?.data?.detail || error.message || "Unknown error"));
-        },
-      });
+  // ─────────────────────────────────────────────────────────────────────────
+  // Create payment request
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const handleCreateRequest = () => {
+    setReqError(null);
+    setReqSuccess(false);
+
+    if (!reqUser.trim()) {
+      setReqError("User code is required.");
+      return;
     }
+    const parsedGaras = parseFloat(reqGaras);
+    const parsedTime = parseInt(reqTime, 10);
+    const hasGaras = reqGaras !== "" && !isNaN(parsedGaras) && parsedGaras > 0;
+    const hasTime = reqTime !== "" && !isNaN(parsedTime) && parsedTime > 0;
+    if (!hasGaras && !hasTime) {
+      setReqError("Enter a valid amount for Time (minutes) or Garas — at least one must be greater than 0.");
+      return;
+    }
+    if (!reqDesc.trim()) {
+      setReqError("A description is required (e.g. 'Lunch split').");
+      return;
+    }
+
+    createRequest.mutate(
+      {
+        debtor_code: reqUser.trim(),
+        amount_regio: hasGaras ? String(parsedGaras) : undefined,
+        amount_time: hasTime ? parsedTime : undefined,
+        description: reqDesc.trim(),
+      },
+      {
+        onSuccess: () => {
+          setReqSuccess(true);
+          setReqUser("");
+          setReqGaras("");
+          setReqTime("");
+          setReqDesc("");
+          refetchOutgoing();
+          setTimeout(() => {
+            setRequestOpen(false);
+            setReqSuccess(false);
+          }, 1500);
+        },
+        onError: (err) => {
+          setReqError(getErrorMessage(err));
+        },
+      }
+    );
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Incoming request actions
+  // ─────────────────────────────────────────────────────────────────────────
+
+  const handleConfirmRequest = (id: string, amount: string) => {
+    setActionError(null);
+    if (!confirm(`Pay ${amount}?`)) return;
+    confirmRequest.mutate(id, {
+      onSuccess: () => {
+        refetchIncoming();
+      },
+      onError: (err) => {
+        setActionError({ id, msg: getErrorMessage(err) });
+      },
+    });
   };
 
   const handleRejectRequest = (id: string) => {
-    if (confirm("Reject this request?")) {
-      rejectRequest.mutate(id, {
-        onSuccess: () => {
-          refetchIncoming();
-        },
-        onError: (err: unknown) => {
-          const error = err as { response?: { data?: { detail?: string } }; message?: string };
-          alert("Failed: " + (error?.response?.data?.detail || error.message || "Unknown error"));
-        },
-      });
-    }
+    setActionError(null);
+    if (!confirm("Decline this payment request?")) return;
+    rejectRequest.mutate(id, {
+      onSuccess: () => {
+        refetchIncoming();
+      },
+      onError: (err) => {
+        setActionError({ id, msg: getErrorMessage(err) });
+      },
+    });
   };
 
   const handleCancelRequest = (id: string) => {
-    if (confirm("Cancel this request?")) {
-      cancelRequest.mutate(id, {
+    setActionError(null);
+    if (!confirm("Cancel this request?")) return;
+    cancelRequest.mutate(id, {
+      onSuccess: () => {
+        refetchOutgoing();
+      },
+      onError: (err) => {
+        setActionError({ id, msg: getErrorMessage(err) });
+      },
+    });
+  };
+
+  const handleRaiseDispute = (id: string) => {
+    const reason = window.prompt(
+      "Optionally provide a reason for this dispute (max 500 chars):"
+    );
+    if (reason === null) return;
+    raiseDisputeMutation.mutate(
+      { requestId: id, data: { reason: reason || undefined } },
+      {
         onSuccess: () => {
           refetchOutgoing();
         },
-        onError: (err: unknown) => {
-          const error = err as { response?: { data?: { detail?: string } }; message?: string };
-          alert("Failed: " + (error?.response?.data?.detail || error.message || "Unknown error"));
+        onError: (err) => {
+          setActionError({ id, msg: getErrorMessage(err) });
         },
-      });
-    }
+      }
+    );
   };
 
-  // Format helpers
-  const formatTime = (minutes: number) => {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return `${h}:${m.toString().padStart(2, "0")}`;
-  };
-
-  const requestsCount =
-    (incomingRequests?.length || 0) + (outgoingRequests?.length || 0);
+  // ─────────────────────────────────────────────────────────────────────────
+  // Render
+  // ─────────────────────────────────────────────────────────────────────────
 
   return (
     <div className="bg-[var(--bg-app)] min-h-screen pb-[70px]">
-      {/* Header */}
+      {/* ── Header ── */}
       <header className="bg-white border-b border-[#eee] sticky top-0 z-100">
         <div className="flex justify-between items-center p-[15px]">
           <div className="flex items-center gap-[10px]">
@@ -210,33 +353,84 @@ export default function WalletPage() {
         </div>
       </header>
 
-      {/* Balance Cards */}
+      {/* ── Balance Cards ── */}
       <div className="p-[15px] flex gap-[10px] overflow-x-auto pb-[5px]">
-        <div className="flex-1 min-w-[160px] rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden bg-gradient-to-br from-[#8cb348] to-[#5e8e3e]">
+        {/* Time card */}
+        <div
+          className={`flex-1 min-w-[160px] rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden ${
+            isTimeNegative
+              ? "bg-gradient-to-br from-[#e53935] to-[#b71c1c]"
+              : "bg-gradient-to-br from-[#8cb348] to-[#5e8e3e]"
+          }`}
+        >
           <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px]">
             {t.wallet.time_account}
           </div>
-          <div className="text-[24px] font-[800] mb-[5px]">
+          <div className="text-[24px] font-[800] mb-[1px]">
             {balanceData ? formatTime(balanceData.balance.time) : "..."}
           </div>
           <div className="text-[14px] font-[500] opacity-90">{t.wallet.time_unit}</div>
+          {isTimeNegative && (
+            <div className="text-[10px] opacity-80 mt-[4px]">
+              Limit: {formatTime(balanceData!.limits.max_debt_time)}
+            </div>
+          )}
+          {!isTimeNegative && balanceData && (
+            <div className="text-[10px] opacity-70 mt-[4px]">
+              Available: {formatTime(availableTime)}
+            </div>
+          )}
           <FaClock className="absolute -right-[10px] -bottom-[10px] text-[80px] opacity-15 -rotate-12" />
         </div>
-        <div className="flex-1 min-w-[160px] rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden bg-gradient-to-br from-[#4a90e2] to-[#0056b3]">
+
+        {/* Garas card */}
+        <div
+          className={`flex-1 min-w-[160px] rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden ${
+            isGarasNegative
+              ? "bg-gradient-to-br from-[#f57c00] to-[#e65100]"
+              : "bg-gradient-to-br from-[#4a90e2] to-[#0056b3]"
+          }`}
+        >
           <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px]">
             {t.wallet.garas_account}
           </div>
-          <div className="text-[24px] font-[800] mb-[5px]">
+          <div className="text-[24px] font-[800] mb-[1px]">
             {balanceData ? balanceData.balance.regio : "..."}
           </div>
-          <div className="text-[14px] font-[500] opacity-90">
-            {t.wallet.garas_unit}
-          </div>
+          <div className="text-[14px] font-[500] opacity-90">{t.wallet.garas_unit}</div>
+          {isGarasNegative && (
+            <div className="text-[10px] opacity-80 mt-[4px]">
+              Limit: {balanceData!.limits.max_debt_regio} ℛ
+            </div>
+          )}
+          {!isGarasNegative && balanceData && (
+            <div className="text-[10px] opacity-70 mt-[4px]">
+              Available: {availableGaras} ℛ
+            </div>
+          )}
           <FaCoins className="absolute -right-[10px] -bottom-[10px] text-[80px] opacity-15 -rotate-12" />
         </div>
       </div>
 
-      {/* Requests Section */}
+      {/* ── Trust level & limits info bar ── */}
+      {balanceData && (
+        <div className="mx-[15px] mb-[10px] bg-white border border-[#eee] rounded-[8px] px-[12px] py-[8px] flex justify-between items-center text-[11px] text-[#888]">
+          <span>
+            Trust level: <strong className="text-[#555]">{balanceData.trust_level}</strong>
+          </span>
+          <span>
+            Debt limit:{" "}
+            <strong className="text-[#555]">
+              {formatTime(balanceData.limits.max_debt_time)} / {balanceData.limits.max_debt_regio} ℛ
+            </strong>
+          </span>
+          <span>
+            Earned: <strong className="text-[#555]">{formatTime(balanceData.total_time_earned)}</strong>
+          </span>
+        </div>
+      )}
+
+      {/* ── Requests Section ── */}
       {requestsCount > 0 && (
         <div className="px-[15px] mb-[10px]">
           <div className="text-[12px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[10px] flex justify-between items-center">
@@ -246,7 +440,7 @@ export default function WalletPage() {
             </span>
           </div>
 
-          {/* Incoming */}
+          {/* Incoming requests */}
           {incomingRequests?.map((req) => (
             <div
               key={req.id}
@@ -259,16 +453,16 @@ export default function WalletPage() {
               <div className="flex justify-between items-center mb-[10px]">
                 <div>
                   <div className="font-bold text-[14px] text-[#333]">
-                    {t.wallet.from.replace('{name}', req.creditor_name)}
+                    {t.wallet.from.replace("{name}", req.creditor_name)}
                   </div>
                   <div className="text-[12px] text-[#666]">
-                    {t.wallet.ref.replace('{ref}', req.description || t.wallet.no_ref)}
+                    {t.wallet.ref.replace("{ref}", req.description || t.wallet.no_ref)}
                   </div>
                 </div>
                 <div className="flex gap-[5px] flex-col items-end">
                   {req.amount_regio !== "0.00" && (
                     <span className="bg-[#fff3e0] text-[#f57c00] p-[2px_6px] rounded-[4px] text-[11px] font-bold border border-[#ffe0b2]">
-                      {req.amount_regio} R
+                      {req.amount_regio} ℛ
                     </span>
                   )}
                   {req.amount_time > 0 && (
@@ -278,30 +472,41 @@ export default function WalletPage() {
                   )}
                 </div>
               </div>
-              <div className="flex gap-[10px]">
+
+              {/* Per-request action error */}
+              {actionError?.id === req.id && (
+                <InlineError
+                  message={actionError.msg}
+                  onDismiss={() => setActionError(null)}
+                />
+              )}
+
+              <div className="flex gap-[10px] mt-[8px]">
                 <button
-                  className="flex-1 p-[8px] rounded-[4px] border border-[#ddd] bg-[#f5f5f5] text-[#333] text-[12px] font-[600] cursor-pointer"
+                  className="flex-1 p-[8px] rounded-[4px] border border-[#ddd] bg-[#f5f5f5] text-[#333] text-[12px] font-[600] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => handleRejectRequest(req.id)}
+                  disabled={rejectRequest.isPending || confirmRequest.isPending}
                 >
-                  {t.wallet.deny_button}
+                  {rejectRequest.isPending ? "..." : t.wallet.deny_button}
                 </button>
                 <button
-                  className="flex-1 p-[8px] rounded-[4px] border-none bg-[var(--color-green-offer)] text-white text-[12px] font-[600] cursor-pointer"
+                  className="flex-1 p-[8px] rounded-[4px] border-none bg-[var(--color-green-offer)] text-white text-[12px] font-[600] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() =>
                     handleConfirmRequest(
                       req.id,
-                      `${req.amount_regio} R / ${req.amount_time} min`
+                      `${req.amount_regio} ℛ / ${req.amount_time} min`
                     )
                   }
+                  disabled={confirmRequest.isPending || rejectRequest.isPending}
                 >
-                  {t.wallet.confirm_pay_button}
+                  {confirmRequest.isPending ? "..." : t.wallet.confirm_pay_button}
                 </button>
               </div>
             </div>
           ))}
 
-          {/* Outgoing */}
-          {outgoingRequests?.map((req) => (
+          {/* Outgoing — PENDING (can be cancelled) */}
+          {pendingOutgoing.map((req) => (
             <div
               key={req.id}
               className="bg-white border border-[#e0e0e0] border-l-[4px] border-l-[#999] rounded-[6px] p-[12px] mb-[10px] shadow-sm"
@@ -313,16 +518,16 @@ export default function WalletPage() {
               <div className="flex justify-between items-center mb-[10px]">
                 <div>
                   <div className="font-bold text-[14px] text-[#333]">
-                    {t.wallet.to.replace('{name}', req.debtor_name)}
+                    {t.wallet.to.replace("{name}", req.debtor_name)}
                   </div>
                   <div className="text-[12px] text-[#666]">
-                    {t.wallet.ref.replace('{ref}', req.description || t.wallet.no_ref)}
+                    {t.wallet.ref.replace("{ref}", req.description || t.wallet.no_ref)}
                   </div>
                 </div>
                 <div className="flex gap-[5px] flex-col items-end">
                   {req.amount_regio !== "0.00" && (
                     <span className="bg-[#f5f5f5] text-[#666] p-[2px_6px] rounded-[4px] text-[11px] font-bold border border-[#ddd]">
-                      {req.amount_regio} R
+                      {req.amount_regio} ℛ
                     </span>
                   )}
                   {req.amount_time > 0 && (
@@ -332,20 +537,87 @@ export default function WalletPage() {
                   )}
                 </div>
               </div>
-              <div className="flex gap-[10px]">
+
+              {actionError?.id === req.id && (
+                <InlineError
+                  message={actionError.msg}
+                  onDismiss={() => setActionError(null)}
+                />
+              )}
+
+              <div className="flex gap-[10px] mt-[8px]">
                 <button
-                  className="w-full p-[8px] rounded-[4px] border border-[#ddd] bg-[#f5f5f5] text-[#666] text-[12px] font-[600] cursor-pointer"
+                  className="w-full p-[8px] rounded-[4px] border border-[#ddd] bg-[#f5f5f5] text-[#666] text-[12px] font-[600] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => handleCancelRequest(req.id)}
+                  disabled={cancelRequest.isPending}
                 >
-                  {t.wallet.cancel_request_button}
+                  {cancelRequest.isPending ? "..." : t.wallet.cancel_request_button}
                 </button>
+              </div>
+            </div>
+          ))}
+
+          {/* Outgoing — REJECTED (can raise dispute) */}
+          {rejectedOutgoing.map((req) => (
+            <div
+              key={req.id}
+              className="bg-white border border-[#e0e0e0] border-l-[4px] border-l-[#e53935] rounded-[6px] p-[12px] mb-[10px] shadow-sm"
+            >
+              <div className="flex justify-between mb-[5px] text-[11px] text-[#666]">
+                <span className="text-[#e53935] font-semibold">Declined Request</span>
+                <span>{new Date(req.created_at).toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between items-center mb-[10px]">
+                <div>
+                  <div className="font-bold text-[14px] text-[#333]">
+                    {t.wallet.to.replace("{name}", req.debtor_name)}
+                  </div>
+                  <div className="text-[12px] text-[#666]">
+                    {t.wallet.ref.replace("{ref}", req.description || t.wallet.no_ref)}
+                  </div>
+                </div>
+                <div className="flex gap-[5px] flex-col items-end">
+                  {req.amount_regio !== "0.00" && (
+                    <span className="bg-[#ffebee] text-[#e53935] p-[2px_6px] rounded-[4px] text-[11px] font-bold border border-[#ffcdd2]">
+                      {req.amount_regio} ℛ
+                    </span>
+                  )}
+                  {req.amount_time > 0 && (
+                    <span className="bg-[#ffebee] text-[#e53935] p-[2px_6px] rounded-[4px] text-[11px] font-bold border border-[#ffcdd2]">
+                      {req.amount_time} min
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {actionError?.id === req.id && (
+                <InlineError
+                  message={actionError.msg}
+                  onDismiss={() => setActionError(null)}
+                />
+              )}
+
+              <div className="flex gap-[10px] mt-[8px]">
+                {req.dispute_raised ? (
+                  <div className="w-full p-[8px] rounded-[4px] bg-[#fff3e0] border border-[#ffe0b2] text-[#f57c00] text-[12px] font-[600] text-center">
+                    Dispute Under Review
+                  </div>
+                ) : (
+                  <button
+                    className="w-full p-[8px] rounded-[4px] border border-[#ffe0b2] bg-[#fff3e0] text-[#f57c00] text-[12px] font-[600] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => handleRaiseDispute(req.id)}
+                    disabled={raiseDisputeMutation.isPending}
+                  >
+                    {raiseDisputeMutation.isPending ? "..." : "Raise Dispute"}
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Action Buttons */}
+      {/* ── Action Buttons ── */}
       <div className="flex gap-[15px] p-[10px_15px_20px_15px] justify-center border-b border-[#f0f0f0]">
         <div
           className={`flex-1 bg-white border rounded-[8px] p-[12px] text-center cursor-pointer transition-all shadow-sm flex flex-col items-center gap-[5px] hover:-translate-y-[2px] hover:bg-[#f9f9f9] ${
@@ -371,11 +643,11 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* Collapsible Forms */}
+      {/* ── Send Form ── */}
       <div
         className={`bg-[#f9f9f9] border-b border-[#e0e0e0] overflow-hidden transition-[max-height] duration-300 ease-out ${
           sendOpen
-            ? "max-h-[500px] shadow-[inset_0_5px_10px_-5px_rgba(0,0,0,0.1)]"
+            ? "max-h-[600px] shadow-[inset_0_5px_10px_-5px_rgba(0,0,0,0.1)]"
             : "max-h-0"
         }`}
       >
@@ -383,58 +655,84 @@ export default function WalletPage() {
           <div className="text-[14px] font-bold mb-[15px] text-[#333] border-b-[2px] border-[var(--color-green-offer)] inline-block pb-[2px]">
             {t.wallet.send_form.title}
           </div>
+
+          {/* Available balance hint */}
+          {balanceData && (
+            <div className="text-[11px] text-[#888] mb-[12px] bg-white border border-[#eee] rounded-[4px] p-[6px_10px]">
+              Available to send:{" "}
+              <strong className={availableTime <= 0 ? "text-[#e53935]" : "text-[#333]"}>
+                {formatTime(availableTime)} min
+              </strong>{" "}
+              /{" "}
+              <strong className={parseFloat(String(availableGaras)) <= 0 ? "text-[#e53935]" : "text-[#333]"}>
+                {availableGaras} ℛ
+              </strong>
+            </div>
+          )}
+
           <div className="mb-[12px]">
             <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-              {t.wallet.send_form.recipient_label}
+              {t.wallet.send_form.recipient_label} <span className="text-[#e53935]">*</span>
             </label>
             <input
               type="text"
               className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
               placeholder={t.wallet.send_form.recipient_placeholder}
               value={sendRecipient}
-              onChange={(e) => setSendRecipient(e.target.value)}
+              onChange={(e) => { setSendRecipient(e.target.value); setSendError(null); }}
             />
           </div>
+
           <div className="flex gap-[10px] mb-[12px]">
-            <div className="flex-1">
-              <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                {t.wallet.send_form.garas_label}
-              </label>
-              <input
-                type="number"
-                className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-                placeholder={t.wallet.send_form.garas_placeholder}
-                value={sendGaras}
-                onChange={(e) => setSendGaras(e.target.value)}
-              />
-            </div>
             <div className="flex-1">
               <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
                 {t.wallet.send_form.time_label}
               </label>
               <input
                 type="number"
+                min="0"
                 className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
                 placeholder={t.wallet.send_form.time_placeholder}
                 value={sendTime}
-                onChange={(e) => setSendTime(e.target.value)}
+                onChange={(e) => { setSendTime(e.target.value); setSendError(null); }}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
+                {t.wallet.send_form.garas_label}
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
+                placeholder={t.wallet.send_form.garas_placeholder}
+                value={sendGaras}
+                onChange={(e) => { setSendGaras(e.target.value); setSendError(null); }}
               />
             </div>
           </div>
+
           <div className="mb-[12px]">
             <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-              {t.wallet.send_form.reference_label}
+              {t.wallet.send_form.reference_label} <span className="text-[#e53935]">*</span>
             </label>
             <input
               type="text"
+              maxLength={140}
               className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
               placeholder={t.wallet.send_form.reference_placeholder}
               value={sendRef}
-              onChange={(e) => setSendRef(e.target.value)}
+              onChange={(e) => { setSendRef(e.target.value); setSendError(null); }}
             />
+            <div className="text-[10px] text-[#aaa] mt-[2px] text-right">{sendRef.length}/140</div>
           </div>
+
+          {sendError && <InlineError message={sendError} onDismiss={() => setSendError(null)} />}
+          {sendSuccess && <InlineSuccess message="Transfer sent successfully!" />}
+
           <button
-            className="w-full p-[12px] bg-[var(--color-green-offer)] text-white border-none rounded-[4px] font-bold cursor-pointer mt-[10px] disabled:opacity-50"
+            className="w-full p-[12px] bg-[var(--color-green-offer)] text-white border-none rounded-[4px] font-bold cursor-pointer mt-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleSend}
             disabled={transfer.isPending}
           >
@@ -443,10 +741,11 @@ export default function WalletPage() {
         </div>
       </div>
 
+      {/* ── Request Form ── */}
       <div
         className={`bg-[#f9f9f9] border-b border-[#e0e0e0] overflow-hidden transition-[max-height] duration-300 ease-out ${
           requestOpen
-            ? "max-h-[500px] shadow-[inset_0_5px_10px_-5px_rgba(0,0,0,0.1)]"
+            ? "max-h-[600px] shadow-[inset_0_5px_10px_-5px_rgba(0,0,0,0.1)]"
             : "max-h-0"
         }`}
       >
@@ -454,67 +753,81 @@ export default function WalletPage() {
           <div className="text-[14px] font-bold mb-[15px] text-[#333] border-b-[2px] border-[#4285f4] inline-block pb-[2px]">
             {t.wallet.request_form.title}
           </div>
+
           <div className="mb-[12px]">
             <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-              {t.wallet.request_form.from_label}
+              {t.wallet.request_form.from_label} <span className="text-[#e53935]">*</span>
             </label>
             <input
               type="text"
               className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
               placeholder={t.wallet.request_form.from_placeholder}
               value={reqUser}
-              onChange={(e) => setReqUser(e.target.value)}
+              onChange={(e) => { setReqUser(e.target.value); setReqError(null); }}
             />
           </div>
+
           <div className="flex gap-[10px] mb-[12px]">
-            <div className="flex-1">
-              <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                {t.wallet.send_form.garas_label}
-              </label>
-              <input
-                type="number"
-                className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-                placeholder={t.wallet.send_form.garas_placeholder}
-                value={reqGaras}
-                onChange={(e) => setReqGaras(e.target.value)}
-              />
-            </div>
             <div className="flex-1">
               <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
                 {t.wallet.send_form.time_label}
               </label>
               <input
                 type="number"
+                min="0"
                 className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
                 placeholder={t.wallet.send_form.time_placeholder}
                 value={reqTime}
-                onChange={(e) => setReqTime(e.target.value)}
+                onChange={(e) => { setReqTime(e.target.value); setReqError(null); }}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
+                {t.wallet.send_form.garas_label}
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
+                placeholder={t.wallet.send_form.garas_placeholder}
+                value={reqGaras}
+                onChange={(e) => { setReqGaras(e.target.value); setReqError(null); }}
               />
             </div>
           </div>
+
           <div className="mb-[12px]">
             <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-              {t.wallet.request_form.reason_label}
+              {t.wallet.request_form.reason_label} <span className="text-[#e53935]">*</span>
             </label>
             <input
               type="text"
+              maxLength={140}
               className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-              placeholder="Reason..."
-              value={reqRef}
-              onChange={(e) => setReqRef(e.target.value)}
+              placeholder="e.g. Lunch split, gardening help…"
+              value={reqDesc}
+              onChange={(e) => { setReqDesc(e.target.value); setReqError(null); }}
             />
+            <div className="text-[10px] text-[#aaa] mt-[2px] text-right">{reqDesc.length}/140</div>
           </div>
+
+          {reqError && <InlineError message={reqError} onDismiss={() => setReqError(null)} />}
+          {reqSuccess && <InlineSuccess message="Payment request sent!" />}
+
           <button
-            className="w-full p-[12px] bg-[#4285f4] text-white border-none rounded-[4px] font-bold cursor-pointer mt-[10px] disabled:opacity-50"
+            className="w-full p-[12px] bg-[#4285f4] text-white border-none rounded-[4px] font-bold cursor-pointer mt-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleCreateRequest}
             disabled={createRequest.isPending}
           >
-            {createRequest.isPending ? t.wallet.send_form.submit_loading : t.wallet.request_form.submit_button}
+            {createRequest.isPending
+              ? t.wallet.send_form.submit_loading
+              : t.wallet.request_form.submit_button}
           </button>
         </div>
       </div>
 
-      {/* History */}
+      {/* ── Transaction History ── */}
       <div className="flex-grow bg-white pt-0">
         <div className="p-[15px] bg-[#fafafa] border-b border-[#eee] flex justify-between items-center">
           <span className="text-[14px] font-bold text-[#555] uppercase tracking-[0.5px]">
@@ -547,6 +860,11 @@ export default function WalletPage() {
                 </span>
                 <div className="text-[11px] text-[#aaa] mt-[2px]">
                   {new Date(tx.date).toLocaleDateString()}
+                  {tx.is_system_fee && (
+                    <span className="ml-[6px] bg-[#f3e5f5] text-[#7b1fa2] text-[10px] px-[4px] py-[1px] rounded">
+                      System
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex gap-[8px] items-center ml-[10px] flex-col items-end">
@@ -558,7 +876,7 @@ export default function WalletPage() {
                         : "text-[#c62828] border-[#ffcdd2] bg-[#ffebee]"
                     }`}
                   >
-                    {tx.type === "INCOMING" ? "+" : "-"} {tx.amount_regio} R
+                    {tx.type === "INCOMING" ? "+" : "-"} {tx.amount_regio} ℛ
                   </span>
                 )}
                 {tx.amount_time > 0 && (
@@ -583,7 +901,7 @@ export default function WalletPage() {
         </ul>
       </div>
 
-      {/* Tx Details Modal */}
+      {/* ── Transaction Detail Modal ── */}
       {selectedTx && (
         <div
           className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-[1000] flex justify-center items-center backdrop-blur-[3px] animate-in fade-in duration-200"
@@ -604,31 +922,28 @@ export default function WalletPage() {
               {selectedTx.amount_regio !== "0.00" && (
                 <div
                   className={`text-[20px] font-[800] ${
-                    selectedTx.type === "INCOMING"
-                      ? "text-[#2e7d32]"
-                      : "text-[#c62828]"
+                    selectedTx.type === "INCOMING" ? "text-[#2e7d32]" : "text-[#c62828]"
                   }`}
                 >
-                  {selectedTx.type === "INCOMING" ? "+" : "-"}{" "}
-                  {selectedTx.amount_regio} R
+                  {selectedTx.type === "INCOMING" ? "+" : "-"} {selectedTx.amount_regio} ℛ
                 </div>
               )}
               {selectedTx.amount_time > 0 && (
                 <div
                   className={`text-[20px] font-[800] ${
-                    selectedTx.type === "INCOMING"
-                      ? "text-[#2e7d32]"
-                      : "text-[#c62828]"
+                    selectedTx.type === "INCOMING" ? "text-[#2e7d32]" : "text-[#c62828]"
                   }`}
                 >
-                  {selectedTx.type === "INCOMING" ? "+" : "-"}{" "}
-                  {selectedTx.amount_time} min
+                  {selectedTx.type === "INCOMING" ? "+" : "-"} {selectedTx.amount_time} min
                 </div>
               )}
             </div>
 
             <div className="text-[13px] text-[#888] mb-[20px]">
               {new Date(selectedTx.date).toLocaleString()}
+              {selectedTx.is_system_fee && (
+                <div className="mt-[4px] text-[11px] text-[#7b1fa2]">System charge</div>
+              )}
             </div>
 
             <div className="flex justify-between border-b border-[#eee] py-[10px] text-[14px]">
@@ -641,9 +956,7 @@ export default function WalletPage() {
             </div>
             <div className="flex justify-between border-b border-[#eee] py-[10px] text-[14px]">
               <span className="text-[#888]">{t.wallet.transactions.detail_modal.transaction_id}</span>
-              <span className="font-[600]">
-                #{selectedTx.id.substring(0, 8)}
-              </span>
+              <span className="font-[600]">#{selectedTx.id.toString().substring(0, 8)}</span>
             </div>
 
             <button

@@ -1,9 +1,12 @@
+import mimetypes
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
 from starlette.middleware.cors import CORSMiddleware
 
+from app.core.file_storage import StorageServiceDep
 from app.admin.routes import router as admin_router
 from app.auth.exceptions import BadAuthRequest, NotAuthorized, PermissionDenied
 from app.auth.handlers import (
@@ -95,6 +98,16 @@ if settings.all_cors_origins:
 @app.get("/healthcheck", include_in_schema=False)
 async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/media/{key:path}", include_in_schema=False)
+async def serve_media(key: str, storage: StorageServiceDep) -> Response:
+    """Proxy R2 object to the client — used for listing images."""
+    data = await storage.get_bytes(key)
+    if data is None:
+        raise HTTPException(status_code=404, detail="Media not found")
+    content_type, _ = mimetypes.guess_type(key)
+    return Response(content=data, media_type=content_type or "application/octet-stream")
 
 
 # Include routers

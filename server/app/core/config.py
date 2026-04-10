@@ -27,6 +27,7 @@ class Settings(RegioBaseSettings):
     # SECRET_KEY: str = secrets.token_urlsafe(32)
 
     FRONTEND_HOST: str = "http://localhost:3000"
+    BACKEND_URL: str = "http://localhost:8000"
     ENVIRONMENT: Literal["development", "staging", "production"]
 
     BACKEND_CORS_ORIGINS: Annotated[

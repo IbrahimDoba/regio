@@ -21,6 +21,7 @@ interface MessageListProps {
   className?: string;
   onPayRequest?: (id: string) => void;
   onDenyRequest?: (id: string) => void;
+  onDisputeRequest?: (id: string) => void;
   getReadReceipts?: (eventId: string) => ReadReceipt[];
 }
 
@@ -69,6 +70,7 @@ export function MessageList({
   className,
   onPayRequest,
   onDenyRequest,
+  onDisputeRequest,
   getReadReceipts,
 }: MessageListProps) {
   const { t } = useLanguage();
@@ -136,6 +138,7 @@ export function MessageList({
               currentUserId={currentUserId}
               onPayRequest={onPayRequest}
               onDenyRequest={onDenyRequest}
+              onDisputeRequest={onDisputeRequest}
               readReceipts={getReadReceipts ? getReadReceipts(message.id) : []}
             />
           ))}
@@ -156,6 +159,7 @@ interface MessageItemProps {
   currentUserId?: string;
   onPayRequest?: (id: string) => void;
   onDenyRequest?: (id: string) => void;
+  onDisputeRequest?: (id: string) => void;
   readReceipts?: ReadReceipt[];
 }
 
@@ -164,10 +168,36 @@ function MessageItem({
   currentUserId,
   onPayRequest,
   onDenyRequest,
+  onDisputeRequest,
   readReceipts = [],
 }: MessageItemProps) {
   const isOwn = message.isOwn;
   const hasReadReceipts = readReceipts.length > 0;
+
+  // Image message
+  if (message.type === 'image' && message.imageUrl) {
+    return (
+      <div className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
+        <div className="flex flex-col items-end gap-1">
+          <div
+            className={cn(
+              'overflow-hidden rounded-lg shadow-sm',
+              isOwn ? 'rounded-tr-none' : 'rounded-tl-none'
+            )}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={message.imageUrl}
+              alt={message.content || 'Image'}
+              className="max-w-[240px] max-h-[320px] object-cover cursor-pointer block"
+              onClick={() => window.open(message.imageUrl, '_blank')}
+            />
+          </div>
+          <MessageTime timestamp={message.timestamp} isOwn={isOwn} readReceipts={readReceipts} />
+        </div>
+      </div>
+    );
+  }
 
   // Payment request message
   if (message.type === 'payment_request' && message.paymentRequest) {
@@ -184,6 +214,7 @@ function MessageItem({
             isOwn={isOwn}
             onPay={onPayRequest}
             onDeny={onDenyRequest}
+            onDispute={onDisputeRequest}
           />
           <MessageTime 
             timestamp={message.timestamp} 

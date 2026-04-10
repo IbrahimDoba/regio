@@ -90,6 +90,7 @@ interface RealTimeContextType {
     msgType?: string,
     extraContent?: Record<string, unknown>
   ) => Promise<void>;
+  uploadImage: (roomId: string, file: File) => Promise<void>;
   sendTyping: (roomId: string, isTyping: boolean) => void;
   sendReadReceipt: (roomId: string, eventId: string) => void;
   markNotificationAsRead: (id: string) => void;
@@ -100,7 +101,7 @@ interface RealTimeContextType {
   updatePaymentRequestStatus: (
     roomId: string,
     paymentRequestId: string,
-    status: "pending" | "paid" | "denied"
+    status: "pending" | "paid" | "denied" | "disputed"
   ) => void;
 
   getMessagesForRoom: (roomId: string) => ChatMessage[];
@@ -133,17 +134,32 @@ function saveLS(key: string, data: unknown) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function matrixEventToChatMessage(event: any, myUserId: string): ChatMessage | null {
+function matrixEventToChatMessage(event: any, myUserId: string, client?: any): ChatMessage | null {
   if (event.getType() !== "m.room.message") return null;
   const content = event.getContent();
   if (!content) return null;
 
   const msgtype = content.msgtype as string;
-  if (msgtype !== "m.text" && msgtype !== "regio.payment_request") return null;
+  if (msgtype !== "m.text" && msgtype !== "regio.payment_request" && msgtype !== "m.image") return null;
 
   const sender = event.getSender() as string;
   const isOwn = sender === myUserId;
   const senderName = isOwn ? "Me" : (event.sender?.name || sender.split(":")[0].replace("@", "") || sender);
+
+  if (msgtype === "m.image") {
+    const mxcUrl = content.url as string;
+    const httpUrl = client ? (client.mxcUrlToHttp(mxcUrl) ?? mxcUrl) : mxcUrl;
+    return {
+      id: event.getId() as string,
+      sender: isOwn ? "me" : sender,
+      senderName,
+      content: (content.body as string) || "Image",
+      timestamp: event.getTs() as number,
+      isOwn,
+      type: "image",
+      imageUrl: httpUrl,
+    };
+  }
 
   const isPayment = msgtype === "regio.payment_request";
 
@@ -318,7 +334,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
       if (event.getType() === "regio.payment_status") {
         const c = event.getContent();
         const bankingId = c.banking_request_id as string;
-        const newStatus = c.status as "paid" | "denied";
+        const newStatus = c.status as "paid" | "denied" | "disputed";
         if (bankingId && newStatus) {
           const roomId = room.roomId as string;
           setMessagesByRoom((prev) => {
@@ -340,7 +356,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
 
       if (event.getType() !== "m.room.message") return;
       const myId = client.getUserId() as string;
-      const msg = matrixEventToChatMessage(event, myId);
+      const msg = matrixEventToChatMessage(event, myId, client);
       if (!msg) return;
 
       const roomId = room.roomId as string;
@@ -400,6 +416,39 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
           ];
         });
       }
+    });
+
+    // Room.localEchoUpdated — fired when one of OUR sent messages is confirmed
+    // by the server. Room.timeline only fires for the initial local echo (which
+    // we skip above because status !== null). This listener catches the moment
+    // the server assigns a real event ID, making our own messages appear instantly.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    client.on("Room.localEchoUpdated", (event: any, room: any, oldEventId: string) => {
+      if (!room || event.status !== null) return; // still in-flight
+      if (event.getType() !== "m.room.message") return;
+      const myId = client.getUserId() as string;
+      const msg = matrixEventToChatMessage(event, myId, client);
+      if (!msg) return;
+
+      const roomId = room.roomId as string;
+      setMessagesByRoom((prev) => {
+        const newMap = new Map(prev);
+        const existing = newMap.get(roomId) || [];
+        // Remove the temp local-echo entry (old ID) and avoid duplicates with new ID
+        const deduped = existing.filter((m) => m.id !== oldEventId && m.id !== msg.id);
+        const sorted = [...deduped, msg].sort((a, b) => a.timestamp - b.timestamp);
+        newMap.set(roomId, sorted);
+        return newMap;
+      });
+      setRooms((prev) =>
+        prev
+          .map((r) =>
+            r.roomId === roomId
+              ? { ...r, lastMessage: msg.content, lastTs: msg.timestamp }
+              : r
+          )
+          .sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0))
+      );
     });
 
     // sync state changes
@@ -571,7 +620,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const events: any[] = sdkRoom.getLiveTimeline().getEvents();
       const messages: ChatMessage[] = events
-        .map((e) => matrixEventToChatMessage(e, myId))
+        .map((e) => matrixEventToChatMessage(e, myId, client))
         .filter((m): m is ChatMessage => m !== null);
 
       // Apply payment status updates from history
@@ -580,7 +629,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
         if (e.getType() === "regio.payment_status") {
           const c = e.getContent();
           const bankingId = c.banking_request_id as string;
-          const newStatus = c.status as "paid" | "denied";
+          const newStatus = c.status as "paid" | "denied" | "disputed";
           if (bankingId && newStatus) {
             for (const msg of messages) {
               if (msg.paymentRequest?.id === bankingId) {
@@ -685,6 +734,27 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
     [matrixClient]
   );
 
+  const uploadImage = useCallback(
+    async (roomId: string, file: File) => {
+      const client = matrixClient || useMatrixStore.getState().matrixClient;
+      if (!client) throw new Error("Matrix client not connected");
+
+      const uploadResponse = await client.uploadContent(file, { name: file.name });
+      const mxcUrl = (uploadResponse.content_uri ?? uploadResponse) as string;
+
+      await client.sendEvent(roomId, "m.room.message", {
+        msgtype: "m.image",
+        body: file.name,
+        url: mxcUrl,
+        info: {
+          mimetype: file.type,
+          size: file.size,
+        },
+      });
+    },
+    [matrixClient]
+  );
+
   const sendTyping = useCallback(
     (roomId: string, isTyping: boolean) => {
       const client = matrixClient || useMatrixStore.getState().matrixClient;
@@ -738,7 +808,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const events: any[] = sdkRoom.getLiveTimeline().getEvents();
         const messages = events
-          .map((e) => matrixEventToChatMessage(e, myId))
+          .map((e) => matrixEventToChatMessage(e, myId, client))
           .filter((m): m is ChatMessage => m !== null);
         setMessagesByRoom((prev) => {
           const newMap = new Map(prev);
@@ -758,7 +828,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
   }, [matrixClient, syncRoomsFromClient]);
 
   const updatePaymentRequestStatus = useCallback(
-    (roomId: string, paymentRequestId: string, newStatus: "pending" | "paid" | "denied") => {
+    (roomId: string, paymentRequestId: string, newStatus: "pending" | "paid" | "denied" | "disputed") => {
       setMessagesByRoom((prev) => {
         const newMap = new Map(prev);
         const msgs = newMap.get(roomId) || [];
@@ -836,6 +906,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
         leaveRoom,
         createListingRoom,
         sendMessage,
+        uploadImage,
         sendTyping,
         sendReadReceipt,
         markNotificationAsRead,

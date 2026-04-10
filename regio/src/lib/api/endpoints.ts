@@ -49,6 +49,7 @@ export const API_ENDPOINTS = {
       CONFIRM: (requestId: string) => `/banking/requests/${requestId}/confirm`,
       REJECT: (requestId: string) => `/banking/requests/${requestId}/reject`,
       CANCEL: (requestId: string) => `/banking/requests/${requestId}/cancel`,
+      DISPUTE: (requestId: string) => `/banking/requests/${requestId}/dispute`,
     },
   },
 

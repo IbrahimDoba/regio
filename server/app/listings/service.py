@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlmodel import col, desc, func, or_, select
 
+from app.core.config import settings
 from app.core.file_storage import LocalStorageService
 from app.listings.enums import ListingCategory, ListingStatus
 from app.listings.exceptions import (
@@ -21,6 +22,25 @@ from app.listings.schemas import (
     ListingUpdate,
 )
 from app.users.models import User
+
+_MEDIA_PREFIX = "/media/"
+
+
+def _ensure_url(key_or_url: str) -> str:
+    """Convert a raw R2 object key to a full backend media proxy URL.
+    Already-converted URLs are returned unchanged."""
+    if key_or_url.startswith("http"):
+        return key_or_url
+    return f"{settings.BACKEND_URL}{_MEDIA_PREFIX}{key_or_url}"
+
+
+def _extract_key(url_or_key: str) -> str:
+    """Strip the backend media proxy prefix to get the raw R2 object key."""
+    prefix = f"{settings.BACKEND_URL}{_MEDIA_PREFIX}"
+    if url_or_key.startswith(prefix):
+        return url_or_key[len(prefix):]
+    return url_or_key
+
 
 ALLOWED_MEDIA_TYPES = {
     "image/jpeg",
@@ -129,7 +149,7 @@ class ListingService:
             title=title,
             description=description,
             payment_notes=listing.payment_notes,
-            media_urls=listing.media_urls,
+            media_urls=[_ensure_url(k) for k in (listing.media_urls or [])],
             tags=listing.tags,
             radius_km=listing.radius_km,
             location_lat=listing.location_lat,
@@ -242,7 +262,7 @@ class ListingService:
         """Delete S3 objects for media URLs that were removed from a listing."""
         removed = set(old_urls) - set(new_urls)
         for key in removed:
-            await storage.delete(key)
+            await storage.delete(_extract_key(key))
 
     async def delete_listing(
         self, listing_id: uuid.UUID, current_user: User
@@ -329,7 +349,7 @@ class ListingService:
                     title=title,
                     description=description,
                     payment_notes=listing.payment_notes,
-                    media_urls=listing.media_urls,
+                    media_urls=[_ensure_url(k) for k in (listing.media_urls or [])],
                     tags=listing.tags,
                     radius_km=listing.radius_km,
                     location_lat=listing.location_lat,

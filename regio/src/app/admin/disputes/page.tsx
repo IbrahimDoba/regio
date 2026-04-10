@@ -17,6 +17,9 @@ interface DisputePublic {
   status: string;
   description: string | null;
   created_at: string;
+  dispute_reason: string | null;
+  dispute_raised_at: string | null;
+  dispute_admin_note: string | null;
 }
 
 export default function AdminDisputesPage() {
@@ -118,7 +121,7 @@ export default function AdminDisputesPage() {
                     </td>
                     <td className="p-3 border-b border-[#eee]">
                       <span className="text-[13px] text-[#666] italic">
-                        &ldquo;{dispute.description?.substring(0, 50) || 'No description'}...&rdquo;
+                        &ldquo;{(dispute.dispute_reason || dispute.description)?.substring(0, 50) || 'No reason provided'}...&rdquo;
                       </span>
                     </td>
                     <td className="p-3 border-b border-[#eee]">

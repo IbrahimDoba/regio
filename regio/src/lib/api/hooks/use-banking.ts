@@ -10,6 +10,7 @@ import { queryKeys } from '../query-keys';
 import type {
   TransferRequest,
   PaymentRequestCreate,
+  DisputeCreate,
 } from '../types';
 
 // ============================================================================
@@ -157,6 +158,23 @@ export function useCancelPaymentRequest() {
     mutationFn: (requestId: string) => bankingApi.cancelPaymentRequest(requestId),
     onSuccess: () => {
       // Invalidate payment requests list
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.banking.paymentRequests.all(),
+      });
+    },
+  });
+}
+
+/**
+ * Raise a dispute on a rejected payment request (creditor only)
+ */
+export function useRaiseDispute() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ requestId, data }: { requestId: string; data: DisputeCreate }) =>
+      bankingApi.raiseDispute(requestId, data),
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.banking.paymentRequests.all(),
       });

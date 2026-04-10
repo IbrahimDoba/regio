@@ -16,7 +16,7 @@ export interface PaymentRequestData {
   amountGaras: number;
   amountTime: number;
   description: string;
-  status: 'pending' | 'paid' | 'denied';
+  status: 'pending' | 'paid' | 'denied' | 'disputed';
 }
 
 interface PaymentRequestCardProps {
@@ -24,6 +24,7 @@ interface PaymentRequestCardProps {
   isOwn: boolean;
   onPay?: (id: string) => void;
   onDeny?: (id: string) => void;
+  onDispute?: (id: string) => void;
   className?: string;
 }
 
@@ -32,12 +33,14 @@ export function PaymentRequestCard({
   isOwn,
   onPay,
   onDeny,
+  onDispute,
   className,
 }: PaymentRequestCardProps) {
   const { id, amountGaras, amountTime, description, status } = data;
 
   const handlePay = () => onPay?.(id);
   const handleDeny = () => onDeny?.(id);
+  const handleDispute = () => onDispute?.(id);
 
   // Format amounts
   const formatGaras = (val: number) => val.toFixed(2);
@@ -173,9 +176,29 @@ export function PaymentRequestCard({
 
       {/* Denied state */}
       {status === 'denied' && (
-        <div className="border-t border-gray-100 px-3 py-2">
+        <div className="border-t border-gray-100 px-3 py-2 flex flex-col gap-1">
           <p className="text-xs text-red-500 text-center font-medium">
             Request declined
+          </p>
+          {isOwn && onDispute && (
+            <button
+              onClick={handleDispute}
+              className={cn(
+                'w-full py-1.5 text-xs font-bold',
+                'text-orange-600 hover:bg-orange-50 rounded transition-colors'
+              )}
+            >
+              Raise Dispute
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Disputed state */}
+      {status === 'disputed' && (
+        <div className="border-t border-gray-100 px-3 py-2">
+          <p className="text-xs text-orange-500 text-center font-medium">
+            Dispute under review
           </p>
         </div>
       )}
