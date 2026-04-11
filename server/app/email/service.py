@@ -14,6 +14,8 @@ from app.email.schemas import (
     BroadcastDigestEmailData,
     DisputeResolvedEmailData,
     EmailMessage,
+    PaymentEnforcedEmailData,
+    PaymentReminderEmailData,
     PaymentRequestRejectedEmailData,
     VerificationEmailData,
     VerificationStatusEmailData,
@@ -124,6 +126,41 @@ class EmailService:
         message = EmailMessage(
             to=data.user_email,
             subject=subject_map.get(data.new_status, "Regio Account Update"),
+            html_body=html,
+            inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_payment_reminder_email(
+        self, data: PaymentReminderEmailData
+    ) -> None:
+        """Remind a debtor that their payment request is overdue."""
+        html = self._render_template(
+            "payment_reminder.html", data.model_dump()
+        )
+        message = EmailMessage(
+            to=data.user_email,
+            subject="Payment Reminder — Action Required on Regio",
+            html_body=html,
+            inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_payment_enforced_email(
+        self, data: PaymentEnforcedEmailData
+    ) -> None:
+        """Notify a user their payment was automatically executed by the system."""
+        subject = (
+            "Your Payment Request Was Automatically Processed — Regio"
+            if data.is_creditor
+            else "Automatic Payment Processed From Your Account — Regio"
+        )
+        html = self._render_template(
+            "payment_enforced.html", data.model_dump()
+        )
+        message = EmailMessage(
+            to=data.user_email,
+            subject=subject,
             html_body=html,
             inline_images={"logo": self._logo_m},
         )

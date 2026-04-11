@@ -298,7 +298,7 @@ class BankingService:
 
         # Date filter
         if days:
-            cutoff_date = datetime.now(timezone.UTC) - timedelta(days=days)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
             conditions.append(Transaction.created_at >= cutoff_date)
 
         # Count Query
@@ -633,6 +633,64 @@ class BankingService:
         else:
             raise InvalidPaymentAction()
 
+    async def force_execute_payment_request(
+        self, request_id: uuid.UUID
+    ) -> PaymentRequest:
+        """
+        System enforcer: force-execute an overdue PENDING payment request.
+        Bypasses trust limits. Intended only for the automated enforcer job.
+        """
+        stmt = (
+            select(PaymentRequest)
+            .where(PaymentRequest.id == request_id)
+            .with_for_update()
+            .options(
+                selectinload(PaymentRequest.creditor),
+                selectinload(PaymentRequest.debtor),
+            )
+        )
+        req = (await self.session.execute(stmt)).scalar_one_or_none()
+
+        if not req:
+            raise PaymentRequestNotFound()
+
+        if req.status != PaymentStatus.PENDING:
+            raise InvalidPaymentRequestStatus(req.status)
+
+        # Idempotency guard: if a transaction already exists for this request,
+        # the transfer completed in a previous run but the status update was
+        # lost (process crash). Just finalise the status — do not transfer again.
+        existing_tx = (
+            await self.session.execute(
+                select(Transaction).where(
+                    Transaction.payment_request_id == req.id
+                )
+            )
+        ).scalar_one_or_none()
+
+        if existing_tx:
+            req.status = PaymentStatus.EXECUTED
+            req.transaction_id = existing_tx.id
+            self.session.add(req)
+            await self.session.commit()
+            return req
+
+        tx = await self.transfer_funds(
+            sender_code=req.debtor.user_code,
+            receiver_code=req.creditor.user_code,
+            amount_time=req.amount_time,
+            amount_regio=req.amount_regio,
+            reference=f"Auto-executed: {req.description or 'Payment Request'}",
+            payment_request_id=req.id,
+            skip_limit_check=True,
+        )
+
+        req.status = PaymentStatus.EXECUTED
+        req.transaction_id = tx.id
+        self.session.add(req)
+        await self.session.commit()
+        return req
+
     # CRON / SYSTEM JOBS
     # (Kept mostly same, just update to use new transfer_funds signature if needed)
     async def collect_monthly_fees(self):
@@ -683,7 +741,7 @@ class BankingService:
             (await self.session.execute(statement)).scalars().all()
         )
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         processed_count = 0
         total_minutes = 0
 

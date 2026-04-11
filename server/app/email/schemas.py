@@ -41,6 +41,30 @@ class BroadcastDigestEmailData(BaseModel):
     broadcast_link: Optional[str] = None
 
 
+class PaymentReminderEmailData(BaseModel):
+    """Remind the debtor that a payment request is overdue."""
+
+    user_first_name: str
+    user_email: EmailStr
+    creditor_name: str
+    amount_time: int
+    amount_regio: float
+    description: Optional[str] = None
+    days_pending: int
+
+
+class PaymentEnforcedEmailData(BaseModel):
+    """Notify both parties that a payment was automatically executed by the system."""
+
+    user_first_name: str
+    user_email: EmailStr
+    is_creditor: bool
+    other_party_name: str
+    amount_time: int
+    amount_regio: float
+    description: Optional[str] = None
+
+
 class PaymentRequestRejectedEmailData(BaseModel):
     """Notify the creditor that the debtor has rejected their payment request."""
 

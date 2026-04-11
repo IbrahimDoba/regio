@@ -2,11 +2,11 @@ import mimetypes
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from starlette.middleware.cors import CORSMiddleware
 
-from app.core.file_storage import StorageServiceDep
 from app.admin.routes import router as admin_router
 from app.auth.exceptions import BadAuthRequest, NotAuthorized, PermissionDenied
 from app.auth.handlers import (
@@ -15,6 +15,7 @@ from app.auth.handlers import (
     permission_denied_handler,
 )
 from app.auth.routes import router as auth_router
+from app.banking.enforcer import run_payment_enforcer
 from app.banking.exceptions import (
     BankingBadRequest,
     BankingConflict,
@@ -34,6 +35,7 @@ from app.broadcast.routes import router as broadcast_router
 from app.chat.routes import router as chat_router
 from app.core.config import settings
 from app.core.database import init_db, test_db_connection
+from app.core.file_storage import StorageServiceDep
 from app.core.handlers import global_exception_handler
 from app.email.exceptions import EmailBaseException
 from app.email.handlers import email_error_handler
@@ -64,14 +66,25 @@ from app.users.handlers import (
 )
 from app.users.routes import router as user_router
 
+scheduler = AsyncIOScheduler()
+scheduler.add_job(
+    run_payment_enforcer,
+    trigger="interval",
+    hours=1,
+    id="payment_enforcer",
+    replace_existing=True,
+)
+
 
 @asynccontextmanager
 async def lifespan(_application: FastAPI) -> AsyncGenerator:
     # Startup
     await test_db_connection()
     await init_db()
+    scheduler.start()
     yield
     # Shutdown
+    scheduler.shutdown(wait=False)
 
 
 app = FastAPI(
@@ -107,7 +120,9 @@ async def serve_media(key: str, storage: StorageServiceDep) -> Response:
     if data is None:
         raise HTTPException(status_code=404, detail="Media not found")
     content_type, _ = mimetypes.guess_type(key)
-    return Response(content=data, media_type=content_type or "application/octet-stream")
+    return Response(
+        content=data, media_type=content_type or "application/octet-stream"
+    )
 
 
 # Include routers
