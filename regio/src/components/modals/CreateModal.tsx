@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { FaSpinner, FaImage, FaXmark } from "react-icons/fa6";
+import { FaSpinner, FaImage, FaXmark, FaMapLocationDot } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingCategory, ListingCreate } from "@/lib/api/types";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
 import { useCreateListing } from "@/lib/api/hooks/use-listings";
 import { uploadMedia } from "@/lib/api/modules/listings";
 import { useLanguage } from "@/context/LanguageContext";
+import LocationPicker from "@/components/map/LocationPicker";
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -60,6 +61,10 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
   // SEARCH_PRODUCT
   const [searchProductDeadline, setSearchProductDeadline] = useState("");
+
+  const [locationLat, setLocationLat] = useState<number | null>(null);
+  const [locationLng, setLocationLng] = useState<number | null>(null);
+  const [showMap, setShowMap] = useState(false);
 
   const createMutation = useCreateListing();
   const { t } = useLanguage();
@@ -181,6 +186,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     setPriceNotes("");
     setSelectedFiles([]);
     setPreviewUrls([]);
+    setLocationLat(null);
+    setLocationLng(null);
+    setShowMap(false);
   };
 
   const handleSubmit = () => {
@@ -192,6 +200,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
       category,
       tags,
       attributes: buildAttributes(),
+      location_lat: locationLat ?? undefined,
+      location_lng: locationLng ?? undefined,
     };
 
     createMutation.mutate(payload, {
@@ -624,6 +634,35 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 onKeyDown={handleTagKeyDown}
               />
             </div>
+          </div>
+
+          {/* Location */}
+          <div className={fieldClass}>
+            <button
+              type="button"
+              onClick={() => setShowMap((v) => !v)}
+              className="inline-flex items-center gap-[6px] text-[13px] text-[#555] bg-[#f0f0f0] border border-[#ccc] rounded-[4px] px-[12px] py-[8px] hover:bg-[#e8e8e8] transition-colors"
+            >
+              <FaMapLocationDot className="text-[14px]" />
+              {showMap ? "Hide map" : locationLat !== null ? `Location set: ${locationLat.toFixed(4)}, ${locationLng!.toFixed(4)}` : "Add location on map"}
+            </button>
+
+            {showMap && (
+              <div className="mt-[10px]">
+                <LocationPicker
+                  lat={locationLat}
+                  lng={locationLng}
+                  onLocationSelect={(lat, lng) => {
+                    setLocationLat(lat);
+                    setLocationLng(lng);
+                  }}
+                  onClear={() => {
+                    setLocationLat(null);
+                    setLocationLng(null);
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Photos */}

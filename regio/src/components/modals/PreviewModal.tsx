@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { getCategoryDetails, formatPrice, ListingAttributes } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
 import type { Translations } from "@/context/LanguageContext";
+import LocationMap from "@/components/map/LocationMap";
 
 interface PreviewModalProps {
   listing: ListingPublic | null;
@@ -176,6 +177,13 @@ export default function PreviewModal({ listing, onClose, onContact, isContacting
                   />
                 </a>
               ))}
+            </div>
+          )}
+
+          {/* Location map */}
+          {listing.location_lat != null && listing.location_lng != null && (
+            <div className="mb-[20px]">
+              <LocationMap lat={listing.location_lat} lng={listing.location_lng} />
             </div>
           )}
 

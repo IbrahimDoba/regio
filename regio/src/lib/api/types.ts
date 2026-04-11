@@ -234,6 +234,8 @@ export interface ListingPublic {
   radius_km: number | null;
   attributes: Record<string, unknown>;
   created_at: string;
+  location_lat?: number | null;
+  location_lng?: number | null;
 }
 
 export interface ListingCreate {
@@ -244,6 +246,8 @@ export interface ListingCreate {
   media_urls?: string[];
   radius_km?: number | null;
   attributes?: Record<string, unknown>;
+  location_lat?: number | null;
+  location_lng?: number | null;
 }
 
 export interface ListingUpdate {
@@ -254,6 +258,8 @@ export interface ListingUpdate {
   radius_km?: number | null;
   status?: ListingStatus;
   attributes?: Record<string, unknown>;
+  location_lat?: number | null;
+  location_lng?: number | null;
 }
 
 export interface FeedParams {
