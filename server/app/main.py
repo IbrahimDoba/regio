@@ -22,6 +22,7 @@ from app.banking.exceptions import (
     BankingForbidden,
     BankingNotFound,
 )
+from app.banking.fees import run_demurrage, run_monthly_fees
 from app.banking.handlers import (
     banking_bad_request_handler,
     banking_conflict_handler,
@@ -72,6 +73,23 @@ scheduler.add_job(
     trigger="interval",
     hours=1,
     id="payment_enforcer",
+    replace_existing=True,
+)
+scheduler.add_job(
+    run_monthly_fees,
+    trigger="cron",
+    day=1,
+    hour=2,
+    minute=0,
+    id="monthly_fees",
+    replace_existing=True,
+)
+scheduler.add_job(
+    run_demurrage,
+    trigger="cron",
+    hour=5,
+    minute=0,
+    id="demurrage",
     replace_existing=True,
 )
 

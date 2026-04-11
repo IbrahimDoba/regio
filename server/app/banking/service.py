@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
@@ -39,6 +40,8 @@ from app.core.config import settings
 from app.users.enums import TrustLevel
 from app.users.exceptions import UserNotFound
 from app.users.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class BankingService:
@@ -692,8 +695,8 @@ class BankingService:
         return req
 
     # CRON / SYSTEM JOBS
-    # (Kept mostly same, just update to use new transfer_funds signature if needed)
-    async def collect_monthly_fees(self):
+
+    async def collect_monthly_fees(self) -> list[dict]:
         stmt_sys = select(User).where(
             User.user_code == settings.SYSTEM_SINK_CODE
         )
@@ -718,6 +721,10 @@ class BankingService:
                 )
                 results.append({"user": user.user_code, "status": "SUCCESS"})
             except Exception as e:
+                await self.session.rollback()
+                logger.error(
+                    f"Monthly fee collection failed for {user.user_code}: {e}"
+                )
                 results.append(
                     {
                         "user": user.user_code,
@@ -727,15 +734,17 @@ class BankingService:
                 )
         return results
 
-    async def process_demurrage(self):
+    async def process_demurrage(self) -> dict:
         statement = (
             select(Account)
             .join(User)
             .where(
                 Account.type == Currency.TIME,
                 Account.balance_time > DEMURRAGE_THRESHOLD_MINUTES,
+                User.is_active.is_(True),
                 User.is_system_admin.is_(False),
             )
+            .options(selectinload(Account.user))
         )
         hoarding_accounts = (
             (await self.session.execute(statement)).scalars().all()
@@ -746,8 +755,8 @@ class BankingService:
         total_minutes = 0
 
         for acc in hoarding_accounts:
-            user = await self.session.get(User, acc.user_id)
-            last_calc = acc.last_demurrage_calc or now
+            user = acc.user
+            last_calc = acc.last_demurrage_calc.astimezone(timezone.utc)
             delta = now - last_calc
             days_elapsed = delta.total_seconds() / (24 * 3600)
 
@@ -770,15 +779,17 @@ class BankingService:
                         reference=f"Demurrage ({days_elapsed:.1f} days)",
                         skip_limit_check=True,
                     )
+                    # Only advance the timestamp on success — a failed charge
+                    # is retried next run rather than silently skipped.
+                    acc.last_demurrage_calc = now
+                    self.session.add(acc)
+                    await self.session.commit()
                     total_minutes += demurrage_minutes
                     processed_count += 1
                 except Exception as e:
-                    print(f"Failed demurrage for {user.user_code}: {e}")
+                    await self.session.rollback()
+                    logger.error(f"Demurrage failed for {user.user_code}: {e}")
 
-            acc.last_demurrage_calc = now
-            self.session.add(acc)
-
-        await self.session.commit()
         return {
             "processed_users": processed_count,
             "total_minutes_collected": total_minutes,
