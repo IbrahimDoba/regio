@@ -30,7 +30,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Show loading spinner while checking auth
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#f8f8f8]">
+      <div className="w-full max-w-[480px] mx-auto min-h-screen bg-[#f8f8f8] flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-green-offer)]"></div>
           <p className="mt-4 text-[#666] text-sm">Loading...</p>

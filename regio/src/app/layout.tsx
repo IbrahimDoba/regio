@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-[#e0e0e0] flex justify-center min-h-screen font-sans antialiased">
+      <body className="bg-[#e0e0e0] min-h-screen font-sans antialiased">
         <QueryProvider>
           <AuthProvider>
             <RealTimeProvider>
