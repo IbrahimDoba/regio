@@ -38,7 +38,7 @@ def _extract_key(url_or_key: str) -> str:
     """Strip the backend media proxy prefix to get the raw R2 object key."""
     prefix = f"{settings.BACKEND_URL}{_MEDIA_PREFIX}"
     if url_or_key.startswith(prefix):
-        return url_or_key[len(prefix):]
+        return url_or_key[len(prefix) :]
     return url_or_key
 
 
@@ -349,7 +349,9 @@ class ListingService:
                     title=title,
                     description=description,
                     payment_notes=listing.payment_notes,
-                    media_urls=[_ensure_url(k) for k in (listing.media_urls or [])],
+                    media_urls=[
+                        _ensure_url(k) for k in (listing.media_urls or [])
+                    ],
                     tags=listing.tags,
                     radius_km=listing.radius_km,
                     location_lat=listing.location_lat,
