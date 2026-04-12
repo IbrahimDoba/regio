@@ -57,7 +57,7 @@ services:
         # REQUIRED: these are baked into the JS bundle at build time.
         # Set them in a root .env file or export before running docker compose build.
         # Example: NEXT_PUBLIC_API_BASE_URL=https://api.app.regio.is
-        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:2323}
         NEXT_PUBLIC_MATRIX_HOMESERVER_URL: ${NEXT_PUBLIC_MATRIX_HOMESERVER_URL:-https://matrix.151.hu}
         NEXT_PUBLIC_MATRIX_DOMAIN: ${NEXT_PUBLIC_MATRIX_DOMAIN:-151.hu}
     ports:
