@@ -1578,6 +1578,7 @@ dependencies = [
     { name = "pydantic", extra = ["email"] },
     { name = "pydantic-settings" },
     { name = "pyjwt" },
+    { name = "python-dotenv" },
     { name = "python-multipart" },
     { name = "redis" },
     { name = "sqlmodel" },
@@ -1589,7 +1590,6 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "pytest" },
-    { name = "python-dotenv" },
     { name = "rich" },
     { name = "ruff" },
     { name = "tqdm" },
@@ -1612,6 +1612,7 @@ requires-dist = [
     { name = "pydantic", extras = ["email"], specifier = ">=2.12.5" },
     { name = "pydantic-settings", specifier = ">=2.12.0" },
     { name = "pyjwt", specifier = ">=2.10.1" },
+    { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "python-multipart", specifier = ">=0.0.21" },
     { name = "redis", specifier = ">=7.1.0" },
     { name = "sqlmodel", specifier = ">=0.0.27" },
@@ -1623,7 +1624,6 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "pytest", specifier = ">=9.0.2" },
-    { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "rich", specifier = ">=14.2.0" },
     { name = "ruff", specifier = ">=0.14.10" },
     { name = "tqdm", specifier = ">=4.67.1" },

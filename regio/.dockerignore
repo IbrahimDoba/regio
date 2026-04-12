@@ -1,9 +1,10 @@
 .next
 node_modules
-.env*.local
-.env
+.env*
+coverage
 *.md
 .git
 .gitignore
 Dockerfile
 .dockerignore
+.DS_Store

@@ -86,7 +86,7 @@ class User(SQLModel, table=True):
         default=None,
         unique=True,
         nullable=True,
-        description="Matrix user ID, e.g. @immo_<uuid>:151.hu",
+        description="Matrix user ID, e.g. @regio_<uuid>:151.hu",
     )
     matrix_password: Optional[str] = Field(
         default=None,

@@ -56,7 +56,7 @@ class MatrixRoomParticipant(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     room_id: uuid.UUID = Field(foreign_key="matrix_rooms.id", index=True)
     user_id: uuid.UUID = Field(foreign_key="users.id", index=True)
-    matrix_user_id: str  # e.g. @immo_<uuid>:151.hu
+    matrix_user_id: str  # e.g. @regio_<uuid>:151.hu
 
 
 class MatrixRegistrationStats(SQLModel, table=True):

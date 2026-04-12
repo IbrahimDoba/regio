@@ -5,6 +5,7 @@ description = "Regio P2P Marketplace API."
 requires-python = ">=3.13.9"
 dependencies = [
     "aioboto3>=15.5.0",
+    "python-dotenv>=1.2.1",
     "aiosmtplib>=3.0.0",
     "alembic>=1.17.2",
     "apscheduler>=3.10,<4",
@@ -30,7 +31,6 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=9.0.2",
-    "python-dotenv>=1.2.1",
     "rich>=14.2.0",
     "ruff>=0.14.10",
     "tqdm>=4.67.1",

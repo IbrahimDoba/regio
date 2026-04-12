@@ -1,0 +1,12 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env*
+.pytest_cache
+.mypy_cache
+.ruff_cache
+dark-harvest
+.DS_Store
+*.md

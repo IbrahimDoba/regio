@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 def _matrix_username_for_user(user: User) -> str:
     """Derive a Matrix localpart from the platform user's UUID."""
-    return f"immo_{str(user.id).replace('-', '')}"
+    return f"regio_{str(user.id).replace('-', '')}"
 
 
 async def check_registration_limit(db: AsyncSession) -> bool:
@@ -157,7 +157,7 @@ async def get_matrix_access_token(user_id: uuid.UUID, db: AsyncSession) -> str:
         )
 
     plain_password = decrypt_password(user.matrix_password)
-    # matrix_user_id is like @immo_<uuid>:151.hu — extract localpart
+    # matrix_user_id is like @regio_<uuid>:151.hu — extract localpart
     localpart = user.matrix_user_id.split(":")[0].lstrip("@")
     login_result = await login_matrix_user(localpart, plain_password)
     new_token = login_result["access_token"]

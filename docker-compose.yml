@@ -1,0 +1,77 @@
+services:
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    command: ["/app/.venv/bin/alembic", "upgrade", "head"]
+    env_file: ./server/.env.docker
+    extra_hosts:
+      - "host.containers.internal:host-gateway"
+    networks:
+      - app-network
+    # This container runs migrations then exits — that's intentional.
+    # api uses service_completed_successfully to wait for it.
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    env_file: ./server/.env.docker
+    extra_hosts:
+      - "host.containers.internal:host-gateway"
+    ports:
+      - "127.0.0.1:2323:2323"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:2323/healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./regio
+      dockerfile: Dockerfile
+      args:
+        # REQUIRED: these are baked into the JS bundle at build time.
+        # Set them in a root .env file or export before running docker compose build.
+        # Example: NEXT_PUBLIC_API_BASE_URL=https://api.app.regio.is
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+        NEXT_PUBLIC_MATRIX_HOMESERVER_URL: ${NEXT_PUBLIC_MATRIX_HOMESERVER_URL:-https://matrix.151.hu}
+        NEXT_PUBLIC_MATRIX_DOMAIN: ${NEXT_PUBLIC_MATRIX_DOMAIN:-151.hu}
+    ports:
+      - "127.0.0.1:3838:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge
