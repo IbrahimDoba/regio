@@ -14,14 +14,17 @@ logger = logging.getLogger(__name__)
 SUPPORTED_LANGUAGES = {"EN", "DE", "HU"}
 
 client = (
-    AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-    if settings.OPENAI_API_KEY
+    AsyncOpenAI(
+        api_key=settings.DEEPSEEK_API_KEY,
+        base_url="https://api.deepseek.com",
+    )
+    if settings.DEEPSEEK_API_KEY
     else None
 )
 
 
 class TranslateService:
-    """Translates listing title + description via OpenAI and persists results."""
+    """Translates listing title + description via DeepSeek and persists results."""
 
     @staticmethod
     async def _translate(
@@ -41,7 +44,7 @@ class TranslateService:
         targets = ", ".join(sorted(target_languages))
 
         response = await client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="deepseek-chat",
             temperature=0.3,
             response_format={"type": "json_object"},
             messages=[
@@ -87,7 +90,7 @@ class TranslateService:
             return
 
         if not client:
-            logger.warning("OPENAI_API_KEY not set — skipping translation")
+            logger.warning("DEEPSEEK_API_KEY not set — skipping translation")
             return
 
         try:
