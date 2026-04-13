@@ -13,7 +13,8 @@ import {
 } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingPublic } from "@/lib/api/types";
-import { getCategoryDetails, formatPrice } from "@/lib/feed-helpers";
+import { getCategoryDetails } from "@/lib/feed-helpers";
+import { formatPriceNode } from "@/lib/feed-helpers-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
@@ -37,7 +38,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCard
   const { t } = useLanguage();
 
   const { color, icon, label, colorVar } = getCategoryDetails(listing.category);
-  const priceDisplay = formatPrice(listing);
+  const priceDisplay = formatPriceNode(listing);
 
   return (
     <div

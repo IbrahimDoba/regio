@@ -4,7 +4,8 @@ import React from "react";
 import { FaEnvelope } from "react-icons/fa6";
 import { ListingPublic } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
-import { getCategoryDetails, formatPrice, ListingAttributes } from "@/lib/feed-helpers";
+import { getCategoryDetails, ListingAttributes } from "@/lib/feed-helpers";
+import { formatPriceNode } from "@/lib/feed-helpers-react";
 import { useLanguage } from "@/context/LanguageContext";
 import type { Translations } from "@/context/LanguageContext";
 import LocationMap from "@/components/map/LocationMap";
@@ -29,23 +30,27 @@ function AttributeDetails({ listing, a }: { listing: ListingPublic; a: Translati
   const attrs = listing.attributes as ListingAttributes;
   if (!attrs) return null;
 
+  const TVal = ({ v }: { v: string }) => <span className="inline-flex items-center gap-1"><img src="/time.png" className="w-4 h-4" alt="" />{v}</span>;
+  const GVal = ({ v }: { v: string }) => <span className="inline-flex items-center gap-1"><img src="/garas.png" className="w-4 h-4" alt="" />{v}</span>;
+  const TFVal = ({ v }: { v: string }) => <span className="inline-flex items-center gap-1"><img src="/timefactor.png" className="w-4 h-4" alt="" />{v}</span>;
+
   const rows: React.ReactNode[] = [];
 
   switch (listing.category) {
     case "OFFER_SERVICE":
-      rows.push(<Row key="tf" label={a.time_factor} value={`${attrs.time_factor ?? 1.0}x — final cost = hours worked × ${attrs.time_factor ?? 1.0}`} />);
+      rows.push(<Row key="tf" label={a.time_factor} value={<TFVal v={`${attrs.time_factor ?? 1.0}x — final cost = hours worked × ${attrs.time_factor ?? 1.0}`} />} />);
       break;
 
     case "SELL_PRODUCT":
-      if (attrs.time_amount) rows.push(<Row key="ta" label={a.price_time} value={`${attrs.time_amount} min`} />);
-      if (attrs.regio_amount) rows.push(<Row key="ra" label={a.price_garas} value={`${attrs.regio_amount} G`} />);
+      if (attrs.time_amount) rows.push(<Row key="ta" label={a.price_time} value={<TVal v={`${attrs.time_amount} min`} />} />);
+      if (attrs.regio_amount) rows.push(<Row key="ra" label={a.price_garas} value={<GVal v={`${attrs.regio_amount} G`} />} />);
       if (attrs.condition) rows.push(<Row key="cond" label={a.condition} value={attrs.condition} />);
       if (attrs.stock) rows.push(<Row key="stock" label={a.stock} value={attrs.stock} />);
       break;
 
     case "OFFER_RENTAL":
-      if (attrs.handling_fee_time) rows.push(<Row key="ft" label={a.handling_fee} value={`${attrs.handling_fee_time} min`} />);
-      if (attrs.usage_fee_regio) rows.push(<Row key="fr" label={a.usage_fee} value={`${attrs.usage_fee_regio} G`} />);
+      if (attrs.handling_fee_time) rows.push(<Row key="ft" label={a.handling_fee} value={<TVal v={`${attrs.handling_fee_time} min`} />} />);
+      if (attrs.usage_fee_regio) rows.push(<Row key="fr" label={a.usage_fee} value={<GVal v={`${attrs.usage_fee_regio} G`} />} />);
       if (attrs.max_rental_duration) rows.push(<Row key="md" label={a.max_duration} value={attrs.max_rental_duration} />);
       if (attrs.deposit_required != null) rows.push(<Row key="dep" label={a.deposit_required} value={attrs.deposit_required ? a.deposit_yes : a.deposit_no} />);
       break;
@@ -55,8 +60,8 @@ function AttributeDetails({ listing, a }: { listing: ListingPublic; a: Translati
       if (attrs.to_location) rows.push(<Row key="to" label={a.to} value={attrs.to_location} />);
       if (attrs.departure_datetime) rows.push(<Row key="dep" label={a.departure} value={new Date(attrs.departure_datetime).toLocaleString()} />);
       if (attrs.seats_available) rows.push(<Row key="seats" label={a.seats_available} value={attrs.seats_available} />);
-      if (attrs.price_time) rows.push(<Row key="pt" label={a.price_per_seat_time} value={`${attrs.price_time} min`} />);
-      if (attrs.price_regio) rows.push(<Row key="pg" label={a.price_per_seat_garas} value={`${attrs.price_regio} G`} />);
+      if (attrs.price_time) rows.push(<Row key="pt" label={a.price_per_seat_time} value={<TVal v={`${attrs.price_time} min`} />} />);
+      if (attrs.price_regio) rows.push(<Row key="pg" label={a.price_per_seat_garas} value={<GVal v={`${attrs.price_regio} G`} />} />);
       break;
 
     case "EVENT_WORKSHOP":
@@ -64,8 +69,8 @@ function AttributeDetails({ listing, a }: { listing: ListingPublic; a: Translati
       if (attrs.event_end_date) rows.push(<Row key="ee" label={a.ends} value={new Date(attrs.event_end_date).toLocaleString()} />);
       if (attrs.location) rows.push(<Row key="loc" label={a.location} value={attrs.location} />);
       if (attrs.max_participants) rows.push(<Row key="mp" label={a.max_participants} value={attrs.max_participants} />);
-      if (attrs.price_time) rows.push(<Row key="pt" label={a.entry_fee_time} value={`${attrs.price_time} min`} />);
-      if (attrs.price_regio) rows.push(<Row key="pg" label={a.material_fee_garas} value={`${attrs.price_regio} G`} />);
+      if (attrs.price_time) rows.push(<Row key="pt" label={a.entry_fee_time} value={<TVal v={`${attrs.price_time} min`} />} />);
+      if (attrs.price_regio) rows.push(<Row key="pg" label={a.material_fee_garas} value={<GVal v={`${attrs.price_regio} G`} />} />);
       break;
 
     case "SEARCH_SERVICE":
@@ -93,7 +98,7 @@ export default function PreviewModal({ listing, onClose, onContact, isContacting
   if (!listing) return null;
 
   const { color, icon, label, colorVar } = getCategoryDetails(listing.category);
-  const priceDisplay = formatPrice(listing);
+  const priceDisplay = formatPriceNode(listing);
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-[1000] flex justify-center items-center backdrop-blur-[3px] animate-in fade-in duration-200">

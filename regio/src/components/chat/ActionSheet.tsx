@@ -9,7 +9,6 @@
 
 import React, { useEffect } from 'react';
 import {
-  FaHandHoldingDollar,
   FaImage,
   FaLocationDot,
   FaXmark,
@@ -75,7 +74,7 @@ export function ActionSheet({
 
         <div className="space-y-1">
           <ActionItem
-            icon={<FaHandHoldingDollar className="w-5 h-5" />}
+            icon={<img src="/requestpayment.png" className="w-5 h-5" alt="" />}
             label={t.chat.action_sheet.request_payment}
             onClick={() => {
               onClose();

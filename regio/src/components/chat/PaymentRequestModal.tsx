@@ -102,8 +102,8 @@ export function PaymentRequestModal({
           {/* Amount Inputs */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-                {t.chat.payment_request_modal.garas_label}
+              <label className="flex items-center gap-1.5 text-xs font-bold text-gray-500 uppercase mb-1.5">
+                <img src="/garas.png" className="w-3.5 h-3.5" alt="" />{t.chat.payment_request_modal.garas_label}
               </label>
               <input
                 type="number"
@@ -120,8 +120,8 @@ export function PaymentRequestModal({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-                {t.chat.payment_request_modal.time_label}
+              <label className="flex items-center gap-1.5 text-xs font-bold text-gray-500 uppercase mb-1.5">
+                <img src="/time.png" className="w-3.5 h-3.5" alt="" />{t.chat.payment_request_modal.time_label}
               </label>
               <input
                 type="number"

@@ -10,8 +10,6 @@ import {
   FaCoins,
   FaArrowDown,
   FaArrowUp,
-  FaPaperPlane,
-  FaHandHoldingDollar,
   FaArrowLeft,
   FaTriangleExclamation,
   FaCircleCheck,
@@ -363,7 +361,8 @@ export default function WalletPage() {
               : "bg-gradient-to-br from-[#8cb348] to-[#5e8e3e]"
           }`}
         >
-          <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px]">
+          <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px] flex items-center gap-[5px]">
+            <img src="/time.png" className="w-4 h-4 rounded bg-white/20 p-[1px]" alt="" />
             {t.wallet.time_account}
           </div>
           <div className="text-[24px] font-[800] mb-[1px]">
@@ -371,13 +370,13 @@ export default function WalletPage() {
           </div>
           <div className="text-[14px] font-[500] opacity-90">{t.wallet.time_unit}</div>
           {isTimeNegative && (
-            <div className="text-[10px] opacity-80 mt-[4px]">
-              Limit: {formatTime(balanceData!.limits.max_debt_time)}
+            <div className="text-[10px] opacity-80 mt-[4px] flex items-center gap-0.5">
+              Limit: <img src="/time.png" className="w-3 h-3" alt="" />{formatTime(balanceData!.limits.max_debt_time)}
             </div>
           )}
           {!isTimeNegative && balanceData && (
-            <div className="text-[10px] opacity-70 mt-[4px]">
-              Available: {formatTime(availableTime)}
+            <div className="text-[10px] opacity-70 mt-[4px] flex items-center gap-0.5">
+              Available: <img src="/time.png" className="w-3 h-3" alt="" />{formatTime(availableTime)}
             </div>
           )}
           <FaClock className="absolute -right-[10px] -bottom-[10px] text-[80px] opacity-15 -rotate-12" />
@@ -391,7 +390,8 @@ export default function WalletPage() {
               : "bg-gradient-to-br from-[#4a90e2] to-[#0056b3]"
           }`}
         >
-          <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px]">
+          <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px] flex items-center gap-[5px]">
+            <img src="/garas.png" className="w-4 h-4 rounded bg-white/20 p-[1px]" alt="" />
             {t.wallet.garas_account}
           </div>
           <div className="text-[24px] font-[800] mb-[1px]">
@@ -399,13 +399,13 @@ export default function WalletPage() {
           </div>
           <div className="text-[14px] font-[500] opacity-90">{t.wallet.garas_unit}</div>
           {isGarasNegative && (
-            <div className="text-[10px] opacity-80 mt-[4px]">
-              Limit: {balanceData!.limits.max_debt_regio} ℛ
+            <div className="text-[10px] opacity-80 mt-[4px] flex items-center gap-0.5">
+              Limit: <img src="/garas.png" className="w-3 h-3" alt="" />{balanceData!.limits.max_debt_regio}
             </div>
           )}
           {!isGarasNegative && balanceData && (
-            <div className="text-[10px] opacity-70 mt-[4px]">
-              Available: {availableGaras} ℛ
+            <div className="text-[10px] opacity-70 mt-[4px] flex items-center gap-0.5">
+              Available: <img src="/garas.png" className="w-3 h-3" alt="" />{availableGaras}
             </div>
           )}
           <FaCoins className="absolute -right-[10px] -bottom-[10px] text-[80px] opacity-15 -rotate-12" />
@@ -420,12 +420,12 @@ export default function WalletPage() {
           </span>
           <span>
             Debt limit:{" "}
-            <strong className="text-[#555]">
-              {formatTime(balanceData.limits.max_debt_time)} / {balanceData.limits.max_debt_regio} ℛ
+            <strong className="text-[#555] inline-flex items-center gap-0.5">
+              <img src="/time.png" className="w-3 h-3" alt="" />{formatTime(balanceData.limits.max_debt_time)} / <img src="/garas.png" className="w-3 h-3" alt="" />{balanceData.limits.max_debt_regio}
             </strong>
           </span>
           <span>
-            Earned: <strong className="text-[#555]">{formatTime(balanceData.total_time_earned)}</strong>
+            Earned: <strong className="text-[#555] inline-flex items-center gap-0.5"><img src="/time.png" className="w-3 h-3" alt="" />{formatTime(balanceData.total_time_earned)}</strong>
           </span>
         </div>
       )}
@@ -459,16 +459,18 @@ export default function WalletPage() {
                     {t.wallet.ref.replace("{ref}", req.description || t.wallet.no_ref)}
                   </div>
                 </div>
-                <div className="flex gap-[5px] flex-col items-end">
-                  {req.amount_regio !== "0.00" && (
-                    <span className="bg-[#fff3e0] text-[#f57c00] p-[2px_6px] rounded-[4px] text-[11px] font-bold border border-[#ffe0b2]">
-                      {req.amount_regio} ℛ
-                    </span>
-                  )}
+                <div className="flex items-center gap-3">
                   {req.amount_time > 0 && (
-                    <span className="bg-[#fff3e0] text-[#f57c00] p-[2px_6px] rounded-[4px] text-[11px] font-bold border border-[#ffe0b2]">
-                      {req.amount_time} min
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <img src="/time.png" className="w-7 h-7" alt="" />
+                      <span className="font-bold text-red-700 text-[13px]">{req.amount_time} min</span>
+                    </div>
+                  )}
+                  {req.amount_regio !== "0.00" && (
+                    <div className="flex items-center gap-1">
+                      <img src="/garas.png" className="w-7 h-7" alt="" />
+                      <span className="font-bold text-red-700 text-[13px]">{req.amount_regio}</span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -524,16 +526,18 @@ export default function WalletPage() {
                     {t.wallet.ref.replace("{ref}", req.description || t.wallet.no_ref)}
                   </div>
                 </div>
-                <div className="flex gap-[5px] flex-col items-end">
-                  {req.amount_regio !== "0.00" && (
-                    <span className="bg-[#f5f5f5] text-[#666] p-[2px_6px] rounded-[4px] text-[11px] font-bold border border-[#ddd]">
-                      {req.amount_regio} ℛ
-                    </span>
-                  )}
+                <div className="flex items-center gap-3">
                   {req.amount_time > 0 && (
-                    <span className="bg-[#f5f5f5] text-[#666] p-[2px_6px] rounded-[4px] text-[11px] font-bold border border-[#ddd]">
-                      {req.amount_time} min
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <img src="/time.png" className="w-7 h-7" alt="" />
+                      <span className="font-bold text-red-700 text-[13px]">{req.amount_time} min</span>
+                    </div>
+                  )}
+                  {req.amount_regio !== "0.00" && (
+                    <div className="flex items-center gap-1">
+                      <img src="/garas.png" className="w-7 h-7" alt="" />
+                      <span className="font-bold text-red-700 text-[13px]">{req.amount_regio}</span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -576,16 +580,18 @@ export default function WalletPage() {
                     {t.wallet.ref.replace("{ref}", req.description || t.wallet.no_ref)}
                   </div>
                 </div>
-                <div className="flex gap-[5px] flex-col items-end">
-                  {req.amount_regio !== "0.00" && (
-                    <span className="bg-[#ffebee] text-[#e53935] p-[2px_6px] rounded-[4px] text-[11px] font-bold border border-[#ffcdd2]">
-                      {req.amount_regio} ℛ
-                    </span>
-                  )}
+                <div className="flex items-center gap-3">
                   {req.amount_time > 0 && (
-                    <span className="bg-[#ffebee] text-[#e53935] p-[2px_6px] rounded-[4px] text-[11px] font-bold border border-[#ffcdd2]">
-                      {req.amount_time} min
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <img src="/time.png" className="w-7 h-7" alt="" />
+                      <span className="font-bold text-red-700 text-[13px]">{req.amount_time} min</span>
+                    </div>
+                  )}
+                  {req.amount_regio !== "0.00" && (
+                    <div className="flex items-center gap-1">
+                      <img src="/garas.png" className="w-7 h-7" alt="" />
+                      <span className="font-bold text-red-700 text-[13px]">{req.amount_regio}</span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -627,7 +633,7 @@ export default function WalletPage() {
           }`}
           onClick={() => toggleForm("send")}
         >
-          <FaPaperPlane className="text-[20px] text-[var(--color-nav-bg)]" />
+          <img src="/sendpayment.png" className="w-[22px] h-[22px]" alt="" />
           <span className="text-[12px] font-bold text-[#555]">{t.wallet.send_button}</span>
         </div>
         <div
@@ -638,7 +644,7 @@ export default function WalletPage() {
           }`}
           onClick={() => toggleForm("request")}
         >
-          <FaHandHoldingDollar className="text-[20px] text-[var(--color-nav-bg)]" />
+          <img src="/requestpayment.png" className="w-[22px] h-[22px]" alt="" />
           <span className="text-[12px] font-bold text-[#555]">{t.wallet.request_button}</span>
         </div>
       </div>
@@ -660,12 +666,12 @@ export default function WalletPage() {
           {balanceData && (
             <div className="text-[11px] text-[#888] mb-[12px] bg-white border border-[#eee] rounded-[4px] p-[6px_10px]">
               Available to send:{" "}
-              <strong className={availableTime <= 0 ? "text-[#e53935]" : "text-[#333]"}>
-                {formatTime(availableTime)} min
+              <strong className={`inline-flex items-center gap-0.5 ${availableTime <= 0 ? "text-[#e53935]" : "text-[#333]"}`}>
+                <img src="/time.png" className="w-3 h-3" alt="" />{formatTime(availableTime)} min
               </strong>{" "}
               /{" "}
-              <strong className={parseFloat(String(availableGaras)) <= 0 ? "text-[#e53935]" : "text-[#333]"}>
-                {availableGaras} ℛ
+              <strong className={`inline-flex items-center gap-0.5 ${parseFloat(String(availableGaras)) <= 0 ? "text-[#e53935]" : "text-[#333]"}`}>
+                <img src="/garas.png" className="w-3 h-3" alt="" />{availableGaras}
               </strong>
             </div>
           )}
@@ -685,8 +691,8 @@ export default function WalletPage() {
 
           <div className="flex gap-[10px] mb-[12px]">
             <div className="flex-1">
-              <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                {t.wallet.send_form.time_label}
+              <label className="flex items-center gap-[4px] text-[11px] font-bold text-[#666] mb-[4px]">
+                <img src="/time.png" className="w-3.5 h-3.5" alt="" />{t.wallet.send_form.time_label}
               </label>
               <input
                 type="number"
@@ -698,8 +704,8 @@ export default function WalletPage() {
               />
             </div>
             <div className="flex-1">
-              <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                {t.wallet.send_form.garas_label}
+              <label className="flex items-center gap-[4px] text-[11px] font-bold text-[#666] mb-[4px]">
+                <img src="/garas.png" className="w-3.5 h-3.5" alt="" />{t.wallet.send_form.garas_label}
               </label>
               <input
                 type="number"
@@ -769,8 +775,8 @@ export default function WalletPage() {
 
           <div className="flex gap-[10px] mb-[12px]">
             <div className="flex-1">
-              <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                {t.wallet.send_form.time_label}
+              <label className="flex items-center gap-[4px] text-[11px] font-bold text-[#666] mb-[4px]">
+                <img src="/time.png" className="w-3.5 h-3.5" alt="" />{t.wallet.send_form.time_label}
               </label>
               <input
                 type="number"
@@ -782,8 +788,8 @@ export default function WalletPage() {
               />
             </div>
             <div className="flex-1">
-              <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
-                {t.wallet.send_form.garas_label}
+              <label className="flex items-center gap-[4px] text-[11px] font-bold text-[#666] mb-[4px]">
+                <img src="/garas.png" className="w-3.5 h-3.5" alt="" />{t.wallet.send_form.garas_label}
               </label>
               <input
                 type="number"
@@ -867,28 +873,22 @@ export default function WalletPage() {
                   )}
                 </div>
               </div>
-              <div className="flex gap-[8px] items-center ml-[10px] flex-col items-end">
+              <div className="flex flex-col gap-[5px] items-end ml-[10px]">
                 {tx.amount_regio !== "0.00" && (
-                  <span
-                    className={`p-[4px_8px] rounded-[4px] text-[12px] font-bold whitespace-nowrap border ${
-                      tx.type === "INCOMING"
-                        ? "text-[#2e7d32] border-[#c8e6c9] bg-[#e8f5e9]"
-                        : "text-[#c62828] border-[#ffcdd2] bg-[#ffebee]"
-                    }`}
-                  >
-                    {tx.type === "INCOMING" ? "+" : "-"} {tx.amount_regio} ℛ
-                  </span>
+                  <div className="flex items-center gap-[4px]">
+                    <img src="/garas.png" className="w-5 h-5" alt="" />
+                    <span className={`text-[13px] font-bold whitespace-nowrap ${tx.type === "INCOMING" ? "text-[#2e7d32]" : "text-red-700"}`}>
+                      {tx.type === "INCOMING" ? "+" : "-"}{tx.amount_regio}
+                    </span>
+                  </div>
                 )}
                 {tx.amount_time > 0 && (
-                  <span
-                    className={`p-[4px_8px] rounded-[4px] text-[12px] font-bold whitespace-nowrap border ${
-                      tx.type === "INCOMING"
-                        ? "text-[#2e7d32] border-[#c8e6c9] bg-[#e8f5e9]"
-                        : "text-[#c62828] border-[#ffcdd2] bg-[#ffebee]"
-                    }`}
-                  >
-                    {tx.type === "INCOMING" ? "+" : "-"} {tx.amount_time} min
-                  </span>
+                  <div className="flex items-center gap-[4px]">
+                    <img src="/time.png" className="w-5 h-5" alt="" />
+                    <span className={`text-[13px] font-bold whitespace-nowrap ${tx.type === "INCOMING" ? "text-[#2e7d32]" : "text-red-700"}`}>
+                      {tx.type === "INCOMING" ? "+" : "-"}{tx.amount_time} min
+                    </span>
+                  </div>
                 )}
               </div>
             </li>
@@ -918,23 +918,21 @@ export default function WalletPage() {
               {selectedTx.type === "INCOMING" ? <FaArrowDown /> : <FaArrowUp />}
             </div>
 
-            <div className="flex justify-center flex-col gap-[5px] mb-[5px]">
-              {selectedTx.amount_regio !== "0.00" && (
-                <div
-                  className={`text-[20px] font-[800] ${
-                    selectedTx.type === "INCOMING" ? "text-[#2e7d32]" : "text-[#c62828]"
-                  }`}
-                >
-                  {selectedTx.type === "INCOMING" ? "+" : "-"} {selectedTx.amount_regio} ℛ
+            <div className="flex justify-center gap-5 mb-[5px]">
+              {selectedTx.amount_time > 0 && (
+                <div className="flex items-center gap-2">
+                  <img src="/time.png" className="w-9 h-9" alt="" />
+                  <span className={`text-[20px] font-[800] ${selectedTx.type === "INCOMING" ? "text-[#2e7d32]" : "text-red-700"}`}>
+                    {selectedTx.type === "INCOMING" ? "+" : "-"}{selectedTx.amount_time} min
+                  </span>
                 </div>
               )}
-              {selectedTx.amount_time > 0 && (
-                <div
-                  className={`text-[20px] font-[800] ${
-                    selectedTx.type === "INCOMING" ? "text-[#2e7d32]" : "text-[#c62828]"
-                  }`}
-                >
-                  {selectedTx.type === "INCOMING" ? "+" : "-"} {selectedTx.amount_time} min
+              {selectedTx.amount_regio !== "0.00" && (
+                <div className="flex items-center gap-2">
+                  <img src="/garas.png" className="w-9 h-9" alt="" />
+                  <span className={`text-[20px] font-[800] ${selectedTx.type === "INCOMING" ? "text-[#2e7d32]" : "text-red-700"}`}>
+                    {selectedTx.type === "INCOMING" ? "+" : "-"}{selectedTx.amount_regio}
+                  </span>
                 </div>
               )}
             </div>
