@@ -1,14 +1,137 @@
 "use client";
 
 import React, { useState } from "react";
-import { FaSpinner, FaImage, FaXmark, FaMapLocationDot } from "react-icons/fa6";
+import {
+  FaSpinner, FaImage, FaXmark, FaMapLocationDot,
+  FaScrewdriverWrench, FaMagnifyingGlass, FaTags,
+  FaMagnifyingGlassDollar, FaHandHoldingHand, FaCar, FaCalendarDays,
+} from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingCategory, ListingCreate } from "@/lib/api/types";
-import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
+import { CATEGORY_CONFIG, getCategoryDetails } from "@/lib/feed-helpers";
 import { useCreateListing } from "@/lib/api/hooks/use-listings";
 import { uploadMedia } from "@/lib/api/modules/listings";
 import { useLanguage } from "@/context/LanguageContext";
 import LocationPicker from "@/components/map/LocationPicker";
+
+const selectItemClass = "flex-1 min-w-0 p-[8px] border border-[#ccc] rounded-[4px] text-[13px] bg-[var(--input-bg)] cursor-pointer";
+
+function DateSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const currentYear = new Date().getFullYear();
+  const initParts = value ? value.split("-") : [];
+  const [selYear, setSelYear] = useState(initParts[0] || "");
+  const [selMonth, setSelMonth] = useState(initParts[1] || "");
+  const [selDay, setSelDay] = useState(initParts[2] || "");
+
+  const maxDay = selYear && selMonth ? new Date(+selYear, +selMonth, 0).getDate() : 31;
+
+  const emit = (y: string, m: string, d: string) => {
+    if (y && m && d) onChange(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`);
+    else onChange("");
+  };
+
+  const onYear = (v: string) => { setSelYear(v); emit(v, selMonth, selDay); };
+  const onMonth = (v: string) => {
+    const max = selYear && v ? new Date(+selYear, +v, 0).getDate() : 31;
+    const nd = selDay && +selDay > max ? "" : selDay;
+    setSelMonth(v); setSelDay(nd); emit(selYear, v, nd);
+  };
+  const onDay = (v: string) => { setSelDay(v); emit(selYear, selMonth, v); };
+
+  return (
+    <div className="flex gap-1 w-full">
+      <select value={selYear} onChange={(e) => onYear(e.target.value)} className={selectItemClass}>
+        <option value="">Year</option>
+        {Array.from({ length: 7 }, (_, i) => currentYear + i).map(yr => (
+          <option key={yr} value={String(yr)}>{yr}</option>
+        ))}
+      </select>
+      <select value={selMonth} onChange={(e) => onMonth(e.target.value)} className={selectItemClass}>
+        <option value="">Month</option>
+        {Array.from({ length: 12 }, (_, i) => i + 1).map(mo => (
+          <option key={mo} value={String(mo).padStart(2, "0")}>{String(mo).padStart(2, "0")}</option>
+        ))}
+      </select>
+      <select value={selDay} onChange={(e) => onDay(e.target.value)} className={selectItemClass}>
+        <option value="">Day</option>
+        {Array.from({ length: maxDay }, (_, i) => i + 1).map(day => (
+          <option key={day} value={String(day).padStart(2, "0")}>{String(day).padStart(2, "0")}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function DateTimeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const currentYear = new Date().getFullYear();
+  const initDatePart = value ? value.split("T")[0] : "";
+  const initTimePart = value ? (value.split("T")[1] ?? "") : "";
+  const initDP = initDatePart ? initDatePart.split("-") : [];
+  const initTP = initTimePart ? initTimePart.split(":") : [];
+
+  const [selYear, setSelYear] = useState(initDP[0] || "");
+  const [selMonth, setSelMonth] = useState(initDP[1] || "");
+  const [selDay, setSelDay] = useState(initDP[2] || "");
+  const [selHour, setSelHour] = useState(initTP[0] || "");
+  const [selMin, setSelMin] = useState(initTP[1] || "");
+
+  const maxDay = selYear && selMonth ? new Date(+selYear, +selMonth, 0).getDate() : 31;
+
+  const emit = (y: string, m: string, d: string, h: string, mn: string) => {
+    if (y && m && d && h !== "" && mn !== "")
+      onChange(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}T${h.padStart(2, "0")}:${mn.padStart(2, "0")}`);
+    else onChange("");
+  };
+
+  const onYear = (v: string) => { setSelYear(v); emit(v, selMonth, selDay, selHour, selMin); };
+  const onMonth = (v: string) => {
+    const max = selYear && v ? new Date(+selYear, +v, 0).getDate() : 31;
+    const nd = selDay && +selDay > max ? "" : selDay;
+    setSelMonth(v); setSelDay(nd); emit(selYear, v, nd, selHour, selMin);
+  };
+  const onDay = (v: string) => { setSelDay(v); emit(selYear, selMonth, v, selHour, selMin); };
+  const onHour = (v: string) => { setSelHour(v); emit(selYear, selMonth, selDay, v, selMin); };
+  const onMin = (v: string) => { setSelMin(v); emit(selYear, selMonth, selDay, selHour, v); };
+
+  return (
+    <div className="flex flex-col gap-1 w-full">
+      <div className="flex gap-1">
+        <select value={selYear} onChange={(e) => onYear(e.target.value)} className={selectItemClass}>
+          <option value="">Year</option>
+          {Array.from({ length: 5 }, (_, i) => currentYear + i).map(yr => (
+            <option key={yr} value={String(yr)}>{yr}</option>
+          ))}
+        </select>
+        <select value={selMonth} onChange={(e) => onMonth(e.target.value)} className={selectItemClass}>
+          <option value="">Month</option>
+          {Array.from({ length: 12 }, (_, i) => i + 1).map(mo => (
+            <option key={mo} value={String(mo).padStart(2, "0")}>{String(mo).padStart(2, "0")}</option>
+          ))}
+        </select>
+        <select value={selDay} onChange={(e) => onDay(e.target.value)} className={selectItemClass}>
+          <option value="">Day</option>
+          {Array.from({ length: maxDay }, (_, i) => i + 1).map(day => (
+            <option key={day} value={String(day).padStart(2, "0")}>{String(day).padStart(2, "0")}</option>
+          ))}
+        </select>
+      </div>
+      <div className="flex gap-1">
+        <select value={selHour} onChange={(e) => onHour(e.target.value)} className={selectItemClass}>
+          <option value="">Hour</option>
+          {Array.from({ length: 24 }, (_, i) => i).map(hr => (
+            <option key={hr} value={String(hr).padStart(2, "0")}>{String(hr).padStart(2, "0")}</option>
+          ))}
+        </select>
+        <select value={selMin} onChange={(e) => onMin(e.target.value)} className={selectItemClass}>
+          <option value="">Min</option>
+          {Array.from({ length: 12 }, (_, i) => i * 5).map(mn => (
+            <option key={mn} value={String(mn).padStart(2, "0")}>{String(mn).padStart(2, "0")}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -225,6 +348,18 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const labelClass = "text-[12px] font-[700] text-[#555] block mb-[5px]";
   const fieldClass = "mb-[15px]";
 
+  const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
+    "fa-screwdriver-wrench": <FaScrewdriverWrench />,
+    "fa-magnifying-glass": <FaMagnifyingGlass />,
+    "fa-tags": <FaTags />,
+    "fa-magnifying-glass-dollar": <FaMagnifyingGlassDollar />,
+    "fa-hand-holding-hand": <FaHandHoldingHand />,
+    "fa-car": <FaCar />,
+    "fa-calendar-days": <FaCalendarDays />,
+  };
+
+  const { icon: catIcon, label: catLabel, colorVar: catColorVar } = getCategoryDetails(category);
+
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-[1000] flex justify-center items-center backdrop-blur-[3px] animate-in fade-in duration-200">
       <div className="w-[95%] max-w-[460px] h-[90vh] bg-white rounded-[8px] p-0 overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
@@ -238,6 +373,19 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           >
             &times;
           </div>
+        </div>
+
+        {/* Category Banner — full width, above the dropdown */}
+        <div
+          className="flex items-center gap-[16px] px-[20px] py-[14px] border-b-[3px]"
+          style={{ borderBottomColor: catColorVar, backgroundColor: `color-mix(in srgb, ${catColorVar} 8%, white)` }}
+        >
+          <span className="text-[44px] leading-none" style={{ color: catColorVar }}>
+            {CATEGORY_ICON_MAP[catIcon]}
+          </span>
+          <span className="text-[20px] font-[800] uppercase tracking-wider" style={{ color: catColorVar }}>
+            {catLabel}
+          </span>
         </div>
 
         <div className="p-[20px] overflow-y-auto flex-grow">
@@ -292,8 +440,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {/* OFFER_SERVICE */}
           {category === "OFFER_SERVICE" && (
             <div className={fieldClass}>
-              <label className={labelClass}>
-                {t.create_modal.offer_service.time_factor_label} <span className="text-[#999] font-normal">{t.create_modal.offer_service.time_factor_hint}</span>
+              <label className={`${labelClass} flex items-center gap-1.5`}>
+                <img src="/timefactor.png" className="w-3.5 h-3.5" alt="" />{t.create_modal.offer_service.time_factor_label} <span className="text-[#999] font-normal">{t.create_modal.offer_service.time_factor_hint}</span>
               </label>
               <input
                 type="range"
@@ -304,7 +452,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 onChange={(e) => setTimeFactor(parseFloat(e.target.value))}
                 className="w-full cursor-pointer"
               />
-              <div className="text-center text-[12px] font-bold text-[#666] mt-1">
+              <div className="text-center text-[12px] font-bold text-[#666] mt-1 flex items-center justify-center gap-1">
+                <img src="/timefactor.png" className="w-3.5 h-3.5" alt="" />
                 {t.create_modal.offer_service.time_factor_description.replace('{factor}', String(timeFactor))}
               </div>
             </div>
@@ -314,12 +463,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {category === "SEARCH_SERVICE" && (
             <div className={fieldClass}>
               <label className={labelClass}>{t.create_modal.search_service.deadline_label}</label>
-              <input
-                type="date"
-                value={searchServiceDeadline}
-                onChange={(e) => setSearchServiceDeadline(e.target.value)}
-                className={inputClass}
-              />
+              <DateSelect value={searchServiceDeadline} onChange={setSearchServiceDeadline} />
             </div>
           )}
 
@@ -328,8 +472,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>
-                    {t.create_modal.sell_product.price_time_label} <span className="text-red-500">*</span>
+                  <label className={`${labelClass} flex items-center gap-1.5`}>
+                    <img src="/time.png" className="w-3.5 h-3.5" alt="" />{t.create_modal.sell_product.price_time_label} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -342,7 +486,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   <div className="text-[11px] text-[#888] mt-1">{t.create_modal.sell_product.price_time_required_hint}</div>
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.sell_product.price_garas_label}</label>
+                  <label className={`${labelClass} flex items-center gap-1.5`}><img src="/garas.png" className="w-3.5 h-3.5" alt="" />{t.create_modal.sell_product.price_garas_label}</label>
                   <input
                     type="number"
                     min="0"
@@ -384,12 +528,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {category === "SEARCH_PRODUCT" && (
             <div className={fieldClass}>
               <label className={labelClass}>{t.create_modal.search_product.deadline_label}</label>
-              <input
-                type="date"
-                value={searchProductDeadline}
-                onChange={(e) => setSearchProductDeadline(e.target.value)}
-                className={inputClass}
-              />
+              <DateSelect value={searchProductDeadline} onChange={setSearchProductDeadline} />
             </div>
           )}
 
@@ -398,7 +537,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.offer_rental.handling_fee_label}</label>
+                  <label className={`${labelClass} flex items-center gap-1.5`}><img src="/time.png" className="w-3.5 h-3.5" alt="" />{t.create_modal.offer_rental.handling_fee_label}</label>
                   <input
                     type="number"
                     min="0"
@@ -410,7 +549,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   <div className="text-[11px] text-[#888] mt-1">{t.create_modal.offer_rental.handling_fee_hint}</div>
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.offer_rental.usage_fee_label}</label>
+                  <label className={`${labelClass} flex items-center gap-1.5`}><img src="/garas.png" className="w-3.5 h-3.5" alt="" />{t.create_modal.offer_rental.usage_fee_label}</label>
                   <input
                     type="number"
                     min="0"
@@ -477,12 +616,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
                   <label className={labelClass}>{t.create_modal.ride_share.departure_label}</label>
-                  <input
-                    type="datetime-local"
-                    value={rideDeparture}
-                    onChange={(e) => setRideDeparture(e.target.value)}
-                    className={inputClass}
-                  />
+                  <DateTimeSelect value={rideDeparture} onChange={setRideDeparture} />
                 </div>
                 <div className="flex-1">
                   <label className={labelClass}>{t.create_modal.ride_share.seats_label}</label>
@@ -498,7 +632,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.ride_share.price_time_label}</label>
+                  <label className={`${labelClass} flex items-center gap-1.5`}><img src="/time.png" className="w-3.5 h-3.5" alt="" />{t.create_modal.ride_share.price_time_label}</label>
                   <input
                     type="number"
                     min="0"
@@ -509,7 +643,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.ride_share.price_garas_label}</label>
+                  <label className={`${labelClass} flex items-center gap-1.5`}><img src="/garas.png" className="w-3.5 h-3.5" alt="" />{t.create_modal.ride_share.price_garas_label}</label>
                   <input
                     type="number"
                     min="0"
@@ -529,21 +663,11 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
                   <label className={labelClass}>{t.create_modal.event_workshop.start_label}</label>
-                  <input
-                    type="datetime-local"
-                    value={eventStart}
-                    onChange={(e) => setEventStart(e.target.value)}
-                    className={inputClass}
-                  />
+                  <DateTimeSelect value={eventStart} onChange={setEventStart} />
                 </div>
                 <div className="flex-1">
                   <label className={labelClass}>{t.create_modal.event_workshop.end_label}</label>
-                  <input
-                    type="datetime-local"
-                    value={eventEnd}
-                    onChange={(e) => setEventEnd(e.target.value)}
-                    className={inputClass}
-                  />
+                  <DateTimeSelect value={eventEnd} onChange={setEventEnd} />
                 </div>
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
@@ -571,7 +695,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.event_workshop.entry_fee_label}</label>
+                  <label className={`${labelClass} flex items-center gap-1.5`}><img src="/time.png" className="w-3.5 h-3.5" alt="" />{t.create_modal.event_workshop.entry_fee_label}</label>
                   <input
                     type="number"
                     min="0"
@@ -582,7 +706,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.event_workshop.material_fee_label}</label>
+                  <label className={`${labelClass} flex items-center gap-1.5`}><img src="/garas.png" className="w-3.5 h-3.5" alt="" />{t.create_modal.event_workshop.material_fee_label}</label>
                   <input
                     type="number"
                     min="0"
