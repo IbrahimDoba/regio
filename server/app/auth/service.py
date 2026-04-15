@@ -1,8 +1,10 @@
+import logging
 import random
 import string
 import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
+from urllib.parse import urlparse
 
 import jwt
 from redis.asyncio import Redis
@@ -32,13 +34,22 @@ from app.core.config import settings
 from app.users.enums import VerificationStatus
 from app.users.models import User
 
+logger = logging.getLogger(__name__)
+
 
 class AuthService:
     def __init__(self, session: AsyncSession):
         self.session = session
         # Initialize Redis for token blacklisting
+        _ssl_kwargs = (
+            {"ssl_cert_reqs": None}
+            if urlparse(settings.REDIS_URL).scheme == "rediss"
+            else {}
+        )
         self.redis = Redis.from_url(
-            settings.REDIS_URL, decode_responses=True, ssl_cert_reqs=None
+            settings.REDIS_URL,
+            decode_responses=True,
+            **_ssl_kwargs,
         )
 
     async def authenticate_user(self, email: str, password: str) -> Token:
@@ -93,8 +104,9 @@ class AuthService:
                 if ttl > 0:
                     # Set blacklisted token in Redis with ttl as expiry time
                     await self.redis.setex(f"blacklist:{jti}", ttl, "true")
-        except Exception:
+        except Exception as e:
             # Skip blacklisting if token is already invalid/expired
+            logger.error(f"Failed to blacklist token: {str(e)}")
             pass
 
     async def _is_blacklisted(self, token: str) -> bool:
@@ -109,7 +121,8 @@ class AuthService:
 
             is_blacklisted = await self.redis.get(f"blacklist:{jti}")
             return is_blacklisted is not None
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed to check is token is blacklisted: {str(e)}")
             return True  # Fail secure
 
     async def refresh_token(self, old_refresh_token: str) -> Token:
