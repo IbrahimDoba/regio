@@ -5,7 +5,7 @@ import { FaEnvelope } from "react-icons/fa6";
 import { ListingPublic } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { getCategoryDetails, ListingAttributes } from "@/lib/feed-helpers";
-import { formatPriceNode } from "@/lib/feed-helpers-react";
+import { formatPriceNode } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
 import type { Translations } from "@/context/LanguageContext";
 import LocationMap from "@/components/map/LocationMap";

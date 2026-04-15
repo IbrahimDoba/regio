@@ -94,7 +94,7 @@ export interface ListingAttributes {
   price_notes?: string;
 }
 
-export function formatPrice(listing: ListingPublic): string {
+export function formatPriceNode(listing: ListingPublic): string {
   const attrs = listing.attributes as ListingAttributes | undefined;
   if (!attrs) return "";
 

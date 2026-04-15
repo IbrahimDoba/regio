@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ListingPublic } from "@/lib/api/types";
 import { getCategoryDetails } from "@/lib/feed-helpers";
-import { formatPriceNode } from "@/lib/feed-helpers-react";
+import { formatPriceNode } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
 
 const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
