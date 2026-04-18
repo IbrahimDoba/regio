@@ -102,39 +102,45 @@ export function PaymentRequestModal({
           {/* Amount Inputs */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-gray-500 uppercase mb-1.5">
-                <img src="/garas.png" className="w-3.5 h-3.5" alt="" />{t.chat.payment_request_modal.garas_label}
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                {t.chat.payment_request_modal.garas_label}
               </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={amountGaras}
-                onChange={(e) => setAmountGaras(e.target.value)}
-                placeholder={t.chat.payment_request_modal.garas_placeholder}
-                className={cn(
-                  'w-full px-4 py-3 bg-white border border-gray-300 rounded-lg',
-                  'text-base text-gray-900 placeholder-gray-400',
-                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                )}
-              />
+              <div className="flex items-center gap-2">
+                <img src="/garas.png" className="w-[44px] h-[44px] flex-shrink-0" alt="" />
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={amountGaras}
+                  onChange={(e) => setAmountGaras(e.target.value)}
+                  placeholder={t.chat.payment_request_modal.garas_placeholder}
+                  className={cn(
+                    'flex-1 min-w-0 px-4 py-3 bg-white border border-gray-300 rounded-lg',
+                    'text-base text-gray-900 placeholder-gray-400',
+                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  )}
+                />
+              </div>
             </div>
             <div>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-gray-500 uppercase mb-1.5">
-                <img src="/time.png" className="w-3.5 h-3.5" alt="" />{t.chat.payment_request_modal.time_label}
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                {t.chat.payment_request_modal.time_label}
               </label>
-              <input
-                type="number"
-                min="0"
-                value={amountTime}
-                onChange={(e) => setAmountTime(e.target.value)}
-                placeholder={t.chat.payment_request_modal.time_placeholder}
-                className={cn(
-                  'w-full px-4 py-3 bg-white border border-gray-300 rounded-lg',
-                  'text-base text-gray-900 placeholder-gray-400',
-                  'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                )}
-              />
+              <div className="flex items-center gap-2">
+                <img src="/time.png" className="w-[44px] h-[44px] flex-shrink-0" alt="" />
+                <input
+                  type="number"
+                  min="0"
+                  value={amountTime}
+                  onChange={(e) => setAmountTime(e.target.value)}
+                  placeholder={t.chat.payment_request_modal.time_placeholder}
+                  className={cn(
+                    'flex-1 min-w-0 px-4 py-3 bg-white border border-gray-300 rounded-lg',
+                    'text-base text-gray-900 placeholder-gray-400',
+                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  )}
+                />
+              </div>
             </div>
           </div>
 

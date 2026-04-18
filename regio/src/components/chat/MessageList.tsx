@@ -7,13 +7,73 @@
  * Handles scrolling and message rendering
  */
 
-import React, { useRef, useEffect } from 'react';
-import { FaLock, FaCheck, FaCheckDouble, FaEye } from 'react-icons/fa6';
+import React, { useRef, useEffect, useState } from 'react';
+import { FaLock, FaCheck, FaCheckDouble, FaEye, FaLocationDot } from 'react-icons/fa6';
 import { PaymentRequestCard } from './PaymentRequestCard';
 import type { ChatMessage } from '@/lib/api/types';
 import type { ReadReceipt } from '@/context/RealTimeContext';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
+import { useMatrixStore } from '@/store/matrixStore';
+
+const MATRIX_HS = (process.env.NEXT_PUBLIC_MATRIX_HOMESERVER_URL || 'https://matrix.151.hu').replace(/\/$/, '');
+
+function mxcToDownloadUrl(mxcUrl: string): string {
+  if (!mxcUrl?.startsWith('mxc://')) return mxcUrl || '';
+  // Matrix 1.11+ authenticated media endpoint
+  return `${MATRIX_HS}/_matrix/client/v1/media/download/${mxcUrl.slice(6)}`;
+}
+
+/**
+ * Fetches a Matrix media URL with the access token and renders it via a blob URL.
+ * Falls back to unauthenticated direct URL if the fetch fails.
+ */
+function ChatImage({ mxcUrl, alt, className, onClick }: {
+  mxcUrl: string;
+  alt: string;
+  className?: string;
+  onClick?: () => void;
+}) {
+  const [src, setSrc] = useState<string | null>(null);
+  const { matrixAccessToken } = useMatrixStore();
+
+  useEffect(() => {
+    if (!mxcUrl) return;
+    const downloadUrl = mxcToDownloadUrl(mxcUrl);
+    let objectUrl: string | null = null;
+
+    fetch(downloadUrl, {
+      headers: matrixAccessToken ? { Authorization: `Bearer ${matrixAccessToken}` } : {},
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error(`${r.status}`);
+        return r.blob();
+      })
+      .then((blob) => {
+        objectUrl = URL.createObjectURL(blob);
+        setSrc(objectUrl);
+      })
+      .catch(() => {
+        // Fall back to direct URL (works on servers without authenticated media)
+        setSrc(downloadUrl);
+      });
+
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [mxcUrl, matrixAccessToken]);
+
+  if (!src) {
+    return (
+      <div className="w-[240px] h-[160px] bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
+        <span className="text-xs text-gray-400">Loading...</span>
+      </div>
+    );
+  }
+
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={src} alt={alt} className={className} onClick={onClick} />;
+}
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -174,23 +234,58 @@ function MessageItem({
   const isOwn = message.isOwn;
   const hasReadReceipts = readReceipts.length > 0;
 
+  // Location message
+  if (message.type === 'location' && message.location) {
+    const { lat, lng } = message.location;
+    const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+    return (
+      <div className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
+        <div className="flex flex-col items-end gap-1">
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              'overflow-hidden rounded-lg shadow-sm block',
+              isOwn ? 'rounded-tr-none' : 'rounded-tl-none'
+            )}
+          >
+            <div className="w-[220px] bg-white">
+              <div className="bg-green-50 px-3 py-2 flex items-center gap-2">
+                <FaLocationDot className="text-green-600 text-sm shrink-0" />
+                <span className="text-sm font-semibold text-green-700">Shared Location</span>
+              </div>
+              <div className="px-3 py-1.5 text-xs text-gray-500">
+                {lat.toFixed(5)}, {lng.toFixed(5)}
+              </div>
+              <div className="px-3 pb-2 text-xs text-blue-500 font-medium">
+                Open in Maps →
+              </div>
+            </div>
+          </a>
+          <MessageTime timestamp={message.timestamp} isOwn={isOwn} readReceipts={readReceipts} />
+        </div>
+      </div>
+    );
+  }
+
   // Image message
   if (message.type === 'image' && message.imageUrl) {
+    const openFull = () => window.open(mxcToDownloadUrl(message.imageUrl!), '_blank');
     return (
       <div className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
         <div className="flex flex-col items-end gap-1">
           <div
             className={cn(
-              'overflow-hidden rounded-lg shadow-sm',
+              'overflow-hidden rounded-lg shadow-sm cursor-pointer',
               isOwn ? 'rounded-tr-none' : 'rounded-tl-none'
             )}
+            onClick={openFull}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={message.imageUrl}
+            <ChatImage
+              mxcUrl={message.imageUrl}
               alt={message.content || 'Image'}
-              className="max-w-[240px] max-h-[320px] object-cover cursor-pointer block"
-              onClick={() => window.open(message.imageUrl, '_blank')}
+              className="max-w-[240px] max-h-[320px] object-cover block"
             />
           </div>
           <MessageTime timestamp={message.timestamp} isOwn={isOwn} readReceipts={readReceipts} />

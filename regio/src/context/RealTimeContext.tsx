@@ -140,15 +140,16 @@ function matrixEventToChatMessage(event: any, myUserId: string, client?: any): C
   if (!content) return null;
 
   const msgtype = content.msgtype as string;
-  if (msgtype !== "m.text" && msgtype !== "regio.payment_request" && msgtype !== "m.image") return null;
+  if (msgtype !== "m.text" && msgtype !== "regio.payment_request" && msgtype !== "m.image" && msgtype !== "m.location") return null;
 
   const sender = event.getSender() as string;
   const isOwn = sender === myUserId;
   const senderName = isOwn ? "Me" : (event.sender?.name || sender.split(":")[0].replace("@", "") || sender);
 
   if (msgtype === "m.image") {
+    // Store the raw mxc:// URL — the ChatImage component converts it to an
+    // authenticated HTTP URL at render time using the Matrix access token.
     const mxcUrl = content.url as string;
-    const httpUrl = client ? (client.mxcUrlToHttp(mxcUrl) ?? mxcUrl) : mxcUrl;
     return {
       id: event.getId() as string,
       sender: isOwn ? "me" : sender,
@@ -157,7 +158,22 @@ function matrixEventToChatMessage(event: any, myUserId: string, client?: any): C
       timestamp: event.getTs() as number,
       isOwn,
       type: "image",
-      imageUrl: httpUrl,
+      imageUrl: mxcUrl,
+    };
+  }
+
+  if (msgtype === "m.location") {
+    const geoUri = (content.geo_uri as string) || "";
+    const [lat, lng] = geoUri.replace("geo:", "").split(",").map(Number);
+    return {
+      id: event.getId() as string,
+      sender: isOwn ? "me" : sender,
+      senderName,
+      content: (content.body as string) || "Location",
+      timestamp: event.getTs() as number,
+      isOwn,
+      type: "location",
+      location: { lat, lng },
     };
   }
 
@@ -727,6 +743,14 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
         await client.sendEvent(roomId, "regio.payment_status", {
           ...extraContent,
         });
+      } else if (msgType === "location" && extraContent) {
+        const lat = extraContent.lat as number;
+        const lng = extraContent.lng as number;
+        await client.sendEvent(roomId, "m.room.message", {
+          msgtype: "m.location",
+          body: `Location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+          geo_uri: `geo:${lat},${lng}`,
+        });
       } else {
         await client.sendTextMessage(roomId, content);
       }
@@ -740,7 +764,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
       if (!client) throw new Error("Matrix client not connected");
 
       const uploadResponse = await client.uploadContent(file, { name: file.name });
-      const mxcUrl = (uploadResponse.content_uri ?? uploadResponse) as string;
+      const mxcUrl = (uploadResponse as { content_uri?: string }).content_uri ?? (uploadResponse as unknown as string);
 
       await client.sendEvent(roomId, "m.room.message", {
         msgtype: "m.image",

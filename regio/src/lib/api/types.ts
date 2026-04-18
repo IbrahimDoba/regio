@@ -396,8 +396,9 @@ export interface ChatMessage {
   content: string;
   timestamp: number;
   isOwn: boolean;
-  type: 'text' | 'payment_request' | 'system' | 'image';
+  type: 'text' | 'payment_request' | 'system' | 'image' | 'location';
   imageUrl?: string;
+  location?: { lat: number; lng: number };
   paymentRequest?: {
     id: string;
     amountGaras: number;

@@ -208,11 +208,33 @@ export default function ChatPage() {
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file || !roomId) return;
-      e.target.value = ""; // allow re-selecting the same file
+      e.target.value = "";
+
+      if (!file.type.startsWith("image/")) {
+        setActionError("Only images can be sent. Videos and other files are not supported.");
+        return;
+      }
+
+      const MAX_MB = 10;
+      if (file.size > MAX_MB * 1024 * 1024) {
+        setActionError(`Image is too large. Maximum size is ${MAX_MB} MB.`);
+        return;
+      }
+
       try {
         await uploadImage(roomId, file);
       } catch (err) {
-        setActionError(err instanceof Error ? err.message : "Failed to send photo");
+        // Parse Matrix JSON errors into readable messages
+        let msg = "Failed to send photo";
+        if (err instanceof Error) {
+          try {
+            const parsed = JSON.parse(err.message) as { error?: string };
+            msg = parsed.error || err.message;
+          } catch {
+            msg = err.message;
+          }
+        }
+        setActionError(msg);
       }
     },
     [roomId, uploadImage]
@@ -435,8 +457,25 @@ export default function ChatPage() {
         onRequestPayment={() => setIsPaymentModalOpen(true)}
         onSendPhoto={handleSendPhoto}
         onShareLocation={() => {
-          // TODO: Implement location sharing
-          console.log("Share location");
+          setIsActionSheetOpen(false);
+          if (!roomId) return;
+          if (!navigator.geolocation) {
+            setActionError("Geolocation is not supported by your browser");
+            return;
+          }
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              try {
+                await sendMessage(roomId, "", "location", {
+                  lat: position.coords.latitude,
+                  lng: position.coords.longitude,
+                });
+              } catch (err) {
+                setActionError(err instanceof Error ? err.message : "Failed to send location");
+              }
+            },
+            (err) => setActionError(`Could not get location: ${err.message}`)
+          );
         }}
       />
 
