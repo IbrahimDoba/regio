@@ -113,11 +113,12 @@ export default function AuthPage() {
 
       {/* Hero */}
       <div className="p-[20px_20px_40px_20px] text-center">
-        <div className="mb-[10px] flex justify-center">
-          <Image src="/logo-M.png" alt="REGIO" width={160} height={58} priority />
+        <div className="mb-[10px] flex items-center justify-center gap-[2px]">
+          <Image src="/favicon.png" alt="REGIO" width={64} height={64} priority />
+          <span className="text-[52px] font-black tracking-[0px] text-[var(--color-nav-bg)] uppercase" style={{ fontFamily: "var(--font-roboto-condensed), 'Roboto Condensed', sans-serif" }}>REGIO</span>
         </div>
-        <div className="text-[16px] text-[#666] max-w-[280px] mx-auto leading-[1.4] whitespace-pre-line">
-          {t.feed.header.subtitle}
+        <div className="text-[15px] font-bold tracking-widest text-[#555] max-w-[280px] mx-auto uppercase" style={{ fontFamily: "var(--font-roboto-condensed), 'Roboto Condensed', sans-serif" }}>
+          {t.auth.subtitle}
         </div>
       </div>
 

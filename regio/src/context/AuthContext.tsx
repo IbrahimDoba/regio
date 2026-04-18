@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCurrentUser, useLogin, useLogout } from '@/lib/api';
+import { useCurrentUser, useLogin, useLogout, getAccessToken } from '@/lib/api';
 import type { UserPublic, LoginRequest } from '@/lib/api';
 
 // ============================================================================
@@ -58,10 +58,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = useCallback(async (credentials: LoginRequest) => {
     try {
       await loginMutation.mutateAsync(credentials);
-      // On success, redirect to home
       router.push('/');
     } catch (error) {
-      // Let the caller handle the error (form will display it)
+      // In TanStack Query v5, mutateAsync rejects if onSuccess throws,
+      // even when the API call itself returned 200 and the token was stored.
+      // If the token is already set, the login succeeded — just navigate.
+      if (getAccessToken()) {
+        router.push('/');
+        return;
+      }
       throw error;
     }
   }, [loginMutation, router]);
