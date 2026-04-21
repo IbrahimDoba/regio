@@ -11,7 +11,7 @@
     },
     "register": {
       "section_title": "Meghívó szükséges",
-      "invite_placeholder": "REGIO-XXXX",
+      "invite_placeholder": "REGIO-XX-XXXXXXXX",
       "real_name_notice": "Valódi név megadása kötelező",
       "first_name_label": "Keresztnév",
       "last_name_label": "Vezetéknév",
@@ -480,3 +480,4 @@
     }
   }
 }
+

@@ -11,7 +11,7 @@
     },
     "register": {
       "section_title": "Invite Required",
-      "invite_placeholder": "REGIO-XXXX",
+      "invite_placeholder": "REGIO-XX-XXXXXXXX",
       "real_name_notice": "Real name required",
       "first_name_label": "First Name",
       "last_name_label": "Last Name",
