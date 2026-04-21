@@ -15,7 +15,6 @@ from sqlmodel import select
 from app.auth.config import auth_settings
 from app.auth.exceptions import (
     AccountInactive,
-    AccountNotVerified,
     InvalidCredentials,
     InvalidInviteCode,
     InvalidToken,
@@ -65,9 +64,6 @@ class AuthService:
 
         if not user.is_active:
             raise AccountInactive()
-
-        if user.verification_status != VerificationStatus.VERIFIED:
-            raise AccountNotVerified()
 
         # Generate Tokens
         return self._generate_tokens(user.id)

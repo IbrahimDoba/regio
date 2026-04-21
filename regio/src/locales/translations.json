@@ -363,7 +363,9 @@
 
   "verification": {
     "title": "Verification Pending",
+    "title_verified": "Account Verified",
     "description": "Welcome to the community! To ensure trust and safety, we verify every member personally via a short video call.",
+    "description_verified": "You're all set! Your identity has been verified and your account is now fully active.",
     "step_register": "Register",
     "step_video_call": "Video Call",
     "step_active": "Active",
@@ -371,7 +373,8 @@
     "call_notice": "Please schedule a 2-minute call with a moderator to activate your account.",
     "book_button": "Book Appointment",
     "data_notice": "Your data is secure and will only be used for verification.",
-    "logout_button": "Log Out"
+    "logout_button": "Log Out",
+    "go_to_app": "Go to App"
   },
 
   "admin": {

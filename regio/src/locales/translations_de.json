@@ -350,7 +350,9 @@
   },
   "verification": {
     "title": "Verifizierung ausstehend",
+    "title_verified": "Konto verifiziert",
     "description": "Willkommen in der Community! Um Vertrauen zu gewährleisten, verifizieren wir jedes Mitglied persönlich per Video-Call.",
+    "description_verified": "Alles bereit! Deine Identität wurde bestätigt und dein Konto ist jetzt vollständig aktiv.",
     "step_register": "Registrieren",
     "step_video_call": "Video-Anruf",
     "step_active": "Aktiv",
@@ -358,7 +360,8 @@
     "call_notice": "Bitte vereinbare einen 2-minütigen Termin mit einem Moderator, um dein Konto freizuschalten.",
     "book_button": "Termin buchen",
     "data_notice": "Deine Daten sind sicher und werden nur für die Verifizierung verwendet.",
-    "logout_button": "Abmelden"
+    "logout_button": "Abmelden",
+    "go_to_app": "Zur App"
   },
   "admin": {
     "sidebar": {

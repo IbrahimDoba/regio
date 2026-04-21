@@ -8,7 +8,7 @@ from app.email.config import email_settings
 from app.email.schemas import VerificationEmailData
 from app.email.tasks import send_welcome_email_task
 from app.users.config import user_settings
-from app.users.dependencies import CurrentAdmin, CurrentUser, UserServiceDep
+from app.users.dependencies import CurrentAdmin, CurrentUser, CurrentUserAnyStatus, UserServiceDep
 from app.users.exceptions import UserNotFound
 from app.users.schemas import UserCreate, UserPublic, UsersPublic, UserUpdate
 
@@ -114,7 +114,7 @@ async def register_user(
 
 
 @router.get("/me", response_model=UserPublic, status_code=status.HTTP_200_OK)
-async def read_user_me(current_user: CurrentUser) -> Any:
+async def read_user_me(current_user: CurrentUserAnyStatus) -> Any:
     """
     Get current user profile.
 

@@ -67,6 +67,7 @@ export interface UserPublic {
   first_name: string;
   last_name: string;
   trust_level: TrustLevel;
+  verification_status: VerificationStatus;
   created_at: string;
   is_system_admin?: boolean;
   avatar_url?: string | null;

@@ -350,7 +350,9 @@
   },
   "verification": {
     "title": "Ellenőrzés folyamatban",
+    "title_verified": "Fiók hitelesítve",
     "description": "Üdvözlünk a közösségben! A biztonság és bizalom érdekében minden tagot személyesen igazolunk egy rövid videóhívás keretében.",
+    "description_verified": "Minden kész! Személyazonosságodat megerősítettük, fiókod mostantól teljesen aktív.",
     "step_register": "Regisztráció",
     "step_video_call": "Videóhívás",
     "step_active": "Aktív",
@@ -358,7 +360,8 @@
     "call_notice": "Kérünk, foglalj időpontot egy 2 perces hívásra egy moderátorral a fiókod aktiválásához.",
     "book_button": "Időpontfoglalás",
     "data_notice": "Adataid biztonságban vannak, csak az ellenőrzéshez használjuk őket.",
-    "logout_button": "Kijelentkezés"
+    "logout_button": "Kijelentkezés",
+    "go_to_app": "Ugrás az alkalmazásba"
   },
   "admin": {
     "sidebar": {

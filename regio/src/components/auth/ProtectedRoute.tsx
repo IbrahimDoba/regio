@@ -1,33 +1,32 @@
 'use client';
 
-/**
- * Protected Route Component
- *
- * Wraps pages that require authentication
- * Redirects unauthenticated users to /auth
- * Shows loading spinner while checking auth status
- */
-
 import React, { useEffect, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  verifiedOnly?: boolean;
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, verifiedOnly = false }: ProtectedRouteProps) {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const pathname = usePathname();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   useEffect(() => {
-    // If not loading and not authenticated, redirect to auth page
-    if (!isLoading && !isAuthenticated) {
-      router.push('/auth');
-    }
-  }, [isAuthenticated, isLoading, router]);
+    if (isLoading) return;
 
-  // Show loading spinner while checking auth
+    if (!isAuthenticated) {
+      router.push('/auth');
+      return;
+    }
+
+    if (verifiedOnly && user && user.verification_status !== 'VERIFIED') {
+      router.push('/verification');
+    }
+  }, [isAuthenticated, isLoading, user, verifiedOnly, router, pathname]);
+
   if (isLoading) {
     return (
       <div className="w-full max-w-[480px] mx-auto min-h-screen bg-[#f8f8f8] flex items-center justify-center">
@@ -39,11 +38,9 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // If not authenticated, show nothing (redirect is happening)
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
-  // User is authenticated, render children
+  if (verifiedOnly && user && user.verification_status !== 'VERIFIED') return null;
+
   return <>{children}</>;
 }

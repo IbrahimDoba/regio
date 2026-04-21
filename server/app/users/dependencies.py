@@ -81,6 +81,48 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+async def get_current_user_any_status(session: SessionDep, token: TokenDep) -> User:
+    """
+    Like get_current_user but does NOT require VERIFIED status.
+    Use only on endpoints that must be accessible to PENDING users (e.g. /users/me).
+    """
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[auth_settings.ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+    except (InvalidTokenError, Exception):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    query = (
+        select(User)
+        .where(User.id == token_data.sub)
+        .options(selectinload(User.verified_by))
+    )
+    result = await session.execute(query)
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+        )
+
+    return user
+
+
+CurrentUserAnyStatus = Annotated[User, Depends(get_current_user_any_status)]
+
+
 async def get_current_active_system_admin(current_user: CurrentUser) -> User:
     """
     Validates that the current user is a system admin.

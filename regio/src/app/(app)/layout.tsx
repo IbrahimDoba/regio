@@ -12,7 +12,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute verifiedOnly>
       <MobileContainer>
           {children}
           <BottomNav onOpenCreate={() => setIsCreateOpen(true)} />
