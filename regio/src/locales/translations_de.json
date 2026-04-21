@@ -18,7 +18,8 @@
       "email_label": "E-Mail",
       "password_label": "Passwort erstellen",
       "password_placeholder": "Min. 8 Zeichen",
-      "terms_checkbox": "Ich akzeptiere die Nutzungsbedingungen",
+      "terms_checkbox_prefix": "Ich akzeptiere die ",
+      "terms_checkbox_link": "Nutzungsbedingungen",
       "submit_loading": "Konto wird erstellt...",
       "submit": "Konto erstellen",
       "toggle_to_login": "Bereits registriert? Hier einloggen"

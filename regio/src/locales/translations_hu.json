@@ -18,7 +18,8 @@
       "email_label": "E-mail",
       "password_label": "Jelszó létrehozása",
       "password_placeholder": "Min. 8 karakter",
-      "terms_checkbox": "Elfogadom a felhasználási feltételeket",
+      "terms_checkbox_prefix": "Elfogadom a ",
+      "terms_checkbox_link": "felhasználási feltételeket",
       "submit_loading": "Fiók létrehozása...",
       "submit": "Regisztráció",
       "toggle_to_login": "Már van fiókod? Lépj be itt"

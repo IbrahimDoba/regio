@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { FaEnvelope, FaLock, FaTicket, FaCircleInfo, FaUsers, FaPenNib, FaSpinner } from "react-icons/fa6";
 import Image from "next/image";
+import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRegisterUser } from "@/lib/api";
@@ -287,7 +288,12 @@ export default function AuthPage() {
                   disabled={isRegistering}
                   required
                 />
-                <label htmlFor="agb">{t.auth.register.terms_checkbox}</label>
+                <label htmlFor="agb">
+                  {t.auth.register.terms_checkbox_prefix}
+                  <Link href="/terms" target="_blank" className="underline text-[var(--color-nav-bg)] font-[600]">
+                    {t.auth.register.terms_checkbox_link}
+                  </Link>
+                </label>
               </div>
 
               <button

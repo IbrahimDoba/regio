@@ -18,7 +18,8 @@
       "email_label": "Email",
       "password_label": "Create Password",
       "password_placeholder": "Min. 8 chars",
-      "terms_checkbox": "I agree to terms and conditions",
+      "terms_checkbox_prefix": "I agree to ",
+      "terms_checkbox_link": "terms and conditions",
       "submit_loading": "Creating account...",
       "submit": "Create Account",
       "toggle_to_login": "Already have an account? Login"
