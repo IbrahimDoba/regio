@@ -33,6 +33,7 @@ class Settings(RegioBaseSettings):
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
+    BACKEND_CORS_ORIGINS_REGEX: str = ""
 
     @computed_field
     @property
