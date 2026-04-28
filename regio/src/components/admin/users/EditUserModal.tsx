@@ -11,7 +11,7 @@ interface UserAdminView {
   role: string;
   trust_level: 'T1' | 'T2' | 'T3' | 'T4' | 'T5' | 'T6';
   is_active: boolean;
-  verification_status: 'PENDING' | 'VERIFIED';
+  verification_status: 'PENDING' | 'VERIFIED' | 'REJECTED';
   balance_time: number;
   balance_regio: string;
   created_at: string;
@@ -110,6 +110,7 @@ export default function EditUserModal({
             >
               <option value="PENDING">Pending</option>
               <option value="VERIFIED">Verified</option>
+              <option value="REJECTED">Rejected</option>
             </select>
           </div>
 
