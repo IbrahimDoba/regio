@@ -48,6 +48,10 @@ class ImmutableFieldUpdate(InvalidUserRequest):
     detail = "Cannot update real names or other protected fields"
 
 
+class InvalidAvatarFile(InvalidUserRequest):
+    detail = "Only JPEG and PNG images are allowed (max 5 MB)"
+
+
 # ==========================================
 # Category: 403 Forbidden
 # ==========================================

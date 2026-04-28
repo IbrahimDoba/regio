@@ -79,9 +79,6 @@ class UserUpdate(SQLModel):
     )
 
     # Profile updates
-    avatar_url: Optional[str] = Field(
-        default=None, description="URL to profile image."
-    )
     bio: Optional[str] = Field(
         default=None, max_length=500, description="Short about me."
     )

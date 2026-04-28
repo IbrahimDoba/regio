@@ -1,9 +1,19 @@
+import io
 from typing import Any, List
 
-from fastapi import APIRouter, BackgroundTasks, Query, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    HTTPException,
+    Query,
+    UploadFile,
+    status,
+)
+from fastapi.responses import StreamingResponse
 
 from app.auth.dependencies import AuthServiceDep
 from app.auth.schemas import InvitePublic
+from app.core.file_storage import StorageServiceDep
 from app.email.config import email_settings
 from app.email.schemas import VerificationEmailData
 from app.email.tasks import send_welcome_email_task
@@ -14,7 +24,7 @@ from app.users.dependencies import (
     CurrentUserAnyStatus,
     UserServiceDep,
 )
-from app.users.exceptions import UserNotFound
+from app.users.exceptions import InvalidAvatarFile, UserNotFound
 from app.users.schemas import UserCreate, UserPublic, UsersPublic, UserUpdate
 
 router = APIRouter()
@@ -99,7 +109,7 @@ async def register_user(
 
     Requires a valid Invite Code to create a new account.
     The system automatically assigns a unique 5-digit User Code upon success.
-    A welcome email with a Calendly verification booking link is sent
+    A welcome email with a Calendar verification booking link is sent
     asynchronously after registration.
 
     - **user_in**: Registration payload including invite code and profile data.
@@ -153,6 +163,37 @@ async def update_user_me(
     return await service.update_user(current_user.id, user_in)
 
 
+@router.put(
+    "/me/avatar",
+    response_model=UserPublic,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "File is not a JPEG or PNG, or exceeds 5 MB."
+        },
+        status.HTTP_404_NOT_FOUND: {"description": "User not found."},
+    },
+)
+async def upload_avatar(
+    file: UploadFile,
+    current_user: CurrentUser,
+    service: UserServiceDep,
+    storage: StorageServiceDep,
+) -> Any:
+    """
+    Upload a profile picture.
+
+    Accepts JPEG or PNG images up to 5 MB. Replaces any existing avatar.
+    The image is compressed and stored on the server.
+    """
+    try:
+        return await service.upload_avatar(current_user.id, file, storage)
+    except InvalidAvatarFile as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=e.detail
+        )
+
+
 @router.get(
     "/invites",
     response_model=List[InvitePublic],
@@ -188,6 +229,49 @@ async def request_new_invites(
     Void existing unused invites and generate 3 new ones.
     """
     return await auth_service.request_invites(current_user.id)
+
+
+@router.get(
+    "/{user_code}/avatar",
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            "description": "User or avatar not found."
+        },
+    },
+)
+async def get_user_avatar(
+    user_code: str,
+    _: CurrentUser,
+    service: UserServiceDep,
+    storage: StorageServiceDep,
+) -> StreamingResponse:
+    """
+    Fetch a user's profile picture.
+
+    Returns the raw image bytes with the appropriate Content-Type header.
+    Use this URL wherever you need to display a user's avatar in the frontend.
+    """
+    user = await service.get_user_by_code(user_code)
+    if not user or not user.avatar_url:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Avatar not found"
+        )
+
+    data = await storage.get_bytes(user.avatar_url)
+    if not data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Avatar not found"
+        )
+
+    ext = (
+        user.avatar_url.rsplit(".", 1)[-1].lower()
+        if "." in user.avatar_url
+        else "jpg"
+    )
+    media_type = "image/png" if ext == "png" else "image/jpeg"
+
+    return StreamingResponse(io.BytesIO(data), media_type=media_type)
 
 
 @router.get(

@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
 
+from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import func, or_, select
 
@@ -9,10 +10,12 @@ from app.auth.security import get_password_hash
 from app.auth.service import AuthService
 from app.banking.service import BankingService
 from app.core.config import settings
+from app.core.file_storage import LocalStorageService
 from app.users.enums import VerificationStatus
 from app.users.exceptions import (
     ActionNotPermitted,
     ImmutableFieldUpdate,
+    InvalidAvatarFile,
     SystemSaturated,
     UserAlreadyExists,
     UserNotFound,
@@ -25,6 +28,9 @@ from app.users.schemas import (
     UserUpdate,
 )
 from app.users.utils import generate_user_code
+
+_ALLOWED_AVATAR_TYPES = {"image/jpeg", "image/png"}
+_MAX_AVATAR_BYTES = 5 * 1024 * 1024  # 5 MB
 
 
 class UserService:
@@ -218,6 +224,34 @@ class UserService:
             del update_data["password"]
 
         db_user.sqlmodel_update(update_data)
+        self.session.add(db_user)
+        await self.session.commit()
+        await self.session.refresh(db_user)
+        return db_user
+
+    async def upload_avatar(
+        self,
+        user_id: uuid.UUID,
+        file: UploadFile,
+        storage: LocalStorageService,
+    ) -> User:
+        if file.content_type not in _ALLOWED_AVATAR_TYPES:
+            raise InvalidAvatarFile()
+
+        data = await file.read()
+        if len(data) > _MAX_AVATAR_BYTES:
+            raise InvalidAvatarFile("File exceeds 5 MB limit")
+        await file.seek(0)
+
+        db_user = await self.get_user_by_id(user_id)
+        if not db_user:
+            raise UserNotFound()
+
+        if db_user.avatar_url:
+            await storage.delete(db_user.avatar_url)
+
+        key = await storage.upload(file, folder=f"users/{user_id}")
+        db_user.avatar_url = key
         self.session.add(db_user)
         await self.session.commit()
         await self.session.refresh(db_user)
