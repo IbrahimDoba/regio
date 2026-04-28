@@ -10,7 +10,6 @@ from pydantic import (
 )
 from pydantic_core import MultiHostUrl
 
-# Import this
 from app.base_config import RegioBaseSettings
 
 
@@ -42,9 +41,7 @@ class Settings(RegioBaseSettings):
     def all_cors_origins(self) -> list[str]:
         return [
             str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS
-        ] + [
-            str(origin).rstrip("/") for origin in self.FRONTEND_HOSTS
-        ]
+        ] + [str(origin).rstrip("/") for origin in self.FRONTEND_HOSTS]
 
     PROJECT_NAME: str
     POSTGRES_SERVER: str

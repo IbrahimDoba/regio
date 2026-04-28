@@ -8,7 +8,12 @@ from app.email.config import email_settings
 from app.email.schemas import VerificationEmailData
 from app.email.tasks import send_welcome_email_task
 from app.users.config import user_settings
-from app.users.dependencies import CurrentAdmin, CurrentUser, CurrentUserAnyStatus, UserServiceDep
+from app.users.dependencies import (
+    CurrentAdmin,
+    CurrentUser,
+    CurrentUserAnyStatus,
+    UserServiceDep,
+)
 from app.users.exceptions import UserNotFound
 from app.users.schemas import UserCreate, UserPublic, UsersPublic, UserUpdate
 

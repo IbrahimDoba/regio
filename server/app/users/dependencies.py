@@ -81,7 +81,9 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-async def get_current_user_any_status(session: SessionDep, token: TokenDep) -> User:
+async def get_current_user_any_status(
+    session: SessionDep, token: TokenDep
+) -> User:
     """
     Like get_current_user but does NOT require VERIFIED status.
     Use only on endpoints that must be accessible to PENDING users (e.g. /users/me).

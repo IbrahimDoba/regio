@@ -30,7 +30,6 @@ from app.auth.utils import (
     decode_token,
 )
 from app.core.config import settings
-from app.users.enums import VerificationStatus
 from app.users.models import User
 
 logger = logging.getLogger(__name__)
