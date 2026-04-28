@@ -107,7 +107,7 @@ export default function VerificationPage() {
             <div className="text-[12px] text-[#555] mb-[15px]">{t.verification.call_notice}</div>
             <button
               className="w-full p-[12px] bg-[var(--color-green-offer)] text-white border-none rounded-[6px] text-[14px] font-[700] cursor-pointer flex justify-center items-center gap-[8px] hover:scale-[1.02] transition-transform"
-              onClick={() => window.open('https://calendly.com', '_blank')}
+              onClick={() => window.open('https://https://cal.regio.is', '_blank')}
             >
               <FaVideo /> <span>{t.verification.book_button}</span>
             </button>

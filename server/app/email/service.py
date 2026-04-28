@@ -101,7 +101,7 @@ class EmailService:
     # ------------------------------------------------------------------ #
 
     async def send_welcome_email(self, data: VerificationEmailData) -> None:
-        """Send registration welcome email with Calendly booking link."""
+        """Send registration welcome email with booking link."""
         html = self._render_template("welcome.html", data.model_dump())
         message = EmailMessage(
             to=data.user_email,

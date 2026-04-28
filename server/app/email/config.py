@@ -22,8 +22,8 @@ class EmailConfig(RegioBaseSettings):
     )
 
     CALENDLY_URL: str = Field(
-        default="https://calendly.com/regio-verification",
-        description="Calendly booking URL for user verification calls.",
+        default="https://cal.regio.is",
+        description="Video call booking URL for user verification calls.",
     )
 
 
