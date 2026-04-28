@@ -42,7 +42,7 @@ export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
       />
 
       {/* Drawer */}
-      <div className="fixed bottom-[60px] left-0 w-full max-w-[480px] bg-white rounded-t-[20px] z-[301] shadow-2xl animate-in slide-in-from-bottom-5 duration-300">
+      <div className="fixed bottom-[60px] w-full max-w-[480px] bg-white rounded-t-[20px] z-[301] shadow-2xl animate-in slide-in-from-bottom-5 duration-300" style={{ left: '50%', transform: 'translateX(-50%)' }}>
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-[#ddd]" />
