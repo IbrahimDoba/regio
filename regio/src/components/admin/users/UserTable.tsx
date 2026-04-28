@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { FaSort, FaPen, FaCheck, FaXmark } from 'react-icons/fa6';
+import { API_CONFIG } from '@/lib/api/config';
 import TrustBadge from '../ui/TrustBadge';
 import StatusBadge from '../ui/StatusBadge';
 
@@ -104,7 +105,11 @@ export default function UserTable({ users, onEditUser, onVerifyUser, onRejectUse
               <td className="p-3 border-b border-[#eee] align-middle">
                 <div className="flex items-center gap-[10px]">
                   <img
-                    src={user.avatar_url || `https://i.pravatar.cc/100?u=${user.user_code}`}
+                    src={
+                      user.avatar_url
+                        ? `${API_CONFIG.BASE_URL}/users/${user.user_code}/avatar`
+                        : `https://ui-avatars.com/api/?name=${user.full_name}&background=random`
+                    }
                     alt={user.full_name}
                     className="w-[30px] h-[30px] rounded-full"
                   />

@@ -16,6 +16,7 @@ import { ListingPublic } from "@/lib/api/types";
 import { getCategoryDetails } from "@/lib/feed-helpers";
 import { formatPriceNode } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
+import { API_CONFIG } from "@/lib/api/config";
 
 const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
   "fa-screwdriver-wrench": <FaScrewdriverWrench />,
@@ -83,7 +84,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCard
                 </div>
                 {listing.owner_avatar ? (
                   <img
-                    src={listing.owner_avatar}
+                    src={`${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar`}
                     className="w-[40px] h-[40px] rounded-full object-cover border border-[#ccc] block"
                     alt="User"
                   />

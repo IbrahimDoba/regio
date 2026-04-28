@@ -13,6 +13,7 @@ import { useFeed, useCreateListingInquiry } from "@/lib/api";
 import { useRealTime } from "@/context/RealTimeContext";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
+import { API_CONFIG } from "@/lib/api/config";
 
 export default function FeedPage() {
   const router = useRouter();
@@ -53,7 +54,7 @@ export default function FeedPage() {
       const params = new URLSearchParams({
         room: roomId,
         name: listing.owner_name,
-        avatar: listing.owner_avatar || "",
+        avatar: listing.owner_avatar ? `${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar` : "",
         listing: listing.title,
       });
       router.push(`/chat?${params.toString()}`);

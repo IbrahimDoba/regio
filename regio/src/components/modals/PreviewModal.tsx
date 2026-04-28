@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { getCategoryDetails, ListingAttributes } from "@/lib/feed-helpers";
 import { formatPriceNode } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
+import { API_CONFIG } from "@/lib/api/config";
 import type { Translations } from "@/context/LanguageContext";
 import LocationMap from "@/components/map/LocationMap";
 
@@ -128,7 +129,7 @@ export default function PreviewModal({ listing, onClose, onContact, isContacting
             <div className="flex items-center gap-[10px]">
               {listing.owner_avatar ? (
                 <img
-                  src={listing.owner_avatar}
+                  src={`${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar`}
                   className="w-[40px] h-[40px] rounded-full"
                   alt="User"
                 />

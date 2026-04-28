@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { FaUsers, FaTags, FaGavel, FaBullhorn } from 'react-icons/fa6';
 import Image from 'next/image';
+import { API_CONFIG } from '@/lib/api/config';
 
 const navItems = [
   { id: 'users',     icon: FaUsers,    labelKey: 'user_management', href: '/admin/users' },
@@ -58,7 +59,11 @@ export default function AdminSidebar() {
       {/* User Profile */}
       <div className="p-5 border-t border-[rgba(255,255,255,0.1)] flex items-center gap-[10px] text-[14px]">
         <img
-          src={user?.avatar_url || 'https://i.pravatar.cc/100?img=33'}
+          src={
+            user?.avatar_url
+              ? `${API_CONFIG.BASE_URL}/users/${user.user_code}/avatar`
+              : `https://ui-avatars.com/api/?name=${user?.first_name}+${user?.last_name}&background=random`
+          }
           alt="Admin"
           className="w-8 h-8 rounded-full"
         />
