@@ -101,7 +101,7 @@ export default function ProfilePage() {
           </div>
           <div
             className="cursor-pointer text-[#888] text-[20px]"
-            onClick={() => window.history.back()}
+            onClick={() => router.push('/')}
           >
             <FaXmark />
           </div>

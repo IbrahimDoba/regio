@@ -177,7 +177,7 @@ export default function NotificationsPage() {
         <div className="flex justify-between items-center p-[15px]">
           <div className="text-[20px] font-[800] text-[#333] flex items-center gap-[10px]">
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push('/')}
               className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors"
             >
               <FaArrowLeft className="w-4 h-4" />

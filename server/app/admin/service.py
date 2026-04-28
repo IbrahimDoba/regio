@@ -39,7 +39,9 @@ class AdminService:
         """
         total_users = await self.session.execute(select(func.count(User.id)))
         active_users = await self.session.execute(
-            select(func.count(User.id)).where(User.is_active)
+            select(func.count(User.id)).where(
+                User.verification_status == VerificationStatus.VERIFIED
+            )
         )
         verification_pending_users = await self.session.execute(
             select(func.count(User.id)).where(

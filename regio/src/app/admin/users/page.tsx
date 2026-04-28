@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   useListUsersRich,
   useUpdateUserDetails,
@@ -19,7 +19,7 @@ interface UserAdminView {
   role: string;
   trust_level: "T1" | "T2" | "T3" | "T4" | "T5" | "T6";
   is_active: boolean;
-  verification_status: "PENDING" | "VERIFIED";
+  verification_status: "PENDING" | "VERIFIED" | "REJECTED";
   balance_time: number;
   balance_regio: string;
   created_at: string;
@@ -27,8 +27,14 @@ interface UserAdminView {
 
 export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserAdminView | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Fetch users from API
   const {
@@ -36,7 +42,7 @@ export default function AdminUsersPage() {
     isLoading: listLoading,
     error,
   } = useListUsersRich({
-    q: searchQuery,
+    q: debouncedSearch,
     skip: 0,
     limit: 50,
   });
@@ -64,6 +70,25 @@ export default function AdminUsersPage() {
         onError: (error) => {
           console.error("Verification error:", error);
           alert("Failed to verify user");
+        },
+      }
+    );
+  };
+
+  const handleRejectUser = (userCode: string) => {
+    if (!confirm(`Reject verification for user ${userCode}?`)) return;
+    updateUserMutation.mutate(
+      {
+        userCode,
+        data: { verification_status: "REJECTED" },
+      },
+      {
+        onSuccess: () => {
+          alert(`User ${userCode} rejected.`);
+        },
+        onError: (error) => {
+          console.error("Rejection error:", error);
+          alert("Failed to reject user");
         },
       }
     );
@@ -129,6 +154,7 @@ export default function AdminUsersPage() {
             users={listData.data}
             onEditUser={handleEditUser}
             onVerifyUser={handleVerifyUser}
+            onRejectUser={handleRejectUser}
           />
         ) : (
           <p className="text-center text-[#888] py-8">No users found</p>

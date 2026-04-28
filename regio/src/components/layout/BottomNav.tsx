@@ -7,9 +7,10 @@ import { useRealTime } from "@/context/RealTimeContext";
 
 interface BottomNavProps {
   onOpenCreate: () => void;
+  onOpenMenu: () => void;
 }
 
-export default function BottomNav({ onOpenCreate }: BottomNavProps) {
+export default function BottomNav({ onOpenCreate, onOpenMenu }: BottomNavProps) {
   const { unreadCount, rooms } = useRealTime();
   const totalUnreadMessages = rooms.reduce((sum, r) => sum + (r.unreadCount || 0), 0);
 
@@ -58,7 +59,10 @@ export default function BottomNav({ onOpenCreate }: BottomNavProps) {
       </div>
       
       {/* Menu */}
-      <div className="nav-item flex flex-col items-center justify-center text-[22px] cursor-pointer opacity-80 w-full h-full hover:opacity-100 transition-opacity">
+      <div
+        className="nav-item flex flex-col items-center justify-center text-[22px] cursor-pointer opacity-80 w-full h-full hover:opacity-100 transition-opacity"
+        onClick={onOpenMenu}
+      >
         <FaBars />
       </div>
     </nav>

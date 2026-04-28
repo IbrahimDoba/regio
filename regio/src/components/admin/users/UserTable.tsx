@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FaSort, FaPen, FaCheck } from 'react-icons/fa6';
+import { FaSort, FaPen, FaCheck, FaXmark } from 'react-icons/fa6';
 import TrustBadge from '../ui/TrustBadge';
 import StatusBadge from '../ui/StatusBadge';
 
@@ -13,7 +13,7 @@ interface UserAdminView {
   role: string;
   trust_level: 'T1' | 'T2' | 'T3' | 'T4' | 'T5' | 'T6';
   is_active: boolean;
-  verification_status: 'PENDING' | 'VERIFIED';
+  verification_status: 'PENDING' | 'VERIFIED' | 'REJECTED';
   balance_time: number;
   balance_regio: string;
   created_at: string;
@@ -23,9 +23,10 @@ interface UserTableProps {
   users: UserAdminView[];
   onEditUser: (user: UserAdminView) => void;
   onVerifyUser: (userCode: string) => void;
+  onRejectUser: (userCode: string) => void;
 }
 
-export default function UserTable({ users, onEditUser, onVerifyUser }: UserTableProps) {
+export default function UserTable({ users, onEditUser, onVerifyUser, onRejectUser }: UserTableProps) {
   const [sortColumn, setSortColumn] = useState<number | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -130,18 +131,28 @@ export default function UserTable({ users, onEditUser, onVerifyUser }: UserTable
               <td className="p-3 border-b border-[#eee]">
                 {user.verification_status === 'PENDING' ? (
                   <StatusBadge variant="pending" label="Pending Verify" />
+                ) : user.verification_status === 'REJECTED' ? (
+                  <StatusBadge variant="conflict" label="Rejected" />
                 ) : (
                   <StatusBadge variant="active" label="Active" />
                 )}
               </td>
               <td className="p-3 border-b border-[#eee]">
                 {user.verification_status === 'PENDING' ? (
-                  <button
-                    onClick={() => onVerifyUser(user.user_code)}
-                    className="py-2 px-4 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#8cb348] text-white"
-                  >
-                    <FaCheck /> Verify
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => onVerifyUser(user.user_code)}
+                      className="py-2 px-3 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#8cb348] text-white"
+                    >
+                      <FaCheck /> Verify
+                    </button>
+                    <button
+                      onClick={() => onRejectUser(user.user_code)}
+                      className="py-2 px-3 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#d32f2f] text-white"
+                    >
+                      <FaXmark /> Reject
+                    </button>
+                  </div>
                 ) : (
                   <button
                     onClick={() => onEditUser(user)}

@@ -14,6 +14,7 @@
       "invite_placeholder": "REGIO-XX-XXXXXXXX",
       "real_name_notice": "Valódi név megadása kötelező",
       "first_name_label": "Keresztnév",
+      "middle_name_label": "Középső név (opcionális)",
       "last_name_label": "Vezetéknév",
       "email_label": "E-mail",
       "password_label": "Jelszó létrehozása",

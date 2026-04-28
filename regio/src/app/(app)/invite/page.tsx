@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   FaTicket,
   FaXmark,
@@ -20,6 +21,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function InvitePage() {
+  const router = useRouter();
   const { t } = useLanguage();
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState(0);
@@ -144,7 +146,7 @@ export default function InvitePage() {
           </div>
           <div
             className="cursor-pointer text-[#888] text-[20px]"
-            onClick={() => window.history.back()}
+            onClick={() => router.push('/profile')}
           >
             <FaXmark />
           </div>

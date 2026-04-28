@@ -14,6 +14,7 @@
       "invite_placeholder": "REGIO-XX-XXXXXXXX",
       "real_name_notice": "Real name required",
       "first_name_label": "First Name",
+      "middle_name_label": "Middle Name (optional)",
       "last_name_label": "Last Name",
       "email_label": "Email",
       "password_label": "Create Password",

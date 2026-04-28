@@ -57,7 +57,7 @@ export interface TokenResponse {
 // ============================================================================
 
 export type TrustLevel = 'T1' | 'T2' | 'T3' | 'T4' | 'T5' | 'T6';
-export type VerificationStatus = 'PENDING' | 'VERIFIED';
+export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
 export type Language = 'EN' | 'DE' | 'HU';
 export type UserRole = 'User' | 'Admin';
 

@@ -27,6 +27,7 @@ export default function AuthPage() {
   // Register form state
   const [inviteCode, setInviteCode] = useState('');
   const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
@@ -75,6 +76,7 @@ export default function AuthPage() {
     try {
       await registerMutation.mutateAsync({
         first_name: firstName,
+        middle_name: middleName || undefined,
         last_name: lastName,
         email: registerEmail,
         password: registerPassword,
@@ -225,7 +227,7 @@ export default function AuthPage() {
                 {t.auth.register.real_name_notice}
               </div>
 
-              <div className="flex gap-[10px] mb-[20px]">
+              <div className="flex gap-[10px] mb-[10px]">
                 <div className="flex-1">
                   <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.first_name_label}</label>
                   <input
@@ -250,6 +252,18 @@ export default function AuthPage() {
                     required
                   />
                 </div>
+              </div>
+
+              <div className="mb-[20px]">
+                <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.middle_name_label}</label>
+                <input
+                  type="text"
+                  className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[var(--input-bg)] outline-none"
+                  placeholder="Middle name"
+                  value={middleName}
+                  onChange={(e) => setMiddleName(e.target.value)}
+                  disabled={isRegistering}
+                />
               </div>
 
               <div className="mb-[20px]">
