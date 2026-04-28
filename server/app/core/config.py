@@ -26,22 +26,25 @@ class Settings(RegioBaseSettings):
     SECRET_KEY: str
     # SECRET_KEY: str = secrets.token_urlsafe(32)
 
-    FRONTEND_HOST: str = "http://localhost:3000"
     BACKEND_URL: str = "http://localhost:8000"
     ENVIRONMENT: Literal["development", "staging", "production"]
 
+    FRONTEND_HOSTS: Annotated[
+        list[AnyUrl] | str, BeforeValidator(parse_cors)
+    ] = []
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
-    BACKEND_CORS_ORIGINS_REGEX: str = ""
+    BACKEND_CORS_ORIGIN_REGEX: str = ""
 
     @computed_field
     @property
     def all_cors_origins(self) -> list[str]:
-        # return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS]
         return [
             str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS
-        ] + [self.FRONTEND_HOST]
+        ] + [
+            str(origin).rstrip("/") for origin in self.FRONTEND_HOSTS
+        ]
 
     PROJECT_NAME: str
     POSTGRES_SERVER: str
