@@ -242,7 +242,6 @@ async def request_new_invites(
 )
 async def get_user_avatar(
     user_code: str,
-    _: CurrentUser,
     service: UserServiceDep,
     storage: StorageServiceDep,
 ) -> StreamingResponse:

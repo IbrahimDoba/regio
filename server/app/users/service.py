@@ -235,12 +235,19 @@ class UserService:
         file: UploadFile,
         storage: LocalStorageService,
     ) -> User:
-        if file.content_type not in _ALLOWED_AVATAR_TYPES:
-            raise InvalidAvatarFile()
-
         data = await file.read()
+
         if len(data) > _MAX_AVATAR_BYTES:
             raise InvalidAvatarFile("File exceeds 5 MB limit")
+
+        # Validate by magic bytes, not the client-supplied Content-Type
+        if data[:3] == b"\xff\xd8\xff":
+            pass  # JPEG
+        elif data[:8] == b"\x89PNG\r\n\x1a\n":
+            pass  # PNG
+        else:
+            raise InvalidAvatarFile()
+
         await file.seek(0)
 
         db_user = await self.get_user_by_id(user_id)

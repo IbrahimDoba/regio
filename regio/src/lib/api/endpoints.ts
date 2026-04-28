@@ -29,6 +29,8 @@ export const API_ENDPOINTS = {
     ME: '/users/me',
     UPDATE_ME: '/users/me',
     BY_CODE: (userCode: string) => `/users/${userCode}`,
+    AVATAR: (userCode: string) => `/users/${userCode}/avatar`,
+    AVATAR_UPLOAD: '/users/me/avatar',
     INVITES: '/users/invites',
     REQUEST_INVITES: '/users/invites/request',
   },

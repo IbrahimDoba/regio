@@ -76,6 +76,20 @@ export function useRegisterUser() {
 }
 
 /**
+ * Upload avatar mutation
+ */
+export function useUploadAvatar() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (file: File) => usersApi.uploadAvatar(file),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(queryKeys.users.me(), updatedUser);
+    },
+  });
+}
+
+/**
  * Update current user mutation
  */
 export function useUpdateUser() {

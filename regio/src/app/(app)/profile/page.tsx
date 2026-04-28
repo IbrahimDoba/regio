@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   FaUserGear,
   FaXmark,
@@ -16,8 +16,10 @@ import { useLanguage } from "@/context/LanguageContext";
 import {
   useMe,
   useUpdateUser,
+  useUploadAvatar,
   useRequestNewInvites,
 } from "@/lib/api/hooks/use-users";
+import { API_CONFIG } from "@/lib/api/config";
 
 export default function ProfilePage() {
   const { language, setLanguage, t } = useLanguage();
@@ -29,7 +31,9 @@ export default function ProfilePage() {
   // Queries & Mutations
   const { data: user, isLoading } = useMe();
   const updateUser = useUpdateUser();
+  const uploadAvatar = useUploadAvatar();
   const requestInvites = useRequestNewInvites(); // If we need to show invite count from user object or separate query?
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   // Note: user object usually contains invites count or we fetch it separately.
   // Let's check UserPublic type. It doesn't seem to have invite count.
   // We can fetch invites count or just redirect to invite page.
@@ -37,6 +41,7 @@ export default function ProfilePage() {
   // Local state for form fields
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
+  const [avatarCacheBust, setAvatarCacheBust] = useState(() => Date.now());
 
   // Update local state when user data is loaded
   React.useEffect(() => {
@@ -112,13 +117,49 @@ export default function ProfilePage() {
       <div className="p-[25px_20px] bg-gradient-to-b from-white to-[#f0f7e6] text-center border-b border-[#e0e0e0]">
         <div className="relative w-[100px] h-[100px] mx-auto mb-[15px]">
           <img
-            src={`https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=random`}
+            src={
+              user.avatar_url
+                ? `${API_CONFIG.BASE_URL}/users/${user.user_code}/avatar?t=${avatarCacheBust}`
+                : `https://ui-avatars.com/api/?name=${user.first_name}+${user.last_name}&background=random`
+            }
             className="w-full h-full rounded-full object-cover border-[3px] border-white shadow-md"
           />
-          <div className="absolute bottom-0 right-0 bg-[var(--color-green-offer)] text-white w-[32px] h-[32px] rounded-full flex justify-center items-center text-[14px] cursor-pointer border-[2px] border-white">
-            <FaCamera />
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/jpeg,image/png"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              if (file.size > 5 * 1024 * 1024) {
+                alert("Image must be smaller than 5 MB.");
+                e.target.value = "";
+                return;
+              }
+              uploadAvatar.mutate(file, {
+                onSuccess: () => setAvatarCacheBust(Date.now()),
+              });
+              e.target.value = "";
+            }}
+          />
+          <div
+            className="absolute bottom-0 right-0 bg-[var(--color-green-offer)] text-white w-[32px] h-[32px] rounded-full flex justify-center items-center text-[14px] cursor-pointer border-[2px] border-white"
+            onClick={() => avatarInputRef.current?.click()}
+          >
+            {uploadAvatar.isPending ? (
+              <span className="text-[10px]">...</span>
+            ) : (
+              <FaCamera />
+            )}
           </div>
         </div>
+        {uploadAvatar.isError && (
+          <p className="text-[11px] text-[#d32f2f] mt-[-8px] mb-[8px]">
+            {(uploadAvatar.error as { response?: { data?: { detail?: string } } })
+              ?.response?.data?.detail ?? "Upload failed. Please try again."}
+          </p>
+        )}
 
         <div className="text-[22px] font-[800] text-[#222] mb-[5px]">
           {user.first_name} {user.last_name}

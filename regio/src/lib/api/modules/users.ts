@@ -88,6 +88,20 @@ export const updateCurrentUser = async (
   return response.data;
 };
 
+/**
+ * Upload profile picture (JPEG or PNG, max 5 MB)
+ */
+export const uploadAvatar = async (file: File): Promise<UserPublic> => {
+  const form = new FormData();
+  form.append("file", file);
+  const response = await apiClient.put<UserPublic>(
+    API_ENDPOINTS.USERS.AVATAR_UPLOAD,
+    form,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return response.data;
+};
+
 // ============================================================================
 // Invites
 // ============================================================================
@@ -123,6 +137,7 @@ export const usersApi = {
   searchUsers,
   registerUser,
   updateCurrentUser,
+  uploadAvatar,
   getUserInvites,
   requestNewInvites,
 } as const;
