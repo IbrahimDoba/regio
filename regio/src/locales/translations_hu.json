@@ -40,7 +40,8 @@
     "filter_button": "Szűrő",
     "loading": "Hirdetések betöltése...",
     "error_chat_start": "Nem sikerült elindítani a chatet. Próbáld újra.",
-    "error_chat_not_connected": "A chat még nem csatlakozott. Várj egy pillanatot."
+    "error_chat_not_connected": "A chat még nem csatlakozott. Várj egy pillanatot.",
+    "contact_prefill": "Érdeklőm a(z) \"{title}\" ajánlatot."
   },
   "feed_card": {
     "region_label": "Régió",
@@ -64,6 +65,11 @@
     "price_label": "Érték / Ár:",
     "contact_button": "Kapcsolat",
     "contact_loading": "Chat indítása...",
+    "modify_button": "Szerkesztés",
+    "modify_loading": "Mentés...",
+    "show_map": "Térkép megjelenítése",
+    "hide_map": "Térkép elrejtése",
+    "edit_log_title": "Módosítási előzmények",
     "attributes": {
       "time_factor": "Idő-szorzó",
       "price_time": "Ár (Idő)",
@@ -340,9 +346,13 @@
     "no_codes": "Nincsenek meghívóid. Kérj újakat fent.",
     "step2_label": "2. Válassz üzenetet",
     "message_standard": "Általános",
+    "message_standard_text": "Hé! Csatlakozz hozzám a regio.is-en – helyi cserekereskedelem és szolgáltatások. Csak meghívóval lehet csatlakozni. Íme a kódod: %CODE%",
     "message_community": "Közösségi fókusz",
+    "message_community_text": "Találtam egy klassz közösséget a méltányos helyi kereskedelemhez: regio.is. Szerintem tökéletesen illeszkedni fogsz! Csatlakozz ezzel: %CODE%",
     "message_short": "Rövid és tömör",
+    "message_short_text": "Íme a belépési kódod a regio.is-hez: %CODE%",
     "message_help": "Segítség és támogatás",
+    "message_help_text": "Segítsük egymást a szomszédságban! A regio.is-en könnyű időt és javakat cserélni. Csatlakozz ezzel: %CODE%",
     "step3_label": "3. Oszd meg most",
     "share_all": "Megosztás (összes app)",
     "share_whatsapp": "WhatsApp",

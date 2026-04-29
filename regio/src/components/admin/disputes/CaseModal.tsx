@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { FaXmark, FaFolderOpen, FaEnvelope, FaComments } from 'react-icons/fa6';
+import { useDialog } from '@/context/DialogContext';
 
 interface DisputePublic {
   request_id: string;
@@ -29,11 +30,12 @@ interface CaseModalProps {
 export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseModalProps) {
   const [consentGranted, setConsentGranted] = useState(false);
   const [reason, setReason] = useState('');
+  const dialog = useDialog();
 
   if (!isOpen || !dispute) return null;
 
-  const handleResolve = (action: 'APPROVE' | 'REJECT') => {
-    if (!confirm(`Are you sure you want to ${action} this dispute?`)) return;
+  const handleResolve = async (action: 'APPROVE' | 'REJECT') => {
+    if (!await dialog.confirm('Confirm Action', `Are you sure you want to ${action} this dispute?`)) return;
     onResolve(dispute.request_id, action, reason);
     onClose();
   };

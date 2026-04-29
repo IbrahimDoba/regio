@@ -21,6 +21,38 @@ interface PaymentRequestCardProps {
   className?: string;
 }
 
+function formatGaras(val: number) {
+  return val.toFixed(2);
+}
+
+function formatTime(val: number) {
+  const hours = Math.floor(val / 60);
+  const mins = val % 60;
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins} min`;
+}
+
+function AmountRow({
+  amountGaras,
+  amountTime,
+}: {
+  amountGaras: number;
+  amountTime: number;
+}) {
+  return (
+    <div className="flex items-center gap-5 py-3 px-3">
+      <div className="flex items-center gap-2">
+        <img src="/time.png" className="w-9 h-9" alt="" />
+        <span className="text-lg font-bold text-red-700">{formatTime(amountTime)}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <img src="/garas.png" className="w-9 h-9" alt="" />
+        <span className="text-lg font-bold text-red-700">{formatGaras(amountGaras)} G</span>
+      </div>
+    </div>
+  );
+}
+
 export function PaymentRequestCard({
   data,
   isOwn,
@@ -34,27 +66,6 @@ export function PaymentRequestCard({
   const handlePay = () => onPay?.(id);
   const handleDeny = () => onDeny?.(id);
   const handleDispute = () => onDispute?.(id);
-
-  const formatGaras = (val: number) => val.toFixed(2);
-  const formatTime = (val: number) => {
-    const hours = Math.floor(val / 60);
-    const mins = val % 60;
-    if (hours > 0) return `${hours}h ${mins}m`;
-    return `${mins} min`;
-  };
-
-  const AmountRow = () => (
-    <div className="flex items-center gap-5 py-3 px-3">
-      <div className="flex items-center gap-2">
-        <img src="/time.png" className="w-9 h-9" alt="" />
-        <span className="text-lg font-bold text-red-700">{formatTime(amountTime)}</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <img src="/garas.png" className="w-9 h-9" alt="" />
-        <span className="text-lg font-bold text-red-700">{formatGaras(amountGaras)} G</span>
-      </div>
-    </div>
-  );
 
   if (status === 'paid') {
     return (
@@ -74,7 +85,7 @@ export function PaymentRequestCard({
           <span className="text-xs text-green-600">#{id.slice(-4)}</span>
         </div>
 
-        <AmountRow />
+        <AmountRow amountGaras={amountGaras} amountTime={amountTime} />
 
         <div className="px-3 pb-2">
           <p className="text-xs text-gray-500 truncate">{description}</p>
@@ -107,7 +118,7 @@ export function PaymentRequestCard({
         <span className="text-xs text-blue-600">#{id.slice(-4)}</span>
       </div>
 
-      <AmountRow />
+      <AmountRow amountGaras={amountGaras} amountTime={amountTime} />
 
       <div className="px-3 pb-2">
         <p className="text-xs text-gray-500 truncate">{description}</p>

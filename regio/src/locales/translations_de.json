@@ -40,7 +40,8 @@
     "filter_button": "Filter",
     "loading": "Anzeigen werden geladen...",
     "error_chat_start": "Chat konnte nicht gestartet werden. Bitte versuche es erneut.",
-    "error_chat_not_connected": "Chat noch nicht verbunden. Bitte kurz warten."
+    "error_chat_not_connected": "Chat noch nicht verbunden. Bitte kurz warten.",
+    "contact_prefill": "Ich hätte Interesse an \"{title}\"."
   },
   "feed_card": {
     "region_label": "Region",
@@ -64,6 +65,11 @@
     "price_label": "Wert / Preis:",
     "contact_button": "Kontakt",
     "contact_loading": "Chat wird gestartet...",
+    "modify_button": "Bearbeiten",
+    "modify_loading": "Wird gespeichert...",
+    "show_map": "Karte anzeigen",
+    "hide_map": "Karte ausblenden",
+    "edit_log_title": "Änderungsprotokoll",
     "attributes": {
       "time_factor": "Zeitfaktor",
       "price_time": "Preis (Zeit)",
@@ -340,9 +346,13 @@
     "no_codes": "Keine Einladungen gefunden. Fordere oben neue an.",
     "step2_label": "2. Wähle eine Nachricht",
     "message_standard": "Standard",
+    "message_standard_text": "Hey! Komm zu mir auf regio.is – tausche Dienstleistungen und Waren lokal. Es ist nur auf Einladung. Hier ist dein Code: %CODE%",
     "message_community": "Community-Fokus",
+    "message_community_text": "Ich habe eine tolle Community für fairen lokalen Austausch gefunden: regio.is. Ich glaube, du würdest super reinpassen! Tritt bei mit: %CODE%",
     "message_short": "Kurz & Direkt",
+    "message_short_text": "Hier ist dein Zugangscode für regio.is: %CODE%",
     "message_help": "Hilfe & Support",
+    "message_help_text": "Lass uns gegenseitig in der Nachbarschaft helfen. regio.is macht es einfach, Zeit und Waren zu tauschen. Tritt bei mit: %CODE%",
     "step3_label": "3. Jetzt teilen",
     "share_all": "Teilen (Alle Apps)",
     "share_whatsapp": "WhatsApp",

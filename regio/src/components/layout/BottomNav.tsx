@@ -15,7 +15,7 @@ export default function BottomNav({ onOpenCreate, onOpenMenu }: BottomNavProps) 
   const totalUnreadMessages = rooms.reduce((sum, r) => sum + (r.unreadCount || 0), 0);
 
   return (
-    <nav className="fixed bottom-0 w-full max-w-[480px] bg-[var(--color-nav-bg)] h-[60px] flex justify-around items-center text-white z-200">
+    <nav className="fixed bottom-0 w-full max-w-[480px] bg-[var(--color-nav-bg)] h-[60px] flex justify-around items-center text-white z-[200]">
       {/* Notifications with Badge */}
       <div 
         className="nav-item flex flex-col items-center justify-center text-[22px] cursor-pointer opacity-80 w-full h-full hover:opacity-100 transition-opacity relative"

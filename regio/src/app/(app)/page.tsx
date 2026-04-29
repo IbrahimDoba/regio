@@ -8,11 +8,14 @@ import FilterPanel from "@/components/feed/FilterPanel";
 import FeedList from "@/components/feed/FeedList";
 import PreviewModal from "@/components/modals/PreviewModal";
 import CreateModal from "@/components/modals/CreateModal";
+import EditModal from "@/components/modals/EditModal";
 import { ListingCategory, ListingPublic } from "@/lib/api/types";
 import { useFeed, useCreateListingInquiry } from "@/lib/api";
 import { useRealTime } from "@/context/RealTimeContext";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
+import { ListingAttributes } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
+import { useDialog } from "@/context/DialogContext";
 import { API_CONFIG } from "@/lib/api/config";
 
 export default function FeedPage() {
@@ -24,11 +27,11 @@ export default function FeedPage() {
     Object.keys(CATEGORY_CONFIG) as ListingCategory[]
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [previewListing, setPreviewListing] = useState<ListingPublic | null>(
-    null
-  );
+  const [previewListing, setPreviewListing] = useState<ListingPublic | null>(null);
+  const [editListing, setEditListing] = useState<ListingPublic | null>(null);
 
   const { t } = useLanguage();
+  const dialog = useDialog();
   const { isConnected: isChatConnected, createListingRoom } = useRealTime();
   const { mutateAsync: createListingInquiry } = useCreateListingInquiry();
   const [isContacting, setIsContacting] = useState(false);
@@ -51,19 +54,25 @@ export default function FeedPage() {
         roomId = await createListingRoom(listing.id, listing.title, listing.owner_code);
       }
       setPreviewListing(null);
+      const attrs = (listing.attributes ?? {}) as ListingAttributes;
+      const priceTime = attrs.time_amount ?? attrs.handling_fee_time ?? attrs.price_time;
+      const priceGaras = attrs.regio_amount ?? attrs.usage_fee_regio ?? attrs.price_regio;
+      const prefill = t.feed.contact_prefill.replace("{title}", listing.title);
       const params = new URLSearchParams({
         room: roomId,
         name: listing.owner_name,
         avatar: listing.owner_avatar ? `${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar` : "",
         listing: listing.title,
+        prefill,
+        ...(priceTime ? { price_time: String(priceTime) } : {}),
+        ...(priceGaras ? { price_garas: String(priceGaras) } : {}),
       });
       router.push(`/chat?${params.toString()}`);
     } catch (error) {
       console.error("Failed to start chat:", error);
-      alert(
-        isChatConnected
-          ? t.feed.error_chat_start
-          : t.feed.error_chat_not_connected
+      dialog.alert(
+        "Chat Error",
+        isChatConnected ? t.feed.error_chat_start : t.feed.error_chat_not_connected
       );
     } finally {
       setIsContacting(false);
@@ -119,6 +128,7 @@ export default function FeedPage() {
           searchQuery={searchQuery}
           onOpenPreview={setPreviewListing}
           onContact={handleContact}
+          onModify={(listing) => { setPreviewListing(null); setEditListing(listing); }}
         />
       )}
 
@@ -127,12 +137,21 @@ export default function FeedPage() {
         onClose={() => setPreviewListing(null)}
         isContacting={isContacting}
         onContact={handleContact}
+        onModify={(listing) => { setPreviewListing(null); setEditListing(listing); }}
       />
 
       <CreateModal
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
       />
+
+      {editListing && (
+        <EditModal
+          key={editListing.id}
+          listing={editListing}
+          onClose={() => setEditListing(null)}
+        />
+      )}
 
       <button
         className="fixed bottom-[20px] right-[20px] w-[60px] h-[60px] rounded-full bg-[var(--color-green-offer)] text-white text-[24px] flex justify-center items-center shadow-[0_4px_10px_rgba(0,0,0,0.3)] border-none cursor-pointer z-50 hover:brightness-110 transition-all active:scale-95"

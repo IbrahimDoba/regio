@@ -41,7 +41,8 @@
     "filter_button": "Filter",
     "loading": "Loading listings...",
     "error_chat_start": "Failed to start chat. Please try again.",
-    "error_chat_not_connected": "Chat is not connected yet. Please wait a moment and try again."
+    "error_chat_not_connected": "Chat is not connected yet. Please wait a moment and try again.",
+    "contact_prefill": "I am interested in \"{title}\"."
   },
 
   "feed_card": {
@@ -69,6 +70,11 @@
     "price_label": "Value / Price:",
     "contact_button": "Contact",
     "contact_loading": "Starting chat...",
+    "modify_button": "Modify",
+    "modify_loading": "Saving...",
+    "show_map": "Show map",
+    "hide_map": "Hide map",
+    "edit_log_title": "Edit History",
     "attributes": {
       "time_factor": "Time Factor",
       "price_time": "Price (Time)",
@@ -352,9 +358,13 @@
     "no_codes": "No invites found. Request new ones above.",
     "step2_label": "2. Choose a Message",
     "message_standard": "Standard",
+    "message_standard_text": "Hey! Join me on regio.is to trade services and goods locally. It's invite-only. Here is your code: %CODE%",
     "message_community": "Community Focus",
+    "message_community_text": "I found a great community for fair local trade called regio.is. I think you'd fit in perfectly! Join us with: %CODE%",
     "message_short": "Short & Direct",
+    "message_short_text": "Here is your access code for regio.is: %CODE%",
     "message_help": "Help & Support",
+    "message_help_text": "Let's help each other in the neighborhood. regio.is makes it easy to swap time and goods. Join with: %CODE%",
     "step3_label": "3. Share Now",
     "share_all": "Share (All Apps)",
     "share_whatsapp": "WhatsApp",

@@ -7,43 +7,43 @@ export const CATEGORY_CONFIG: Record<
   OFFER_SERVICE: {
     color: "green",
     colorVar: "var(--color-green-offer)",
-    icon: "fa-screwdriver-wrench",
+    icon: "/Icons/offer-services.png",
     label: "Offer Service",
   },
   SEARCH_SERVICE: {
     color: "red",
     colorVar: "var(--color-red-search)",
-    icon: "fa-magnifying-glass",
+    icon: "/Icons/search-service.png",
     label: "Search Service",
   },
   SELL_PRODUCT: {
     color: "blue",
     colorVar: "var(--color-blue)",
-    icon: "fa-tags",
+    icon: "/Icons/offer-product.png",
     label: "Sell Product",
   },
   SEARCH_PRODUCT: {
     color: "orange",
     colorVar: "var(--color-orange)",
-    icon: "fa-magnifying-glass-dollar",
+    icon: "/Icons/search-product.png",
     label: "Search Product",
   },
   OFFER_RENTAL: {
     color: "purple",
     colorVar: "var(--color-purple)",
-    icon: "fa-hand-holding-hand",
+    icon: "/Icons/borrow.png",
     label: "Offer Rental",
   },
   RIDE_SHARE: {
     color: "turquoise",
     colorVar: "var(--color-turquoise)",
-    icon: "fa-car",
+    icon: "/Icons/carsharing.png",
     label: "Ride Share",
   },
   EVENT_WORKSHOP: {
     color: "yellow",
     colorVar: "var(--color-yellow)",
-    icon: "fa-calendar-days",
+    icon: "/Icons/event.png",
     label: "Event / Workshop",
   },
 };
@@ -94,7 +94,7 @@ export interface ListingAttributes {
   price_notes?: string;
 }
 
-export function formatPriceNode(listing: ListingPublic): string {
+export function formatPriceNode(listing: ListingPublic, timeUnit = "min"): string {
   const attrs = listing.attributes as ListingAttributes | undefined;
   if (!attrs) return "";
 
@@ -104,28 +104,28 @@ export function formatPriceNode(listing: ListingPublic): string {
 
     case "SELL_PRODUCT": {
       const parts = [];
-      if (attrs.time_amount) parts.push(`${attrs.time_amount} Min`);
+      if (attrs.time_amount) parts.push(`${attrs.time_amount} ${timeUnit}`);
       if (attrs.regio_amount) parts.push(`${attrs.regio_amount} G`);
       return parts.join(" + ") || "Negotiable";
     }
 
     case "OFFER_RENTAL": {
       const parts = [];
-      if (attrs.handling_fee_time) parts.push(`${attrs.handling_fee_time} Min`);
+      if (attrs.handling_fee_time) parts.push(`${attrs.handling_fee_time} ${timeUnit}`);
       if (attrs.usage_fee_regio) parts.push(`${attrs.usage_fee_regio} G`);
       return parts.join(" + ") || "Contact";
     }
 
     case "RIDE_SHARE": {
       const parts = [];
-      if (attrs.price_time) parts.push(`${attrs.price_time} Min`);
+      if (attrs.price_time) parts.push(`${attrs.price_time} ${timeUnit}`);
       if (attrs.price_regio) parts.push(`${attrs.price_regio} G`);
       return parts.join(" + ") || "Contact for price";
     }
 
     case "EVENT_WORKSHOP": {
       const parts = [];
-      if (attrs.price_time) parts.push(`${attrs.price_time} Min`);
+      if (attrs.price_time) parts.push(`${attrs.price_time} ${timeUnit}`);
       if (attrs.price_regio) parts.push(`${attrs.price_regio} G`);
       return parts.join(" + ") || "Free";
     }

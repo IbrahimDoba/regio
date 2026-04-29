@@ -27,12 +27,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>('GB');
 
-  // Restore persisted language on mount
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = localStorage.getItem(STORAGE_KEY) as Language | null;
     if (stored && stored in TRANSLATIONS) {
-      setLanguageState(stored);
+      const id = window.setTimeout(() => setLanguageState(stored), 0);
+      return () => window.clearTimeout(id);
     }
   }, []);
 

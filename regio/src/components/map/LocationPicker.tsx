@@ -35,7 +35,7 @@ const LocationPicker = dynamic(
       return null;
     }
 
-    const { useState: useLocalState, useRef: useLocalRef } = await import("react");
+    const { useState: useLocalState } = await import("react");
     const { useMap } = await import("react-leaflet");
 
     function MapFlyTo({ lat, lng }: { lat: number; lng: number }) {
@@ -48,7 +48,7 @@ const LocationPicker = dynamic(
       const [latInput, setLatInput] = useLocalState(lat !== null ? String(lat) : "");
       const [lngInput, setLngInput] = useLocalState(lng !== null ? String(lng) : "");
       const [flyTarget, setFlyTarget] = useLocalState<{ lat: number; lng: number } | null>(null);
-      const flyKey = useLocalRef(0);
+      const [flyKey, setFlyKey] = useLocalState(0);
 
       const handleMapClick = (clat: number, clng: number) => {
         setLatInput(clat.toFixed(6));
@@ -61,7 +61,7 @@ const LocationPicker = dynamic(
         const parsedLng = parseFloat(lngInput);
         if (isNaN(parsedLat) || isNaN(parsedLng)) return;
         if (parsedLat < -90 || parsedLat > 90 || parsedLng < -180 || parsedLng > 180) return;
-        flyKey.current += 1;
+        setFlyKey((key) => key + 1);
         setFlyTarget({ lat: parsedLat, lng: parsedLng });
         onLocationSelect(parsedLat, parsedLng);
       };
@@ -129,7 +129,7 @@ const LocationPicker = dynamic(
                 <Marker position={[lat, lng]} />
               )}
               {flyTarget && (
-                <MapFlyTo key={flyKey.current} lat={flyTarget.lat} lng={flyTarget.lng} />
+                <MapFlyTo key={flyKey} lat={flyTarget.lat} lng={flyTarget.lng} />
               )}
             </MapContainer>
           </div>

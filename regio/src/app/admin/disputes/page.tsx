@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { usePendingDisputes, useResolveDispute } from '@/lib/api';
+import { useDialog } from '@/context/DialogContext';
 import ContentCard from '@/components/admin/ui/ContentCard';
 import StatusBadge from '@/components/admin/ui/StatusBadge';
 import CaseModal from '@/components/admin/disputes/CaseModal';
@@ -25,6 +26,7 @@ interface DisputePublic {
 export default function AdminDisputesPage() {
   const { data: disputes, isLoading } = usePendingDisputes();
   const resolveDisputeMutation = useResolveDispute();
+  const dialog = useDialog();
 
   const [selectedDispute, setSelectedDispute] = useState<DisputePublic | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,11 +48,11 @@ export default function AdminDisputesPage() {
       },
       {
         onSuccess: () => {
-          alert(`Dispute ${action.toLowerCase()}d successfully!`);
+          dialog.alert('Dispute Resolved', `Dispute ${action.toLowerCase()}d successfully!`);
         },
         onError: (error) => {
           console.error('Dispute resolution error:', error);
-          alert('Failed to resolve dispute');
+          dialog.alert('Error', 'Failed to resolve dispute');
         },
       }
     );

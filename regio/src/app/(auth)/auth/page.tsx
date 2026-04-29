@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
+import { useDialog } from "@/context/DialogContext";
 import { useRegisterUser } from "@/lib/api";
 import MobileContainer from "@/components/layout/MobileContainer";
 import ErrorMessage from "@/components/auth/ErrorMessage";
@@ -13,6 +14,7 @@ import ErrorMessage from "@/components/auth/ErrorMessage";
 export default function AuthPage() {
   const { t, language, setLanguage } = useLanguage();
   const { login } = useAuth();
+  const dialog = useDialog();
   const registerMutation = useRegisterUser();
 
   const [view, setView] = useState<'login' | 'register'>('login');
@@ -347,7 +349,7 @@ export default function AuthPage() {
 
             <div
               className="bg-[#f9f9f9] p-[15px] rounded-[8px] mb-[10px] border border-[#eee] cursor-pointer hover:bg-[#f0f7e6] hover:border-[var(--color-green-offer)] transition-colors"
-              onClick={() => alert('Redirecting...')}
+              onClick={() => dialog.alert('Community Request', 'This feature is coming soon.')}
             >
               <span className="font-bold text-[14px] text-[var(--color-nav-bg)] block mb-[4px]">
                 <FaUsers className="inline mr-[5px]" /> {t.auth.no_code_modal.request_community}
@@ -356,7 +358,7 @@ export default function AuthPage() {
 
             <div
               className="bg-[#f9f9f9] p-[15px] rounded-[8px] mb-[10px] border border-[#eee] cursor-pointer hover:bg-[#f0f7e6] hover:border-[var(--color-green-offer)] transition-colors"
-              onClick={() => alert('Opening form...')}
+              onClick={() => dialog.alert('Apply for Access', 'This feature is coming soon.')}
             >
               <span className="font-bold text-[14px] text-[var(--color-nav-bg)] block mb-[4px]">
                 <FaPenNib className="inline mr-[5px]" /> {t.auth.no_code_modal.apply_access}

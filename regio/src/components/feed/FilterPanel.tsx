@@ -1,27 +1,10 @@
 "use client";
 
 import React from "react";
-import {
-  FaScrewdriverWrench,
-  FaMagnifyingGlass,
-  FaTags,
-  FaMagnifyingGlassDollar,
-  FaHandHoldingHand,
-  FaCar,
-  FaCalendarDays,
-} from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingCategory } from "@/lib/api/types";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
-
-interface FilterItem {
-  category: ListingCategory;
-  color: string;
-  colorVar: string;
-  icon: string;
-  label: string;
-}
 
 interface FilterPanelProps {
   isOpen: boolean;
@@ -38,17 +21,6 @@ const filters = (Object.keys(CATEGORY_CONFIG) as ListingCategory[]).map(
     ...CATEGORY_CONFIG[cat],
   })
 );
-// Map icon strings to components if needed, or update CATEGORY_CONFIG to hold components.
-// For now, I'll map manually here to keep helper pure data.
-const ICON_MAP: Record<string, React.ReactNode> = {
-  "fa-screwdriver-wrench": <FaScrewdriverWrench />,
-  "fa-magnifying-glass": <FaMagnifyingGlass />,
-  "fa-tags": <FaTags />,
-  "fa-magnifying-glass-dollar": <FaMagnifyingGlassDollar />,
-  "fa-hand-holding-hand": <FaHandHoldingHand />,
-  "fa-car": <FaCar />,
-  "fa-calendar-days": <FaCalendarDays />,
-};
 
 export default function FilterPanel({
   isOpen,
@@ -77,17 +49,20 @@ export default function FilterPanel({
               key={f.category}
               onClick={() => toggleFilter(f.category)}
               className={cn(
-                "w-[40px] h-[40px] rounded-full border-[2px] border-[#eee] flex justify-center items-center text-[16px] cursor-pointer transition-all duration-200",
-                isActive
-                  ? "border-transparent text-white scale-110"
-                  : "bg-white text-black"
+                "w-[44px] h-[44px] rounded-full border-[2px] border-[#eee] flex justify-center items-center cursor-pointer transition-all duration-200",
+                isActive ? "border-transparent scale-110" : "bg-white"
               )}
               style={{
                 backgroundColor: isActive ? CATEGORY_CONFIG[f.category].colorVar : undefined,
               }}
               title={t.category_labels[f.category]}
             >
-              {ICON_MAP[f.icon]}
+              <img
+                src={f.icon}
+                alt={f.label}
+                className="w-[26px] h-[26px] object-contain"
+                style={{ filter: isActive ? "brightness(0) invert(1)" : "none" }}
+              />
             </div>
           );
         })}

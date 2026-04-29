@@ -20,26 +20,27 @@ interface PaymentRequestModalProps {
     amountTime: number;
     description: string;
   }) => void;
+  initialAmounts?: { time?: number; garas?: number; description?: string };
 }
 
 export function PaymentRequestModal({
   isOpen,
   onClose,
   onSubmit,
+  initialAmounts,
 }: PaymentRequestModalProps) {
   const { t } = useLanguage();
   const [amountGaras, setAmountGaras] = useState('');
   const [amountTime, setAmountTime] = useState('');
   const [description, setDescription] = useState('');
 
-  // Reset form when opened
+  // Reset/pre-fill form when opened
   useEffect(() => {
     if (isOpen) {
-      // Use requestAnimationFrame to avoid sync setState warning
       requestAnimationFrame(() => {
-        setAmountGaras('');
-        setAmountTime('');
-        setDescription('');
+        setAmountGaras(initialAmounts?.garas ? String(initialAmounts.garas) : '');
+        setAmountTime(initialAmounts?.time ? String(initialAmounts.time) : '');
+        setDescription(initialAmounts?.description ?? '');
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -7,7 +7,7 @@
  * Handles text entry, action sheet trigger, and typing indicators
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaPlus, FaPaperPlane } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
@@ -18,6 +18,7 @@ interface MessageInputProps {
   onOpenActions: () => void;
   disabled?: boolean;
   placeholder?: string;
+  initialValue?: string;
 }
 
 export function MessageInput({
@@ -26,10 +27,11 @@ export function MessageInput({
   onOpenActions,
   disabled = false,
   placeholder,
+  initialValue = '',
 }: MessageInputProps) {
   const { t } = useLanguage();
   const resolvedPlaceholder = placeholder ?? t.chat.message_input.placeholder;
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const hasTypedRef = useRef(false);
 

@@ -30,18 +30,28 @@ import { useRoomMessages } from "@/lib/api/hooks/use-chat";
 import { queryKeys } from "@/lib/api/query-keys";
 import { FaRegComments, FaArrowLeft } from "react-icons/fa6";
 import { useLanguage } from "@/context/LanguageContext";
+import { useDialog } from "@/context/DialogContext";
 
 export default function ChatPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useLanguage();
+  const dialog = useDialog();
 
   // URL parameters for contextual chat
   const roomId = searchParams.get("room");
   const partnerName = searchParams.get("name") || "Chat";
   const partnerAvatar = searchParams.get("avatar");
   const listingTitle = searchParams.get("listing");
+  const prefillMessage = searchParams.get("prefill") || "";
+  const priceTimeParam = searchParams.get("price_time");
+  const priceGarasParam = searchParams.get("price_garas");
+  const listingInitialAmounts = (priceTimeParam || priceGarasParam) ? {
+    time: priceTimeParam ? parseInt(priceTimeParam) : undefined,
+    garas: priceGarasParam ? parseFloat(priceGarasParam) : undefined,
+    description: listingTitle || "",
+  } : undefined;
 
   const queryClient = useQueryClient();
 
@@ -184,7 +194,11 @@ export default function ChatPage() {
   const handleDisputeRequest = useCallback(
     async (requestId: string) => {
       if (!roomId) return;
-      const reason = window.prompt("Optionally provide a reason for raising this dispute (max 500 chars):");
+      const reason = await dialog.prompt(
+        "Raise Dispute",
+        "Optionally provide a reason for raising this dispute (max 500 chars):",
+        "Reason..."
+      );
       if (reason === null) return; // user cancelled
       try {
         await bankingApi.raiseDispute(requestId, { reason: reason || undefined });
@@ -195,7 +209,7 @@ export default function ChatPage() {
         setActionError(getApiErrorMessage(err, "Failed to raise dispute"));
       }
     },
-    [roomId, updatePaymentRequestStatus, sendMessage, queryClient]
+    [roomId, updatePaymentRequestStatus, sendMessage, queryClient, dialog]
   );
 
   // Handle photo upload — triggers hidden file input
@@ -279,7 +293,7 @@ export default function ChatPage() {
   // Show loading state while connecting
   if (isConnecting || (!isConnected && !connectionError)) {
     return (
-      <div className="flex flex-col h-screen bg-gray-100">
+      <div className="flex flex-col h-[calc(100vh-60px)] bg-gray-100">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
@@ -372,7 +386,7 @@ export default function ChatPage() {
   const displayError = localError || connectionError;
   if (displayError) {
     return (
-      <div className="flex flex-col h-screen bg-gray-100">
+      <div className="flex flex-col h-[calc(100vh-60px)] bg-gray-100">
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="text-center max-w-sm">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -405,6 +419,7 @@ export default function ChatPage() {
         partnerAvatar={partnerAvatar}
         listingTitle={listingTitle || undefined}
         typingUsers={typingUsers}
+        onRequestPayment={listingInitialAmounts ? () => setIsPaymentModalOpen(true) : undefined}
       />
 
       {/* Connection Status */}
@@ -442,10 +457,12 @@ export default function ChatPage() {
       <div className="bg-gray-100 border-t border-gray-200 z-40">
         <div className="px-2 py-2">
           <MessageInput
+            key={`${roomId}-${prefillMessage}`}
             onSend={handleSendMessage}
             onTyping={handleTyping}
             onOpenActions={() => setIsActionSheetOpen(true)}
             disabled={!isConnected || !roomId}
+            initialValue={prefillMessage}
           />
         </div>
       </div>
@@ -484,6 +501,7 @@ export default function ChatPage() {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         onSubmit={handleSendPaymentRequest}
+        initialAmounts={listingInitialAmounts}
       />
 
       {/* Hidden file input for photo upload */}

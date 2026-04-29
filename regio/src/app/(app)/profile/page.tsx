@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { useDialog } from "@/context/DialogContext";
 import {
   useMe,
   useUpdateUser,
@@ -23,6 +24,7 @@ import { API_CONFIG } from "@/lib/api/config";
 
 export default function ProfilePage() {
   const { language, setLanguage, t } = useLanguage();
+  const dialog = useDialog();
   const [activeTab, setActiveTab] = useState<"personal" | "account" | "trust">(
     "personal"
   );
@@ -90,7 +92,7 @@ export default function ProfilePage() {
       },
       {
         onSuccess: () => {
-          alert("Profile updated!");
+          dialog.alert("Profile", "Profile updated!");
         },
       }
     );
@@ -133,7 +135,7 @@ export default function ProfilePage() {
               const file = e.target.files?.[0];
               if (!file) return;
               if (file.size > 5 * 1024 * 1024) {
-                alert("Image must be smaller than 5 MB.");
+                dialog.alert("File Too Large", "Image must be smaller than 5 MB.");
                 e.target.value = "";
                 return;
               }
@@ -180,7 +182,7 @@ export default function ProfilePage() {
             className="text-[var(--turquoise)] cursor-pointer text-[14px]"
             onClick={() => {
               navigator.clipboard.writeText(user.user_code);
-              alert("ID copied!");
+              dialog.alert("Copied", "ID copied!");
             }}
           />
         </div>

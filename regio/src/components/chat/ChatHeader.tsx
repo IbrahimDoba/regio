@@ -18,6 +18,7 @@ interface ChatHeaderProps {
   listingTitle?: string;
   typingUsers?: string[];
   onBack?: () => void;
+  onRequestPayment?: () => void;
   className?: string;
 }
 
@@ -27,6 +28,7 @@ export function ChatHeader({
   listingTitle,
   typingUsers = [],
   onBack,
+  onRequestPayment,
   className,
 }: ChatHeaderProps) {
   const router = useRouter();
@@ -101,6 +103,16 @@ export function ChatHeader({
       </div>
 
       {/* Actions */}
+      {onRequestPayment && (
+        <button
+          onClick={onRequestPayment}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-full transition-colors shrink-0"
+          aria-label="Request payment"
+        >
+          <img src="/requestpayment.png" className="w-4 h-4" alt="" />
+          Pay
+        </button>
+      )}
       <button
         className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
         aria-label="More options"

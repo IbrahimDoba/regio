@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { useDialog } from "@/context/DialogContext";
 import {
   FaWallet,
   FaQrcode,
@@ -26,7 +27,8 @@ import {
   useCancelPaymentRequest,
   useRaiseDispute,
 } from "@/lib/api/hooks/use-banking";
-import { TransactionPublic } from "@/lib/api/types";
+import { useSearchUsers } from "@/lib/api/hooks/use-users";
+import { TransactionPublic, UserPublic } from "@/lib/api/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -84,6 +86,113 @@ function InlineSuccess({ message }: { message: string }) {
   );
 }
 
+function formatUserOption(user: UserPublic): string {
+  return `${user.first_name} ${user.last_name} | ${user.user_code}`;
+}
+
+function UserAutocomplete({
+  value,
+  selectedCode,
+  placeholder,
+  onChange,
+  onSelect,
+  onClearError,
+}: {
+  value: string;
+  selectedCode: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+  onSelect: (user: UserPublic) => void;
+  onClearError: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { data: users = [], isFetching } = useSearchUsers(value, 8, isOpen && value.length >= 2);
+
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
+        placeholder={placeholder}
+        value={value}
+        onFocus={() => setIsOpen(true)}
+        onBlur={() => window.setTimeout(() => setIsOpen(false), 120)}
+        onChange={(e) => {
+          onChange(e.target.value);
+          onClearError();
+          setIsOpen(true);
+        }}
+      />
+      {selectedCode && (
+        <div className="text-[10px] text-[#888] mt-[3px]">
+          Selected: <span className="font-mono font-[700]">{selectedCode}</span>
+        </div>
+      )}
+      {isOpen && value.length >= 2 && (
+        <div className="absolute left-0 right-0 top-[42px] bg-white border border-[#ddd] rounded-[4px] shadow-lg z-[20] max-h-[190px] overflow-y-auto">
+          {isFetching && (
+            <div className="px-[10px] py-[9px] text-[12px] text-[#888]">
+              Searching...
+            </div>
+          )}
+          {!isFetching && users.length === 0 && (
+            <div className="px-[10px] py-[9px] text-[12px] text-[#888]">
+              No matching users
+            </div>
+          )}
+          {users.map((user) => (
+            <button
+              key={user.user_code}
+              type="button"
+              className="w-full px-[10px] py-[9px] text-left text-[13px] text-[#333] hover:bg-[#f0f7e6] border-b border-[#f5f5f5] last:border-b-0"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onSelect(user);
+                setIsOpen(false);
+              }}
+            >
+              <span>{user.first_name} {user.last_name}</span>
+              <span className="text-[#888] mx-[6px]">|</span>
+              <span className="font-mono font-[700]">{user.user_code}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AmountInput({
+  value,
+  onChange,
+  placeholder,
+  unit,
+  step,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  unit: string;
+  step?: string;
+}) {
+  return (
+    <div className="relative">
+      <input
+        type="number"
+        min="0"
+        step={step}
+        className="w-full p-[10px_40px_10px_10px] border border-[#ccc] rounded-[4px] bg-white text-[14px] text-right tabular-nums"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <span className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[11px] font-[700] text-[#888] pointer-events-none">
+        {unit}
+      </span>
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Page
 // ─────────────────────────────────────────────────────────────────────────────
@@ -91,12 +200,14 @@ function InlineSuccess({ message }: { message: string }) {
 export default function WalletPage() {
   const router = useRouter();
   const { t } = useLanguage();
+  const dialog = useDialog();
   const [sendOpen, setSendOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionPublic | null>(null);
 
   // ── Send form state ──────────────────────────────────────────────────────
   const [sendRecipient, setSendRecipient] = useState("");
+  const [sendRecipientQuery, setSendRecipientQuery] = useState("");
   const [sendGaras, setSendGaras] = useState("");
   const [sendTime, setSendTime] = useState("");
   const [sendRef, setSendRef] = useState("");
@@ -105,6 +216,7 @@ export default function WalletPage() {
 
   // ── Request form state ───────────────────────────────────────────────────
   const [reqUser, setReqUser] = useState("");
+  const [reqUserQuery, setReqUserQuery] = useState("");
   const [reqGaras, setReqGaras] = useState("");
   const [reqTime, setReqTime] = useState("");
   const [reqDesc, setReqDesc] = useState("");
@@ -161,13 +273,13 @@ export default function WalletPage() {
   // Send transfer
   // ─────────────────────────────────────────────────────────────────────────
 
-  const handleSend = () => {
+  const handleSend = async () => {
     setSendError(null);
     setSendSuccess(false);
 
     // Client-side validation
     if (!sendRecipient.trim()) {
-      setSendError("Recipient user code is required.");
+      setSendError("Please search and choose a recipient from the dropdown.");
       return;
     }
     const parsedGaras = parseFloat(sendGaras);
@@ -183,7 +295,7 @@ export default function WalletPage() {
       return;
     }
 
-    if (!confirm(`Send to ${sendRecipient}?`)) return;
+    if (!await dialog.confirm("Confirm Transfer", `Send to ${sendRecipient}?`)) return;
 
     transfer.mutate(
       {
@@ -196,6 +308,7 @@ export default function WalletPage() {
         onSuccess: () => {
           setSendSuccess(true);
           setSendRecipient("");
+          setSendRecipientQuery("");
           setSendGaras("");
           setSendTime("");
           setSendRef("");
@@ -221,7 +334,7 @@ export default function WalletPage() {
     setReqSuccess(false);
 
     if (!reqUser.trim()) {
-      setReqError("User code is required.");
+      setReqError("Please search and choose a user from the dropdown.");
       return;
     }
     const parsedGaras = parseFloat(reqGaras);
@@ -248,6 +361,7 @@ export default function WalletPage() {
         onSuccess: () => {
           setReqSuccess(true);
           setReqUser("");
+          setReqUserQuery("");
           setReqGaras("");
           setReqTime("");
           setReqDesc("");
@@ -268,9 +382,9 @@ export default function WalletPage() {
   // Incoming request actions
   // ─────────────────────────────────────────────────────────────────────────
 
-  const handleConfirmRequest = (id: string, amount: string) => {
+  const handleConfirmRequest = async (id: string, amount: string) => {
     setActionError(null);
-    if (!confirm(`Pay ${amount}?`)) return;
+    if (!await dialog.confirm("Confirm Payment", `Pay ${amount}?`)) return;
     confirmRequest.mutate(id, {
       onSuccess: () => {
         refetchIncoming();
@@ -281,9 +395,9 @@ export default function WalletPage() {
     });
   };
 
-  const handleRejectRequest = (id: string) => {
+  const handleRejectRequest = async (id: string) => {
     setActionError(null);
-    if (!confirm("Decline this payment request?")) return;
+    if (!await dialog.confirm("Decline Request", "Decline this payment request?")) return;
     rejectRequest.mutate(id, {
       onSuccess: () => {
         refetchIncoming();
@@ -294,9 +408,9 @@ export default function WalletPage() {
     });
   };
 
-  const handleCancelRequest = (id: string) => {
+  const handleCancelRequest = async (id: string) => {
     setActionError(null);
-    if (!confirm("Cancel this request?")) return;
+    if (!await dialog.confirm("Cancel Request", "Cancel this request?")) return;
     cancelRequest.mutate(id, {
       onSuccess: () => {
         refetchOutgoing();
@@ -307,9 +421,11 @@ export default function WalletPage() {
     });
   };
 
-  const handleRaiseDispute = (id: string) => {
-    const reason = window.prompt(
-      "Optionally provide a reason for this dispute (max 500 chars):"
+  const handleRaiseDispute = async (id: string) => {
+    const reason = await dialog.prompt(
+      "Raise Dispute",
+      "Optionally provide a reason for this dispute (max 500 chars):",
+      "Reason..."
     );
     if (reason === null) return;
     raiseDisputeMutation.mutate(
@@ -680,12 +796,20 @@ export default function WalletPage() {
             <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
               {t.wallet.send_form.recipient_label} <span className="text-[#e53935]">*</span>
             </label>
-            <input
-              type="text"
-              className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
+            <UserAutocomplete
+              value={sendRecipientQuery}
+              selectedCode={sendRecipient}
               placeholder={t.wallet.send_form.recipient_placeholder}
-              value={sendRecipient}
-              onChange={(e) => { setSendRecipient(e.target.value); setSendError(null); }}
+              onChange={(value) => {
+                setSendRecipientQuery(value);
+                setSendRecipient("");
+              }}
+              onSelect={(user) => {
+                setSendRecipient(user.user_code);
+                setSendRecipientQuery(formatUserOption(user));
+                setSendError(null);
+              }}
+              onClearError={() => setSendError(null)}
             />
           </div>
 
@@ -694,27 +818,23 @@ export default function WalletPage() {
               <label className="flex items-center gap-[4px] text-[11px] font-bold text-[#666] mb-[4px]">
                 <img src="/time.png" className="w-3.5 h-3.5" alt="" />{t.wallet.send_form.time_label}
               </label>
-              <input
-                type="number"
-                min="0"
-                className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-                placeholder={t.wallet.send_form.time_placeholder}
+              <AmountInput
                 value={sendTime}
-                onChange={(e) => { setSendTime(e.target.value); setSendError(null); }}
+                placeholder={t.wallet.send_form.time_placeholder}
+                unit="min"
+                onChange={(value) => { setSendTime(value); setSendError(null); }}
               />
             </div>
             <div className="flex-1">
               <label className="flex items-center gap-[4px] text-[11px] font-bold text-[#666] mb-[4px]">
                 <img src="/garas.png" className="w-3.5 h-3.5" alt="" />{t.wallet.send_form.garas_label}
               </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-                placeholder={t.wallet.send_form.garas_placeholder}
+              <AmountInput
                 value={sendGaras}
-                onChange={(e) => { setSendGaras(e.target.value); setSendError(null); }}
+                placeholder={t.wallet.send_form.garas_placeholder}
+                unit="G"
+                step="0.01"
+                onChange={(value) => { setSendGaras(value); setSendError(null); }}
               />
             </div>
           </div>
@@ -764,12 +884,20 @@ export default function WalletPage() {
             <label className="block text-[11px] font-bold text-[#666] mb-[4px]">
               {t.wallet.request_form.from_label} <span className="text-[#e53935]">*</span>
             </label>
-            <input
-              type="text"
-              className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
+            <UserAutocomplete
+              value={reqUserQuery}
+              selectedCode={reqUser}
               placeholder={t.wallet.request_form.from_placeholder}
-              value={reqUser}
-              onChange={(e) => { setReqUser(e.target.value); setReqError(null); }}
+              onChange={(value) => {
+                setReqUserQuery(value);
+                setReqUser("");
+              }}
+              onSelect={(user) => {
+                setReqUser(user.user_code);
+                setReqUserQuery(formatUserOption(user));
+                setReqError(null);
+              }}
+              onClearError={() => setReqError(null)}
             />
           </div>
 
@@ -778,27 +906,23 @@ export default function WalletPage() {
               <label className="flex items-center gap-[4px] text-[11px] font-bold text-[#666] mb-[4px]">
                 <img src="/time.png" className="w-3.5 h-3.5" alt="" />{t.wallet.send_form.time_label}
               </label>
-              <input
-                type="number"
-                min="0"
-                className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-                placeholder={t.wallet.send_form.time_placeholder}
+              <AmountInput
                 value={reqTime}
-                onChange={(e) => { setReqTime(e.target.value); setReqError(null); }}
+                placeholder={t.wallet.send_form.time_placeholder}
+                unit="min"
+                onChange={(value) => { setReqTime(value); setReqError(null); }}
               />
             </div>
             <div className="flex-1">
               <label className="flex items-center gap-[4px] text-[11px] font-bold text-[#666] mb-[4px]">
                 <img src="/garas.png" className="w-3.5 h-3.5" alt="" />{t.wallet.send_form.garas_label}
               </label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                className="w-full p-[10px] border border-[#ccc] rounded-[4px] bg-white text-[14px]"
-                placeholder={t.wallet.send_form.garas_placeholder}
+              <AmountInput
                 value={reqGaras}
-                onChange={(e) => { setReqGaras(e.target.value); setReqError(null); }}
+                placeholder={t.wallet.send_form.garas_placeholder}
+                unit="G"
+                step="0.01"
+                onChange={(value) => { setReqGaras(value); setReqError(null); }}
               />
             </div>
           </div>

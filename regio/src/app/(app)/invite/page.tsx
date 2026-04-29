@@ -19,10 +19,12 @@ import {
   useRequestNewInvites,
 } from "@/lib/api/hooks/use-users";
 import { useLanguage } from "@/context/LanguageContext";
+import { useDialog } from "@/context/DialogContext";
 
 export default function InvitePage() {
   const router = useRouter();
   const { t } = useLanguage();
+  const dialog = useDialog();
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState(0);
 
@@ -30,15 +32,15 @@ export default function InvitePage() {
   const { data: invites, isLoading, refetch } = useUserInvites();
   const requestInvitesMutation = useRequestNewInvites();
 
-  const handleRequestInvites = () => {
-    if (
-      confirm(
-        "Are you sure you want to void current invites and request new ones?"
-      )
-    ) {
+  const handleRequestInvites = async () => {
+    const ok = await dialog.confirm(
+      "Request New Invites",
+      "Are you sure you want to void current invites and request new ones?"
+    );
+    if (ok) {
       requestInvitesMutation.mutate(undefined, {
         onSuccess: () => {
-          alert("New invites generated!");
+          dialog.alert("Done", "New invites generated!");
           setSelectedCode(null);
         },
       });
@@ -59,19 +61,19 @@ export default function InvitePage() {
   const templates = [
     {
       title: t.invite.message_standard,
-      text: "Hey! Join me on regio.is to trade services and goods locally. It's invite-only. Here is your code: %CODE%",
+      text: t.invite.message_standard_text,
     },
     {
       title: t.invite.message_community,
-      text: "I found a great community for fair local trade called regio.is. I think you'd fit in perfectly! Join us with: %CODE%",
+      text: t.invite.message_community_text,
     },
     {
       title: t.invite.message_short,
-      text: "Here is your access code for regio.is: %CODE%",
+      text: t.invite.message_short_text,
     },
     {
       title: t.invite.message_help,
-      text: "Let's help each other in the neighborhood. regio.is makes it easy to swap time and goods. Join with: %CODE%",
+      text: t.invite.message_help_text,
     },
   ];
 
@@ -84,9 +86,9 @@ export default function InvitePage() {
     );
   };
 
-  const share = (platform: string) => {
+  const share = async (platform: string) => {
     if (!selectedCode) {
-      alert("Please select an available invite code first.");
+      await dialog.alert("Select a Code", "Please select an available invite code first.");
       return;
     }
     const text = getFinalText();
@@ -100,7 +102,7 @@ export default function InvitePage() {
             .catch(console.error);
         } else {
           navigator.clipboard.writeText(text);
-          alert("Text copied to clipboard");
+          dialog.alert("Copied", "Text copied to clipboard");
         }
         break;
       case "whatsapp":
@@ -115,7 +117,7 @@ export default function InvitePage() {
         break;
       case "facebook":
         navigator.clipboard.writeText(selectedCode);
-        alert("Code copied! You can paste it in your post.");
+        dialog.alert("Code Copied", "Code copied! You can paste it in your post.");
         window.open(
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
             url
@@ -123,10 +125,9 @@ export default function InvitePage() {
         );
         break;
       case "email":
-        // eslint-disable-next-line react-hooks/immutability
-        window.location.href = `mailto:?subject=${encodeURIComponent(
+        window.open(`mailto:?subject=${encodeURIComponent(
           "Invite to regio.is"
-        )}&body=${encodeURIComponent(text)}`;
+        )}&body=${encodeURIComponent(text)}`, "_self");
         break;
     }
   };

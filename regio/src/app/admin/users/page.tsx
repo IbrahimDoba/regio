@@ -10,6 +10,7 @@ import ContentCard from "@/components/admin/ui/ContentCard";
 import UserTable from "@/components/admin/users/UserTable";
 import EditUserModal from "@/components/admin/users/EditUserModal";
 import StatsGrid from "@/components/admin/dashboard/StatsGrid";
+import { useDialog } from "@/context/DialogContext";
 
 interface UserAdminView {
   user_code: string;
@@ -51,6 +52,7 @@ export default function AdminUsersPage() {
   const { data: statsData, isLoading: statsLoading } = useDashboardStats();
 
   const updateUserMutation = useUpdateUserDetails();
+  const dialog = useDialog();
 
   const handleEditUser = (user: UserAdminView) => {
     setSelectedUser(user);
@@ -65,18 +67,18 @@ export default function AdminUsersPage() {
       },
       {
         onSuccess: () => {
-          alert(`User ${userCode} verified successfully!`);
+          dialog.alert("User Verified", `User ${userCode} verified successfully!`);
         },
         onError: (error) => {
           console.error("Verification error:", error);
-          alert("Failed to verify user");
+          dialog.alert("Error", "Failed to verify user");
         },
       }
     );
   };
 
-  const handleRejectUser = (userCode: string) => {
-    if (!confirm(`Reject verification for user ${userCode}?`)) return;
+  const handleRejectUser = async (userCode: string) => {
+    if (!await dialog.confirm("Reject User", `Reject verification for user ${userCode}?`)) return;
     updateUserMutation.mutate(
       {
         userCode,
@@ -84,11 +86,11 @@ export default function AdminUsersPage() {
       },
       {
         onSuccess: () => {
-          alert(`User ${userCode} rejected.`);
+          dialog.alert("User Rejected", `User ${userCode} rejected.`);
         },
         onError: (error) => {
           console.error("Rejection error:", error);
-          alert("Failed to reject user");
+          dialog.alert("Error", "Failed to reject user");
         },
       }
     );
@@ -99,11 +101,11 @@ export default function AdminUsersPage() {
       { userCode, data },
       {
         onSuccess: () => {
-          alert("User updated successfully!");
+          dialog.alert("User Updated", "User updated successfully!");
         },
         onError: (error) => {
           console.error("Update error:", error);
-          alert("Failed to update user");
+          dialog.alert("Error", "Failed to update user");
         },
       }
     );

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAdminTags, useUpdateTag, useDeleteTag } from '@/lib/api';
+import { useDialog } from '@/context/DialogContext';
 import ContentCard from '@/components/admin/ui/ContentCard';
 import { FaCheck, FaTrash, FaPen, FaHourglassHalf } from 'react-icons/fa6';
 
@@ -20,6 +21,7 @@ export default function AdminTagsPage() {
   const { data: officialTags, isLoading: officialLoading } = useAdminTags({ pending: false });
   const updateTagMutation = useUpdateTag();
   const deleteTagMutation = useDeleteTag();
+  const dialog = useDialog();
 
   const [editingTags, setEditingTags] = useState<Record<string, TagAdminView>>({});
 
@@ -48,7 +50,7 @@ export default function AdminTagsPage() {
       },
       {
         onSuccess: () => {
-          alert('Tag approved successfully!');
+          dialog.alert('Tag Approved', 'Tag approved successfully!');
           setEditingTags((prev) => {
             const newState = { ...prev };
             delete newState[tag.id];
@@ -57,22 +59,22 @@ export default function AdminTagsPage() {
         },
         onError: (error) => {
           console.error('Tag approval error:', error);
-          alert('Failed to approve tag');
+          dialog.alert('Error', 'Failed to approve tag');
         },
       }
     );
   };
 
-  const handleDeleteTag = (tagId: string) => {
-    if (!confirm('Are you sure you want to delete this tag?')) return;
+  const handleDeleteTag = async (tagId: string) => {
+    if (!await dialog.confirm('Delete Tag', 'Are you sure you want to delete this tag?')) return;
 
     deleteTagMutation.mutate(tagId, {
       onSuccess: () => {
-        alert('Tag deleted successfully!');
+        dialog.alert('Tag Deleted', 'Tag deleted successfully!');
       },
       onError: (error) => {
         console.error('Tag deletion error:', error);
-        alert('Failed to delete tag');
+        dialog.alert('Error', 'Failed to delete tag');
       },
     });
   };

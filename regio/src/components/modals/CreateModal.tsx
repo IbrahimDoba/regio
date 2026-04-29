@@ -2,9 +2,7 @@
 
 import React, { useState } from "react";
 import {
-  FaSpinner, FaImage, FaXmark, FaMapLocationDot,
-  FaScrewdriverWrench, FaMagnifyingGlass, FaTags,
-  FaMagnifyingGlassDollar, FaHandHoldingHand, FaCar, FaCalendarDays,
+  FaSpinner, FaImage, FaXmark, FaMapLocationDot, FaClock,
 } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingCategory, ListingCreate } from "@/lib/api/types";
@@ -348,17 +346,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const labelClass = "text-[14px] font-[700] text-[#555] block mb-[6px]";
   const fieldClass = "mb-[15px]";
 
-  const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
-    "fa-screwdriver-wrench": <FaScrewdriverWrench />,
-    "fa-magnifying-glass": <FaMagnifyingGlass />,
-    "fa-tags": <FaTags />,
-    "fa-magnifying-glass-dollar": <FaMagnifyingGlassDollar />,
-    "fa-hand-holding-hand": <FaHandHoldingHand />,
-    "fa-car": <FaCar />,
-    "fa-calendar-days": <FaCalendarDays />,
-  };
-
-  const { icon: catIcon, label: catLabel, colorVar: catColorVar } = getCategoryDetails(category);
+  const { icon: catIcon, colorVar: catColorVar } = getCategoryDetails(category);
+  const catLabel = t.category_labels[category];
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-[1000] flex justify-center items-center backdrop-blur-[3px] animate-in fade-in duration-200">
@@ -380,9 +369,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           className="flex items-center gap-[16px] px-[20px] py-[14px] border-b-[3px]"
           style={{ borderBottomColor: catColorVar, backgroundColor: `color-mix(in srgb, ${catColorVar} 8%, white)` }}
         >
-          <span className="text-[44px] leading-none" style={{ color: catColorVar }}>
-            {CATEGORY_ICON_MAP[catIcon]}
-          </span>
+          <img src={catIcon} alt={catLabel} className="w-[44px] h-[44px] object-contain" />
           <span className="text-[20px] font-[800] uppercase tracking-wider" style={{ color: catColorVar }}>
             {catLabel}
           </span>
@@ -399,7 +386,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             >
               {Object.keys(CATEGORY_CONFIG).map((catKey) => (
                 <option key={catKey} value={catKey}>
-                  {CATEGORY_CONFIG[catKey as ListingCategory].label}
+                  {t.category_labels[catKey as ListingCategory]}
                 </option>
               ))}
             </select>
@@ -440,9 +427,16 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {/* OFFER_SERVICE */}
           {category === "OFFER_SERVICE" && (
             <div className={fieldClass}>
-              <label className={`${labelClass} flex items-center gap-1.5`}>
-                <img src="/timefactor.png" className="w-5 h-5" alt="" />{t.create_modal.offer_service.time_factor_label} <span className="text-[#999] font-normal">{t.create_modal.offer_service.time_factor_hint}</span>
-              </label>
+              <div className="flex justify-between items-center mb-2">
+                <label className={labelClass}>
+                  {t.create_modal.offer_service.time_factor_label}
+                  <span className="text-[#999] font-normal ml-1">{t.create_modal.offer_service.time_factor_hint}</span>
+                </label>
+                <div className="flex items-center gap-1.5 bg-[#f0f0f0] rounded-[6px] px-2.5 py-1 shrink-0">
+                  <span className="text-[14px] font-[800] text-[#333]">{timeFactor}x</span>
+                  <FaClock className="text-[#888] text-[12px]" />
+                </div>
+              </div>
               <input
                 type="range"
                 min="0.25"
@@ -450,10 +444,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 step="0.25"
                 value={timeFactor}
                 onChange={(e) => setTimeFactor(parseFloat(e.target.value))}
-                className="w-full cursor-pointer"
+                className="w-full cursor-pointer accent-[#e05555]"
               />
-              <div className="text-center text-[12px] font-bold text-[#666] mt-1 flex items-center justify-center gap-1">
-                <img src="/timefactor.png" className="w-5 h-5" alt="" />
+              <div className="text-[12px] text-[#888] mt-1.5 italic">
                 {t.create_modal.offer_service.time_factor_description.replace('{factor}', String(timeFactor))}
               </div>
             </div>

@@ -1,45 +1,31 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  FaLocationDot,
-  FaScrewdriverWrench,
-  FaMagnifyingGlass,
-  FaTags,
-  FaMagnifyingGlassDollar,
-  FaHandHoldingHand,
-  FaCar,
-  FaCalendarDays,
-} from "react-icons/fa6";
+import { FaLocationDot } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingPublic } from "@/lib/api/types";
 import { getCategoryDetails } from "@/lib/feed-helpers";
 import { formatPriceNode } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import { API_CONFIG } from "@/lib/api/config";
-
-const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
-  "fa-screwdriver-wrench": <FaScrewdriverWrench />,
-  "fa-magnifying-glass": <FaMagnifyingGlass />,
-  "fa-tags": <FaTags />,
-  "fa-magnifying-glass-dollar": <FaMagnifyingGlassDollar />,
-  "fa-hand-holding-hand": <FaHandHoldingHand />,
-  "fa-car": <FaCar />,
-  "fa-calendar-days": <FaCalendarDays />,
-};
 
 interface FeedCardProps {
   listing: ListingPublic;
   onOpenPreview: (listing: ListingPublic) => void;
   onContact?: (listing: ListingPublic) => void;
+  onModify?: (listing: ListingPublic) => void;
 }
 
-export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCardProps) {
+export default function FeedCard({ listing, onOpenPreview, onContact, onModify }: FeedCardProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { user } = useAuth();
 
+  const isOwn = !!user && listing.owner_code === user.user_code;
+  const timeUnit = language === "HU" ? "perc" : "min";
   const { color, icon, label, colorVar } = getCategoryDetails(listing.category);
-  const priceDisplay = formatPriceNode(listing);
+  const priceDisplay = formatPriceNode(listing, timeUnit);
 
   return (
     <div
@@ -65,8 +51,8 @@ export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCard
           className="grid grid-cols-[50px_1fr] gap-[10px] mb-[5px] cursor-pointer border-b border-[var(--grey-line)] pb-[8px]"
           onClick={() => onOpenPreview(listing)}
         >
-          <div className="flex justify-center items-start pt-[2px] text-[42px] leading-none" style={{ color: colorVar }}>
-            {CATEGORY_ICON_MAP[icon]}
+          <div className="flex justify-center items-start pt-[2px]">
+            <img src={icon} alt={label} className="w-[42px] h-[42px] object-contain" />
           </div>
           <div className="flex flex-col justify-between">
             <h3 className="text-[17px] font-[500] leading-[1.3] m-[0_0_8px_0] text-[var(--color-text-main)]">
@@ -154,11 +140,11 @@ export default function FeedCard({ listing, onOpenPreview, onContact }: FeedCard
                   {priceDisplay}
                 </div>
                 <button
-                  onClick={() => onContact?.(listing)}
-                  className={`text-white border-none p-[8px_20px] rounded-[3px] text-[13px] font-[700] cursor-pointer hover:brightness-110 transition-all`}
+                  onClick={() => isOwn ? onModify?.(listing) : onContact?.(listing)}
+                  className="text-white border-none p-[8px_20px] rounded-[3px] text-[13px] font-[700] cursor-pointer hover:brightness-110 transition-all"
                   style={{ backgroundColor: colorVar }}
                 >
-                  {t.feed_card.contact_button}
+                  {isOwn ? t.preview_modal.modify_button : t.feed_card.contact_button}
                 </button>
               </div>
             </div>

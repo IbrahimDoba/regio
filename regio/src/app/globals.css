@@ -4,6 +4,8 @@
   color-scheme: light;
   --background: #e0e0e0;
   --foreground: #171717;
+  --font-roboto: Arial, Helvetica, sans-serif;
+  --font-roboto-condensed: "Arial Narrow", "Roboto Condensed", Arial, Helvetica, sans-serif;
 
   /* Regio App Colors */
   --color-green-offer: #8cb348;
