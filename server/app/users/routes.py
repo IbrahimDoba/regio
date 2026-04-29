@@ -116,14 +116,16 @@ async def register_user(
     """
     db_user = await service.create_user(user_in)
 
-    background_tasks.add_task(
-        send_welcome_email_task,
-        VerificationEmailData(
-            user_first_name=db_user.first_name,
-            user_email=db_user.email,
-            calendly_url=email_settings.CALENDLY_URL,
-        ),
-    )
+    # Only send emails on successful registrations
+    if db_user:
+        background_tasks.add_task(
+            send_welcome_email_task,
+            VerificationEmailData(
+                user_first_name=db_user.first_name,
+                user_email=db_user.email,
+                calendly_url=email_settings.CALENDLY_URL,
+            ),
+        )
 
     return db_user
 
