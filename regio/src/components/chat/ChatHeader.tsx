@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { FaArrowLeft, FaEllipsisVertical, FaReply } from 'react-icons/fa6';
+import { FaArrowLeft, FaReply } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -113,12 +113,7 @@ export function ChatHeader({
           Pay
         </button>
       )}
-      <button
-        className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
-        aria-label="More options"
-      >
-        <FaEllipsisVertical className="w-5 h-5" />
-      </button>
+
     </header>
   );
 }

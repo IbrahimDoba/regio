@@ -6,7 +6,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useDialog } from "@/context/DialogContext";
 import {
   FaWallet,
-  FaQrcode,
   FaClock,
   FaCoins,
   FaArrowDown,
@@ -461,9 +460,7 @@ export default function WalletPage() {
               <FaWallet className="text-[var(--color-nav-bg)]" /> {t.wallet.header}
             </div>
           </div>
-          <div className="cursor-pointer text-[#888] text-[20px]">
-            <FaQrcode />
-          </div>
+
         </div>
       </header>
 
