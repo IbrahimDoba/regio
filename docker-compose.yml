@@ -34,6 +34,8 @@ services:
       - "host.containers.internal:host-gateway"
     ports:
       - "127.0.0.1:2323:2323"
+    volumes:
+      - user_files:/app/data
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -71,6 +73,7 @@ services:
 
 volumes:
   redis_data:
+  user_files:
 
 networks:
   app-network:

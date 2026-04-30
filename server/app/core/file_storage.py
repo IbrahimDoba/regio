@@ -1,4 +1,5 @@
 import asyncio
+import os
 import uuid
 from pathlib import Path
 from typing import Annotated
@@ -7,8 +8,8 @@ from fastapi import Depends, UploadFile
 
 from app.core.exceptions import FileUploadError
 
-# Resolves to <server_root>/data/
-BASE_DIR = Path(__file__).resolve().parents[2] / "data"
+_default_base = Path(__file__).resolve().parents[2] / "data"
+BASE_DIR = Path(os.environ.get("STORAGE_BASE_DIR", _default_base))
 
 # Cap concurrent GhostScript processes to avoid resource exhaustion under load
 _GS_SEMAPHORE = asyncio.Semaphore(5)

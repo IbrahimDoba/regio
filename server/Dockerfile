@@ -34,7 +34,9 @@ RUN apk add --no-cache \
     ghostscript \
     libffi \
  && addgroup -S app \
- && adduser -S app -G app
+ && adduser -S app -G app \
+ && mkdir -p /app/data \
+ && chown app:app /app/data
 
 COPY --from=builder --chown=app:app /app /app
 
