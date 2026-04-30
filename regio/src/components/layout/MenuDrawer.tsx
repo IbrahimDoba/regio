@@ -13,23 +13,27 @@ import {
   FaArrowRightFromBracket,
 } from "react-icons/fa6";
 import { useLogout } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
+import { FaShield } from "react-icons/fa6";
 
 interface MenuDrawerProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const menuItems = [
-  { href: "/", icon: <FaHouse />, label: "Feed" },
-  { href: "/profile", icon: <FaUser />, label: "Profile" },
-  { href: "/wallet", icon: <FaWallet />, label: "Wallet" },
-  { href: "/chat", icon: <FaEnvelope />, label: "Messages" },
-  { href: "/notifications", icon: <FaBell />, label: "Notifications" },
-  { href: "/invite", icon: <FaTicket />, label: "Invite" },
-];
-
 export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
   const { mutate: logout } = useLogout();
+  const { user } = useAuth();
+
+  const menuItems = [
+    { href: "/", icon: <FaHouse />, label: "Feed" },
+    { href: "/profile", icon: <FaUser />, label: "Profile" },
+    { href: "/wallet", icon: <FaWallet />, label: "Wallet" },
+    { href: "/chat", icon: <FaEnvelope />, label: "Messages" },
+    { href: "/notifications", icon: <FaBell />, label: "Notifications" },
+    { href: "/invite", icon: <FaTicket />, label: "Invite" },
+    ...(user?.is_system_admin ? [{ href: "/admin", icon: <FaShield />, label: "Admin" }] : []),
+  ];
 
   if (!isOpen) return null;
 
