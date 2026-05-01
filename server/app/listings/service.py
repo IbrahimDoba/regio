@@ -122,7 +122,9 @@ class ListingService:
             radius_km=data.radius_km,
             location_lat=data.location_lat,
             location_lng=data.location_lng,
-            attributes=data.attributes.model_dump(exclude_none=True),
+            attributes=data.attributes.model_dump(
+                mode="json", exclude_none=True
+            ),
         )
 
         self.session.add(listing)
