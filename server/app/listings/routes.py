@@ -48,13 +48,14 @@ async def create_listing(
     """
     listing = await service.create_listing(current_user, data)
 
-    background_tasks.add_task(
-        TranslateService.translate_listing,
-        listing_id=listing.id,
-        title=data.title,
-        description=data.description,
-        origin_language=current_user.language,
-    )
+    if listing:
+        background_tasks.add_task(
+            TranslateService.translate_listing,
+            listing_id=listing.id,
+            title=data.title,
+            description=data.description,
+            origin_language=current_user.language,
+        )
 
     return await service.format_listing(listing, current_user.language)
 
