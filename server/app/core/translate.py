@@ -46,6 +46,7 @@ class TranslateService:
         response = await client.chat.completions.create(
             model="deepseek-chat",
             temperature=0.3,
+            timeout=60,
             response_format={"type": "json_object"},
             messages=[
                 {
@@ -122,21 +123,26 @@ class TranslateService:
             ) or desc_translations.get(lang.lower(), "")
 
         # Persist with a fresh session
-        async with AsyncSessionLocal() as session:
-            result = await session.execute(
-                select(Listing).where(Listing.id == listing_id)
-            )
-            listing = result.scalar_one_or_none()
-            if not listing:
-                logger.error(
-                    f"Listing {listing_id} not found for translation update"
+        try:
+            async with AsyncSessionLocal() as session:
+                result = await session.execute(
+                    select(Listing).where(Listing.id == listing_id)
                 )
-                return
+                listing = result.scalar_one_or_none()
+                if not listing:
+                    logger.error(
+                        f"Listing {listing_id} not found for translation update"
+                    )
+                    return
 
-            for field, value in update_data.items():
-                setattr(listing, field, value)
+                for field, value in update_data.items():
+                    setattr(listing, field, value)
 
-            session.add(listing)
-            await session.commit()
+                session.add(listing)
+                await session.commit()
 
-            logger.info(f"Translations saved for listing {listing_id}")
+                logger.info(f"Translations saved for listing {listing_id}")
+        except Exception:
+            logger.exception(
+                f"Failed to persist translations for listing {listing_id}"
+            )
