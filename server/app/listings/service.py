@@ -8,7 +8,7 @@ from sqlmodel import col, desc, func, or_, select
 
 from app.core.config import settings
 from app.core.file_storage import LocalStorageService
-from app.listings.enums import ListingCategory, ListingStatus
+from app.listings.enums import RADIUS_FILTER_KM, ListingCategory, ListingStatus, RadiusFilter
 from app.listings.exceptions import (
     ListingNotFound,
     ListingNotOwned,
@@ -288,6 +288,7 @@ class ListingService:
         categories: Optional[List[ListingCategory]] = None,
         search_query: Optional[str] = None,
         tags: Optional[List[str]] = None,
+        radius_filter: Optional[RadiusFilter] = None,
         limit: int = 20,
         offset: int = 0,
         user_lang: str = "en",
@@ -297,6 +298,12 @@ class ListingService:
         # Category Filter
         if categories:
             query = query.where(col(Listing.category).in_(categories))
+
+        # Radius Filter — NATIONWIDE omits the constraint entirely
+        if radius_filter and radius_filter in RADIUS_FILTER_KM:
+            query = query.where(
+                Listing.radius_km <= RADIUS_FILTER_KM[radius_filter]
+            )
 
         # Tag Filter (JSONB Containment)
         if tags:

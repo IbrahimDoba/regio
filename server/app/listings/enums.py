@@ -15,3 +15,23 @@ class ListingStatus(StrEnum):
     ACTIVE = "ACTIVE"
     SOLD = "SOLD"
     DELETED = "DELETED"
+
+
+class RadiusFilter(StrEnum):
+    KM_5 = "5km"
+    KM_10 = "10km"
+    KM_25 = "25km"
+    KM_50 = "50km"
+    KM_100 = "100km"
+    NATIONWIDE = "nationwide"
+
+
+# Maps each RadiusFilter to its integer km value for DB filtering.
+# NATIONWIDE is intentionally absent — it means no radius constraint.
+RADIUS_FILTER_KM: dict[RadiusFilter, int] = {
+    RadiusFilter.KM_5: 5,
+    RadiusFilter.KM_10: 10,
+    RadiusFilter.KM_25: 25,
+    RadiusFilter.KM_50: 50,
+    RadiusFilter.KM_100: 100,
+}

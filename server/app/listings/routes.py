@@ -6,7 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Query, UploadFile, status
 from app.core.file_storage import StorageServiceDep
 from app.core.translate import TranslateService
 from app.listings.dependencies import ListingServiceDep
-from app.listings.enums import ListingCategory
+from app.listings.enums import ListingCategory, RadiusFilter
 from app.listings.schemas import (
     FeedResponse,
     ListingCreate,
@@ -81,6 +81,10 @@ async def get_feed(
     tags: Optional[List[str]] = Query(
         None, description="Filter by specific tags."
     ),
+    radius: Optional[RadiusFilter] = Query(
+        None,
+        description="Filter by listing reach. Options: 5km, 10km, 25km, 50km, 100km, nationwide. Omit to show all.",
+    ),
     offset: int = Query(
         0, ge=0, description="Pagination offset (skip N items)."
     ),
@@ -91,12 +95,13 @@ async def get_feed(
     """
     Main Feed.
 
-    Supports filtering by multiple categories, tags, text search, and pagination.
+    Supports filtering by multiple categories, tags, text search, radius, and pagination.
     """
     return await service.get_feed(
         categories=categories,
         search_query=q,
         tags=tags,
+        radius_filter=radius,
         offset=offset,
         user_lang=lang,
     )
