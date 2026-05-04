@@ -22,6 +22,7 @@ services:
       - "host.containers.internal:host-gateway"
     networks:
       - app-network
+      - regio-staging
     # This container runs migrations then exits — that's intentional.
     # api uses service_completed_successfully to wait for it.
 
@@ -44,6 +45,7 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+      - regio-staging
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:2323/healthcheck"]
       interval: 30s
@@ -78,3 +80,5 @@ volumes:
 networks:
   app-network:
     driver: bridge
+  regio-staging:
+    external: true
