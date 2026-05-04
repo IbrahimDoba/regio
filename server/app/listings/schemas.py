@@ -171,7 +171,10 @@ class TagCreate(BaseModel):
 
 class TagPublic(BaseModel):
     id: int = Field(..., description="Unique identifier for the tag.")
-    name: str = Field(..., description="The display name/text of the tag.")
+    name: str = Field(
+        ...,
+        description="Display name, localized to the requested language. Falls back to canonical name.",
+    )
     is_official: bool = Field(
         ...,
         description="If True, this tag is system-approved. If False, it is user-generated.",

@@ -8,7 +8,12 @@ from sqlmodel import col, desc, func, or_, select
 
 from app.core.config import settings
 from app.core.file_storage import LocalStorageService
-from app.listings.enums import RADIUS_FILTER_KM, ListingCategory, ListingStatus, RadiusFilter
+from app.listings.enums import (
+    RADIUS_FILTER_KM,
+    ListingCategory,
+    ListingStatus,
+    RadiusFilter,
+)
 from app.listings.exceptions import (
     ListingNotFound,
     ListingNotOwned,
@@ -20,6 +25,7 @@ from app.listings.schemas import (
     ListingCreate,
     ListingPublic,
     ListingUpdate,
+    TagPublic,
 )
 from app.users.models import User
 
@@ -69,40 +75,57 @@ class ListingService:
 
     """TAGS"""
 
-    async def search_tags(self, query: str) -> List[Tag]:
-        """Autocomplete for tags"""
+    async def search_tags(
+        self, query: str, lang: str = "en"
+    ) -> List[TagPublic]:
+        """Autocomplete for tags, searching the localized name column for the given lang."""
+        lang = lang.lower()
+        lang_col = {
+            "de": Tag.name_de,
+            "hu": Tag.name_hu,
+        }.get(lang, Tag.name_en)
+
+        pattern = f"%{query}%"
         statement = (
-            select(Tag).where(col(Tag.name).ilike(f"%{query}%")).limit(10)
+            select(Tag)
+            .where(
+                or_(
+                    col(Tag.name).ilike(pattern),
+                    col(lang_col).ilike(pattern),
+                )
+            )
+            .limit(10)
         )
         results = await self.session.execute(statement)
-        return results.scalars().all()
+        tags = results.scalars().all()
+
+        return [
+            TagPublic(
+                id=tag.id,
+                name=getattr(tag, f"name_{lang}", None) or tag.name,
+                is_official=tag.is_official,
+            )
+            for tag in tags
+        ]
 
     async def _process_tags(self, raw_tags: List[str]) -> List[str]:
         """
-        Validates tag.
-        If a tag exists, use it.
-        If it doesn't exist, create it as 'is_official=False' (User Suggestion).
+        Validates tags. Uses existing tags or creates them as suggestions.
+        Fetches all in one query to avoid N+1.
         """
         cleaned_tags = [t.lower().strip() for t in raw_tags if t.strip()]
         if not cleaned_tags:
             return []
 
-        final_tags = []
+        stmt = select(Tag).where(col(Tag.name).in_(cleaned_tags))
+        res = await self.session.execute(stmt)
+        existing = {tag.name for tag in res.scalars().all()}
+
         for tag_name in cleaned_tags:
-            # Check existence
-            stmt = select(Tag).where(Tag.name == tag_name)
-            res = await self.session.execute(stmt)
-            tag_obj = res.scalar_one_or_none()
+            if tag_name not in existing:
+                self.session.add(Tag(name=tag_name, is_official=False))
 
-            if not tag_obj:
-                # Create Suggestion
-                tag_obj = Tag(name=tag_name, is_official=False)
-                self.session.add(tag_obj)
-                # We save it to DB so next user sees it in autocomplete immediately
-                # Admin can clean up later
-            final_tags.append(tag_obj.name)
-
-        return final_tags
+        return cleaned_tags
 
     """LISTINGS"""
 

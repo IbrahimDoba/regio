@@ -117,13 +117,21 @@ async def get_feed(
         }
     },
 )
-async def autocomplete_tags(q: str, service: ListingServiceDep) -> Any:
+async def autocomplete_tags(
+    q: str,
+    service: ListingServiceDep,
+    lang: str = Query(
+        "en",
+        description="Display language (en, de, hu). Tags are matched against the localized name for this language.",
+    ),
+) -> Any:
     """
     Search tags for autocomplete.
 
-    Returns a list of tags matching the query string 'q'.
+    Returns a list of tags matching the query string 'q', searched against
+    the canonical name and the localized name for the given lang.
     """
-    return await service.search_tags(q)
+    return await service.search_tags(q, lang=lang)
 
 
 @router.get(
