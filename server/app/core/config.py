@@ -1,4 +1,5 @@
 from typing import Annotated, Any, Literal
+from urllib.parse import quote
 
 from pydantic import (
     AliasChoices,
@@ -62,8 +63,8 @@ class Settings(RegioBaseSettings):
     def DATABASE_URL(self) -> PostgresDsn:
         return MultiHostUrl.build(
             scheme="postgresql+asyncpg",
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
+            username=quote(self.POSTGRES_USER, safe=""),
+            password=quote(self.POSTGRES_PASSWORD, safe=""),
             host=self.POSTGRES_SERVER,
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
