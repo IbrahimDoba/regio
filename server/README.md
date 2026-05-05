@@ -29,7 +29,7 @@ API docs available at http://localhost:8000/docs (disabled in production).
 | Alembic | Database migrations |
 | Redis | Token blacklist, session invalidation |
 | APScheduler | Cron jobs (demurrage, fees, payment enforcement) |
-| aioboto3 | Cloudflare R2 (S3-compatible) file storage |
+| aioboto3 | Cloudflare R2 (S3-compatible) file storage — available but not active |
 | PyJWT + pwdlib | JWT tokens + Argon2 password hashing |
 | aiosmtplib | Async email sending |
 | DeepSeek API | Listing translation (EN/DE/HU) |
@@ -86,7 +86,7 @@ module/
 | POST | `/users/register` | Public registration. Requires a valid invite code. |
 | GET | `/users/me` | Current user's profile. |
 | PATCH | `/users/me` | Update mutable fields (address, language, notification prefs). Name and email are immutable. |
-| PUT | `/users/me/avatar` | Upload profile picture (JPEG/PNG, max 5 MB). Stored in R2. |
+| PUT | `/users/me/avatar` | Upload profile picture (JPEG/PNG, max 5 MB). |
 | GET | `/users/{user_code}/avatar` | Serve a user's avatar. |
 | GET | `/users/search?q=` | Autocomplete user search by name or code. |
 | GET | `/users/invites` | Get current user's invite codes (up to 3). |
@@ -253,7 +253,7 @@ POSTGRES_PORT=5432
 # Redis
 REDIS_URL=redis://localhost:6379/0
 
-# Cloudflare R2 (file storage)
+# Cloudflare R2 (optional — set to switch from local disk to R2)
 R2_BUCKET_NAME=
 R2_ENDPOINT_URL=
 R2_ACCESS_KEY_ID=
@@ -329,9 +329,9 @@ These are started on app startup via the lifespan context manager in `main.py`.
 
 ## File Storage
 
-Files are stored in Cloudflare R2. The storage layer (`core/file_storage.py`) is abstracted so it can fall back to local disk if R2 env vars are not set — useful for local development without cloud credentials.
+Files are currently stored on local disk. The storage layer (`core/file_storage.py`) is abstracted to support Cloudflare R2 (S3-compatible) — set the `R2_*` env vars to switch to R2 without any code changes.
 
-Uploaded files are served via `GET /media/{key:path}` which proxies from R2 to the client. This keeps R2 credentials server-side.
+Uploaded files are served via `GET /media/{key:path}`. When R2 is active, this proxies from R2 to the client, keeping credentials server-side.
 
 PDFs are auto-compressed via GhostScript (installed in the Docker image).
 

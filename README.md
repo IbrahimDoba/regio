@@ -17,17 +17,17 @@ Regio/
 
 ## Tech Stack Summary
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 16 (App Router), TypeScript, Tailwind CSS |
-| State / Data | Zustand v5, TanStack Query v5 |
-| Chat | Matrix JS SDK v41 (via matrix.151.hu homeserver) |
-| Backend | FastAPI, Python 3.13, SQLModel (SQLAlchemy async) |
-| Database | PostgreSQL + Alembic migrations |
-| Cache | Redis (token blacklist, sessions) |
-| File Storage | Cloudflare R2 (S3-compatible) |
-| Auth | JWT (access + refresh token rotation), Argon2 passwords |
-| Scheduling | APScheduler (demurrage, monthly fees, payment enforcement) |
+| Layer        | Technology                                                           |
+| ------------ | -------------------------------------------------------------------- |
+| Frontend     | Next.js 16 (App Router), TypeScript, Tailwind CSS                    |
+| State / Data | Zustand v5, TanStack Query v5                                        |
+| Chat         | Matrix JS SDK v41 (via matrix.151.hu homeserver)                     |
+| Backend      | FastAPI, Python 3.13, SQLModel (SQLAlchemy async)                    |
+| Database     | PostgreSQL + Alembic migrations                                      |
+| Cache        | Redis (token blacklist, sessions)                                    |
+| File Storage | Local disk (Cloudflare R2 available — set `R2_*` env vars to switch) |
+| Auth         | JWT (access + refresh token rotation), Argon2 passwords              |
+| Scheduling   | APScheduler (demurrage, monthly fees, payment enforcement)           |
 
 ---
 
@@ -52,6 +52,7 @@ docker compose up --build
 ```
 
 Services:
+
 - Frontend: http://localhost:3838
 - API: http://localhost:2323
 - API docs: http://localhost:2323/docs (dev only)
@@ -103,5 +104,5 @@ pnpm dev                    # http://localhost:3000
 
 - The API runs on port `2323` and is only bound to `127.0.0.1` in docker-compose (put Nginx in front).
 - Frontend build args (`NEXT_PUBLIC_*`) are baked into the JS bundle at build time — they must be set before `docker compose build`.
-- R2 credentials are required for file uploads. The API will fall back to local disk if R2 is not configured, but this is not suitable for production.
+- File uploads use local disk by default. Set the `R2_*` env vars in `server/.env.docker` to switch to Cloudflare R2 for production.
 - OpenAPI docs (`/docs`) are disabled when `ENVIRONMENT=production`.
