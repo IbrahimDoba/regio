@@ -1,73 +1,107 @@
-# Regio - Local Exchange Platform
+# Regio
 
-Regio is a modern web application designed to foster a fair local economy. It allows users to exchange goods and services using both a community currency ("Regio") and time credits, promoting trust and local cooperation.
+A community exchange platform built around two currencies: **Regio** (local currency) and **Time Credits** (hour-based). Users can post listings for goods, services, rentals, and events, then transact directly with each other through a built-in chat and payment system.
 
-## 🚀 Project Overview
+---
 
-This project is a port of a high-fidelity HTML/CSS/JS prototype into a robust **Next.js** application. It aims to provide a seamless user experience for browsing local offers, managing digital assets, and interacting with the community.
-
-### Key Features
-
--   **🏠 Smart Feed**: A dynamic feed of offers and requests, filterable by category (Goods, Services, Food, etc.), distance, and type.
--   **🔐 Authentication**: Secure login and registration flows, including a "No Code" access modal.
--   **👤 User Profile**: Comprehensive profile management with tabs for Personal details, Account settings, and Trust/Verification status.
--   **💰 Digital Wallet**: A dual-currency wallet system tracking "Regio" (currency) and "Time" (hours/minutes), with features to send and request payments.
--   **✅ Identity Verification**: A multi-step verification process (Registration -> Video Call -> Active) to ensure community safety.
--   **🔔 Notifications**: Real-time updates for system messages, chats, and transactions.
--   **💌 Invite System**: A growth mechanism allowing verified users to invite friends using unique codes.
--   **🌍 Internationalization**: Built-in support for multiple languages (English, German, Hungarian).
-
-## 🛠️ Tech Stack
-
--   **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
--   **Language**: [TypeScript](https://www.typescriptlang.org/)
--   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
--   **Icons**: [React Icons](https://react-icons.github.io/react-icons/) (Fa6)
--   **State Management**: React Context API (for Language and Global State)
-
-## 📂 Project Structure
+## Monorepo Structure
 
 ```
-src/
-├── app/
-│   ├── (app)/          # Main application routes (Feed, Profile, Wallet, etc.)
-│   ├── (auth)/         # Authentication routes (Login, Register)
-│   ├── globals.css     # Global styles and Tailwind directives
-│   └── layout.tsx      # Root layout with LanguageProvider
-├── components/
-│   ├── feed/           # Feed-related components (Card, List, Filter)
-│   ├── layout/         # Layout components (Header, BottomNav, MobileContainer)
-│   └── modals/         # Modal components (Create, Preview)
-├── context/            # React Contexts (LanguageContext)
-├── data/               # Mock data and translations
-└── lib/                # Utility functions and TypeScript types
+Regio/
+├── regio/          # Next.js 16 frontend
+├── server/         # FastAPI backend
+└── docker-compose.yml
 ```
 
-## 🚦 Getting Started
+---
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/IbrahimDoba/regio.git
-    cd regio
-    ```
+## Tech Stack Summary
 
-2.  **Install dependencies:**
-    ```bash
-    cd regio  # Navigate to the Next.js app directory
-    pnpm install
-    ```
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js 16 (App Router), TypeScript, Tailwind CSS |
+| State / Data | Zustand v5, TanStack Query v5 |
+| Chat | Matrix JS SDK v41 (via matrix.151.hu homeserver) |
+| Backend | FastAPI, Python 3.13, SQLModel (SQLAlchemy async) |
+| Database | PostgreSQL + Alembic migrations |
+| Cache | Redis (token blacklist, sessions) |
+| File Storage | Cloudflare R2 (S3-compatible) |
+| Auth | JWT (access + refresh token rotation), Argon2 passwords |
+| Scheduling | APScheduler (demurrage, monthly fees, payment enforcement) |
 
-3.  **Run the development server:**
-    ```bash
-    pnpm dev
-    ```
+---
 
-4.  **Open the app:**
-    Visit [http://localhost:3000](http://localhost:3000) in your browser.
+## Running with Docker Compose
 
-## 🔮 Future Roadmap
+This is the recommended way to run everything together.
 
--   [ ] Backend integration (API routes, Database).
--   [ ] Real-time chat implementation.
--   [ ] Map view for local offers.
--   [ ] Advanced search functionality.
+**1. Create a root `.env` file** with the two frontend build args:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:2323
+NEXT_PUBLIC_MATRIX_HOMESERVER_URL=https://matrix.151.hu
+NEXT_PUBLIC_MATRIX_DOMAIN=151.hu
+```
+
+**2. Create `server/.env.docker`** — copy from `server/env-example` and fill in all values (database, Redis, R2, Matrix, SMTP, etc.).
+
+**3. Start everything:**
+
+```bash
+docker compose up --build
+```
+
+Services:
+- Frontend: http://localhost:3838
+- API: http://localhost:2323
+- API docs: http://localhost:2323/docs (dev only)
+
+The `migrate` service runs `alembic upgrade head` automatically before the API starts.
+
+---
+
+## Running Locally (Development)
+
+### Backend
+
+Requirements: Python 3.13+, PostgreSQL running, Redis running.
+
+```bash
+cd server
+cp env-example .env      # fill in values
+uv run alembic upgrade head
+uv run fastapi dev       # http://localhost:8000
+```
+
+### Frontend
+
+Requirements: Node.js, pnpm.
+
+```bash
+cd regio
+cp env-example .env.local   # set NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+pnpm install
+pnpm dev                    # http://localhost:3000
+```
+
+---
+
+## Platform Features
+
+- **Listings feed** — filterable by category, tags, radius, and text search
+- **Dual-currency wallet** — send/receive Time Credits and Regio, request payments, dispute resolution
+- **Real-time chat** — Matrix-based, rooms created per listing inquiry
+- **Identity verification** — multi-step trust level system (T1–T6)
+- **Invite system** — growth via unique invite codes
+- **Broadcasts** — admin messages to targeted trust level groups
+- **Multilingual** — English, German, Hungarian (frontend + listing content)
+- **Admin dashboard** — user management, tag moderation, dispute resolution
+
+---
+
+## Deployment Notes
+
+- The API runs on port `2323` and is only bound to `127.0.0.1` in docker-compose (put Nginx in front).
+- Frontend build args (`NEXT_PUBLIC_*`) are baked into the JS bundle at build time — they must be set before `docker compose build`.
+- R2 credentials are required for file uploads. The API will fall back to local disk if R2 is not configured, but this is not suitable for production.
+- OpenAPI docs (`/docs`) are disabled when `ENVIRONMENT=production`.

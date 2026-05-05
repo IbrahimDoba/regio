@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { FaXmark } from "react-icons/fa6";
@@ -32,6 +33,7 @@ const flags: Record<string, string> = {
 };
 
 export default function TermsPage() {
+  const router = useRouter();
   const { language, setLanguage } = useLanguage();
 
   const toggleLang = () => {
@@ -45,7 +47,7 @@ export default function TermsPage() {
       {/* Top bar */}
       <div className="sticky top-0 z-10 bg-white border-b border-[#eee] px-[15px] py-[12px] flex items-center justify-between shadow-sm">
         <button
-          onClick={() => window.close()}
+          onClick={() => router.back()}
           className="cursor-pointer flex items-center gap-[8px] text-[#999] font-[700] text-[14px]"
         >
           <FaXmark className="text-[16px]" />
