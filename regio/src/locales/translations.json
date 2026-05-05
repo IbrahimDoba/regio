@@ -53,7 +53,10 @@
   },
 
   "filter_panel": {
-    "search_placeholder": "Search..."
+    "search_placeholder": "Search...",
+    "search_button": "Search",
+    "radius_all": "All distances",
+    "radius_nationwide": "Nationwide"
   },
 
   "category_labels": {

@@ -93,11 +93,11 @@ export const uploadMedia = async (listingId: string, files: File[]): Promise<Lis
 /**
  * Search tags for autocomplete
  */
-export const searchTags = async (q: string): Promise<TagPublic[]> => {
-  const response = await apiClient.get<TagPublic[]>(
+export const searchTags = async (q: string, lang?: string): Promise<TagAutocomplete[]> => {
+  const response = await apiClient.get<TagAutocomplete[]>(
     API_ENDPOINTS.LISTINGS.TAGS,
     {
-      params: { q },
+      params: { q, ...(lang ? { lang } : {}) },
     }
   );
   return response.data;

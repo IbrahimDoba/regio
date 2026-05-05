@@ -267,6 +267,7 @@ export interface FeedParams {
   categories?: ListingCategory[];
   tags?: string[];
   q?: string | null;
+  radius?: string;
   offset?: number;
   lang?: string; // ISO code sent to backend for localised content: 'en' | 'de' | 'hu'
 }

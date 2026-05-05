@@ -50,7 +50,10 @@
     "contact_button": "Kapcsolat"
   },
   "filter_panel": {
-    "search_placeholder": "Keresés..."
+    "search_placeholder": "Keresés...",
+    "search_button": "Keresés",
+    "radius_all": "Minden távolság",
+    "radius_nationwide": "Országos"
   },
   "category_labels": {
     "OFFER_SERVICE": "Szolgáltatást kínál",

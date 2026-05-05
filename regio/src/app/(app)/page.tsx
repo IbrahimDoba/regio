@@ -26,7 +26,16 @@ export default function FeedPage() {
   const [activeFilters, setActiveFilters] = useState<ListingCategory[]>(
     Object.keys(CATEGORY_CONFIG) as ListingCategory[]
   );
-  const [searchQuery, setSearchQuery] = useState("");
+  // Staged filter state (assembled in UI, not yet sent to API)
+  const [stagedQ, setStagedQ] = useState("");
+  const [stagedTags, setStagedTags] = useState<string[]>([]);
+  const [stagedRadius, setStagedRadius] = useState<string | undefined>(undefined);
+  // Committed filters (sent to API on search)
+  const [committedFilters, setCommittedFilters] = useState<{
+    q?: string;
+    tags?: string[];
+    radius?: string;
+  }>({});
   const [previewListing, setPreviewListing] = useState<ListingPublic | null>(null);
   const [editListing, setEditListing] = useState<ListingPublic | null>(null);
 
@@ -79,18 +88,19 @@ export default function FeedPage() {
     }
   };
 
-  // Fetch Feed
-  const { data, isLoading } = useFeed({
-    // We can filter by backend if we want, but UI filtering is implemented in FeedList for now
-    // properly we should pass params to useFeed, but let's keep client-side filtering logic from previous impl if lists are small,
-    // OR pass params to API.
-    // The previous implementation did client side filtering.
-    // Let's stick to client side filtering on the fetched page for simplicity OF TRANSITION,
-    // but typically we should pass `categories: activeFilters` to API.
-    // However, the task is to "replace mock data".
-    // I will pass NO params to get everything, and let FeedList filter (as it does now).
-    // Wait, FeedList expects `listings`.
-  });
+  const handleSearch = () => {
+    setCommittedFilters({
+      ...(stagedQ ? { q: stagedQ } : {}),
+      ...(stagedTags.length > 0 ? { tags: stagedTags } : {}),
+      ...(stagedRadius ? { radius: stagedRadius } : {}),
+    });
+  };
+
+  const addTag = (tag: string) => setStagedTags((prev) => [...prev, tag]);
+  const removeTag = (tag: string) => setStagedTags((prev) => prev.filter((t) => t !== tag));
+
+  // Fetch Feed with committed filters only
+  const { data, isLoading } = useFeed(committedFilters);
 
   const listings = data?.pages.flatMap((page) => page.data) || [];
 
@@ -114,8 +124,14 @@ export default function FeedPage() {
           isOpen={isFilterOpen}
           activeFilters={activeFilters}
           toggleFilter={toggleFilter}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+          q={stagedQ}
+          setQ={setStagedQ}
+          tags={stagedTags}
+          addTag={addTag}
+          removeTag={removeTag}
+          radius={stagedRadius}
+          setRadius={setStagedRadius}
+          onSearch={handleSearch}
         />
       </Header>
 
@@ -125,7 +141,6 @@ export default function FeedPage() {
         <FeedList
           listings={listings}
           activeFilters={activeFilters}
-          searchQuery={searchQuery}
           onOpenPreview={setPreviewListing}
           onContact={handleContact}
           onModify={(listing) => { setPreviewListing(null); setEditListing(listing); }}

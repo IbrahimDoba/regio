@@ -65,12 +65,16 @@ export function useListing(listingId: string) {
 }
 
 /**
- * Hook to search tags
+ * Hook to search tags for autocomplete. Automatically includes the current language
+ * so the backend matches against localized tag names.
  */
 export function useSearchTags(query: string) {
+  const { language } = useLanguage();
+  const lang = toApiLang(language);
+
   return useQuery({
-    queryKey: queryKeys.listings.tags.search(query),
-    queryFn: () => listingsApi.searchTags(query),
+    queryKey: [...queryKeys.listings.tags.search(query), lang],
+    queryFn: () => listingsApi.searchTags(query, lang),
     enabled: query.length > 1,
     staleTime: 5 * 60 * 1000, // Cache tags for 5 minutes
   });

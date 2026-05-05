@@ -50,7 +50,10 @@
     "contact_button": "Kontakt"
   },
   "filter_panel": {
-    "search_placeholder": "Suchen..."
+    "search_placeholder": "Suchen...",
+    "search_button": "Suchen",
+    "radius_all": "Alle Entfernungen",
+    "radius_nationwide": "Landesweit"
   },
   "category_labels": {
     "OFFER_SERVICE": "Dienstleistung anbieten",
