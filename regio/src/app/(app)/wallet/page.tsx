@@ -6,8 +6,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useDialog } from "@/context/DialogContext";
 import {
   FaWallet,
-  FaClock,
-  FaCoins,
   FaArrowDown,
   FaArrowUp,
   FaArrowLeft,
@@ -247,8 +245,6 @@ export default function WalletPage() {
 
   const availableTime = balanceData?.limits.available_time ?? 0;
   const availableGaras = balanceData?.limits.available_regio ?? "0.00";
-  const isTimeNegative = (balanceData?.balance.time ?? 0) < 0;
-  const isGarasNegative = parseFloat(String(balanceData?.balance.regio ?? "0")) < 0;
 
   // ─────────────────────────────────────────────────────────────────────────
   // Form toggling
@@ -465,80 +461,60 @@ export default function WalletPage() {
       </header>
 
       {/* ── Balance Cards ── */}
-      <div className="p-[15px] flex gap-[10px] overflow-x-auto pb-[5px]">
-        {/* Time card */}
-        <div
-          className={`flex-1 min-w-[160px] rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden ${
-            isTimeNegative
-              ? "bg-gradient-to-br from-[#e53935] to-[#b71c1c]"
-              : "bg-gradient-to-br from-[#8cb348] to-[#5e8e3e]"
-          }`}
-        >
-          <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px] flex items-center gap-[5px]">
-            <img src="/time.png" className="w-4 h-4 rounded bg-white/20 p-[1px]" alt="" />
-            {t.wallet.time_account}
+      <div className="p-[15px] flex gap-[10px] pb-[5px]">
+        {/* Zeit card */}
+        <div className="flex-1 rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden bg-gradient-to-br from-[#e53935] to-[#b71c1c] flex flex-col justify-between min-h-[100px]">
+          <div>
+            <div className="text-[12px] uppercase tracking-[1px] opacity-80 mb-[4px]">
+              {t.wallet.time_account}
+            </div>
+            <div className="text-[34px] font-[800] leading-tight">
+              {balanceData ? <>{balanceData.balance.time}<span className="text-[18px] font-[600] ml-[4px]">min</span></> : "..."}
+            </div>
           </div>
-          <div className="text-[24px] font-[800] mb-[1px]">
-            {balanceData ? formatTime(balanceData.balance.time) : "..."}
-          </div>
-          <div className="text-[14px] font-[500] opacity-90">{t.wallet.time_unit}</div>
-          {isTimeNegative && (
-            <div className="text-[10px] opacity-80 mt-[4px] flex items-center gap-0.5">
-              Limit: <img src="/time.png" className="w-3 h-3" alt="" />{formatTime(balanceData!.limits.max_debt_time)}
+          {balanceData && (
+            <div className="text-[13px] opacity-85 mt-[8px]">
+              {t.wallet.limit_label} {balanceData.limits.max_debt_time} min
             </div>
           )}
-          {!isTimeNegative && balanceData && (
-            <div className="text-[10px] opacity-70 mt-[4px] flex items-center gap-0.5">
-              Available: <img src="/time.png" className="w-3 h-3" alt="" />{formatTime(availableTime)}
-            </div>
-          )}
-          <FaClock className="absolute -right-[10px] -bottom-[10px] text-[80px] opacity-15 -rotate-12" />
+          <img
+            src="/time.png"
+            className="absolute right-[-10px] bottom-[-10px] w-[90px] h-[90px] opacity-30 object-contain pointer-events-none [filter:brightness(0)_invert(1)]"
+            alt=""
+          />
         </div>
 
         {/* Garas card */}
-        <div
-          className={`flex-1 min-w-[160px] rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden ${
-            isGarasNegative
-              ? "bg-gradient-to-br from-[#f57c00] to-[#e65100]"
-              : "bg-gradient-to-br from-[#4a90e2] to-[#0056b3]"
-          }`}
-        >
-          <div className="text-[11px] uppercase tracking-[1px] opacity-80 mb-[5px] flex items-center gap-[5px]">
-            <img src="/garas.png" className="w-4 h-4 rounded bg-white/20 p-[1px]" alt="" />
-            {t.wallet.garas_account}
+        <div className="flex-1 rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden bg-gradient-to-br from-[#4a90e2] to-[#0056b3] flex flex-col justify-between min-h-[100px]">
+          <div>
+            <div className="text-[12px] uppercase tracking-[1px] opacity-80 mb-[4px]">
+              {t.wallet.garas_account}
+            </div>
+            <div className="text-[34px] font-[800] leading-tight">
+              {balanceData ? <>{String(balanceData.balance.regio).replace(".", ",")}<span className="text-[18px] font-[600] ml-[4px]">G</span></> : "..."}
+            </div>
           </div>
-          <div className="text-[24px] font-[800] mb-[1px]">
-            {balanceData ? balanceData.balance.regio : "..."}
-          </div>
-          <div className="text-[14px] font-[500] opacity-90">{t.wallet.garas_unit}</div>
-          {isGarasNegative && (
-            <div className="text-[10px] opacity-80 mt-[4px] flex items-center gap-0.5">
-              Limit: <img src="/garas.png" className="w-3 h-3" alt="" />{balanceData!.limits.max_debt_regio}
+          {balanceData && (
+            <div className="text-[13px] opacity-85 mt-[8px]">
+              {t.wallet.limit_label} {String(balanceData.limits.max_debt_regio).replace(".", ",")} G
             </div>
           )}
-          {!isGarasNegative && balanceData && (
-            <div className="text-[10px] opacity-70 mt-[4px] flex items-center gap-0.5">
-              Available: <img src="/garas.png" className="w-3 h-3" alt="" />{availableGaras}
-            </div>
-          )}
-          <FaCoins className="absolute -right-[10px] -bottom-[10px] text-[80px] opacity-15 -rotate-12" />
+          <img
+            src="/garas.png"
+            className="absolute right-[-10px] bottom-[-10px] w-[90px] h-[90px] opacity-30 object-contain pointer-events-none [filter:brightness(0)_invert(1)]"
+            alt=""
+          />
         </div>
       </div>
 
-      {/* ── Trust level & limits info bar ── */}
+      {/* ── Trust level & time earned info bar ── */}
       {balanceData && (
-        <div className="mx-[15px] mb-[10px] bg-white border border-[#eee] rounded-[8px] px-[12px] py-[8px] flex justify-between items-center text-[11px] text-[#888]">
+        <div className="mx-[15px] mb-[10px] bg-white border border-[#eee] rounded-[8px] px-[12px] py-[8px] flex justify-between items-center text-[14px] text-[#888]">
           <span>
-            Trust level: <strong className="text-[#555]">{balanceData.trust_level}</strong>
+            {t.wallet.trust_level_label} <strong className="text-[#555]">{balanceData.trust_level}</strong>
           </span>
           <span>
-            Debt limit:{" "}
-            <strong className="text-[#555] inline-flex items-center gap-0.5">
-              <img src="/time.png" className="w-3 h-3" alt="" />{formatTime(balanceData.limits.max_debt_time)} / <img src="/garas.png" className="w-3 h-3" alt="" />{balanceData.limits.max_debt_regio}
-            </strong>
-          </span>
-          <span>
-            Earned: <strong className="text-[#555] inline-flex items-center gap-0.5"><img src="/time.png" className="w-3 h-3" alt="" />{formatTime(balanceData.total_time_earned)}</strong>
+            {t.wallet.time_earned_label} <strong className="text-[#555]">{formatTime(balanceData.total_time_earned)}</strong>
           </span>
         </div>
       )}

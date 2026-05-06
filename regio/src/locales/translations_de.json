@@ -142,6 +142,12 @@
     "submit_button": "Anzeige erstellen",
     "submit_loading": "Wird erstellt...",
     "error_failed": "Erstellung fehlgeschlagen. Bitte Felder prüfen.",
+    "address_label": "Adresse",
+    "zip_placeholder": "PLZ *",
+    "address_detail_placeholder": "Straße, Ort oder Gebiet (optional)",
+    "address_searching": "Suche läuft...",
+    "address_not_found": "Adresse nicht gefunden. Andere PLZ versuchen.",
+    "address_set": "Standort gesetzt",
     "images_label": "Fotos",
     "images_hint": "Bis zu 5 Bilder, max. 1MB je Datei (JPEG, PNG, WebP)",
     "images_add": "Fotos hinzufügen",
@@ -268,6 +274,9 @@
     "deny_button": "Ablehnen",
     "confirm_pay_button": "Zahlung bestätigen",
     "cancel_request_button": "Anforderung stornieren",
+    "trust_level_label": "Vertrauenslevel:",
+    "time_earned_label": "Zeit verdient:",
+    "limit_label": "Limit:",
     "send_button": "Senden",
     "request_button": "Anfordern",
     "send_form": {
@@ -319,7 +328,7 @@
       "location_placeholder": "z.B. Budapest, 1051",
       "location_hint": "Wird für die Distanzberechnung im Feed genutzt.",
       "language_label": "Sprache",
-      "language_en": "English (GB)",
+      "language_en": "English (EN)",
       "language_de": "Deutsch",
       "language_hu": "Magyar",
       "bio_label": "Über mich (Bio)",
@@ -520,5 +529,18 @@
       "delete_success": "Tag gelöscht!",
       "delete_error": "Fehler beim Löschen"
     }
+  },
+
+  "nav": {
+    "menu": "Menü",
+    "create": "Inserat erstellen",
+    "offers": "Angebote",
+    "profile": "Profil",
+    "wallet": "Wallet",
+    "messages": "Nachrichten",
+    "notifications": "Benachrichtigungen",
+    "invite": "Einladen",
+    "admin": "Admin",
+    "logout": "Abmelden"
   }
 }

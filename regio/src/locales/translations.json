@@ -142,6 +142,12 @@
     "submit_button": "Create Listing",
     "submit_loading": "Creating...",
     "error_failed": "Failed to create listing. Please check all fields and try again.",
+    "address_label": "Address",
+    "zip_placeholder": "ZIP / Postal code *",
+    "address_detail_placeholder": "Street, village, or area (optional)",
+    "address_searching": "Searching...",
+    "address_not_found": "Address not found. Try a different ZIP code.",
+    "address_set": "Location set",
     "images_label": "Photos",
     "images_hint": "Up to 5 images, max 1MB each (JPEG, PNG, WebP)",
     "images_add": "Add Photos",
@@ -268,6 +274,9 @@
     "deny_button": "Deny",
     "confirm_pay_button": "Confirm Pay",
     "cancel_request_button": "Cancel Request",
+    "trust_level_label": "Trust Level:",
+    "time_earned_label": "Time earned:",
+    "limit_label": "Limit:",
     "send_button": "Send",
     "request_button": "Request",
     "send_form": {
@@ -319,7 +328,7 @@
       "location_placeholder": "e.g. New York, 10001",
       "location_hint": "Used to calculate distances in the feed.",
       "language_label": "Language",
-      "language_en": "English (GB)",
+      "language_en": "English (EN)",
       "language_de": "Deutsch",
       "language_hu": "Magyar",
       "bio_label": "About me (Bio)",
@@ -520,5 +529,18 @@
       "delete_success": "Tag deleted successfully!",
       "delete_error": "Failed to delete tag"
     }
+  },
+
+  "nav": {
+    "menu": "Menu",
+    "create": "New Listing",
+    "offers": "Offers",
+    "profile": "Profile",
+    "wallet": "Wallet",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "invite": "Invite",
+    "admin": "Admin",
+    "logout": "Logout"
   }
 }

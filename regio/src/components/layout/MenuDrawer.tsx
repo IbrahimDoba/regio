@@ -15,6 +15,7 @@ import {
 import { useLogout } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { FaShield } from "react-icons/fa6";
+import { useLanguage } from "@/context";
 
 interface MenuDrawerProps {
   isOpen: boolean;
@@ -24,15 +25,16 @@ interface MenuDrawerProps {
 export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
   const { mutate: logout } = useLogout();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const menuItems = [
-    { href: "/", icon: <FaHouse />, label: "Feed" },
-    { href: "/profile", icon: <FaUser />, label: "Profile" },
-    { href: "/wallet", icon: <FaWallet />, label: "Wallet" },
-    { href: "/chat", icon: <FaEnvelope />, label: "Messages" },
-    { href: "/notifications", icon: <FaBell />, label: "Notifications" },
-    { href: "/invite", icon: <FaTicket />, label: "Invite" },
-    ...(user?.is_system_admin ? [{ href: "/admin", icon: <FaShield />, label: "Admin" }] : []),
+    { href: "/", icon: <FaHouse />, label: t.nav.offers },
+    { href: "/profile", icon: <FaUser />, label: t.nav.profile },
+    { href: "/wallet", icon: <FaWallet />, label: t.nav.wallet },
+    { href: "/chat", icon: <FaEnvelope />, label: t.nav.messages },
+    { href: "/notifications", icon: <FaBell />, label: t.nav.notifications },
+    { href: "/invite", icon: <FaTicket />, label: t.nav.invite },
+    ...(user?.is_system_admin ? [{ href: "/admin", icon: <FaShield />, label: t.nav.admin }] : []),
   ];
 
   if (!isOpen) return null;
@@ -54,7 +56,7 @@ export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
 
         {/* Close */}
         <div className="flex justify-between items-center px-5 pb-3 border-b border-[#f0f0f0]">
-          <span className="text-[16px] font-[700] text-[#333]">Menu</span>
+          <span className="text-[16px] font-[700] text-[#333]">{t.nav.menu}</span>
           <button onClick={onClose} className="text-[#999] text-[20px] p-1">
             <FaXmark />
           </button>
@@ -87,7 +89,7 @@ export default function MenuDrawer({ isOpen, onClose }: MenuDrawerProps) {
             <span className="text-[18px] w-6 flex justify-center">
               <FaArrowRightFromBracket />
             </span>
-            Logout
+            {t.nav.logout}
           </button>
         </div>
       </div>

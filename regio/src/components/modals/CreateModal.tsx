@@ -185,7 +185,39 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
   const [locationLat, setLocationLat] = useState<number | null>(null);
   const [locationLng, setLocationLng] = useState<number | null>(null);
-  const [showMap, setShowMap] = useState(false);
+  const [zipCode, setZipCode] = useState("");
+  const [addressDetail, setAddressDetail] = useState("");
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeError, setGeocodeError] = useState<string | null>(null);
+  const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
+
+  const handleZipGeocode = async (zip: string, detail: string) => {
+    if (!zip.trim()) return;
+    setGeocoding(true);
+    setGeocodeError(null);
+    setResolvedAddress(null);
+    const query = [zip.trim(), detail.trim()].filter(Boolean).join(", ");
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
+        { headers: { "Accept-Language": "en" } }
+      );
+      const data = await res.json();
+      if (data && data.length > 0) {
+        setLocationLat(parseFloat(data[0].lat));
+        setLocationLng(parseFloat(data[0].lon));
+        setResolvedAddress(data[0].display_name);
+      } else {
+        setGeocodeError(t.create_modal.address_not_found);
+        setLocationLat(null);
+        setLocationLng(null);
+      }
+    } catch {
+      setGeocodeError(t.create_modal.address_not_found);
+    } finally {
+      setGeocoding(false);
+    }
+  };
 
   const createMutation = useCreateListing();
   const { t } = useLanguage();
@@ -427,27 +459,29 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {/* OFFER_SERVICE */}
           {category === "OFFER_SERVICE" && (
             <div className={fieldClass}>
-              <div className="flex justify-between items-center mb-2">
-                <label className={labelClass}>
-                  {t.create_modal.offer_service.time_factor_label}
-                  <span className="text-[#999] font-normal ml-1">{t.create_modal.offer_service.time_factor_hint}</span>
-                </label>
-                <div className="flex items-center gap-1.5 bg-[#f0f0f0] rounded-[6px] px-2.5 py-1 shrink-0">
-                  <span className="text-[14px] font-[800] text-[#333]">{timeFactor}x</span>
-                  <FaClock className="text-[#888] text-[12px]" />
+              <label className={labelClass}>
+                {t.create_modal.offer_service.time_factor_label}{" "}
+                <span className="text-[#999] font-normal">(0.25 – 3.0)</span>
+              </label>
+              <div className="flex items-center gap-[12px]">
+                <input
+                  type="range"
+                  min="0.25"
+                  max="3.0"
+                  step="0.25"
+                  value={timeFactor}
+                  onChange={(e) => setTimeFactor(parseFloat(e.target.value))}
+                  className="flex-1 cursor-pointer accent-[#e05555]"
+                />
+                <div className="flex items-center gap-[8px] shrink-0">
+                  <div className="bg-white border border-[#ddd] rounded-[6px] px-[14px] py-[8px] text-[16px] font-[700] text-[#333] min-w-[74px] text-center">
+                    {String(timeFactor).replace(".", ",")} x
+                  </div>
+                  <img src="/Icons/timefactor.png" className="w-[44px] h-[44px] opacity-60" alt="" />
                 </div>
               </div>
-              <input
-                type="range"
-                min="0.25"
-                max="3.0"
-                step="0.25"
-                value={timeFactor}
-                onChange={(e) => setTimeFactor(parseFloat(e.target.value))}
-                className="w-full cursor-pointer accent-[#e05555]"
-              />
-              <div className="text-[12px] text-[#888] mt-1.5 italic">
-                {t.create_modal.offer_service.time_factor_description.replace('{factor}', String(timeFactor))}
+              <div className="text-[12px] text-[#888] mt-[8px] italic text-center">
+                {t.create_modal.offer_service.time_factor_description.replace("{factor}", String(timeFactor).replace(".", ","))}
               </div>
             </div>
           )}
@@ -777,17 +811,50 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
           {/* Location */}
           <div className={fieldClass}>
-            <button
-              type="button"
-              onClick={() => setShowMap((v) => !v)}
-              className="inline-flex items-center gap-[6px] text-[15px] text-[#555] bg-[#f0f0f0] border border-[#ccc] rounded-[4px] px-[12px] py-[10px] hover:bg-[#e8e8e8] transition-colors"
-            >
-              <FaMapLocationDot className="text-[14px]" />
-              {showMap ? "Hide map" : locationLat !== null ? `Location set: ${locationLat.toFixed(4)}, ${locationLng!.toFixed(4)}` : "Add location on map"}
-            </button>
+            <label className={labelClass}>{t.create_modal.address_label}</label>
 
-            {showMap && (
-              <div className="mt-[10px]">
+            {/* ZIP code — required to show map */}
+            <div className="flex gap-[8px] mb-[8px]">
+              <input
+                type="text"
+                value={zipCode}
+                onChange={(e) => { setZipCode(e.target.value); setGeocodeError(null); }}
+                onBlur={() => handleZipGeocode(zipCode, addressDetail)}
+                onKeyDown={(e) => e.key === "Enter" && handleZipGeocode(zipCode, addressDetail)}
+                placeholder={t.create_modal.zip_placeholder}
+                className={inputClass + " flex-1"}
+              />
+              {geocoding && (
+                <div className="flex items-center px-[10px] text-[12px] text-[#888]">
+                  {t.create_modal.address_searching}
+                </div>
+              )}
+            </div>
+
+            {/* Optional street / village */}
+            <input
+              type="text"
+              value={addressDetail}
+              onChange={(e) => setAddressDetail(e.target.value)}
+              onBlur={() => zipCode.trim() && handleZipGeocode(zipCode, addressDetail)}
+              placeholder={t.create_modal.address_detail_placeholder}
+              className={inputClass + " mb-[8px]"}
+            />
+
+            {geocodeError && (
+              <div className="text-[12px] text-[#c62828] bg-[#ffebee] border border-[#ffcdd2] rounded-[4px] px-[10px] py-[6px] mb-[8px]">
+                {geocodeError}
+              </div>
+            )}
+
+            {/* Map — shown automatically once ZIP resolves */}
+            {locationLat !== null && locationLng !== null && (
+              <div>
+                {resolvedAddress && (
+                  <div className="text-[12px] text-[#2e7d32] bg-[#e8f5e9] border border-[#c8e6c9] rounded-[4px] px-[10px] py-[6px] mb-[8px]">
+                    ✓ {resolvedAddress}
+                  </div>
+                )}
                 <LocationPicker
                   lat={locationLat}
                   lng={locationLng}
@@ -798,6 +865,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                   onClear={() => {
                     setLocationLat(null);
                     setLocationLng(null);
+                    setResolvedAddress(null);
+                    setZipCode("");
+                    setAddressDetail("");
                   }}
                 />
               </div>

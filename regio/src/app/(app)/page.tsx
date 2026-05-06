@@ -20,7 +20,7 @@ import { API_CONFIG } from "@/lib/api/config";
 
 export default function FeedPage() {
   const router = useRouter();
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   // Initialize with all categories
   const [activeFilters, setActiveFilters] = useState<ListingCategory[]>(

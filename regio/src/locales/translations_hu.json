@@ -142,6 +142,12 @@
     "submit_button": "Hirdetés közzététele",
     "submit_loading": "Létrehozás...",
     "error_failed": "Hiba történt. Ellenőrizd a mezőket.",
+    "address_label": "Cím",
+    "zip_placeholder": "Irányítószám *",
+    "address_detail_placeholder": "Utca, település vagy kerület (opcionális)",
+    "address_searching": "Keresés...",
+    "address_not_found": "Cím nem található. Próbálj más irányítószámot.",
+    "address_set": "Helyszín beállítva",
     "images_label": "Fotók",
     "images_hint": "Legfeljebb 5 kép, egyenként max. 1MB (JPEG, PNG, WebP)",
     "images_add": "Fotók hozzáadása",
@@ -268,6 +274,9 @@
     "deny_button": "Elutasít",
     "confirm_pay_button": "Fizetés megerősítése",
     "cancel_request_button": "Kérés törlése",
+    "trust_level_label": "Bizalmi szint:",
+    "time_earned_label": "Szerzett idő:",
+    "limit_label": "Hitelkeret:",
     "send_button": "Küldés",
     "request_button": "Kérés",
     "send_form": {
@@ -319,7 +328,7 @@
       "location_placeholder": "pl. Budapest, 1051",
       "location_hint": "A távolságok kiszámításához használjuk.",
       "language_label": "Nyelv",
-      "language_en": "English (GB)",
+      "language_en": "English (EN)",
       "language_de": "Deutsch",
       "language_hu": "Magyar",
       "bio_label": "Rólam",
@@ -520,5 +529,18 @@
       "delete_success": "Címke törölve!",
       "delete_error": "Hiba a törléskor"
     }
+  },
+
+  "nav": {
+    "menu": "Menü",
+    "create": "Hirdetés létrehozása",
+    "offers": "Ajánlatok",
+    "profile": "Profil",
+    "wallet": "Tárca",
+    "messages": "Üzenetek",
+    "notifications": "Értesítések",
+    "invite": "Meghívás",
+    "admin": "Admin",
+    "logout": "Kijelentkezés"
   }
 }
