@@ -1,5 +1,6 @@
 import logging
 import random
+import secrets
 import string
 import uuid
 from datetime import datetime, timezone
@@ -17,13 +18,15 @@ from app.auth.exceptions import (
     AccountInactive,
     InvalidCredentials,
     InvalidInviteCode,
+    InvalidOrExpiredResetToken,
     InvalidToken,
     InviteCodeDepleted,
     RefreshTokenExpired,
 )
 from app.auth.models import Invite
 from app.auth.schemas import InvitePublic, Token
-from app.auth.security import verify_password
+from app.auth.security import get_password_hash, verify_password
+from app.email.schemas import PasswordResetEmailData
 from app.auth.utils import (
     create_access_token,
     create_refresh_token,
@@ -279,3 +282,43 @@ class AuthService:
 
         # Let the caller commit usually, but if called independently:
         # await self.session.commit()
+
+    async def request_password_reset(
+        self, email: str
+    ) -> Optional[PasswordResetEmailData]:
+        result = await self.session.execute(
+            select(User).where(User.email == email)
+        )
+        user = result.scalar_one_or_none()
+
+        if not user or not user.is_active:
+            return None
+
+        token = secrets.token_urlsafe(32)
+        ttl = auth_settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES * 60
+        await self.redis.setex(f"pwd_reset:{token}", ttl, str(user.id))
+
+        reset_url = f"{auth_settings.PASSWORD_RESET_BASE_URL}?token={token}"
+        return PasswordResetEmailData(
+            user_first_name=user.first_name,
+            user_email=user.email,
+            reset_url=reset_url,
+        )
+
+    async def reset_password(self, token: str, new_password: str) -> None:
+        user_id_str = await self.redis.get(f"pwd_reset:{token}")
+        if not user_id_str:
+            raise InvalidOrExpiredResetToken()
+
+        result = await self.session.execute(
+            select(User).where(User.id == uuid.UUID(user_id_str))
+        )
+        user = result.scalar_one_or_none()
+        if not user:
+            raise InvalidOrExpiredResetToken()
+
+        await self.redis.delete(f"pwd_reset:{token}")
+        user.password_hash = get_password_hash(new_password)
+        user.tokens_valid_from = datetime.now(timezone.utc)
+        self.session.add(user)
+        await self.session.commit()

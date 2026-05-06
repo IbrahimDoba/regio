@@ -63,3 +63,7 @@ class InvalidInviteCode(BadAuthRequest):
 
 class InviteCodeDepleted(BadAuthRequest):
     detail = "Invite code has no uses left"
+
+
+class InvalidOrExpiredResetToken(BadAuthRequest):
+    detail = "Password reset token is invalid or has expired"

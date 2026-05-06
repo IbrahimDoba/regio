@@ -87,3 +87,11 @@ class DisputeResolvedEmailData(BaseModel):
     amount_time: int
     amount_regio: float
     description: Optional[str] = None
+
+
+class PasswordResetEmailData(BaseModel):
+    """Data for rendering the password reset email."""
+
+    user_first_name: str
+    user_email: EmailStr
+    reset_url: str

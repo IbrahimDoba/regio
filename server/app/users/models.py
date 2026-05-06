@@ -80,6 +80,11 @@ class User(SQLModel, table=True):
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)},
     )
+    tokens_valid_from: Optional[datetime] = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),
+        description="Any token issued before this timestamp is considered invalid.",
+    )
 
     # Matrix integration
     matrix_user_id: Optional[str] = Field(

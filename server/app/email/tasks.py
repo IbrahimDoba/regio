@@ -5,6 +5,7 @@ from typing import List
 from app.email.schemas import (
     BroadcastDigestEmailData,
     DisputeResolvedEmailData,
+    PasswordResetEmailData,
     PaymentRequestRejectedEmailData,
     VerificationEmailData,
     VerificationStatusEmailData,
@@ -59,6 +60,16 @@ async def send_dispute_resolved_email_task(
     except Exception as e:
         logger.error(
             f"Background dispute resolved email failed for {data.user_email}: {e}"
+        )
+
+
+async def send_password_reset_email_task(data: PasswordResetEmailData) -> None:
+    """Background task: send password reset email."""
+    try:
+        await email_service.send_password_reset_email(data)
+    except Exception as e:
+        logger.error(
+            f"Background password reset email failed for {data.user_email}: {e}"
         )
 
 

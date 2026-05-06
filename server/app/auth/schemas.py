@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, EmailStr, Field
 from sqlmodel import SQLModel
 
 
@@ -57,6 +57,16 @@ class TokenPayload(SQLModel):
         default=None,
         description="Unique Token Identifier (used for blacklisting/revocation).",
     )
+
+
+# PASSWORD RESET SCHEMAS
+class PasswordResetRequest(SQLModel):
+    email: EmailStr
+
+
+class PasswordResetConfirm(SQLModel):
+    token: str
+    new_password: str = Field(..., min_length=8)
 
 
 # INVITE SCHEMAS

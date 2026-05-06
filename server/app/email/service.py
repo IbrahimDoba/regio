@@ -14,6 +14,7 @@ from app.email.schemas import (
     BroadcastDigestEmailData,
     DisputeResolvedEmailData,
     EmailMessage,
+    PasswordResetEmailData,
     PaymentEnforcedEmailData,
     PaymentReminderEmailData,
     PaymentRequestRejectedEmailData,
@@ -213,6 +214,22 @@ class EmailService:
             subject=f"Regio Update: {data.broadcast_title}",
             html_body=html,
             inline_images={"logo": self._logo_s},
+        )
+        await self._send(message)
+
+
+    async def send_password_reset_email(
+        self, data: PasswordResetEmailData
+    ) -> None:
+        """Send a password reset link to the user."""
+        html = self._render_template(
+            "password_reset.html", data.model_dump()
+        )
+        message = EmailMessage(
+            to=data.user_email,
+            subject="Reset Your Regio Password",
+            html_body=html,
+            inline_images={"logo": self._logo_m},
         )
         await self._send(message)
 

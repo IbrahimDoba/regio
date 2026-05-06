@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Annotated
 
 import jwt
@@ -68,6 +69,14 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
         )
+    token_iat = payload.get("iat")
+    if user.tokens_valid_from and token_iat:
+        if datetime.fromtimestamp(token_iat, tz=timezone.utc) < user.tokens_valid_from:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session invalidated, please log in again",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
     if user.verification_status != VerificationStatus.VERIFIED:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -118,6 +127,14 @@ async def get_current_user_any_status(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
         )
+    token_iat = payload.get("iat")
+    if user.tokens_valid_from and token_iat:
+        if datetime.fromtimestamp(token_iat, tz=timezone.utc) < user.tokens_valid_from:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session invalidated, please log in again",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
     return user
 

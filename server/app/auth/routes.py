@@ -1,12 +1,13 @@
 from typing import Annotated, Any, Optional
 
-from fastapi import APIRouter, Cookie, Depends, Request, Response, status
+from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.auth.dependencies import AuthServiceDep
-from app.auth.schemas import TokenResponse
+from app.auth.schemas import PasswordResetConfirm, PasswordResetRequest, TokenResponse
 from app.auth.utils import set_refresh_cookie
 from app.core.schemas import Message
+from app.email.tasks import send_password_reset_email_task
 from app.users.dependencies import CurrentUser
 from app.users.schemas import UserPublic
 
@@ -129,3 +130,45 @@ async def logout(
     response.delete_cookie("access_token")
 
     return Message(message="Logged out successfully")
+
+
+@router.post(
+    "/password-reset/request",
+    response_model=Message,
+    status_code=status.HTTP_200_OK,
+)
+async def request_password_reset(
+    body: PasswordResetRequest,
+    service: AuthServiceDep,
+    background_tasks: BackgroundTasks,
+) -> Message:
+    """
+    Request a password reset link.
+
+    Always returns 200 regardless of whether the email is registered.
+    """
+    email_data = await service.request_password_reset(body.email)
+    if email_data:
+        background_tasks.add_task(send_password_reset_email_task, email_data)
+    return Message(message="If that email is registered, a reset link has been sent.")
+
+
+@router.post(
+    "/password-reset/confirm",
+    response_model=Message,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Token is invalid or has expired"
+        }
+    },
+)
+async def confirm_password_reset(
+    body: PasswordResetConfirm,
+    service: AuthServiceDep,
+) -> Message:
+    """
+    Reset password using the token from the reset email.
+    """
+    await service.reset_password(body.token, body.new_password)
+    return Message(message="Password has been reset successfully.")
