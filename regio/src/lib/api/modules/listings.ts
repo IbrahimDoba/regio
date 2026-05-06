@@ -9,8 +9,8 @@ import {
   ListingCreate,
   ListingUpdate,
   FeedResponse,
-  TagPublic,
   FeedParams,
+  TagAutocomplete,
 } from "../types";
 
 /**
@@ -26,7 +26,7 @@ export const getFeed = async (params?: FeedParams): Promise<FeedResponse> => {
     API_ENDPOINTS.LISTINGS.FEED,
     {
       params,
-    }
+    },
   );
   return response.data;
 };
@@ -34,10 +34,13 @@ export const getFeed = async (params?: FeedParams): Promise<FeedResponse> => {
 /**
  * Get a single listing by ID
  */
-export const getListing = async (listingId: string, lang?: string): Promise<ListingPublic> => {
+export const getListing = async (
+  listingId: string,
+  lang?: string,
+): Promise<ListingPublic> => {
   const response = await apiClient.get<ListingPublic>(
     API_ENDPOINTS.LISTINGS.BY_ID(listingId),
-    { params: lang ? { lang } : undefined }
+    { params: lang ? { lang } : undefined },
   );
   return response.data;
 };
@@ -46,11 +49,11 @@ export const getListing = async (listingId: string, lang?: string): Promise<List
  * Create a new listing
  */
 export const createListing = async (
-  data: ListingCreate
+  data: ListingCreate,
 ): Promise<ListingPublic> => {
   const response = await apiClient.post<ListingPublic>(
     API_ENDPOINTS.LISTINGS.BASE,
-    data
+    data,
   );
   return response.data;
 };
@@ -60,11 +63,11 @@ export const createListing = async (
  */
 export const updateListing = async (
   listingId: string,
-  data: ListingUpdate
+  data: ListingUpdate,
 ): Promise<ListingPublic> => {
   const response = await apiClient.patch<ListingPublic>(
     API_ENDPOINTS.LISTINGS.BY_ID(listingId),
-    data
+    data,
   );
   return response.data;
 };
@@ -79,13 +82,16 @@ export const deleteListing = async (listingId: string): Promise<void> => {
 /**
  * Upload media files to an existing listing
  */
-export const uploadMedia = async (listingId: string, files: File[]): Promise<ListingPublic> => {
+export const uploadMedia = async (
+  listingId: string,
+  files: File[],
+): Promise<ListingPublic> => {
   const formData = new FormData();
-  files.forEach(file => formData.append('files', file));
+  files.forEach((file) => formData.append("files", file));
   const response = await apiClient.post<ListingPublic>(
     API_ENDPOINTS.LISTINGS.MEDIA(listingId),
     formData,
-    { headers: { 'Content-Type': 'multipart/form-data' } }
+    { headers: { "Content-Type": "multipart/form-data" } },
   );
   return response.data;
 };
@@ -93,12 +99,15 @@ export const uploadMedia = async (listingId: string, files: File[]): Promise<Lis
 /**
  * Search tags for autocomplete
  */
-export const searchTags = async (q: string, lang?: string): Promise<TagAutocomplete[]> => {
+export const searchTags = async (
+  q: string,
+  lang?: string,
+): Promise<TagAutocomplete[]> => {
   const response = await apiClient.get<TagAutocomplete[]>(
     API_ENDPOINTS.LISTINGS.TAGS,
     {
       params: { q, ...(lang ? { lang } : {}) },
-    }
+    },
   );
   return response.data;
 };
