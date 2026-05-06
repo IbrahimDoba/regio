@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useDialog } from "@/context/DialogContext";
-import { useRegisterUser } from "@/lib/api";
+import { useRegisterUser, useRequestPasswordReset } from "@/lib/api";
 import MobileContainer from "@/components/layout/MobileContainer";
 import ErrorMessage from "@/components/auth/ErrorMessage";
 
@@ -16,8 +16,9 @@ export default function AuthPage() {
   const { login } = useAuth();
   const dialog = useDialog();
   const registerMutation = useRegisterUser();
+  const requestResetMutation = useRequestPasswordReset();
 
-  const [view, setView] = useState<'login' | 'register'>('login');
+  const [view, setView] = useState<'login' | 'register' | 'forgot'>('login');
   const [isNoCodeOpen, setIsNoCodeOpen] = useState(false);
 
   // Login form state
@@ -25,6 +26,11 @@ export default function AuthPage() {
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  // Forgot password state
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
+  const [forgotError, setForgotError] = useState<string | null>(null);
 
   // Register form state
   const [inviteCode, setInviteCode] = useState('');
@@ -58,6 +64,17 @@ export default function AuthPage() {
       setLoginError(message);
     } finally {
       setIsLoggingIn(false);
+    }
+  };
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError(null);
+    try {
+      await requestResetMutation.mutateAsync(forgotEmail);
+      setForgotSent(true);
+    } catch {
+      setForgotError(t.auth.forgot_password.error_generic);
     }
   };
 
@@ -130,7 +147,71 @@ export default function AuthPage() {
       {/* Card */}
       <div className="bg-white rounded-t-[25px] flex-grow p-[30px] shadow-[0_-5px_20px_rgba(0,0,0,0.05)] animate-in slide-in-from-bottom-10 duration-500 flex flex-col">
 
-        {view === 'login' ? (
+        {view === 'forgot' ? (
+          <div className="animate-in fade-in duration-300">
+            <h2 className="mb-[25px] text-[#333] text-[24px] font-bold">{t.auth.forgot_password.section_title}</h2>
+
+            {forgotSent ? (
+              <div className="text-center py-[20px]">
+                <div className="text-[40px] mb-[15px]">📬</div>
+                <div className="font-bold text-[18px] text-[#333] mb-[10px]">{t.auth.forgot_password.sent_title}</div>
+                <div className="text-[14px] text-[#666] leading-[1.6] mb-[30px]">{t.auth.forgot_password.sent_body}</div>
+                <span
+                  className="text-[var(--color-nav-bg)] font-bold cursor-pointer text-[14px]"
+                  onClick={() => setView('login')}
+                >
+                  {t.auth.forgot_password.back_to_login}
+                </span>
+              </div>
+            ) : (
+              <>
+                {forgotError && <ErrorMessage message={forgotError} className="mb-[20px]" />}
+
+                <form onSubmit={handleForgotSubmit}>
+                  <div className="mb-[20px]">
+                    <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.forgot_password.email_label}</label>
+                    <div className="relative">
+                      <FaEnvelope className="absolute left-[15px] top-1/2 -translate-y-1/2 text-[#999] text-[16px]" />
+                      <input
+                        type="email"
+                        className="w-full p-[14px_14px_14px_45px] border border-[#ddd] rounded-[8px] text-[15px] bg-[var(--input-bg)] focus:border-[var(--color-green-offer)] outline-none"
+                        placeholder="you@example.com"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        disabled={requestResetMutation.isPending}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full p-[15px] bg-[var(--color-green-offer)] text-white border-none rounded-[8px] text-[16px] font-bold cursor-pointer mt-[10px] shadow-[0_4px_10px_rgba(140,179,72,0.3)] active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 flex items-center justify-center gap-[8px]"
+                    disabled={requestResetMutation.isPending}
+                  >
+                    {requestResetMutation.isPending ? (
+                      <>
+                        <FaSpinner className="animate-spin" />
+                        {t.auth.forgot_password.submit_loading}
+                      </>
+                    ) : (
+                      t.auth.forgot_password.submit
+                    )}
+                  </button>
+                </form>
+
+                <div className="text-center mt-[25px] text-[13px] text-[#777] pb-[20px]">
+                  <span
+                    className="text-[var(--color-nav-bg)] font-bold cursor-pointer"
+                    onClick={() => setView('login')}
+                  >
+                    {t.auth.forgot_password.toggle_to_login}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+        ) : view === 'login' ? (
           <div className="animate-in fade-in duration-300">
             <h2 className="mb-[25px] text-[#333] text-[24px] font-bold">{t.auth.login.section_title}</h2>
 
@@ -185,7 +266,16 @@ export default function AuthPage() {
               </button>
             </form>
 
-            <div className="text-center mt-[25px] text-[13px] text-[#777] pb-[20px]">
+            <div className="text-center mt-[20px] text-[13px] text-[#777]">
+              <span
+                className="text-[#999] cursor-pointer hover:text-[var(--color-nav-bg)] transition-colors"
+                onClick={() => { setForgotSent(false); setForgotError(null); setView('forgot'); }}
+              >
+                {t.auth.forgot_password.link}
+              </span>
+            </div>
+
+            <div className="text-center mt-[15px] text-[13px] text-[#777] pb-[20px]">
               <span
                 className="text-[var(--color-nav-bg)] font-bold cursor-pointer"
                 onClick={() => setView('register')}

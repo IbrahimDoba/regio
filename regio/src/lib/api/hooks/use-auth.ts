@@ -152,3 +152,22 @@ export function useTestToken() {
     retry: false,
   });
 }
+
+/**
+ * Request a password reset email
+ */
+export function useRequestPasswordReset() {
+  return useMutation({
+    mutationFn: (email: string) => authApi.requestPasswordReset(email),
+  });
+}
+
+/**
+ * Confirm password reset with token and new password
+ */
+export function useConfirmPasswordReset() {
+  return useMutation({
+    mutationFn: (data: { token: string; new_password: string }) =>
+      authApi.confirmPasswordReset(data),
+  });
+}

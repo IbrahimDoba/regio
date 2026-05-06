@@ -64,6 +64,31 @@ export const testToken = async (): Promise<UserPublic> => {
 };
 
 /**
+ * Request a password reset email
+ */
+export const requestPasswordReset = async (email: string): Promise<Message> => {
+  const response = await apiClient.post<Message>(
+    API_ENDPOINTS.AUTH.PASSWORD_RESET_REQUEST,
+    { email }
+  );
+  return response.data;
+};
+
+/**
+ * Confirm password reset with token and new password
+ */
+export const confirmPasswordReset = async (data: {
+  token: string;
+  new_password: string;
+}): Promise<Message> => {
+  const response = await apiClient.post<Message>(
+    API_ENDPOINTS.AUTH.PASSWORD_RESET_CONFIRM,
+    data
+  );
+  return response.data;
+};
+
+/**
  * Auth API module
  */
 export const authApi = {
@@ -71,4 +96,6 @@ export const authApi = {
   logout,
   refreshToken,
   testToken,
+  requestPasswordReset,
+  confirmPasswordReset,
 } as const;

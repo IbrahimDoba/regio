@@ -30,9 +30,32 @@
       "request_community": "Request one from community",
       "apply_access": "Apply for early access"
     },
-    "subtitle": "Act. Together. Locally."
+    "subtitle": "Act. Together. Locally.",
+    "forgot_password": {
+      "link": "Forgot password?",
+      "section_title": "Reset Password",
+      "email_label": "Email Address",
+      "submit": "Send Reset Link",
+      "submit_loading": "Sending...",
+      "sent_title": "Check your email",
+      "sent_body": "If that address is registered, a reset link is on its way. It expires in 30 minutes.",
+      "back_to_login": "Back to login",
+      "toggle_to_login": "Back to login",
+      "error_generic": "Something went wrong. Please try again."
+    },
+    "reset_password": {
+      "section_title": "Set New Password",
+      "password_label": "New Password",
+      "confirm_label": "Confirm Password",
+      "submit": "Reset Password",
+      "submit_loading": "Resetting...",
+      "success_title": "Password updated",
+      "success_body": "Your password has been reset. Redirecting you to login...",
+      "error_mismatch": "Passwords do not match.",
+      "error_too_short": "Password must be at least 8 characters.",
+      "error_generic": "This link is invalid or has expired. Please request a new one."
+    }
   },
-
   "feed": {
     "header": {
       "subtitle": "All current offers and searches",
@@ -44,21 +67,18 @@
     "error_chat_not_connected": "Chat is not connected yet. Please wait a moment and try again.",
     "contact_prefill": "I am interested in \"{title}\"."
   },
-
   "feed_card": {
     "region_label": "Region",
     "region_unit": "km",
     "read_more": "Read More >",
     "contact_button": "Contact"
   },
-
   "filter_panel": {
     "search_placeholder": "Search...",
     "search_button": "Search",
     "radius_all": "All distances",
     "radius_nationwide": "Nationwide"
   },
-
   "category_labels": {
     "OFFER_SERVICE": "Offer Service",
     "SEARCH_SERVICE": "Search Service",
@@ -68,7 +88,6 @@
     "RIDE_SHARE": "Ride Share",
     "EVENT_WORKSHOP": "Event / Workshop"
   },
-
   "preview_modal": {
     "price_label": "Value / Price:",
     "contact_button": "Contact",
@@ -107,7 +126,6 @@
       "price_notes": "Price Notes"
     }
   },
-
   "create_modal": {
     "title": "Create New Listing",
     "category_label": "Category",
@@ -128,7 +146,6 @@
     "images_hint": "Up to 5 images, max 1MB each (JPEG, PNG, WebP)",
     "images_add": "Add Photos",
     "images_uploading": "Uploading photos...",
-
     "offer_service": {
       "time_factor_label": "Time Factor",
       "time_factor_hint": "(0.25 – 3.0)",
@@ -185,7 +202,6 @@
       "material_fee_label": "Material Fee (Garas)"
     }
   },
-
   "chat": {
     "page": {
       "header": "Messages",
@@ -235,7 +251,6 @@
       "submit_button": "Send Request"
     }
   },
-
   "wallet": {
     "header": "My Wallet",
     "time_account": "Time Account",
@@ -287,7 +302,6 @@
       }
     }
   },
-
   "profile": {
     "header": "My Profile",
     "trust_level": "Trust Level:",
@@ -335,7 +349,6 @@
       "invites_reputation_hint": "Inviting active members earns you reputation points."
     }
   },
-
   "notifications": {
     "header": "Notifications",
     "mark_all_read": "Mark all read",
@@ -346,7 +359,6 @@
     "section_activity": "Activity",
     "section_broadcasts": "Broadcasts"
   },
-
   "invite": {
     "header": "Invite Friends",
     "codes_available": "{count} / 3",
@@ -375,7 +387,6 @@
     "share_facebook": "Facebook",
     "share_email": "Email"
   },
-
   "verification": {
     "title": "Verification Pending",
     "title_verified": "Account Verified",
@@ -391,7 +402,6 @@
     "logout_button": "Log Out",
     "go_to_app": "Go to App"
   },
-
   "admin": {
     "sidebar": {
       "brand": "ADMIN",

@@ -30,7 +30,31 @@
       "request_community": "Kérj egyet a közösségtől",
       "apply_access": "Jelentkezés korai hozzáférésre"
     },
-    "subtitle": "Helyben. Együtt. Cselekszünk."
+    "subtitle": "Helyben. Együtt. Cselekszünk.",
+    "forgot_password": {
+      "link": "Elfelejtett jelszó?",
+      "section_title": "Jelszó visszaállítása",
+      "email_label": "E-mail cím",
+      "submit": "Visszaállító link küldése",
+      "submit_loading": "Küldés...",
+      "sent_title": "Ellenőrizd az e-mail fiókod",
+      "sent_body": "Ha ez a cím regisztrált, hamarosan megérkezik a visszaállító link. 30 percig érvényes.",
+      "back_to_login": "Vissza a bejelentkezéshez",
+      "toggle_to_login": "Vissza a bejelentkezéshez",
+      "error_generic": "Valami hiba történt. Kérjük, próbáld újra."
+    },
+    "reset_password": {
+      "section_title": "Új jelszó beállítása",
+      "password_label": "Új jelszó",
+      "confirm_label": "Jelszó megerősítése",
+      "submit": "Jelszó visszaállítása",
+      "submit_loading": "Visszaállítás...",
+      "success_title": "Jelszó frissítve",
+      "success_body": "A jelszavad sikeresen visszaállítva. Átirányítás a bejelentkezéshez...",
+      "error_mismatch": "A jelszavak nem egyeznek.",
+      "error_too_short": "A jelszónak legalább 8 karakter hosszúnak kell lennie.",
+      "error_generic": "Ez a link érvénytelen vagy lejárt. Kérj újat."
+    }
   },
   "feed": {
     "header": {
@@ -498,4 +522,3 @@
     }
   }
 }
-
