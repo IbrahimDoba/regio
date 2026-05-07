@@ -341,7 +341,6 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     setPreviewUrls([]);
     setLocationLat(null);
     setLocationLng(null);
-    setShowMap(false);
   };
 
   const handleSubmit = () => {
