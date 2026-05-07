@@ -14,7 +14,7 @@ interface UserAdminView {
   role: string;
   trust_level: 'T1' | 'T2' | 'T3' | 'T4' | 'T5' | 'T6';
   is_active: boolean;
-  verification_status: 'PENDING' | 'VERIFIED' | 'REJECTED';
+  verification_status: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'ACTION_REQUIRED';
   balance_time: number;
   balance_regio: string;
   created_at: string;

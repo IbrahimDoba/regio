@@ -6,6 +6,7 @@ import {
   useUpdateUserDetails,
   useDashboardStats,
 } from "@/lib/api";
+import type { AdminUserUpdate } from "@/lib/api/types";
 import ContentCard from "@/components/admin/ui/ContentCard";
 import UserTable from "@/components/admin/users/UserTable";
 import EditUserModal from "@/components/admin/users/EditUserModal";
@@ -20,7 +21,7 @@ interface UserAdminView {
   role: string;
   trust_level: "T1" | "T2" | "T3" | "T4" | "T5" | "T6";
   is_active: boolean;
-  verification_status: "PENDING" | "VERIFIED" | "REJECTED";
+  verification_status: "PENDING" | "VERIFIED" | "REJECTED" | "ACTION_REQUIRED";
   balance_time: number;
   balance_regio: string;
   created_at: string;
@@ -96,7 +97,7 @@ export default function AdminUsersPage() {
     );
   };
 
-  const handleSaveUser = (userCode: string, data: Record<string, unknown>) => {
+  const handleSaveUser = (userCode: string, data: AdminUserUpdate) => {
     updateUserMutation.mutate(
       { userCode, data },
       {

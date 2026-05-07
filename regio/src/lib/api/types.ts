@@ -57,7 +57,7 @@ export interface TokenResponse {
 // ============================================================================
 
 export type TrustLevel = 'T1' | 'T2' | 'T3' | 'T4' | 'T5' | 'T6';
-export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
+export type VerificationStatus = 'PENDING' | 'VERIFIED' | 'REJECTED' | 'ACTION_REQUIRED';
 export type Language = 'EN' | 'DE' | 'HU';
 export type UserRole = 'User' | 'Admin';
 
@@ -103,11 +103,16 @@ export interface UserUpdate {
   language?: Language;
 }
 
-export interface AdminUserUpdate extends UserUpdate {
+export interface AdminUserUpdate {
+  email?: string;
+  language?: Language;
   first_name?: string;
   last_name?: string;
+  is_active?: boolean;
+  is_system_admin?: boolean;
   trust_level?: TrustLevel;
   verification_status?: VerificationStatus;
+  total_time_earned?: number;
 }
 
 export interface UsersListResponse {
