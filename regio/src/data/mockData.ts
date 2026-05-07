@@ -30,7 +30,7 @@ export const posts: Post[] = [
 ];
 
 export const uiTexts: { [key: string]: LangTexts } = {
-    'GB': { 
+    'EN': { 
         filter: 'Filter', offers: 'All current offers and searches', scroll: 'Scroll through or use search or filter with the red button', contact: 'Contact', readmore: 'Read More >', searchPh: 'Search...', region: 'Region', country: 'Country', city: 'City',
         createTitle: 'Create New Listing', catLabel: 'Category', titleLabel: 'Title', titlePh: 'What are you offering/searching?', descLabel: 'Description', descPh: 'Describe details...', imagesLabel: 'Images / PDF', radiusLabel: 'Radius', tagsLabel: 'Tags', cancel: 'Cancel', save: 'Create Listing',
         hintCat: 'Choose the category that best fits your offer or request.',

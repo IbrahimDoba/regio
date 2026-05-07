@@ -88,7 +88,7 @@ export default function ProfilePage() {
     updateUser.mutate(
       {
         address: location,
-        language: language === "GB" ? "EN" : (language as "EN" | "DE" | "HU"), // Language is handled by context but we also save it to backend?
+        language: language as "EN" | "DE" | "HU",
       },
       {
         onSuccess: () => {
@@ -278,9 +278,9 @@ export default function ProfilePage() {
               <select
                 className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
                 value={language}
-                onChange={(e) => setLanguage(e.target.value as "GB" | "DE" | "HU")}
+                onChange={(e) => setLanguage(e.target.value as "EN" | "DE" | "HU")}
               >
-                <option value="GB">{t.profile.personal_tab.language_en}</option>
+                <option value="EN">{t.profile.personal_tab.language_en}</option>
                 <option value="DE">{t.profile.personal_tab.language_de}</option>
                 <option value="HU">{t.profile.personal_tab.language_hu}</option>
               </select>

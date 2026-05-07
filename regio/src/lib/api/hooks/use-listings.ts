@@ -21,7 +21,8 @@ function toApiLang(lang: string): string {
   switch (lang) {
     case "HU": return "hu";
     case "DE": return "de";
-    default:   return "en"; // 'GB' and any unknown → English
+    case "EN": return "en";
+    default:   return "en";
   }
 }
 

@@ -18,7 +18,7 @@ export default function Header({ isFilterOpen, toggleFilter, children, count, to
   const { language, setLanguage, t } = useLanguage();
   const [isLangOpen, setIsLangOpen] = React.useState(false);
 
-  const flags: { [key: string]: string } = { 'GB': '🇬🇧', 'HU': '🇭🇺', 'DE': '🇩🇪' };
+  const flags: { [key: string]: string } = { 'EN': '🇬🇧', 'HU': '🇭🇺', 'DE': '🇩🇪' };
 
   return (
     <header className="bg-[var(--white)] border-b border-[#eee] sticky top-0 z-100">
@@ -47,7 +47,7 @@ export default function Header({ isFilterOpen, toggleFilter, children, count, to
                     key={lang}
                     className="p-[5px_10px] text-[20px] cursor-pointer hover:bg-[#f5f5f5] flex justify-center"
                     onClick={() => {
-                      setLanguage(lang as "GB" | "DE" | "HU");
+                      setLanguage(lang as "EN" | "DE" | "HU");
                       setIsLangOpen(false);
                     }}
                   >

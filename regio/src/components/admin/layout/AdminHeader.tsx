@@ -9,12 +9,12 @@ export default function AdminHeader() {
   const { language, setLanguage, t } = useLanguage();
 
   const flags: { [key: string]: string } = {
-    GB: "🇬🇧 EN",
-    HU: "🇭🇺 HU",
-    DE: "🇩🇪 DE",
+    EN: "🇬🇧",
+    HU: "🇭🇺",
+    DE: "🇩🇪",
   };
 
-  const langOrder: ("GB" | "HU" | "DE")[] = ["GB", "HU", "DE"];
+  const langOrder: ("EN" | "HU" | "DE")[] = ["EN", "HU", "DE"];
 
   const toggleLang = () => {
     const idx = langOrder.indexOf(language);

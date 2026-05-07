@@ -21,15 +21,15 @@ Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et d
 Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores.`;
 
 const titles: Record<string, string> = {
-  GB: "Terms and Conditions",
+  EN: "Terms and Conditions",
   DE: "Nutzungsbedingungen",
   HU: "Felhasználási Feltételek",
 };
 
 const flags: Record<string, string> = {
-  GB: "🇬🇧 EN",
-  HU: "🇭🇺 HU",
-  DE: "🇩🇪 DE",
+  EN: "🇬🇧",
+  HU: "🇭🇺",
+  DE: "🇩🇪",
 };
 
 export default function TermsPage() {
@@ -37,7 +37,7 @@ export default function TermsPage() {
   const { language, setLanguage } = useLanguage();
 
   const toggleLang = () => {
-    const order: ("GB" | "HU" | "DE")[] = ["GB", "HU", "DE"];
+    const order: ("EN" | "HU" | "DE")[] = ["EN", "HU", "DE"];
     const idx = order.indexOf(language);
     setLanguage(order[(idx + 1) % order.length]);
   };

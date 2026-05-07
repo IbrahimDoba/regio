@@ -43,8 +43,8 @@ export default function AuthPage() {
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
 
-  const flags: { [key: string]: string } = { 'GB': '🇬🇧 EN', 'HU': '🇭🇺 HU', 'DE': '🇩🇪 DE' };
-  const langOrder: ('GB' | 'HU' | 'DE')[] = ['GB', 'HU', 'DE'];
+  const flags: { [key: string]: string } = { 'EN': '🇬🇧', 'HU': '🇭🇺', 'DE': '🇩🇪' };
+  const langOrder: ('EN' | 'HU' | 'DE')[] = ['EN', 'HU', 'DE'];
 
   const toggleLang = () => {
     const idx = langOrder.indexOf(language);

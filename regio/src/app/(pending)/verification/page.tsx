@@ -14,10 +14,10 @@ export default function VerificationPage() {
 
   const isVerified = user?.verification_status === 'VERIFIED';
 
-  const flags: { [key: string]: string } = { 'GB': '🇬🇧 EN', 'HU': '🇭🇺 HU', 'DE': '🇩🇪 DE' };
+  const flags: { [key: string]: string } = { 'EN': '🇬🇧', 'HU': '🇭🇺', 'DE': '🇩🇪' };
 
   const toggleLanguage = () => {
-    const langs: ('GB' | 'HU' | 'DE')[] = ['GB', 'HU', 'DE'];
+    const langs: ('EN' | 'HU' | 'DE')[] = ['EN', 'HU', 'DE'];
     const idx = langs.indexOf(language);
     const next = langs[(idx + 1) % langs.length];
     setLanguage(next);

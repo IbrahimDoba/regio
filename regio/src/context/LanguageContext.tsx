@@ -5,11 +5,11 @@ import translationsEn from '@/locales/translations.json';
 import translationsDe from '@/locales/translations_de.json';
 import translationsHu from '@/locales/translations_hu.json';
 
-export type Language = 'GB' | 'HU' | 'DE';
+export type Language = 'EN' | 'HU' | 'DE';
 export type Translations = typeof translationsEn;
 
 const TRANSLATIONS: Record<Language, Translations> = {
-  GB: translationsEn,
+  EN: translationsEn,
   DE: translationsDe as Translations,
   HU: translationsHu as Translations,
 };
@@ -25,7 +25,7 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('GB');
+  const [language, setLanguageState] = useState<Language>('EN');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

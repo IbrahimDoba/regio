@@ -465,7 +465,7 @@ export default function WalletPage() {
         {/* Zeit card */}
         <div className="flex-1 rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden bg-gradient-to-br from-[#e53935] to-[#b71c1c] flex flex-col justify-between min-h-[100px]">
           <div>
-            <div className="text-[12px] uppercase tracking-[1px] opacity-80 mb-[4px]">
+            <div className="text-[12px] tracking-[1px] opacity-80 mb-[4px]">
               {t.wallet.time_account}
             </div>
             <div className="text-[34px] font-[800] leading-tight">
@@ -487,7 +487,7 @@ export default function WalletPage() {
         {/* Garas card */}
         <div className="flex-1 rounded-[12px] p-[15px] text-white shadow-md relative overflow-hidden bg-gradient-to-br from-[#4a90e2] to-[#0056b3] flex flex-col justify-between min-h-[100px]">
           <div>
-            <div className="text-[12px] uppercase tracking-[1px] opacity-80 mb-[4px]">
+            <div className="text-[12px] tracking-[1px] opacity-80 mb-[4px]">
               {t.wallet.garas_account}
             </div>
             <div className="text-[34px] font-[800] leading-tight">
@@ -722,7 +722,7 @@ export default function WalletPage() {
           }`}
           onClick={() => toggleForm("send")}
         >
-          <img src="/sendpayment.png" className="w-[22px] h-[22px]" alt="" />
+          <img src="/sendpayment.png" className="w-[36px] h-[36px]" alt="" />
           <span className="text-[12px] font-bold text-[#555]">{t.wallet.send_button}</span>
         </div>
         <div
@@ -733,7 +733,7 @@ export default function WalletPage() {
           }`}
           onClick={() => toggleForm("request")}
         >
-          <img src="/requestpayment.png" className="w-[22px] h-[22px]" alt="" />
+          <img src="/requestpayment.png" className="w-[36px] h-[36px]" alt="" />
           <span className="text-[12px] font-bold text-[#555]">{t.wallet.request_button}</span>
         </div>
       </div>
