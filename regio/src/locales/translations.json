@@ -89,6 +89,9 @@
     "EVENT_WORKSHOP": "Event / Workshop"
   },
   "preview_modal": {
+    "timefactor_label": "Timefactor",
+    "value_label": "Value",
+    "images_label": "Photos",
     "price_label": "Value / Price:",
     "contact_button": "Contact",
     "contact_loading": "Starting chat...",
@@ -144,7 +147,7 @@
     "error_failed": "Failed to create listing. Please check all fields and try again.",
     "address_label": "Address",
     "zip_placeholder": "ZIP / Postal code *",
-    "address_detail_placeholder": "Street, village, or area (optional)",
+    "city_placeholder": "City *",
     "address_searching": "Searching...",
     "address_not_found": "Address not found. Try a different ZIP code.",
     "address_set": "Location set",
@@ -152,6 +155,13 @@
     "images_hint": "Up to 5 images, max 1MB each (JPEG, PNG, WebP)",
     "images_add": "Add Photos",
     "images_uploading": "Uploading photos...",
+    "date_select": {
+      "year": "Year",
+      "month": "Month",
+      "day": "Day",
+      "hour": "Hour",
+      "minute": "Min"
+    },
     "offer_service": {
       "time_factor_label": "Time Factor",
       "time_factor_hint": "(0.25 – 3.0)",
@@ -195,7 +205,9 @@
       "seats_label": "Available Seats",
       "seats_placeholder": "e.g. 3",
       "price_time_label": "Price per Seat (minutes)",
-      "price_garas_label": "Price per Seat (Garas)"
+      "price_time_placeholder": "0",
+      "price_garas_label": "Price per Seat (Garas)",
+      "price_garas_placeholder": "0"
     },
     "event_workshop": {
       "start_label": "Start Date & Time",
@@ -205,7 +217,9 @@
       "max_participants_label": "Max Participants (optional)",
       "max_participants_placeholder": "e.g. 20",
       "entry_fee_label": "Entry Fee (minutes)",
-      "material_fee_label": "Material Fee (Garas)"
+      "entry_fee_placeholder": "0",
+      "material_fee_label": "Material Fee (Garas)",
+      "material_fee_placeholder": "0"
     }
   },
   "chat": {

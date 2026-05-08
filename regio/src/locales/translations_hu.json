@@ -89,6 +89,9 @@
     "EVENT_WORKSHOP": "Esemény / Workshop"
   },
   "preview_modal": {
+    "timefactor_label": "Időfaktor",
+    "value_label": "Érték",
+    "images_label": "Fotók",
     "price_label": "Érték / Ár:",
     "contact_button": "Kapcsolat",
     "contact_loading": "Chat indítása...",
@@ -144,7 +147,7 @@
     "error_failed": "Hiba történt. Ellenőrizd a mezőket.",
     "address_label": "Cím",
     "zip_placeholder": "Irányítószám *",
-    "address_detail_placeholder": "Utca, település vagy kerület (opcionális)",
+    "city_placeholder": "Város *",
     "address_searching": "Keresés...",
     "address_not_found": "Cím nem található. Próbálj más irányítószámot.",
     "address_set": "Helyszín beállítva",
@@ -152,6 +155,13 @@
     "images_hint": "Legfeljebb 5 kép, egyenként max. 1MB (JPEG, PNG, WebP)",
     "images_add": "Fotók hozzáadása",
     "images_uploading": "Fotók feltöltése...",
+    "date_select": {
+      "year": "Év",
+      "month": "Hónap",
+      "day": "Nap",
+      "hour": "Óra",
+      "minute": "Perc"
+    },
     "offer_service": {
       "time_factor_label": "Idő-szorzó",
       "time_factor_hint": "(0.25 – 3.0)",
@@ -195,7 +205,9 @@
       "seats_label": "Szabad helyek",
       "seats_placeholder": "pl. 3",
       "price_time_label": "Ár / hely (perc)",
-      "price_garas_label": "Ár / hely (Garas)"
+      "price_time_placeholder": "0",
+      "price_garas_label": "Ár / hely (Garas)",
+      "price_garas_placeholder": "0"
     },
     "event_workshop": {
       "start_label": "Kezdés időpontja",
@@ -205,7 +217,9 @@
       "max_participants_label": "Max. résztvevő (opcionális)",
       "max_participants_placeholder": "pl. 20",
       "entry_fee_label": "Belépő (perc)",
-      "material_fee_label": "Anyagköltség (Garas)"
+      "entry_fee_placeholder": "0",
+      "material_fee_label": "Anyagköltség (Garas)",
+      "material_fee_placeholder": "0"
     }
   },
   "chat": {
