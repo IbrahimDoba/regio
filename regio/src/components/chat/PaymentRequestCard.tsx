@@ -22,7 +22,7 @@ interface PaymentRequestCardProps {
 }
 
 function formatGaras(val: number) {
-  return val.toFixed(2);
+  return val.toFixed(2).replace(".", ",");
 }
 
 function formatTime(val: number) {

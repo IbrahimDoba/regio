@@ -558,7 +558,7 @@ export default function WalletPage() {
                   {req.amount_regio !== "0.00" && (
                     <div className="flex items-center gap-1">
                       <img src="/garas.png" className="w-7 h-7" alt="" />
-                      <span className="font-bold text-red-700 text-[13px]">{req.amount_regio}</span>
+                      <span className="font-bold text-red-700 text-[13px]">{req.amount_regio.replace(".", ",")} G</span>
                     </div>
                   )}
                 </div>
@@ -625,7 +625,7 @@ export default function WalletPage() {
                   {req.amount_regio !== "0.00" && (
                     <div className="flex items-center gap-1">
                       <img src="/garas.png" className="w-7 h-7" alt="" />
-                      <span className="font-bold text-red-700 text-[13px]">{req.amount_regio}</span>
+                      <span className="font-bold text-red-700 text-[13px]">{req.amount_regio.replace(".", ",")} G</span>
                     </div>
                   )}
                 </div>
@@ -679,7 +679,7 @@ export default function WalletPage() {
                   {req.amount_regio !== "0.00" && (
                     <div className="flex items-center gap-1">
                       <img src="/garas.png" className="w-7 h-7" alt="" />
-                      <span className="font-bold text-red-700 text-[13px]">{req.amount_regio}</span>
+                      <span className="font-bold text-red-700 text-[13px]">{req.amount_regio.replace(".", ",")} G</span>
                     </div>
                   )}
                 </div>
@@ -975,7 +975,7 @@ export default function WalletPage() {
                   <div className="flex items-center gap-[4px]">
                     <img src="/garas.png" className="w-5 h-5" alt="" />
                     <span className={`text-[13px] font-bold whitespace-nowrap ${tx.type === "INCOMING" ? "text-[#2e7d32]" : "text-red-700"}`}>
-                      {tx.type === "INCOMING" ? "+" : "-"}{tx.amount_regio}
+                      {tx.type === "INCOMING" ? "+" : "-"}{tx.amount_regio.replace(".", ",")} G
                     </span>
                   </div>
                 )}
@@ -1028,7 +1028,7 @@ export default function WalletPage() {
                 <div className="flex items-center gap-2">
                   <img src="/garas.png" className="w-9 h-9" alt="" />
                   <span className={`text-[20px] font-[800] ${selectedTx.type === "INCOMING" ? "text-[#2e7d32]" : "text-red-700"}`}>
-                    {selectedTx.type === "INCOMING" ? "+" : "-"}{selectedTx.amount_regio}
+                    {selectedTx.type === "INCOMING" ? "+" : "-"}{selectedTx.amount_regio.replace(".", ",")} G
                   </span>
                 </div>
               )}

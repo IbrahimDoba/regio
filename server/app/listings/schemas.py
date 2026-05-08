@@ -38,10 +38,10 @@ class SearchServiceAttributes(BaseModel):
 class ProductAttributes(BaseModel):
     """Attributes for SELL_PRODUCT listings."""
 
-    time_amount: int = Field(
-        ...,
+    time_amount: Optional[int] = Field(
+        default=None,
         gt=0,
-        description="Price in Time currency. Required and must be greater than 0.",
+        description="Price in Time currency. Optional.",
     )
     regio_amount: Optional[int] = Field(
         default=None,
@@ -283,7 +283,7 @@ class CreateSearchServiceListing(ListingCreateBase):
 
 
 class CreateProductListing(ListingCreateBase):
-    """Create a Sell Product listing. Must include a Time price (cannot be Regio-only)."""
+    """Create a Sell Product listing."""
 
     category: Literal[ListingCategory.SELL_PRODUCT] = Field(
         ListingCategory.SELL_PRODUCT, description="Category: SELL_PRODUCT"

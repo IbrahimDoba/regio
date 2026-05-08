@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import { FaLocationDot } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingPublic } from "@/lib/api/types";
-import { getCategoryDetails } from "@/lib/feed-helpers";
-import { formatPriceNode } from "@/lib/feed-helpers";
+import { getCategoryDetails, ListingAttributes } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { API_CONFIG } from "@/lib/api/config";
@@ -25,7 +24,37 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
   const isOwn = !!user && listing.owner_code === user.user_code;
   const timeUnit = language === "HU" ? "perc" : "min";
   const { color, icon, label, colorVar } = getCategoryDetails(listing.category);
-  const priceDisplay = formatPriceNode(listing, timeUnit);
+  const attrs = listing.attributes as ListingAttributes;
+
+  // Build price node with icons
+  let priceNode: React.ReactNode = null;
+  if (listing.category === "OFFER_SERVICE" && attrs?.time_factor) {
+    priceNode = (
+      <span className="flex items-center gap-[4px]">
+        <img src="/Icons/timefactor.png" className="w-[28px] h-[28px] object-contain" alt="" />
+        <span>{String(attrs.time_factor).replace(".", ",")} x</span>
+      </span>
+    );
+  } else if (listing.category === "SEARCH_SERVICE" || listing.category === "SEARCH_PRODUCT") {
+    priceNode = <span>{language === "HU" ? "Keresett" : language === "DE" ? "Gesucht" : "Wanted"}</span>;
+  } else {
+    const timeVal = attrs?.time_amount ?? attrs?.handling_fee_time ?? attrs?.price_time ?? null;
+    const garasVal = attrs?.regio_amount ?? attrs?.usage_fee_regio ?? attrs?.price_regio ?? null;
+    const parts: React.ReactNode[] = [];
+    if (timeVal) parts.push(
+      <span key="t" className="flex items-center gap-[4px]">
+        <img src="/time.png" className="w-[28px] h-[28px] object-contain" alt="" />
+        <span>{timeVal} {timeUnit}</span>
+      </span>
+    );
+    if (garasVal) parts.push(
+      <span key="g" className="flex items-center gap-[4px]">
+        <img src="/garas.png" className="w-[28px] h-[28px] object-contain" alt="" />
+        <span>{Number(garasVal).toFixed(2).replace(".", ",")} G</span>
+      </span>
+    );
+    if (parts.length > 0) priceNode = <>{parts.map((p, i) => i < parts.length - 1 ? <React.Fragment key={i}>{p}<span className="text-[#aaa]">+</span></React.Fragment> : <React.Fragment key={i}>{p}</React.Fragment>)}</>;
+  }
 
   return (
     <div
@@ -136,8 +165,8 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
                 {new Date(listing.created_at).toLocaleDateString()}
               </div>
               <div className="flex items-center gap-[15px] ml-auto">
-                <div className="flex gap-[10px] font-[700] text-[15px] text-right text-[#666]">
-                  {priceDisplay}
+                <div className="flex items-center gap-[8px] font-[700] text-[14px] text-[#666]">
+                  {priceNode}
                 </div>
                 <button
                   onClick={() => isOwn ? onModify?.(listing) : onContact?.(listing)}

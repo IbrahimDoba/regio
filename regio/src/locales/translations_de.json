@@ -89,6 +89,9 @@
     "EVENT_WORKSHOP": "Event / Workshop"
   },
   "preview_modal": {
+    "timefactor_label": "Zeitfaktor",
+    "value_label": "Wert",
+    "images_label": "Bilder",
     "price_label": "Wert / Preis:",
     "contact_button": "Kontakt",
     "contact_loading": "Chat wird gestartet...",
@@ -144,7 +147,7 @@
     "error_failed": "Erstellung fehlgeschlagen. Bitte Felder prüfen.",
     "address_label": "Adresse",
     "zip_placeholder": "PLZ *",
-    "address_detail_placeholder": "Straße, Ort oder Gebiet (optional)",
+    "city_placeholder": "Stadt *",
     "address_searching": "Suche läuft...",
     "address_not_found": "Adresse nicht gefunden. Andere PLZ versuchen.",
     "address_set": "Standort gesetzt",
@@ -152,6 +155,13 @@
     "images_hint": "Bis zu 5 Bilder, max. 1MB je Datei (JPEG, PNG, WebP)",
     "images_add": "Fotos hinzufügen",
     "images_uploading": "Fotos werden hochgeladen...",
+    "date_select": {
+      "year": "Jahr",
+      "month": "Monat",
+      "day": "Tag",
+      "hour": "Stunde",
+      "minute": "Min"
+    },
     "offer_service": {
       "time_factor_label": "Zeitfaktor",
       "time_factor_hint": "(0.25 – 3.0)",
@@ -195,7 +205,9 @@
       "seats_label": "Verfügbare Plätze",
       "seats_placeholder": "z.B. 3",
       "price_time_label": "Preis pro Platz (Minuten)",
-      "price_garas_label": "Preis pro Platz (Garas)"
+      "price_time_placeholder": "0",
+      "price_garas_label": "Preis pro Platz (Garas)",
+      "price_garas_placeholder": "0"
     },
     "event_workshop": {
       "start_label": "Beginn (Datum & Zeit)",
@@ -205,7 +217,9 @@
       "max_participants_label": "Max. Teilnehmer (optional)",
       "max_participants_placeholder": "z.B. 20",
       "entry_fee_label": "Teilnahmegebühr (Minuten)",
-      "material_fee_label": "Materialkosten (Garas)"
+      "entry_fee_placeholder": "0",
+      "material_fee_label": "Materialkosten (Garas)",
+      "material_fee_placeholder": "0"
     }
   },
   "chat": {

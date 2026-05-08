@@ -2,47 +2,54 @@ import { ListingCategory, ListingPublic } from "@/lib/api/types";
 
 export const CATEGORY_CONFIG: Record<
   ListingCategory,
-  { color: string; colorVar: string; icon: string; label: string }
+  { color: string; colorVar: string; lightBg: string; icon: string; label: string }
 > = {
   OFFER_SERVICE: {
     color: "green",
     colorVar: "var(--color-green-offer)",
+    lightBg: "#f1f7e8",
     icon: "/Icons/offer-services.png",
     label: "Offer Service",
   },
   SEARCH_SERVICE: {
     color: "red",
     colorVar: "var(--color-red-search)",
+    lightBg: "#fdeaea",
     icon: "/Icons/search-service.png",
     label: "Search Service",
   },
   SELL_PRODUCT: {
     color: "blue",
     colorVar: "var(--color-blue)",
+    lightBg: "#eaf1fe",
     icon: "/Icons/offer-product.png",
     label: "Sell Product",
   },
   SEARCH_PRODUCT: {
     color: "orange",
     colorVar: "var(--color-orange)",
+    lightBg: "#fef3e8",
     icon: "/Icons/search-product.png",
     label: "Search Product",
   },
   OFFER_RENTAL: {
     color: "purple",
     colorVar: "var(--color-purple)",
+    lightBg: "#ede8f8",
     icon: "/Icons/borrow.png",
     label: "Offer Rental",
   },
   RIDE_SHARE: {
     color: "turquoise",
     colorVar: "var(--color-turquoise)",
+    lightBg: "#e4f7fa",
     icon: "/Icons/carsharing.png",
     label: "Ride Share",
   },
   EVENT_WORKSHOP: {
     color: "yellow",
     colorVar: "var(--color-yellow)",
+    lightBg: "#fef8e4",
     icon: "/Icons/event.png",
     label: "Event / Workshop",
   },

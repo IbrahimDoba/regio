@@ -6,6 +6,10 @@ const TI = <img src="/time.png" style={{ width: 14, height: 14, display: "inline
 const GI = <img src="/garas.png" style={{ width: 14, height: 14, display: "inline-block", verticalAlign: "middle", marginRight: 2 }} alt="" />;
 const TFI = <img src="/timefactor.png" style={{ width: 14, height: 14, display: "inline-block", verticalAlign: "middle", marginRight: 2 }} alt="" />;
 
+function fG(val: number | string): string {
+  return Number(val).toFixed(2).replace(".", ",");
+}
+
 export function formatPriceNode(listing: ListingPublic, timeUnit = "min"): React.ReactNode {
   const attrs = listing.attributes as ListingAttributes | undefined;
   if (!attrs) return null;
@@ -17,7 +21,7 @@ export function formatPriceNode(listing: ListingPublic, timeUnit = "min"): React
     case "SELL_PRODUCT": {
       const parts: React.ReactNode[] = [];
       if (attrs.time_amount) parts.push(<span key="t" style={{ display: "inline-flex", alignItems: "center" }}>{TI}{attrs.time_amount} {timeUnit}</span>);
-      if (attrs.regio_amount) parts.push(<span key="g" style={{ display: "inline-flex", alignItems: "center" }}>{GI}{attrs.regio_amount} G</span>);
+      if (attrs.regio_amount) parts.push(<span key="g" style={{ display: "inline-flex", alignItems: "center" }}>{GI}{fG(attrs.regio_amount)} G</span>);
       if (!parts.length) return "Negotiable";
       return <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{parts}</span>;
     }
@@ -25,7 +29,7 @@ export function formatPriceNode(listing: ListingPublic, timeUnit = "min"): React
     case "OFFER_RENTAL": {
       const parts: React.ReactNode[] = [];
       if (attrs.handling_fee_time) parts.push(<span key="t" style={{ display: "inline-flex", alignItems: "center" }}>{TI}{attrs.handling_fee_time} {timeUnit}</span>);
-      if (attrs.usage_fee_regio) parts.push(<span key="g" style={{ display: "inline-flex", alignItems: "center" }}>{GI}{attrs.usage_fee_regio} G</span>);
+      if (attrs.usage_fee_regio) parts.push(<span key="g" style={{ display: "inline-flex", alignItems: "center" }}>{GI}{fG(attrs.usage_fee_regio)} G</span>);
       if (!parts.length) return "Contact";
       return <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{parts}</span>;
     }
@@ -33,7 +37,7 @@ export function formatPriceNode(listing: ListingPublic, timeUnit = "min"): React
     case "RIDE_SHARE": {
       const parts: React.ReactNode[] = [];
       if (attrs.price_time) parts.push(<span key="t" style={{ display: "inline-flex", alignItems: "center" }}>{TI}{attrs.price_time} {timeUnit}</span>);
-      if (attrs.price_regio) parts.push(<span key="g" style={{ display: "inline-flex", alignItems: "center" }}>{GI}{attrs.price_regio} G</span>);
+      if (attrs.price_regio) parts.push(<span key="g" style={{ display: "inline-flex", alignItems: "center" }}>{GI}{fG(attrs.price_regio)} G</span>);
       if (!parts.length) return "Contact for price";
       return <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{parts}</span>;
     }
@@ -41,7 +45,7 @@ export function formatPriceNode(listing: ListingPublic, timeUnit = "min"): React
     case "EVENT_WORKSHOP": {
       const parts: React.ReactNode[] = [];
       if (attrs.price_time) parts.push(<span key="t" style={{ display: "inline-flex", alignItems: "center" }}>{TI}{attrs.price_time} {timeUnit}</span>);
-      if (attrs.price_regio) parts.push(<span key="g" style={{ display: "inline-flex", alignItems: "center" }}>{GI}{attrs.price_regio} G</span>);
+      if (attrs.price_regio) parts.push(<span key="g" style={{ display: "inline-flex", alignItems: "center" }}>{GI}{fG(attrs.price_regio)} G</span>);
       if (!parts.length) return "Free";
       return <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{parts}</span>;
     }

@@ -3,9 +3,8 @@
 import React from "react";
 import { FaEnvelope, FaPencil } from "react-icons/fa6";
 import { ListingPublic } from "@/lib/api/types";
-import { cn } from "@/lib/utils";
 import { getCategoryDetails, ListingAttributes } from "@/lib/feed-helpers";
-import { formatPriceNode } from "@/lib/feed-helpers";
+
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { API_CONFIG } from "@/lib/api/config";
@@ -30,32 +29,6 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function TimeValue({ value }: { value: string }) {
-  return (
-    <span className="inline-flex items-center gap-1">
-      <img src="/time.png" className="w-4 h-4" alt="" />
-      {value}
-    </span>
-  );
-}
-
-function GarasValue({ value }: { value: string }) {
-  return (
-    <span className="inline-flex items-center gap-1">
-      <img src="/garas.png" className="w-4 h-4" alt="" />
-      {value}
-    </span>
-  );
-}
-
-function TimeFactorValue({ value }: { value: string }) {
-  return (
-    <span className="inline-flex items-center gap-1">
-      <img src="/timefactor.png" className="w-4 h-4" alt="" />
-      {value}
-    </span>
-  );
-}
 
 function AttributeDetails({
   listing,
@@ -73,36 +46,11 @@ function AttributeDetails({
 
   switch (listing.category) {
     case "OFFER_SERVICE":
-      rows.push(
-        <Row
-          key="tf"
-          label={a.time_factor}
-          value={
-            <TimeFactorValue
-              value={`${attrs.time_factor ?? 1.0}x — final cost = hours worked × ${attrs.time_factor ?? 1.0}`}
-            />
-          }
-        />
-      );
+      // time_factor shown in footer — no attribute rows needed
       break;
 
     case "SELL_PRODUCT":
-      if (attrs.time_amount)
-        rows.push(
-          <Row
-            key="ta"
-            label={a.price_time}
-            value={<TimeValue value={`${attrs.time_amount} ${timeUnit}`} />}
-          />
-        );
-      if (attrs.regio_amount)
-        rows.push(
-          <Row
-            key="ra"
-            label={a.price_garas}
-            value={<GarasValue value={`${attrs.regio_amount} G`} />}
-          />
-        );
+      // prices shown in footer
       if (attrs.condition)
         rows.push(<Row key="cond" label={a.condition} value={attrs.condition} />);
       if (attrs.stock)
@@ -110,37 +58,12 @@ function AttributeDetails({
       break;
 
     case "OFFER_RENTAL":
-      if (attrs.handling_fee_time)
-        rows.push(
-          <Row
-            key="ft"
-            label={a.handling_fee}
-            value={<TimeValue value={`${attrs.handling_fee_time} ${timeUnit}`} />}
-          />
-        );
-      if (attrs.usage_fee_regio)
-        rows.push(
-          <Row
-            key="fr"
-            label={a.usage_fee}
-            value={<GarasValue value={`${attrs.usage_fee_regio} G`} />}
-          />
-        );
+      // prices shown in footer
       if (attrs.max_rental_duration)
-        rows.push(
-          <Row
-            key="md"
-            label={a.max_duration}
-            value={attrs.max_rental_duration}
-          />
-        );
+        rows.push(<Row key="md" label={a.max_duration} value={attrs.max_rental_duration} />);
       if (attrs.deposit_required != null)
         rows.push(
-          <Row
-            key="dep"
-            label={a.deposit_required}
-            value={attrs.deposit_required ? a.deposit_yes : a.deposit_no}
-          />
+          <Row key="dep" label={a.deposit_required} value={attrs.deposit_required ? a.deposit_yes : a.deposit_no} />
         );
       break;
 
@@ -151,110 +74,46 @@ function AttributeDetails({
         rows.push(<Row key="to" label={a.to} value={attrs.to_location} />);
       if (attrs.departure_datetime)
         rows.push(
-          <Row
-            key="dep"
-            label={a.departure}
-            value={new Date(attrs.departure_datetime).toLocaleString()}
-          />
+          <Row key="dep" label={a.departure} value={new Date(attrs.departure_datetime).toLocaleString()} />
         );
       if (attrs.seats_available)
-        rows.push(
-          <Row
-            key="seats"
-            label={a.seats_available}
-            value={attrs.seats_available}
-          />
-        );
-      if (attrs.price_time)
-        rows.push(
-          <Row
-            key="pt"
-            label={a.price_per_seat_time}
-            value={<TimeValue value={`${attrs.price_time} ${timeUnit}`} />}
-          />
-        );
-      if (attrs.price_regio)
-        rows.push(
-          <Row
-            key="pg"
-            label={a.price_per_seat_garas}
-            value={<GarasValue value={`${attrs.price_regio} G`} />}
-          />
-        );
+        rows.push(<Row key="seats" label={a.seats_available} value={attrs.seats_available} />);
+      // prices shown in footer
       break;
 
     case "EVENT_WORKSHOP":
       if (attrs.event_start_date)
         rows.push(
-          <Row
-            key="es"
-            label={a.starts}
-            value={new Date(attrs.event_start_date).toLocaleString()}
-          />
+          <Row key="es" label={a.starts} value={new Date(attrs.event_start_date).toLocaleString()} />
         );
       if (attrs.event_end_date)
         rows.push(
-          <Row
-            key="ee"
-            label={a.ends}
-            value={new Date(attrs.event_end_date).toLocaleString()}
-          />
+          <Row key="ee" label={a.ends} value={new Date(attrs.event_end_date).toLocaleString()} />
         );
       if (attrs.location)
         rows.push(<Row key="loc" label={a.location} value={attrs.location} />);
       if (attrs.max_participants)
-        rows.push(
-          <Row
-            key="mp"
-            label={a.max_participants}
-            value={attrs.max_participants}
-          />
-        );
-      if (attrs.price_time)
-        rows.push(
-          <Row
-            key="pt"
-            label={a.entry_fee_time}
-            value={<TimeValue value={`${attrs.price_time} ${timeUnit}`} />}
-          />
-        );
-      if (attrs.price_regio)
-        rows.push(
-          <Row
-            key="pg"
-            label={a.material_fee_garas}
-            value={<GarasValue value={`${attrs.price_regio} G`} />}
-          />
-        );
+        rows.push(<Row key="mp" label={a.max_participants} value={attrs.max_participants} />);
+      // prices shown in footer
       break;
 
     case "SEARCH_SERVICE":
       if (attrs.deadline)
         rows.push(
-          <Row
-            key="dl"
-            label={a.deadline}
-            value={new Date(attrs.deadline).toLocaleDateString()}
-          />
+          <Row key="dl" label={a.deadline} value={new Date(attrs.deadline).toLocaleDateString()} />
         );
       break;
 
     case "SEARCH_PRODUCT":
       if (attrs.urgency_deadline)
         rows.push(
-          <Row
-            key="dl"
-            label={a.needed_by}
-            value={new Date(attrs.urgency_deadline).toLocaleDateString()}
-          />
+          <Row key="dl" label={a.needed_by} value={new Date(attrs.urgency_deadline).toLocaleDateString()} />
         );
       break;
   }
 
   if (attrs.price_notes)
-    rows.push(
-      <Row key="pn" label={a.price_notes} value={attrs.price_notes} />
-    );
+    rows.push(<Row key="pn" label={a.price_notes} value={attrs.price_notes} />);
 
   if (rows.length === 0) return null;
 
@@ -279,25 +138,63 @@ export default function PreviewModal({
   const isOwn = !!user && listing.owner_code === user.user_code;
   const timeUnit = language === "HU" ? "perc" : "min";
 
-  const { icon, label, colorVar } = getCategoryDetails(listing.category);
-  const priceDisplay = formatPriceNode(listing, timeUnit);
+  const { icon, colorVar, lightBg } = getCategoryDetails(listing.category);
+  const attrs = listing.attributes as ListingAttributes;
 
   const editLog = isOwn ? getEditLog(listing.id) : [];
+
+  // Build footer pricing label + icon node
+  let pricingLabel: string | null = null;
+  let pricingNode: React.ReactNode = null;
+
+  if (listing.category === "OFFER_SERVICE" && attrs?.time_factor) {
+    pricingLabel = t.preview_modal.timefactor_label;
+    pricingNode = (
+      <div className="flex items-center gap-[8px]">
+        <img src="/Icons/timefactor.png" className="w-[40px] h-[40px] object-contain" alt="" />
+        <span className="text-[22px] font-[800]" style={{ color: colorVar }}>
+          {String(attrs.time_factor).replace(".", ",")} x
+        </span>
+      </div>
+    );
+  } else {
+    const timeVal = attrs?.time_amount ?? attrs?.handling_fee_time ?? attrs?.price_time ?? null;
+    const garasVal = attrs?.regio_amount ?? attrs?.usage_fee_regio ?? attrs?.price_regio ?? null;
+    const parts: React.ReactNode[] = [];
+    if (timeVal) parts.push(
+      <span key="t" className="flex items-center gap-[5px]">
+        <img src="/time.png" className="w-[32px] h-[32px] object-contain" alt="" />
+        <span className="text-[20px] font-[800]" style={{ color: colorVar }}>{timeVal} {timeUnit}</span>
+      </span>
+    );
+    if (garasVal) parts.push(
+      <span key="g" className="flex items-center gap-[5px]">
+        <img src="/garas.png" className="w-[32px] h-[32px] object-contain" alt="" />
+        <span className="text-[20px] font-[800]" style={{ color: colorVar }}>{Number(garasVal).toFixed(2).replace(".", ",")} G</span>
+      </span>
+    );
+    if (parts.length > 0) {
+      pricingLabel = t.preview_modal.value_label;
+      pricingNode = <div className="flex items-center gap-[12px]">{parts}</div>;
+    }
+  }
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-[1000] flex justify-center items-center backdrop-blur-[3px] animate-in fade-in duration-200">
       <div className="w-[95%] max-w-[460px] h-[90vh] bg-white rounded-[8px] p-0 overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="p-[15px] border-b border-[#eee] flex justify-between items-start bg-[#f9f9f9]">
-          <div className="flex gap-[15px] w-[85%]">
-            <i
-              className={`fa-solid ${icon} text-[32px] mt-[2px]`}
-              style={{ color: colorVar }}
-            ></i>
-            <div className="text-[18px] font-[700] leading-[1.3] text-[#333]">
-              {listing.title}
-            </div>
-          </div>
+
+        {/* Category Banner — same style as CreateModal */}
+        <div
+          className="flex items-center gap-[16px] px-[20px] py-[14px] border-b-[3px] shrink-0"
+          style={{ borderBottomColor: colorVar, backgroundColor: lightBg }}
+        >
+          <img src={icon} alt="" className="w-[44px] h-[44px] object-contain" />
+          <span
+            className="text-[18px] font-[800] uppercase tracking-wider flex-1 leading-tight"
+            style={{ color: colorVar }}
+          >
+            {t.category_labels[listing.category]}
+          </span>
           <div
             className="text-[28px] text-[#999] cursor-pointer leading-none hover:text-[#333]"
             onClick={onClose}
@@ -306,71 +203,70 @@ export default function PreviewModal({
           </div>
         </div>
 
-        {/* Body */}
+        {/* Scrollable body */}
         <div className="p-[20px] overflow-y-auto flex-grow">
-          <div className="flex justify-between mb-[20px] text-[12px] text-[#666] border-b border-[#eee] pb-[10px]">
-            <div className="flex items-center gap-[10px]">
+
+          {/* User info row */}
+          <div className="flex justify-between items-start mb-[10px]">
+            <div className="flex gap-[12px] items-center">
               {listing.owner_avatar ? (
                 <img
                   src={`${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar`}
-                  className="w-[40px] h-[40px] rounded-full"
-                  alt="User"
+                  className="w-[44px] h-[44px] rounded-full object-cover border-[2px] border-[#e0e0e0] shrink-0"
+                  alt=""
                 />
               ) : (
-                <div className="w-[40px] h-[40px] rounded-full bg-[#eee] flex items-center justify-center text-[#999]">
+                <div className="w-[44px] h-[44px] rounded-full bg-[#eee] flex items-center justify-center text-[#999] font-[700] text-[15px] shrink-0">
                   {listing.owner_name.substring(0, 2)}
                 </div>
               )}
               <div>
-                <div className="font-bold text-[#333]">{listing.owner_name}</div>
-                <div>
-                  {t.feed_card.region_label} {listing.radius_km}
-                  {t.feed_card.region_unit}
-                </div>
+                <div className="font-[700] text-[#222] text-[15px] leading-tight">{listing.owner_name}</div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="font-bold">
+            <div className="text-right shrink-0 ml-2">
+              <div className="font-[700] text-[13px] text-[#444]">
                 {new Date(listing.created_at).toLocaleDateString()}
               </div>
-              <div className="mt-[2px] text-[10px] text-[#999]">
-                ID: #{listing.id.substring(0, 8)}
+              <div className="text-[10px] text-[#aaa] font-mono mt-[3px]">
+                ID #{listing.id.substring(0, 8)}
               </div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-[5px] mb-[15px]">
-            {listing.tags.map((tag, i) => (
-              <div
-                key={i}
-                className="bg-[#eee] p-[4px_10px] rounded-[12px] text-[11px] text-[#555] font-[600]"
-              >
-                {tag}
-              </div>
-            ))}
+          {/* Region bar */}
+          {listing.radius_km != null && (
+            <div
+              className="w-full text-center text-[13px] font-[700] py-[7px] mb-[14px] rounded-[4px]"
+              style={{ backgroundColor: lightBg, color: colorVar }}
+            >
+              {t.feed_card.region_label} {listing.radius_km}{t.feed_card.region_unit}
+            </div>
+          )}
+
+          {/* Title */}
+          <div
+            className="text-[22px] font-[800] mb-[10px] leading-snug"
+            style={{ color: colorVar }}
+          >
+            {listing.title}
           </div>
 
-          <div className="text-[15px] leading-[1.6] text-[#333] mb-[20px] whitespace-pre-wrap">
+          {/* Description */}
+          <div className="text-[15px] leading-[1.6] text-[#333] mb-[16px] whitespace-pre-wrap">
             {listing.description}
           </div>
 
-          {/* Image Gallery */}
-          {listing.media_urls.length > 0 && (
-            <div className="flex gap-[8px] overflow-x-auto pb-[4px] mb-[20px]">
-              {listing.media_urls.map((url, i) => (
-                <a
+          {/* Tags */}
+          {listing.tags.length > 0 && (
+            <div className="flex flex-wrap gap-[5px] mb-[16px]">
+              {listing.tags.map((tag, i) => (
+                <div
                   key={i}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0"
+                  className="bg-[#eee] p-[4px_10px] rounded-[12px] text-[11px] text-[#555] font-[600]"
                 >
-                  <img
-                    src={url}
-                    alt={`Photo ${i + 1}`}
-                    className="h-[160px] w-auto rounded-[6px] object-cover border border-[#eee] hover:opacity-90 transition-opacity"
-                  />
-                </a>
+                  {tag}
+                </div>
               ))}
             </div>
           )}
@@ -392,6 +288,26 @@ export default function PreviewModal({
             timeUnit={timeUnit}
           />
 
+          {/* Image Gallery — shown after attributes */}
+          {listing.media_urls.length > 0 && (
+            <div className="mb-[20px]">
+              <div className="text-[12px] font-[700] text-[#888] uppercase tracking-[0.5px] mb-[8px]">
+                {t.preview_modal.images_label}
+              </div>
+              <div className="flex gap-[8px] overflow-x-auto pb-[4px]">
+                {listing.media_urls.map((url, i) => (
+                  <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                    <img
+                      src={url}
+                      alt={`Photo ${i + 1}`}
+                      className="h-[120px] w-auto rounded-[6px] object-cover border border-[#eee] hover:opacity-90 transition-opacity"
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Edit log (own posts only) */}
           {isOwn && editLog.length > 0 && (
             <div className="mt-[10px] mb-[20px]">
@@ -401,9 +317,7 @@ export default function PreviewModal({
               <div className="bg-[#f8f8f8] rounded-[6px] border border-[#eee] p-[10px] text-[11px] font-mono text-[#555] space-y-[4px] max-h-[140px] overflow-y-auto">
                 {editLog.map((entry, i) => (
                   <div key={i}>
-                    <span className="text-[#aaa]">
-                      {new Date(entry.ts).toLocaleString()}
-                    </span>{" "}
+                    <span className="text-[#aaa]">{new Date(entry.ts).toLocaleString()}</span>{" "}
                     <span className="text-[#555] font-bold">{entry.field}:</span>{" "}
                     <span className="text-[#c00]">{String(entry.from)}</span>
                     {" → "}
@@ -416,24 +330,27 @@ export default function PreviewModal({
         </div>
 
         {/* Footer */}
-        <div className="p-[15px] border-t border-[#eee] bg-white">
-          {priceDisplay && (
-            <div className="bg-[#f0f7e6] p-[15px] rounded-[6px] flex justify-between items-center mb-[10px] border border-[#dcebc0]">
-              <span className="text-[12px] text-[#666] font-[600]">
-                {t.preview_modal.price_label}
-              </span>
-              <span className="text-[18px] font-[800] text-[var(--color-green-offer)]">
-                {priceDisplay}
-              </span>
+        <div className="p-[15px] border-t border-[#eee] bg-white shrink-0">
+
+          {/* Zeitfaktor / Wert pricing row */}
+          {pricingLabel && (
+            <div
+              className="flex items-center justify-between mb-[10px] px-[16px] py-[12px] rounded-[8px] border"
+              style={{
+                borderColor: colorVar,
+                backgroundColor: lightBg,
+              }}
+            >
+              <span className="text-[15px] font-[700] text-[#444]">{pricingLabel}</span>
+              {pricingNode}
             </div>
           )}
 
+          {/* Action button */}
           {isOwn ? (
             <button
               onClick={() => onModify?.(listing)}
-              className={cn(
-                "w-full p-[12px] text-[16px] rounded-[5px] border-none text-white font-bold cursor-pointer flex justify-center items-center gap-[10px] hover:brightness-110 transition-all"
-              )}
+              className="w-full p-[12px] text-[16px] rounded-[5px] border-none text-white font-bold cursor-pointer flex justify-center items-center gap-[10px] hover:brightness-110 transition-all"
               style={{ backgroundColor: colorVar }}
             >
               <FaPencil /> {t.preview_modal.modify_button}
