@@ -6,7 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Query, UploadFile, status
 from app.core.file_storage import StorageServiceDep
 from app.core.translate import TranslateService
 from app.listings.dependencies import ListingServiceDep
-from app.listings.enums import ListingCategory, RadiusFilter
+from app.listings.enums import ListingCategory
 from app.listings.schemas import (
     FeedResponse,
     ListingCreate,
@@ -81,9 +81,15 @@ async def get_feed(
     tags: Optional[List[str]] = Query(
         None, description="Filter by specific tags."
     ),
-    radius: Optional[RadiusFilter] = Query(
+    viewer_zip: Optional[str] = Query(
         None,
-        description="Filter by listing reach. Options: 5km, 10km, 25km, 50km, 100km, nationwide. Omit to show all.",
+        description="Viewer's homebase ZIP code. Used to filter listings by pre-computed ZIP visibility.",
+    ),
+    max_distance_km: Optional[int] = Query(
+        None,
+        ge=0,
+        le=50,
+        description="Max distance (km) from viewer's ZIP. Only applies when viewer_zip is set.",
     ),
     offset: int = Query(
         0, ge=0, description="Pagination offset (skip N items)."
@@ -95,13 +101,17 @@ async def get_feed(
     """
     Main Feed.
 
-    Supports filtering by multiple categories, tags, text search, radius, and pagination.
+    Visibility is ZIP-code based:
+      - Listings with d_class D5 (Nationwide) or D6 (Online) always appear.
+      - Local listings (D1–D4) appear only when the viewer's ZIP is in post_visibilities.
+      - max_distance_km adds an extra viewer-side cap on top of the listing's declared range.
     """
     return await service.get_feed(
         categories=categories,
         search_query=q,
         tags=tags,
-        radius_filter=radius,
+        viewer_zip=viewer_zip,
+        max_distance_km=max_distance_km,
         offset=offset,
         user_lang=lang,
     )

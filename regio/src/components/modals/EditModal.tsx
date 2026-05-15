@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { FaSpinner, FaImage, FaXmark, FaPencil, FaClock } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
-import { ListingPublic, ListingUpdate } from "@/lib/api/types";
+import { DClass, ListingPublic, ListingUpdate } from "@/lib/api/types";
 import { getCategoryDetails } from "@/lib/feed-helpers";
 import { ListingAttributes } from "@/lib/feed-helpers";
 import { useUpdateListing } from "@/lib/api/hooks/use-listings";
@@ -138,6 +138,11 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
   const [description, setDescription] = useState(listing.description);
   const [tags, setTags] = useState<string[]>(listing.tags ?? []);
   const [tagInput, setTagInput] = useState("");
+  const [zipCode, setZipCode] = useState(listing.zip_code ?? "");
+  const [dClass, setDClass] = useState<DClass>((listing.d_class as DClass) ?? "D5");
+  const [availableUntil, setAvailableUntil] = useState(
+    listing.available_until ? listing.available_until.slice(0, 10) : ""
+  );
 
   const init = buildInitialAttrs(listing);
   const [timeFactor, setTimeFactor] = useState(init.timeFactor);
@@ -298,6 +303,9 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
       description,
       tags,
       attributes: newAttrs,
+      zip_code: zipCode.trim() || null,
+      d_class: dClass,
+      available_until: availableUntil ? new Date(availableUntil).toISOString() : null,
     };
 
     updateMutation.mutate(
@@ -770,6 +778,52 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
               value={priceNotes}
               onChange={(e) => setPriceNotes(e.target.value)}
             />
+          </div>
+
+          {/* ZIP Code + Visibility */}
+          <div className={cn(fieldClass, "flex gap-[10px]")}>
+            <div className="flex-1">
+              <label className={labelClass}>{t.create_modal.zip_code_label}</label>
+              <input
+                type="text"
+                className={inputClass}
+                placeholder={t.create_modal.zip_placeholder}
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                maxLength={10}
+              />
+            </div>
+            <div className="flex-1">
+              <label className={labelClass}>{t.create_modal.d_class_label}</label>
+              <select
+                className={inputClass}
+                value={dClass}
+                onChange={(e) => setDClass(e.target.value as DClass)}
+              >
+                {(["D1", "D2", "D3", "D4", "D5", "D6"] as DClass[]).map((d) => (
+                  <option key={d} value={d}>{t.d_class_labels[d]}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Available Until */}
+          <div className={fieldClass}>
+            <label className={labelClass}>
+              <span className="flex items-center gap-[6px]">
+                <FaClock className="text-[13px] text-[#888]" />
+                {t.create_modal.available_until_label}
+              </span>
+            </label>
+            <input
+              type="date"
+              className={inputClass}
+              value={availableUntil}
+              min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
+              max={new Date(Date.now() + 62 * 86400000).toISOString().slice(0, 10)}
+              onChange={(e) => setAvailableUntil(e.target.value)}
+            />
+            <div className="text-[12px] text-[#888] mt-[4px]">{t.create_modal.available_until_hint}</div>
           </div>
 
           {/* Tags */}

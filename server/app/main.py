@@ -67,7 +67,40 @@ from app.users.handlers import (
 )
 from app.users.routes import router as user_router
 
+async def run_listing_expiry() -> None:
+    """Daily job: mark listings whose available_until has passed as INACTIVE."""
+    from datetime import datetime, timezone
+
+    import sqlalchemy as sa
+
+    from app.core.database import AsyncSessionLocal
+    from app.listings.models import Listing
+    from app.listings.enums import ListingStatus
+
+    async with AsyncSessionLocal() as session:
+        now = datetime.now(timezone.utc)
+        stmt = (
+            sa.update(Listing)
+            .where(
+                Listing.available_until != None,  # noqa: E711
+                Listing.available_until < now,
+                Listing.status == ListingStatus.ACTIVE,
+            )
+            .values(status=ListingStatus.INACTIVE)
+        )
+        await session.execute(stmt)
+        await session.commit()
+
+
 scheduler = AsyncIOScheduler()
+scheduler.add_job(
+    run_listing_expiry,
+    trigger="cron",
+    hour=0,
+    minute=5,
+    id="listing_expiry",
+    replace_existing=True,
+)
 scheduler.add_job(
     run_payment_enforcer,
     trigger="interval",

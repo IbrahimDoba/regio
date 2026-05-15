@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaPlus } from "react-icons/fa6";
 import Header from "@/components/layout/Header";
@@ -11,31 +11,40 @@ import CreateModal from "@/components/modals/CreateModal";
 import EditModal from "@/components/modals/EditModal";
 import { ListingCategory, ListingPublic } from "@/lib/api/types";
 import { useFeed, useCreateListingInquiry } from "@/lib/api";
+import { getStoredHomebaseZip } from "@/lib/api/hooks/use-listings";
 import { useRealTime } from "@/context/RealTimeContext";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
 import { ListingAttributes } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
 import { useDialog } from "@/context/DialogContext";
+import { useAuth } from "@/context/AuthContext";
 import { API_CONFIG } from "@/lib/api/config";
 
 export default function FeedPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [isFilterOpen, setIsFilterOpen] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  // Initialize with all categories
+
+  // Category toggles
   const [activeFilters, setActiveFilters] = useState<ListingCategory[]>(
     Object.keys(CATEGORY_CONFIG) as ListingCategory[]
   );
+
   // Staged filter state (assembled in UI, not yet sent to API)
   const [stagedQ, setStagedQ] = useState("");
   const [stagedTags, setStagedTags] = useState<string[]>([]);
-  const [stagedRadius, setStagedRadius] = useState<string | undefined>(undefined);
+  const [stagedViewerZip, setStagedViewerZip] = useState<string>("");
+  const [stagedMaxDistanceKm, setStagedMaxDistanceKm] = useState<number | undefined>(undefined);
+
   // Committed filters (sent to API on search)
   const [committedFilters, setCommittedFilters] = useState<{
     q?: string;
     tags?: string[];
-    radius?: string;
+    viewer_zip?: string | null;
+    max_distance_km?: number | null;
   }>({});
+
   const [previewListing, setPreviewListing] = useState<ListingPublic | null>(null);
   const [editListing, setEditListing] = useState<ListingPublic | null>(null);
 
@@ -45,7 +54,14 @@ export default function FeedPage() {
   const { mutateAsync: createListingInquiry } = useCreateListingInquiry();
   const [isContacting, setIsContacting] = useState(false);
 
-  // Handle contact action - used by both FeedCard and PreviewModal
+  // Restore homebase ZIP from localStorage on mount (expires at midnight)
+  useEffect(() => {
+    const stored = getStoredHomebaseZip();
+    if (stored) setStagedViewerZip(stored);
+    // Pre-fill from user profile if no stored ZIP
+    else if (user?.zip_code) setStagedViewerZip(user.zip_code);
+  }, [user?.zip_code]);
+
   const handleContact = async (listing: ListingPublic) => {
     if (isContacting) return;
     setIsContacting(true);
@@ -92,16 +108,17 @@ export default function FeedPage() {
     setCommittedFilters({
       ...(stagedQ ? { q: stagedQ } : {}),
       ...(stagedTags.length > 0 ? { tags: stagedTags } : {}),
-      ...(stagedRadius ? { radius: stagedRadius } : {}),
+      ...(stagedViewerZip ? { viewer_zip: stagedViewerZip } : {}),
+      ...(stagedViewerZip && stagedMaxDistanceKm !== undefined
+        ? { max_distance_km: stagedMaxDistanceKm }
+        : {}),
     });
   };
 
   const addTag = (tag: string) => setStagedTags((prev) => [...prev, tag]);
   const removeTag = (tag: string) => setStagedTags((prev) => prev.filter((t) => t !== tag));
 
-  // Fetch Feed with committed filters only
   const { data, isLoading } = useFeed(committedFilters);
-
   const listings = data?.pages.flatMap((page) => page.data) || [];
 
   const toggleFilter = (category: ListingCategory) => {
@@ -117,7 +134,7 @@ export default function FeedPage() {
       <Header
         isFilterOpen={isFilterOpen}
         toggleFilter={() => setIsFilterOpen(!isFilterOpen)}
-        count={listings.length} // Should be filtered count ideally
+        count={listings.length}
         total={listings.length}
       >
         <FilterPanel
@@ -129,8 +146,10 @@ export default function FeedPage() {
           tags={stagedTags}
           addTag={addTag}
           removeTag={removeTag}
-          radius={stagedRadius}
-          setRadius={setStagedRadius}
+          viewerZip={stagedViewerZip}
+          setViewerZip={setStagedViewerZip}
+          maxDistanceKm={stagedMaxDistanceKm}
+          setMaxDistanceKm={setStagedMaxDistanceKm}
           onSearch={handleSearch}
         />
       </Header>

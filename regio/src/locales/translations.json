@@ -77,7 +77,9 @@
     "search_placeholder": "Search...",
     "search_button": "Search",
     "radius_all": "All distances",
-    "radius_nationwide": "Nationwide"
+    "radius_nationwide": "Nationwide",
+    "homebase_placeholder": "ZIP (your location)...",
+    "max_distance_all": "All distances"
   },
   "category_labels": {
     "OFFER_SERVICE": "Offer Service",
@@ -220,7 +222,11 @@
       "entry_fee_placeholder": "0",
       "material_fee_label": "Material Fee (Garas)",
       "material_fee_placeholder": "0"
-    }
+    },
+    "zip_code_label": "ZIP Code",
+    "d_class_label": "Visibility",
+    "available_until_label": "Available Until",
+    "available_until_hint": "Optional. Max. 2 months ahead. Listing expires automatically."
   },
   "chat": {
     "page": {
@@ -544,7 +550,6 @@
       "delete_error": "Failed to delete tag"
     }
   },
-
   "nav": {
     "menu": "Menu",
     "create": "New Listing",
@@ -556,5 +561,13 @@
     "invite": "Invite",
     "admin": "Admin",
     "logout": "Logout"
+  },
+  "d_class_labels": {
+    "D1": "Direct neighborhood",
+    "D2": "Nearby area (10 km)",
+    "D3": "Own region (25 km)",
+    "D4": "Wider area (40 km)",
+    "D5": "Nationwide",
+    "D6": "Online"
   }
 }

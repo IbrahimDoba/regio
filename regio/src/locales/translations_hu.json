@@ -77,7 +77,9 @@
     "search_placeholder": "Keresés...",
     "search_button": "Keresés",
     "radius_all": "Minden távolság",
-    "radius_nationwide": "Országos"
+    "radius_nationwide": "Országos",
+    "homebase_placeholder": "Irányítószám (helyed)...",
+    "max_distance_all": "Minden távolság"
   },
   "category_labels": {
     "OFFER_SERVICE": "Szolgáltatást kínál",
@@ -220,7 +222,11 @@
       "entry_fee_placeholder": "0",
       "material_fee_label": "Anyagköltség (Garas)",
       "material_fee_placeholder": "0"
-    }
+    },
+    "zip_code_label": "Irányítószám",
+    "d_class_label": "Láthatóság",
+    "available_until_label": "Elérhető eddig",
+    "available_until_hint": "Nem kötelező. Max. 2 hónap. A hirdetés automatikusan lejár."
   },
   "chat": {
     "page": {
@@ -544,7 +550,6 @@
       "delete_error": "Hiba a törléskor"
     }
   },
-
   "nav": {
     "menu": "Menü",
     "create": "Hirdetés létrehozása",
@@ -556,5 +561,13 @@
     "invite": "Meghívás",
     "admin": "Admin",
     "logout": "Kijelentkezés"
+  },
+  "d_class_labels": {
+    "D1": "Közvetlen szomszédság",
+    "D2": "Közeli környék (10 km)",
+    "D3": "Saját régió (25 km)",
+    "D4": "Tágabb körzetk (40 km)",
+    "D5": "Országos",
+    "D6": "Online"
   }
 }

@@ -6,7 +6,8 @@ import { ListingCategory } from "@/lib/api/types";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSearchTags } from "@/lib/api";
-import { FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
+import { getStoredHomebaseZip, setStoredHomebaseZip } from "@/lib/api/hooks/use-listings";
+import { FaMagnifyingGlass, FaXmark, FaLocationDot } from "react-icons/fa6";
 
 interface FilterPanelProps {
   isOpen: boolean;
@@ -17,14 +18,18 @@ interface FilterPanelProps {
   tags: string[];
   addTag: (tag: string) => void;
   removeTag: (tag: string) => void;
-  radius: string | undefined;
-  setRadius: (radius: string | undefined) => void;
+  viewerZip: string;
+  setViewerZip: (zip: string) => void;
+  maxDistanceKm: number | undefined;
+  setMaxDistanceKm: (km: number | undefined) => void;
   onSearch: () => void;
 }
 
 const categoryFilters = (Object.keys(CATEGORY_CONFIG) as ListingCategory[]).map(
   (cat) => ({ category: cat, ...CATEGORY_CONFIG[cat] })
 );
+
+const DISTANCE_OPTIONS = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
 
 export default function FilterPanel({
   isOpen,
@@ -35,8 +40,10 @@ export default function FilterPanel({
   tags,
   addTag,
   removeTag,
-  radius,
-  setRadius,
+  viewerZip,
+  setViewerZip,
+  maxDistanceKm,
+  setMaxDistanceKm,
   onSearch,
 }: FilterPanelProps) {
   const { t } = useLanguage();
@@ -85,13 +92,18 @@ export default function FilterPanel({
   };
 
   const handleSelectTag = (tagName: string) => {
-    if (!tags.includes(tagName)) {
-      addTag(tagName);
-    }
+    if (!tags.includes(tagName)) addTag(tagName);
     setInputValue("");
     setQ("");
     setDebouncedInput("");
     setShowDropdown(false);
+  };
+
+  const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+    setViewerZip(val);
+    if (!val) setMaxDistanceKm(undefined);
+    if (val.length >= 4) setStoredHomebaseZip(val);
   };
 
   return (
@@ -142,20 +154,28 @@ export default function FilterPanel({
         )}
       </div>
 
-      {/* Radius + Search button row */}
+      {/* Homebase ZIP + Max Distance + Search button */}
       <div className="flex gap-[8px] mb-[10px]">
+        <div className="relative flex-1">
+          <FaLocationDot className="absolute left-[9px] top-1/2 -translate-y-1/2 text-[#888] text-[13px] pointer-events-none" />
+          <input
+            type="text"
+            className="w-full pl-[26px] pr-[8px] py-[8px] border border-[#ccc] rounded-[5px] bg-[var(--input-bg)] text-[14px]"
+            placeholder={t.filter_panel.homebase_placeholder}
+            value={viewerZip}
+            onChange={handleZipChange}
+            maxLength={10}
+          />
+        </div>
         <select
-          className="flex-1 p-[8px] border border-[#ccc] rounded-[5px] bg-[var(--input-bg)] text-[14px]"
-          value={radius ?? ""}
-          onChange={(e) => setRadius(e.target.value || undefined)}
+          className="w-[130px] p-[8px] border border-[#ccc] rounded-[5px] bg-[var(--input-bg)] text-[14px]"
+          value={maxDistanceKm ?? ""}
+          onChange={(e) => setMaxDistanceKm(e.target.value ? parseInt(e.target.value) : undefined)}
         >
-          <option value="">{t.filter_panel.radius_all}</option>
-          <option value="5km">5 km</option>
-          <option value="10km">10 km</option>
-          <option value="25km">25 km</option>
-          <option value="50km">50 km</option>
-          <option value="100km">100 km</option>
-          <option value="nationwide">{t.filter_panel.radius_nationwide}</option>
+          <option value="">{t.filter_panel.max_distance_all}</option>
+          {DISTANCE_OPTIONS.map((km) => (
+            <option key={km} value={km}>{km} km</option>
+          ))}
         </select>
         <button
           type="button"

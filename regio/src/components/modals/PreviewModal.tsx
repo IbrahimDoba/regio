@@ -9,7 +9,6 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { API_CONFIG } from "@/lib/api/config";
 import type { Translations } from "@/context/LanguageContext";
-import LocationAddress from "@/components/map/LocationAddress";
 import { getEditLog } from "@/lib/listingEditLog";
 
 interface PreviewModalProps {
@@ -235,12 +234,14 @@ export default function PreviewModal({
           </div>
 
           {/* Region bar */}
-          {listing.radius_km != null && (
+          {(listing.zip_code || listing.d_class) && (
             <div
               className="w-full text-center text-[13px] font-[700] py-[7px] mb-[14px] rounded-[4px]"
               style={{ backgroundColor: lightBg, color: colorVar }}
             >
-              {t.feed_card.region_label} {listing.radius_km}{t.feed_card.region_unit}
+              {listing.d_class && (
+                <span>{listing.d_class} · {t.d_class_labels[listing.d_class as keyof typeof t.d_class_labels] ?? listing.d_class}</span>
+              )}
             </div>
           )}
 
@@ -269,16 +270,6 @@ export default function PreviewModal({
                 </div>
               ))}
             </div>
-          )}
-
-          {/* Address + togglable map */}
-          {listing.location_lat != null && listing.location_lng != null && (
-            <LocationAddress
-              lat={listing.location_lat}
-              lng={listing.location_lng}
-              showMapLabel={t.preview_modal.show_map}
-              hideMapLabel={t.preview_modal.hide_map}
-            />
           )}
 
           {/* Category-specific attributes */}

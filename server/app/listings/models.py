@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 # Forward refs
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
+import sqlalchemy as sa
 from sqlalchemy import DateTime, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import JSON, Column, Field, Relationship, SQLModel
@@ -12,6 +13,43 @@ from app.listings.enums import ListingCategory, ListingStatus
 
 if TYPE_CHECKING:
     from app.users.models import User
+
+
+class ZipDistance(SQLModel, table=True):
+    """Pre-computed real driving distances between Hungarian ZIP codes (max 40 km)."""
+
+    __tablename__ = "zip_distances"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    zip_from: str = Field(sa_column=Column(String(10), nullable=False, index=True))
+    zip_to: str = Field(sa_column=Column(String(10), nullable=False))
+    distance_km: int = Field(sa_column=Column(sa.SmallInteger(), nullable=False))
+
+    __table_args__ = (
+        sa.Index("ix_zip_distances_zip_from_km", "zip_from", "distance_km"),
+    )
+
+
+class PostVisibility(SQLModel, table=True):
+    """
+    Junction table: which viewer ZIPs can see a given post.
+    Populated at listing creation time for D1–D4 listings.
+    D5/D6 listings skip this table — they are always visible.
+    """
+
+    __tablename__ = "post_visibilities"
+
+    post_id: uuid.UUID = Field(
+        sa_column=Column(
+            sa.Uuid,
+            sa.ForeignKey("listings.id", ondelete="CASCADE"),
+            primary_key=True,
+            nullable=False,
+        )
+    )
+    viewer_zip: str = Field(
+        sa_column=Column(String(10), primary_key=True, nullable=False, index=True)
+    )
 
 
 class Tag(SQLModel, table=True):
@@ -60,28 +98,32 @@ class Listing(SQLModel, table=True):
     description_hu: Optional[str] = None
 
     # META
-    # Storing tags as JSON list ["vegan", "bio"] for super fast filtering
     tags: List[str] = Field(default=[], sa_column=Column(JSONB))
-
-    # List of URL strings
     media_urls: List[str] = Field(default=[], sa_column=Column(JSON))
 
-    radius_km: int = Field(default=10)
-    location_lat: Optional[float] = Field(
+    # LOCATION & VISIBILITY (ZIP-code based system)
+    zip_code: Optional[str] = Field(
         default=None,
-        description="Latitude from map selection (e.g. OpenStreetMap). Enables precise map pin for viewers.",
+        sa_column=Column(String(10), nullable=True),
+        description="Hungarian ZIP code of the listing's origin.",
     )
-    location_lng: Optional[float] = Field(
+    d_class: Optional[str] = Field(
         default=None,
-        description="Longitude from map selection (e.g. OpenStreetMap). Enables precise map pin for viewers.",
+        sa_column=Column(String(2), nullable=True, index=True),
+        description="Visibility distance class: D1 (0km) to D6 (Online). D5/D6 are nationwide/online.",
+    )
+
+    # EXPIRY
+    available_until: Optional[datetime] = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),
+        description="Date after which the listing is automatically set to INACTIVE.",
     )
 
     # Free-text field for payment/price notes (all categories)
     payment_notes: Optional[str] = Field(default=None, sa_type=String)
 
     # POLYMORPHIC ATTRIBUTES
-    # Stores category-specific fields (time_factor, prices, locations, etc.)
-    # Queryable in Postgres via attributes->>'key'
     attributes: Dict[str, Any] = Field(default={}, sa_column=Column(JSONB))
 
     created_at: datetime = Field(

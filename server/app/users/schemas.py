@@ -83,6 +83,10 @@ class UserUpdate(SQLModel):
         default=None, max_length=500, description="Short about me."
     )
 
+    zip_code: Optional[str] = Field(
+        default=None, max_length=10, description="User's home ZIP code."
+    )
+
     # Notification Settings
     notif_email_digest: Optional[bool] = Field(
         default=None, description="Receive email digest."
@@ -151,6 +155,7 @@ class UserPublic(SQLModel):
     )
     bio: Optional[str] = Field(default=None, description="Short about me.")
     address: Optional[str] = Field(..., description="User's physical address.")
+    zip_code: Optional[str] = Field(default=None, description="User's home ZIP code.")
     language: Optional[str] = Field(
         ..., description="User's preferred interface language (EN, DE, HU)."
     )

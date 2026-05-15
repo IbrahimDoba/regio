@@ -77,7 +77,9 @@
     "search_placeholder": "Suchen...",
     "search_button": "Suchen",
     "radius_all": "Alle Entfernungen",
-    "radius_nationwide": "Landesweit"
+    "radius_nationwide": "Landesweit",
+    "homebase_placeholder": "PLZ (Ihr Standort)...",
+    "max_distance_all": "Alle Entfernungen"
   },
   "category_labels": {
     "OFFER_SERVICE": "Dienstleistung anbieten",
@@ -220,7 +222,11 @@
       "entry_fee_placeholder": "0",
       "material_fee_label": "Materialkosten (Garas)",
       "material_fee_placeholder": "0"
-    }
+    },
+    "zip_code_label": "PLZ",
+    "d_class_label": "Sichtbarkeit",
+    "available_until_label": "Verfügbar bis",
+    "available_until_hint": "Optional. Max. 2 Monate voraus. Angebot läuft automatisch ab."
   },
   "chat": {
     "page": {
@@ -544,7 +550,6 @@
       "delete_error": "Fehler beim Löschen"
     }
   },
-
   "nav": {
     "menu": "Menü",
     "create": "Inserat erstellen",
@@ -556,5 +561,13 @@
     "invite": "Einladen",
     "admin": "Admin",
     "logout": "Abmelden"
+  },
+  "d_class_labels": {
+    "D1": "Direkte Nachbarschaft",
+    "D2": "Nähere Umgebung (10 km)",
+    "D3": "Eigene Region (25 km)",
+    "D4": "Weiterer Umkreis (40 km)",
+    "D5": "Landesweit",
+    "D6": "Online"
   }
 }

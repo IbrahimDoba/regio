@@ -51,6 +51,36 @@ export function useFeed(params?: Omit<FeedParams, "lang">) {
 }
 
 /**
+ * Utility: get the stored homebase ZIP from localStorage.
+ * Returns null if not set or if it has expired (past midnight).
+ */
+export function getStoredHomebaseZip(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem("regio_homebase");
+    if (!raw) return null;
+    const { zip, expires } = JSON.parse(raw) as { zip: string; expires: number };
+    if (Date.now() > expires) {
+      localStorage.removeItem("regio_homebase");
+      return null;
+    }
+    return zip;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Utility: persist the homebase ZIP to localStorage until midnight.
+ */
+export function setStoredHomebaseZip(zip: string): void {
+  if (typeof window === "undefined") return;
+  const now = new Date();
+  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+  localStorage.setItem("regio_homebase", JSON.stringify({ zip, expires: midnight }));
+}
+
+/**
  * Hook to fetch a single listing by ID.
  * Automatically includes the user's current language.
  */

@@ -13,25 +13,25 @@ class ListingCategory(StrEnum):
 
 class ListingStatus(StrEnum):
     ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"  # Expired or manually deactivated
     SOLD = "SOLD"
     DELETED = "DELETED"
 
 
-class RadiusFilter(StrEnum):
-    KM_5 = "5km"
-    KM_10 = "10km"
-    KM_25 = "25km"
-    KM_50 = "50km"
-    KM_100 = "100km"
-    NATIONWIDE = "nationwide"
+class DClass(StrEnum):
+    D1 = "D1"  # Direct neighborhood — same ZIP only (0 km)
+    D2 = "D2"  # Nearby area — up to 10 km
+    D3 = "D3"  # Own region — up to 25 km
+    D4 = "D4"  # Wider area — up to 40 km
+    D5 = "D5"  # All Hungary — Nationwide (no geo filter)
+    D6 = "D6"  # Digital / Remote help — Online (no geo filter)
 
 
-# Maps each RadiusFilter to its integer km value for DB filtering.
-# NATIONWIDE is intentionally absent — it means no radius constraint.
-RADIUS_FILTER_KM: dict[RadiusFilter, int] = {
-    RadiusFilter.KM_5: 5,
-    RadiusFilter.KM_10: 10,
-    RadiusFilter.KM_25: 25,
-    RadiusFilter.KM_50: 50,
-    RadiusFilter.KM_100: 100,
+# Max driving distance (km) for each local D-class.
+# D5 and D6 have no geographic limit — they are not in this map.
+D_CLASS_MAX_KM: dict[DClass, int] = {
+    DClass.D1: 0,
+    DClass.D2: 10,
+    DClass.D3: 25,
+    DClass.D4: 40,
 }

@@ -85,7 +85,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
           </div>
           <div className="flex flex-col justify-between">
             <h3 className="text-[17px] font-[500] leading-[1.3] m-[0_0_8px_0] text-[var(--color-text-main)]">
-              {listing.title}
+              {listing.title.length > 70 ? listing.title.slice(0, 70) + '...' : listing.title}
             </h3>
             <div className="flex justify-end items-end gap-[10px]">
               <div className="text-right leading-[1.2] pb-0 flex items-baseline justify-end gap-[5px]">
@@ -94,7 +94,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
                     {listing.owner_name}
                   </div>
                   <div className="text-[11px] text-[#777] whitespace-nowrap">
-                    {t.feed_card.region_label} {listing.radius_km}{t.feed_card.region_unit}
+                    {listing.d_class ? t.d_class_labels[listing.d_class] ?? listing.d_class : ""}
                   </div>
                 </div>
                 {listing.owner_avatar ? (
@@ -124,8 +124,10 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
               onClick={() => setIsOpen(!isOpen)}
             />
             <div className="text-[11px] text-[#444] font-[500] inline-flex items-center gap-[6px] h-full">
-              <FaLocationDot className="text-[#555] text-[14px]" /> {t.feed_card.region_label}{" "}
-              {listing.radius_km}{t.feed_card.region_unit}
+              <FaLocationDot className="text-[#555] text-[14px]" />
+              {listing.d_class && (
+                <span>{listing.d_class} · {t.d_class_labels[listing.d_class] ?? listing.d_class}</span>
+              )}
             </div>
           </div>
           <div className="flex gap-[5px] items-center">
@@ -153,7 +155,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
               {listing.description}
             </div>
             <div
-              className="text-[11px] underline float-right cursor-pointer ml-[5px] mt-[2px] text-[var(--color-text-main)]"
+              className="text-[11px] underline float-right cursor-pointer ml-[5px] mt-[2px] mb-[8px] text-[var(--color-text-main)]"
               onClick={() => onOpenPreview(listing)}
             >
               {t.feed_card.read_more}

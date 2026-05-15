@@ -71,6 +71,9 @@ export interface UserPublic {
   created_at: string;
   is_system_admin?: boolean;
   avatar_url?: string | null;
+  zip_code?: string | null;
+  address?: string | null;
+  language?: string | null;
 }
 
 export interface UserRich {
@@ -100,6 +103,7 @@ export interface UserCreate {
 
 export interface UserUpdate {
   address?: string | null;
+  zip_code?: string | null;
   language?: Language;
 }
 
@@ -224,7 +228,10 @@ export type ListingCategory =
   | 'RIDE_SHARE'
   | 'EVENT_WORKSHOP';
 
-export type ListingStatus = 'ACTIVE' | 'INACTIVE';
+export type ListingStatus = 'ACTIVE' | 'INACTIVE' | 'SOLD' | 'DELETED';
+
+/** D1–D4 are local (ZIP-based), D5 = Nationwide, D6 = Online */
+export type DClass = 'D1' | 'D2' | 'D3' | 'D4' | 'D5' | 'D6';
 
 export interface ListingPublic {
   id: string;
@@ -235,44 +242,48 @@ export interface ListingPublic {
   status: ListingStatus;
   title: string;
   description: string;
+  payment_notes?: string | null;
   media_urls: string[];
   tags: string[];
-  radius_km: number | null;
+  zip_code?: string | null;
+  d_class?: DClass | null;
+  available_until?: string | null;
   attributes: Record<string, unknown>;
   created_at: string;
-  location_lat?: number | null;
-  location_lng?: number | null;
 }
 
 export interface ListingCreate {
   category: ListingCategory;
   title: string;
   description: string;
+  payment_notes?: string | null;
   tags?: string[];
   media_urls?: string[];
-  radius_km?: number | null;
+  zip_code?: string | null;
+  d_class?: DClass;
+  available_until?: string | null;
   attributes?: Record<string, unknown>;
-  location_lat?: number | null;
-  location_lng?: number | null;
 }
 
 export interface ListingUpdate {
   title?: string;
   description?: string;
+  payment_notes?: string | null;
   tags?: string[];
   media_urls?: string[];
-  radius_km?: number | null;
   status?: ListingStatus;
+  zip_code?: string | null;
+  d_class?: DClass | null;
+  available_until?: string | null;
   attributes?: Record<string, unknown>;
-  location_lat?: number | null;
-  location_lng?: number | null;
 }
 
 export interface FeedParams {
   categories?: ListingCategory[];
   tags?: string[];
   q?: string | null;
-  radius?: string;
+  viewer_zip?: string | null;
+  max_distance_km?: number | null;
   offset?: number;
   lang?: string; // ISO code sent to backend for localised content: 'en' | 'de' | 'hu'
 }
