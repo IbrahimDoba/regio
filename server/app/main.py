@@ -67,6 +67,7 @@ from app.users.handlers import (
 )
 from app.users.routes import router as user_router
 
+
 async def run_listing_expiry() -> None:
     """Daily job: mark listings whose available_until has passed as INACTIVE."""
     from datetime import datetime, timezone
@@ -74,8 +75,8 @@ async def run_listing_expiry() -> None:
     import sqlalchemy as sa
 
     from app.core.database import AsyncSessionLocal
-    from app.listings.models import Listing
     from app.listings.enums import ListingStatus
+    from app.listings.models import Listing
 
     async with AsyncSessionLocal() as session:
         now = datetime.now(timezone.utc)

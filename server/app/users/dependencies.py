@@ -71,7 +71,10 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
         )
     token_iat = payload.get("iat")
     if user.tokens_valid_from and token_iat:
-        if datetime.fromtimestamp(token_iat, tz=timezone.utc) < user.tokens_valid_from:
+        if (
+            datetime.fromtimestamp(token_iat, tz=timezone.utc)
+            < user.tokens_valid_from
+        ):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Session invalidated, please log in again",
@@ -129,7 +132,10 @@ async def get_current_user_any_status(
         )
     token_iat = payload.get("iat")
     if user.tokens_valid_from and token_iat:
-        if datetime.fromtimestamp(token_iat, tz=timezone.utc) < user.tokens_valid_from:
+        if (
+            datetime.fromtimestamp(token_iat, tz=timezone.utc)
+            < user.tokens_valid_from
+        ):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Session invalidated, please log in again",

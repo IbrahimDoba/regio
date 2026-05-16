@@ -21,9 +21,13 @@ class ZipDistance(SQLModel, table=True):
     __tablename__ = "zip_distances"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    zip_from: str = Field(sa_column=Column(String(10), nullable=False, index=True))
+    zip_from: str = Field(
+        sa_column=Column(String(10), nullable=False, index=True)
+    )
     zip_to: str = Field(sa_column=Column(String(10), nullable=False))
-    distance_km: int = Field(sa_column=Column(sa.SmallInteger(), nullable=False))
+    distance_km: int = Field(
+        sa_column=Column(sa.SmallInteger(), nullable=False)
+    )
 
     __table_args__ = (
         sa.Index("ix_zip_distances_zip_from_km", "zip_from", "distance_km"),
@@ -48,7 +52,9 @@ class PostVisibility(SQLModel, table=True):
         )
     )
     viewer_zip: str = Field(
-        sa_column=Column(String(10), primary_key=True, nullable=False, index=True)
+        sa_column=Column(
+            String(10), primary_key=True, nullable=False, index=True
+        )
     )
 
 
@@ -100,6 +106,10 @@ class Listing(SQLModel, table=True):
     # META
     tags: List[str] = Field(default=[], sa_column=Column(JSONB))
     media_urls: List[str] = Field(default=[], sa_column=Column(JSON))
+
+    __table_args__ = (
+        sa.Index("ix_listings_tags_gin", "tags", postgresql_using="gin"),
+    )
 
     # LOCATION & VISIBILITY (ZIP-code based system)
     zip_code: Optional[str] = Field(

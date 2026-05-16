@@ -9,7 +9,12 @@ from sqlmodel import col, desc, func, or_, select
 
 from app.core.config import settings
 from app.core.file_storage import LocalStorageService
-from app.listings.enums import D_CLASS_MAX_KM, DClass, ListingCategory, ListingStatus
+from app.listings.enums import (
+    D_CLASS_MAX_KM,
+    DClass,
+    ListingCategory,
+    ListingStatus,
+)
 from app.listings.exceptions import (
     ListingNotFound,
     ListingNotOwned,
@@ -39,7 +44,7 @@ def _extract_key(url_or_key: str) -> str:
     """Strip the backend media proxy prefix to get the raw R2 object key."""
     prefix = f"{settings.BACKEND_URL}{_MEDIA_PREFIX}"
     if url_or_key.startswith(prefix):
-        return url_or_key[len(prefix):]
+        return url_or_key[len(prefix) :]
     return url_or_key
 
 
@@ -58,7 +63,8 @@ def _localize(listing: Listing, lang: str) -> tuple[str, str]:
     lang = lang.lower()
     title = getattr(listing, f"title_{lang}", None) or listing.title_original
     description = (
-        getattr(listing, f"description_{lang}", None) or listing.description_original
+        getattr(listing, f"description_{lang}", None)
+        or listing.description_original
     )
     return title, description
 
@@ -71,7 +77,9 @@ class ListingService:
     # TAGS
     # --------------------------------------------------------
 
-    async def search_tags(self, query: str, lang: str = "en") -> List[TagPublic]:
+    async def search_tags(
+        self, query: str, lang: str = "en"
+    ) -> List[TagPublic]:
         """Autocomplete for tags, searching the localized name column for the given lang."""
         lang = lang.lower()
         lang_col = {
@@ -183,7 +191,9 @@ class ListingService:
             zip_code=data.zip_code,
             d_class=data.d_class.value if data.d_class else DClass.D5.value,
             available_until=data.available_until,
-            attributes=data.attributes.model_dump(mode="json", exclude_none=True),
+            attributes=data.attributes.model_dump(
+                mode="json", exclude_none=True
+            ),
         )
 
         self.session.add(listing)
@@ -334,7 +344,9 @@ class ListingService:
         listing = await self.session.get(Listing, listing_id)
         if not listing:
             raise ListingNotFound()
-        if not (current_user.id == listing.owner_id or current_user.is_system_admin):
+        if not (
+            current_user.id == listing.owner_id or current_user.is_system_admin
+        ):
             raise ListingNotOwned()
 
         # post_visibilities rows are cascade-deleted via FK ondelete="CASCADE"
@@ -396,7 +408,8 @@ class ListingService:
                                 PostVisibility.viewer_zip == viewer_zip,
                                 or_(
                                     ZipDistance.distance_km <= max_distance_km,
-                                    ZipDistance.distance_km == None,  # same-ZIP rows  # noqa: E711
+                                    ZipDistance.distance_km
+                                    == None,  # same-ZIP rows  # noqa: E711
                                 ),
                             ),
                         )
@@ -407,7 +420,9 @@ class ListingService:
                 # Basic ZIP-based visibility (client's exact SQL pattern)
                 query = (
                     select(Listing)
-                    .outerjoin(PostVisibility, PostVisibility.post_id == Listing.id)
+                    .outerjoin(
+                        PostVisibility, PostVisibility.post_id == Listing.id
+                    )
                     .where(Listing.status == ListingStatus.ACTIVE)
                     .where(
                         or_(
@@ -420,7 +435,9 @@ class ListingService:
                 )
         else:
             # No homebase ZIP — show all active listings (backward-compatible)
-            query = select(Listing).where(Listing.status == ListingStatus.ACTIVE)
+            query = select(Listing).where(
+                Listing.status == ListingStatus.ACTIVE
+            )
 
         # Category filter
         if categories:
@@ -471,7 +488,9 @@ class ListingService:
                     title=title,
                     description=description,
                     payment_notes=listing.payment_notes,
-                    media_urls=[_ensure_url(k) for k in (listing.media_urls or [])],
+                    media_urls=[
+                        _ensure_url(k) for k in (listing.media_urls or [])
+                    ],
                     tags=listing.tags,
                     zip_code=listing.zip_code,
                     d_class=listing.d_class,
