@@ -1,6 +1,6 @@
 # ---- base ----
 FROM node:22-alpine AS base
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 
 # ---- deps ----
 FROM base AS deps
