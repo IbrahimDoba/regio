@@ -565,7 +565,7 @@
   "d_class_labels": {
     "D1": "Direct neighborhood",
     "D2": "Nearby area (10 km)",
-    "D3": "Own region (25 km)",
+    "D3": "Own region (20 km)",
     "D4": "Wider area (40 km)",
     "D5": "Nationwide",
     "D6": "Online"

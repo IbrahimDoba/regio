@@ -565,7 +565,7 @@
   "d_class_labels": {
     "D1": "Direkte Nachbarschaft",
     "D2": "Nähere Umgebung (10 km)",
-    "D3": "Eigene Region (25 km)",
+    "D3": "Eigene Region (20 km)",
     "D4": "Weiterer Umkreis (40 km)",
     "D5": "Landesweit",
     "D6": "Online"

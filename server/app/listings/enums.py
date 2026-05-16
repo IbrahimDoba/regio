@@ -21,7 +21,7 @@ class ListingStatus(StrEnum):
 class DClass(StrEnum):
     D1 = "D1"  # Direct neighborhood — same ZIP only (0 km)
     D2 = "D2"  # Nearby area — up to 10 km
-    D3 = "D3"  # Own region — up to 25 km
+    D3 = "D3"  # Own region — up to 20 km
     D4 = "D4"  # Wider area — up to 40 km
     D5 = "D5"  # All Hungary — Nationwide (no geo filter)
     D6 = "D6"  # Digital / Remote help — Online (no geo filter)
@@ -32,6 +32,6 @@ class DClass(StrEnum):
 D_CLASS_MAX_KM: dict[DClass, int] = {
     DClass.D1: 0,
     DClass.D2: 10,
-    DClass.D3: 25,
+    DClass.D3: 20,
     DClass.D4: 40,
 }

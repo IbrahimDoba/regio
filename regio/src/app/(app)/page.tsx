@@ -54,12 +54,14 @@ export default function FeedPage() {
   const { mutateAsync: createListingInquiry } = useCreateListingInquiry();
   const [isContacting, setIsContacting] = useState(false);
 
-  // Restore homebase ZIP from localStorage on mount (expires at midnight)
+  // Restore homebase ZIP on mount and immediately apply it to the feed
   useEffect(() => {
     const stored = getStoredHomebaseZip();
-    if (stored) setStagedViewerZip(stored);
-    // Pre-fill from user profile if no stored ZIP
-    else if (user?.zip_code) setStagedViewerZip(user.zip_code);
+    const zip = stored || user?.zip_code || "";
+    if (zip) {
+      setStagedViewerZip(zip);
+      setCommittedFilters((prev) => ({ ...prev, viewer_zip: zip }));
+    }
   }, [user?.zip_code]);
 
   const handleContact = async (listing: ListingPublic) => {

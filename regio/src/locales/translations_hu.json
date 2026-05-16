@@ -565,7 +565,7 @@
   "d_class_labels": {
     "D1": "Közvetlen szomszédság",
     "D2": "Közeli környék (10 km)",
-    "D3": "Saját régió (25 km)",
+    "D3": "Saját régió (20 km)",
     "D4": "Tágabb körzetk (40 km)",
     "D5": "Országos",
     "D6": "Online"
