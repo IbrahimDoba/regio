@@ -155,7 +155,9 @@ class UserPublic(SQLModel):
     )
     bio: Optional[str] = Field(default=None, description="Short about me.")
     address: Optional[str] = Field(..., description="User's physical address.")
-    zip_code: Optional[str] = Field(default=None, description="User's home ZIP code.")
+    zip_code: Optional[str] = Field(
+        default=None, description="User's home ZIP code."
+    )
     language: Optional[str] = Field(
         ..., description="User's preferred interface language (EN, DE, HU)."
     )

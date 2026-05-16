@@ -1,10 +1,22 @@
 from typing import Annotated, Any, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, Request, Response, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Cookie,
+    Depends,
+    Request,
+    Response,
+    status,
+)
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.auth.dependencies import AuthServiceDep
-from app.auth.schemas import PasswordResetConfirm, PasswordResetRequest, TokenResponse
+from app.auth.schemas import (
+    PasswordResetConfirm,
+    PasswordResetRequest,
+    TokenResponse,
+)
 from app.auth.utils import set_refresh_cookie
 from app.core.schemas import Message
 from app.email.tasks import send_password_reset_email_task
@@ -150,7 +162,9 @@ async def request_password_reset(
     email_data = await service.request_password_reset(body.email)
     if email_data:
         background_tasks.add_task(send_password_reset_email_task, email_data)
-    return Message(message="If that email is registered, a reset link has been sent.")
+    return Message(
+        message="If that email is registered, a reset link has been sent."
+    )
 
 
 @router.post(

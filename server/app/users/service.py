@@ -289,7 +289,10 @@ class UserService:
             ):
                 db_user.verified_by = current_admin
                 db_user.verified_at = datetime.now(timezone.utc)
-        # NOTE: Updating verification_status of user in update_user is now deprecated, please use admin_service.verify_user. The UserAdminUpdate schema will be updated in the future.
+
+        # NOTE: Updating verification_status of user in update_user is now
+        # deprecated, please use admin_service.verify_user.
+        # The UserAdminUpdate schema will be updated in the future.
 
         self.session.add(db_user)
         await self.session.commit()

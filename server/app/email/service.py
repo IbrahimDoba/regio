@@ -217,14 +217,11 @@ class EmailService:
         )
         await self._send(message)
 
-
     async def send_password_reset_email(
         self, data: PasswordResetEmailData
     ) -> None:
         """Send a password reset link to the user."""
-        html = self._render_template(
-            "password_reset.html", data.model_dump()
-        )
+        html = self._render_template("password_reset.html", data.model_dump())
         message = EmailMessage(
             to=data.user_email,
             subject="Reset Your Regio Password",

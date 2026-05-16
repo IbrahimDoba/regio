@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from app.listings.enums import DClass, ListingCategory, ListingStatus
 
@@ -111,6 +111,7 @@ class ListingCreateBase(BaseModel):
             return v
         if isinstance(v, str):
             from datetime import datetime
+
             v = datetime.fromisoformat(v.replace("Z", "+00:00"))
         now = datetime.now(timezone.utc)
         if v.tzinfo is None:
@@ -118,42 +119,62 @@ class ListingCreateBase(BaseModel):
         if v <= now:
             raise ValueError("available_until must be in the future")
         if v > now + _TWO_MONTHS:
-            raise ValueError("available_until cannot be more than 2 months ahead")
+            raise ValueError(
+                "available_until cannot be more than 2 months ahead"
+            )
         return v
 
 
 class CreateServiceListing(ListingCreateBase):
-    category: Literal[ListingCategory.OFFER_SERVICE] = Field(ListingCategory.OFFER_SERVICE)
+    category: Literal[ListingCategory.OFFER_SERVICE] = Field(
+        ListingCategory.OFFER_SERVICE
+    )
     attributes: ServiceAttributes
 
 
 class CreateSearchServiceListing(ListingCreateBase):
-    category: Literal[ListingCategory.SEARCH_SERVICE] = Field(ListingCategory.SEARCH_SERVICE)
-    attributes: SearchServiceAttributes = Field(default_factory=SearchServiceAttributes)
+    category: Literal[ListingCategory.SEARCH_SERVICE] = Field(
+        ListingCategory.SEARCH_SERVICE
+    )
+    attributes: SearchServiceAttributes = Field(
+        default_factory=SearchServiceAttributes
+    )
 
 
 class CreateProductListing(ListingCreateBase):
-    category: Literal[ListingCategory.SELL_PRODUCT] = Field(ListingCategory.SELL_PRODUCT)
+    category: Literal[ListingCategory.SELL_PRODUCT] = Field(
+        ListingCategory.SELL_PRODUCT
+    )
     attributes: ProductAttributes
 
 
 class CreateSearchProductListing(ListingCreateBase):
-    category: Literal[ListingCategory.SEARCH_PRODUCT] = Field(ListingCategory.SEARCH_PRODUCT)
-    attributes: SearchProductAttributes = Field(default_factory=SearchProductAttributes)
+    category: Literal[ListingCategory.SEARCH_PRODUCT] = Field(
+        ListingCategory.SEARCH_PRODUCT
+    )
+    attributes: SearchProductAttributes = Field(
+        default_factory=SearchProductAttributes
+    )
 
 
 class CreateRentalListing(ListingCreateBase):
-    category: Literal[ListingCategory.OFFER_RENTAL] = Field(ListingCategory.OFFER_RENTAL)
+    category: Literal[ListingCategory.OFFER_RENTAL] = Field(
+        ListingCategory.OFFER_RENTAL
+    )
     attributes: RentalAttributes
 
 
 class CreateRideShareListing(ListingCreateBase):
-    category: Literal[ListingCategory.RIDE_SHARE] = Field(ListingCategory.RIDE_SHARE)
+    category: Literal[ListingCategory.RIDE_SHARE] = Field(
+        ListingCategory.RIDE_SHARE
+    )
     attributes: RideShareAttributes
 
 
 class CreateEventListing(ListingCreateBase):
-    category: Literal[ListingCategory.EVENT_WORKSHOP] = Field(ListingCategory.EVENT_WORKSHOP)
+    category: Literal[ListingCategory.EVENT_WORKSHOP] = Field(
+        ListingCategory.EVENT_WORKSHOP
+    )
     attributes: EventAttributes
 
 
@@ -198,6 +219,7 @@ class ListingUpdate(BaseModel):
             return v
         if isinstance(v, str):
             from datetime import datetime
+
             v = datetime.fromisoformat(v.replace("Z", "+00:00"))
         now = datetime.now(timezone.utc)
         if v.tzinfo is None:
@@ -205,7 +227,9 @@ class ListingUpdate(BaseModel):
         if v <= now:
             raise ValueError("available_until must be in the future")
         if v > now + _TWO_MONTHS:
-            raise ValueError("available_until cannot be more than 2 months ahead")
+            raise ValueError(
+                "available_until cannot be more than 2 months ahead"
+            )
         return v
 
 

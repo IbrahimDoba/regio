@@ -26,13 +26,13 @@ from app.auth.exceptions import (
 from app.auth.models import Invite
 from app.auth.schemas import InvitePublic, Token
 from app.auth.security import get_password_hash, verify_password
-from app.email.schemas import PasswordResetEmailData
 from app.auth.utils import (
     create_access_token,
     create_refresh_token,
     decode_token,
 )
 from app.core.config import settings
+from app.email.schemas import PasswordResetEmailData
 from app.users.models import User
 
 logger = logging.getLogger(__name__)
