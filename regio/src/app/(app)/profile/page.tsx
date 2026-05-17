@@ -10,6 +10,7 @@ import {
   FaFloppyDisk,
   FaVideo,
   FaChevronRight,
+  FaSpinner,
 } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
@@ -20,6 +21,7 @@ import {
   useUploadAvatar,
   useRequestNewInvites,
 } from "@/lib/api/hooks/use-users";
+import { useRequestPasswordReset } from "@/lib/api";
 import { API_CONFIG } from "@/lib/api/config";
 
 export default function ProfilePage() {
@@ -34,7 +36,10 @@ export default function ProfilePage() {
   const { data: user, isLoading } = useMe();
   const updateUser = useUpdateUser();
   const uploadAvatar = useUploadAvatar();
-  const requestInvites = useRequestNewInvites(); // If we need to show invite count from user object or separate query?
+  const requestInvites = useRequestNewInvites();
+  const requestResetMutation = useRequestPasswordReset();
+  const [passwordResetSent, setPasswordResetSent] = useState(false);
+  const [passwordResetError, setPasswordResetError] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   // Note: user object usually contains invites count or we fetch it separately.
   // Let's check UserPublic type. It doesn't seem to have invite count.
@@ -83,6 +88,16 @@ export default function ProfilePage() {
   if (!user) {
     return <div className="p-10 text-center">Error loading profile.</div>; // Should probably redirect to login
   }
+
+  const handleChangePassword = async () => {
+    setPasswordResetError(null);
+    try {
+      await requestResetMutation.mutateAsync(user!.email);
+      setPasswordResetSent(true);
+    } catch {
+      setPasswordResetError("Failed to send reset email. Please try again.");
+    }
+  };
 
   const handleSavePersonal = () => {
     updateUser.mutate(
@@ -336,9 +351,33 @@ export default function ProfilePage() {
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
                 Password
               </label>
-              <button className="w-full p-[10px] bg-white border border-[#ccc] rounded-[6px] cursor-pointer text-[14px]">
-                {t.profile.account_tab.change_password_button}
-              </button>
+              {passwordResetSent ? (
+                <div className="text-center py-[10px]">
+                  <span className="text-[24px] block mb-[6px]">📬</span>
+                  <p className="text-[13px] text-[#555]">
+                    Reset link sent to <strong>{user.email}</strong>. Check your inbox.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {passwordResetError && (
+                    <p className="text-[12px] text-[#d32f2f] mb-[8px]">{passwordResetError}</p>
+                  )}
+                  <button
+                    className="w-full p-[10px] bg-white border border-[#ccc] rounded-[6px] cursor-pointer text-[14px] flex justify-center items-center gap-[8px] disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleChangePassword}
+                    disabled={requestResetMutation.isPending}
+                  >
+                    {requestResetMutation.isPending ? (
+                      <>
+                        <FaSpinner className="animate-spin" /> Sending...
+                      </>
+                    ) : (
+                      t.profile.account_tab.change_password_button
+                    )}
+                  </button>
+                </>
+              )}
             </div>
 
             <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[30px] border-b border-[#eee] pb-[5px]">
