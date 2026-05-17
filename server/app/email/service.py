@@ -1,7 +1,11 @@
 import logging
+import re
+import uuid
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import formataddr, formatdate, make_msgid
+from html import unescape
 from pathlib import Path
 
 import aiosmtplib
@@ -25,6 +29,44 @@ from app.email.schemas import (
 logger = logging.getLogger(__name__)
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
+
+FROM_DISPLAY_NAME = "REGIO"
+
+# Strips tags/scripts/styles and collapses whitespace. Good enough for
+# transactional emails whose templates are simple — we don't need a full
+# DOM parser here.
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+_HTML_SCRIPT_STYLE_RE = re.compile(
+    r"<(script|style)[^>]*>.*?</\1>", re.DOTALL | re.IGNORECASE
+)
+_HTML_WHITESPACE_RE = re.compile(r"[ \t]+")
+_HTML_NEWLINE_RE = re.compile(r"\n{3,}")
+
+
+def _html_to_text(html: str) -> str:
+    """Derive a plaintext alternative from rendered HTML."""
+    text = _HTML_SCRIPT_STYLE_RE.sub("", html)
+    # Preserve line structure where the original HTML used block tags
+    text = re.sub(r"<\s*br\s*/?\s*>", "\n", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"</\s*(p|div|tr|li|h[1-6])\s*>",
+        "\n",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = _HTML_TAG_RE.sub("", text)
+    text = unescape(text)
+    text = _HTML_WHITESPACE_RE.sub(" ", text)
+    text = _HTML_NEWLINE_RE.sub("\n\n", text)
+    return text.strip()
+
+
+def _from_domain() -> str:
+    """Parse the domain out of SMTP_FROM_ADDRESS for Message-ID generation."""
+    address = email_settings.SMTP_FROM_ADDRESS
+    if "@" in address:
+        return address.rsplit("@", 1)[-1]
+    return "regio.local"
 
 
 class EmailService:
@@ -60,13 +102,15 @@ class EmailService:
         """
         Low-level async SMTP send.
 
-        Constructs a MIME multipart message with HTML (and optional plain text)
-        parts and delivers it via the configured SMTP server.
+        Builds a multipart/alternative (text + html) container, wraps it in
+        multipart/related when inline images are present, and attaches the
+        deliverability headers mailbox providers expect on modern senders.
         """
+        plain_body = message.plain_body or _html_to_text(message.html_body)
+
         alternative = MIMEMultipart("alternative")
-        if message.plain_body:
-            alternative.attach(MIMEText(message.plain_body, "plain"))
-        alternative.attach(MIMEText(message.html_body, "html"))
+        alternative.attach(MIMEText(plain_body, "plain", "utf-8"))
+        alternative.attach(MIMEText(message.html_body, "html", "utf-8"))
 
         if message.inline_images:
             msg = MIMEMultipart("related")
@@ -79,9 +123,22 @@ class EmailService:
         else:
             msg = alternative
 
-        msg["From"] = self.config.SMTP_FROM_ADDRESS
+        msg["From"] = formataddr(
+            (FROM_DISPLAY_NAME, self.config.SMTP_FROM_ADDRESS)
+        )
         msg["To"] = message.to
         msg["Subject"] = message.subject
+        msg["Date"] = formatdate(localtime=True)
+        msg["Message-ID"] = make_msgid(domain=_from_domain())
+        msg["Reply-To"] = (
+            self.config.SMTP_REPLY_TO or self.config.SMTP_FROM_ADDRESS
+        )
+        # Mark all programmatic mail as auto-generated so vacation responders
+        # don't loop back into us and mailbox providers classify correctly.
+        msg["Auto-Submitted"] = "auto-generated"
+        msg["X-Auto-Response-Suppress"] = "All"
+        # Stable ref for grouping inside ESP analytics; helps debugging blocks.
+        msg["X-Entity-Ref-ID"] = str(uuid.uuid4())
 
         try:
             await aiosmtplib.send(

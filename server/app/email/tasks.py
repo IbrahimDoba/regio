@@ -2,6 +2,7 @@ import asyncio
 import logging
 from typing import List
 
+from app.email.config import email_settings
 from app.email.schemas import (
     BroadcastDigestEmailData,
     DisputeResolvedEmailData,
@@ -11,8 +12,6 @@ from app.email.schemas import (
     VerificationStatusEmailData,
 )
 from app.email.service import email_service
-
-_BROADCAST_SEMAPHORE = asyncio.Semaphore(10)
 
 logger = logging.getLogger(__name__)
 
@@ -76,10 +75,23 @@ async def send_password_reset_email_task(data: PasswordResetEmailData) -> None:
 async def send_broadcast_digest_emails_task(
     recipients: List[BroadcastDigestEmailData],
 ) -> None:
-    """Background task: send broadcast digest to multiple users concurrently."""
+    """
+    Send broadcast digest to many users without bursting the SMTP relay.
+
+    Recipients are processed in fixed-size chunks. Within each chunk a small
+    number of sends run concurrently; between chunks we sleep so the upstream
+    SMTP relay observes a steady, paced flow rather than a thousand near-
+    simultaneous TLS handshakes.
+    """
+    if not recipients:
+        return
+
+    chunk_size = email_settings.BROADCAST_CHUNK_SIZE
+    chunk_delay = email_settings.BROADCAST_CHUNK_DELAY_SECONDS
+    semaphore = asyncio.Semaphore(email_settings.BROADCAST_CONCURRENCY)
 
     async def _send_one(data: BroadcastDigestEmailData) -> None:
-        async with _BROADCAST_SEMAPHORE:
+        async with semaphore:
             try:
                 await email_service.send_broadcast_digest_email(data)
             except Exception as e:
@@ -88,4 +100,23 @@ async def send_broadcast_digest_emails_task(
                     f"{data.user_email}: {e}"
                 )
 
-    await asyncio.gather(*(_send_one(r) for r in recipients))
+    total = len(recipients)
+    logger.info(
+        "Broadcast digest: %d recipients, chunk_size=%d, concurrency=%d",
+        total,
+        chunk_size,
+        email_settings.BROADCAST_CONCURRENCY,
+    )
+
+    for start in range(0, total, chunk_size):
+        chunk = recipients[start : start + chunk_size]
+        await asyncio.gather(*(_send_one(r) for r in chunk))
+        end = start + len(chunk)
+        if end < total:
+            logger.debug(
+                "Broadcast digest paused after %d/%d for %.1fs",
+                end,
+                total,
+                chunk_delay,
+            )
+            await asyncio.sleep(chunk_delay)
