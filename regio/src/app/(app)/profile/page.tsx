@@ -19,7 +19,6 @@ import {
   useMe,
   useUpdateUser,
   useUploadAvatar,
-  useRequestNewInvites,
 } from "@/lib/api/hooks/use-users";
 import { useRequestPasswordReset } from "@/lib/api";
 import { API_CONFIG } from "@/lib/api/config";
@@ -36,7 +35,6 @@ export default function ProfilePage() {
   const { data: user, isLoading } = useMe();
   const updateUser = useUpdateUser();
   const uploadAvatar = useUploadAvatar();
-  const requestInvites = useRequestNewInvites();
   const requestResetMutation = useRequestPasswordReset();
   const [passwordResetSent, setPasswordResetSent] = useState(false);
   const [passwordResetError, setPasswordResetError] = useState<string | null>(null);
@@ -206,31 +204,28 @@ export default function ProfilePage() {
       {/* Tabs */}
       <div className="flex border-b border-[#e0e0e0] bg-white sticky top-[60px] z-90">
         <div
-          className={`flex-1 text-center p-[15px] text-[13px] font-[600] text-[#666] cursor-pointer border-b-[3px] transition-all ${
-            activeTab === "personal"
+          className={`flex-1 text-center p-[15px] text-[13px] font-[600] text-[#666] cursor-pointer border-b-[3px] transition-all ${activeTab === "personal"
               ? "text-[var(--color-green-offer)] border-[var(--color-green-offer)]"
               : "border-transparent hover:bg-[#f9f9f9]"
-          }`}
+            }`}
           onClick={() => setActiveTab("personal")}
         >
           {t.profile.tabs.personal}
         </div>
         <div
-          className={`flex-1 text-center p-[15px] text-[13px] font-[600] text-[#666] cursor-pointer border-b-[3px] transition-all ${
-            activeTab === "account"
+          className={`flex-1 text-center p-[15px] text-[13px] font-[600] text-[#666] cursor-pointer border-b-[3px] transition-all ${activeTab === "account"
               ? "text-[var(--color-green-offer)] border-[var(--color-green-offer)]"
               : "border-transparent hover:bg-[#f9f9f9]"
-          }`}
+            }`}
           onClick={() => setActiveTab("account")}
         >
           {t.profile.tabs.account}
         </div>
         <div
-          className={`flex-1 text-center p-[15px] text-[13px] font-[600] text-[#666] cursor-pointer border-b-[3px] transition-all ${
-            activeTab === "trust"
+          className={`flex-1 text-center p-[15px] text-[13px] font-[600] text-[#666] cursor-pointer border-b-[3px] transition-all ${activeTab === "trust"
               ? "text-[var(--color-green-offer)] border-[var(--color-green-offer)]"
               : "border-transparent hover:bg-[#f9f9f9]"
-          }`}
+            }`}
           onClick={() => setActiveTab("trust")}
         >
           {t.profile.tabs.trust_invites}
