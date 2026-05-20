@@ -147,7 +147,7 @@ class EmailService:
                 port=self.config.SMTP_PORT,
                 username=self.config.SMTP_USERNAME,
                 password=self.config.SMTP_PASSWORD,
-                use_tls=self.config.SMTP_USE_TLS,
+                use_tls=self.config.SMTP_SECURE,
             )
             logger.info(f"Email sent to {message.to}: {message.subject}")
         except Exception as e:

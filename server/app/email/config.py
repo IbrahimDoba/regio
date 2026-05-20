@@ -23,8 +23,8 @@ class EmailConfig(RegioBaseSettings):
         default=None,
         description="Reply-To address. Falls back to SMTP_FROM_ADDRESS.",
     )
-    SMTP_USE_TLS: bool = Field(
-        default=True, description="Whether to use STARTTLS."
+    SMTP_SECURE: bool = Field(
+        default=True, description="Whether to use TLS/STARTTLS. Set to false for plain SMTP (e.g. local smartrelay on port 25)."
     )
 
     CALENDLY_URL: str = Field(
