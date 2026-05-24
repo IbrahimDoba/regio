@@ -1,24 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
-import { FaEnvelope, FaLock, FaTicket, FaCircleInfo, FaUsers, FaPenNib, FaSpinner } from "react-icons/fa6";
+import React, { useState, Suspense } from "react";
+import { FaEnvelope, FaLock, FaTicket, FaUsers, FaPenNib, FaSpinner } from "react-icons/fa6";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useDialog } from "@/context/DialogContext";
+import { useToast } from "@/context/ToastContext";
 import { useRegisterUser, useRequestPasswordReset } from "@/lib/api";
 import MobileContainer from "@/components/layout/MobileContainer";
 import ErrorMessage from "@/components/auth/ErrorMessage";
 
-export default function AuthPage() {
+function AuthForm() {
   const { t, language, setLanguage } = useLanguage();
   const { login } = useAuth();
   const dialog = useDialog();
+  const toast = useToast();
   const registerMutation = useRegisterUser();
   const requestResetMutation = useRequestPasswordReset();
+  const searchParams = useSearchParams();
 
-  const [view, setView] = useState<'login' | 'register' | 'forgot'>('login');
+  const [view, setView] = useState<'login' | 'register' | 'forgot'>(
+    searchParams.get("view") === "register" ? "register" : "login"
+  );
   const [isNoCodeOpen, setIsNoCodeOpen] = useState(false);
 
   // Login form state
@@ -35,8 +41,8 @@ export default function AuthPage() {
   // Register form state
   const [inviteCode, setInviteCode] = useState('');
   const [firstName, setFirstName] = useState('');
-  const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [location, setLocation] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
@@ -95,11 +101,11 @@ export default function AuthPage() {
     try {
       await registerMutation.mutateAsync({
         first_name: firstName,
-        middle_name: middleName || undefined,
         last_name: lastName,
         email: registerEmail,
         password: registerPassword,
         invite_code: inviteCode,
+        address: location || undefined,
       });
       await login({ username: registerEmail, password: registerPassword });
     } catch (error: unknown) {
@@ -292,7 +298,6 @@ export default function AuthPage() {
 
             <form onSubmit={handleRegisterSubmit}>
               <div className="bg-[#f0f7e6] border border-dashed border-[var(--color-green-offer)] p-[15px] rounded-[8px] mb-[10px] text-center">
-                <div className="text-[12px] font-bold text-[var(--color-nav-bg)] mb-[5px] uppercase">{t.auth.register.section_title}</div>
                 <div className="relative bg-white rounded-[6px]">
                   <FaTicket className="absolute left-[15px] top-1/2 -translate-y-1/2 text-[#999] text-[16px]" />
                   <input
@@ -314,12 +319,7 @@ export default function AuthPage() {
                 {t.auth.no_code_modal.title}
               </span>
 
-              <div className="bg-[#e3f2fd] border-l-[3px] border-[#2196f3] p-[10px] text-[11px] text-[#0d47a1] mb-[20px] rounded-[4px] leading-[1.4]">
-                <FaCircleInfo className="inline mr-[5px]" />
-                {t.auth.register.real_name_notice}
-              </div>
-
-              <div className="flex gap-[10px] mb-[10px]">
+              <div className="flex gap-[10px] mb-[20px]">
                 <div className="flex-1">
                   <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.first_name_label}</label>
                   <input
@@ -347,14 +347,15 @@ export default function AuthPage() {
               </div>
 
               <div className="mb-[20px]">
-                <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.middle_name_label}</label>
+                <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.location_label}</label>
                 <input
                   type="text"
                   className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[var(--input-bg)] outline-none"
-                  placeholder="Middle name"
-                  value={middleName}
-                  onChange={(e) => setMiddleName(e.target.value)}
+                  placeholder={t.auth.register.location_placeholder}
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                   disabled={isRegistering}
+                  required
                 />
               </div>
 
@@ -439,7 +440,7 @@ export default function AuthPage() {
 
             <div
               className="bg-[#f9f9f9] p-[15px] rounded-[8px] mb-[10px] border border-[#eee] cursor-pointer hover:bg-[#f0f7e6] hover:border-[var(--color-green-offer)] transition-colors"
-              onClick={() => dialog.alert('Community Request', 'This feature is coming soon.')}
+              onClick={() => toast.info('This feature is coming soon.')}
             >
               <span className="font-bold text-[14px] text-[var(--color-nav-bg)] block mb-[4px]">
                 <FaUsers className="inline mr-[5px]" /> {t.auth.no_code_modal.request_community}
@@ -448,7 +449,7 @@ export default function AuthPage() {
 
             <div
               className="bg-[#f9f9f9] p-[15px] rounded-[8px] mb-[10px] border border-[#eee] cursor-pointer hover:bg-[#f0f7e6] hover:border-[var(--color-green-offer)] transition-colors"
-              onClick={() => dialog.alert('Apply for Access', 'This feature is coming soon.')}
+              onClick={() => toast.info('This feature is coming soon.')}
             >
               <span className="font-bold text-[14px] text-[var(--color-nav-bg)] block mb-[4px]">
                 <FaPenNib className="inline mr-[5px]" /> {t.auth.no_code_modal.apply_access}
@@ -459,5 +460,13 @@ export default function AuthPage() {
       )}
 
     </MobileContainer>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense>
+      <AuthForm />
+    </Suspense>
   );
 }

@@ -15,6 +15,10 @@
     .body { padding: 40px; line-height: 1.6; font-size: 18px; }
     h2 { font-size: 20px; margin-top: 0; margin-bottom: 15px; font-weight: 600; }
     .info-box { background-color: #f9f9f9; border-left: 4px solid #1a1a1a; padding: 20px; margin: 20px 0; border-radius: 4px; font-size: 17px; }
+    .steps { background-color: #f9f9f9; padding: 20px; border-radius: 8px; list-style: none; margin: 20px 0; font-size: 17px; }
+    .steps li { margin-bottom: 10px; padding-left: 25px; position: relative; }
+    .steps li::before { content: '→'; position: absolute; left: 0; color: #3D633D; font-weight: bold; }
+    .cta { display: inline-block; padding: 14px 28px; background-color: #3D633D; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 10px 0; font-size: 17px; }
     .footer { padding: 40px; text-align: center; font-size: 13px; color: #ffffff; background-color: #1a1a1a; }
   </style>
 </head>
@@ -27,8 +31,30 @@
     {% if new_status == "VERIFIED" %}
     <div class="status-bar verified-color"></div>
     <div class="body">
-      <h2>High five, {{ user_first_name }}!</h2>
-      <p>Your account is now <strong>fully verified</strong>. You're ready to start connecting and trading within the community!</p>
+      <h2>High five, {{ user_first_name }}! 🎉</h2>
+      <p>Your account is now <strong>fully verified</strong> and active. Welcome to the Regio community!</p>
+
+      <p><strong>What you can do on Regio:</strong></p>
+      <ul class="steps">
+        <li>Browse and post local offers &amp; requests (goods, services, time)</li>
+        <li>Connect and trade with neighbors using Regio credits</li>
+        <li>Build trust in your local community — no money needed</li>
+      </ul>
+
+      {% if how_it_works_video_url %}
+      <p>New to Regio? Watch our short intro to get started:</p>
+      <div style="text-align: center;">
+        <a class="cta" href="{{ how_it_works_video_url }}" style="background-color:#f57c00;">▶ How Regio works</a>
+      </div>
+      {% endif %}
+
+      {% if app_url %}
+      <div style="text-align: center; margin-top: 20px;">
+        <a class="cta" href="{{ app_url }}">Open the App →</a>
+      </div>
+      {% endif %}
+
+      <p style="margin-top: 30px;">If you have any questions, just reply to this email.<br><strong>The Regio Team</strong></p>
     </div>
 
     {% elif new_status == "REJECTED" %}

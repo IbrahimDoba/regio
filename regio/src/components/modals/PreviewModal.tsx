@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FaEnvelope, FaPencil } from "react-icons/fa6";
+import { FaEnvelope, FaPencil, FaCircleUser } from "react-icons/fa6";
 import { ListingPublic } from "@/lib/api/types";
 import { getCategoryDetails, ListingAttributes } from "@/lib/feed-helpers";
 
@@ -213,12 +213,15 @@ export default function PreviewModal({
                   src={`${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar`}
                   className="w-[44px] h-[44px] rounded-full object-cover border-[2px] border-[#e0e0e0] shrink-0"
                   alt=""
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                  }}
                 />
-              ) : (
-                <div className="w-[44px] h-[44px] rounded-full bg-[#eee] flex items-center justify-center text-[#999] font-[700] text-[15px] shrink-0">
-                  {listing.owner_name.substring(0, 2)}
-                </div>
-              )}
+              ) : null}
+              <div className={`w-[44px] h-[44px] flex items-center justify-center text-[#bbb] shrink-0 ${listing.owner_avatar ? "hidden" : ""}`}>
+                <FaCircleUser size={44} />
+              </div>
               <div>
                 <div className="font-[700] text-[#222] text-[15px] leading-tight">{listing.owner_name}</div>
               </div>

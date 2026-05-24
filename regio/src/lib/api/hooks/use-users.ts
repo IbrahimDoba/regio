@@ -121,6 +121,18 @@ export function useUserInvites() {
   });
 }
 
+export function useRequestEmailChange() {
+  return useMutation({
+    mutationFn: (newEmail: string) => usersApi.requestEmailChange(newEmail),
+  });
+}
+
+export function useConfirmEmailChange() {
+  return useMutation({
+    mutationFn: (token: string) => usersApi.confirmEmailChange(token),
+  });
+}
+
 /**
  * Request new invites mutation
  * Voids existing unused invites and generates 3 new ones

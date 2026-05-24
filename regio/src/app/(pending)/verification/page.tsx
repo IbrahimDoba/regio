@@ -102,16 +102,21 @@ export default function VerificationPage() {
 
         {/* Action Box — only for PENDING */}
         {!isVerified && (
-          <div className="bg-[#f0f7e6] border border-[#dcedc8] p-[15px] rounded-[10px] mb-[20px]">
-            <span className="font-[700] text-[var(--color-nav-bg)] text-[13px] mb-[5px] block">{t.verification.next_step}</span>
-            <div className="text-[12px] text-[#555] mb-[15px]">{t.verification.call_notice}</div>
-            <button
-              className="w-full p-[12px] bg-[var(--color-green-offer)] text-white border-none rounded-[6px] text-[14px] font-[700] cursor-pointer flex justify-center items-center gap-[8px] hover:scale-[1.02] transition-transform"
-              onClick={() => window.open('https://cal.regio.is', '_blank')}
-            >
-              <FaVideo /> <span>{t.verification.book_button}</span>
-            </button>
-          </div>
+          <>
+            <div className="bg-[#f0f7e6] border border-[#dcedc8] p-[15px] rounded-[10px] mb-[10px]">
+              <span className="font-[700] text-[var(--color-nav-bg)] text-[13px] mb-[5px] block">{t.verification.next_step}</span>
+              <div className="text-[12px] text-[#555] mb-[15px]">{t.verification.call_notice}</div>
+              <button
+                className="w-full p-[12px] bg-[var(--color-green-offer)] text-white border-none rounded-[6px] text-[14px] font-[700] cursor-pointer flex justify-center items-center gap-[8px] hover:scale-[1.02] transition-transform"
+                onClick={() => window.open('https://cal.regio.is', '_blank')}
+              >
+                <FaVideo /> <span>{t.verification.book_button}</span>
+              </button>
+            </div>
+            <div className="text-[11px] text-[#999] text-center mb-[20px] leading-[1.5]">
+              {t.verification.email_reminder_hint}
+            </div>
+          </>
         )}
 
         {/* Go to App — only for VERIFIED */}

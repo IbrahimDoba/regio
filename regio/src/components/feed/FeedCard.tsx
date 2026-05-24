@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FaLocationDot } from "react-icons/fa6";
+import { FaLocationDot, FaCircleUser } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingPublic } from "@/lib/api/types";
 import { getCategoryDetails, ListingAttributes } from "@/lib/feed-helpers";
@@ -87,27 +87,28 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
             <h3 className="text-[17px] font-[500] leading-[1.3] m-[0_0_8px_0] text-[var(--color-text-main)]">
               {listing.title.length > 70 ? listing.title.slice(0, 70) + '...' : listing.title}
             </h3>
-            <div className="flex justify-end items-end gap-[10px]">
-              <div className="text-right leading-[1.2] pb-0 flex items-baseline justify-end gap-[5px]">
-                <div>
-                  <div className="text-[13px] text-black font-[700] whitespace-nowrap">
-                    {listing.owner_name}
-                  </div>
-                  <div className="text-[11px] text-[#777] whitespace-nowrap">
-                    {listing.d_class ? t.d_class_labels[listing.d_class] ?? listing.d_class : ""}
-                  </div>
+            <div className="flex justify-end items-end gap-[8px]">
+              <div className="text-right leading-[1.2]">
+                <div className="text-[13px] text-black font-[700] whitespace-nowrap">
+                  {listing.owner_name}
                 </div>
-                {listing.owner_avatar ? (
-                  <img
-                    src={`${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar`}
-                    className="w-[40px] h-[40px] rounded-full object-cover border border-[#ccc] block"
-                    alt="User"
-                  />
-                ) : (
-                  <div className="w-[40px] h-[40px] rounded-full bg-[#eee] border border-[#ccc] flex items-center justify-center text-[#999] text-[12px]">
-                    {listing.owner_name.substring(0, 2)}
-                  </div>
-                )}
+                <div className="text-[11px] text-[#777] whitespace-nowrap">
+                  {listing.d_class ? t.d_class_labels[listing.d_class] ?? listing.d_class : ""}
+                </div>
+              </div>
+              {listing.owner_avatar ? (
+                <img
+                  src={`${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar`}
+                  className="w-[40px] h-[40px] rounded-full object-cover border border-[#ccc] block"
+                  alt="User"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                  }}
+                />
+              ) : null}
+              <div className={`w-[40px] h-[40px] flex items-center justify-center text-[#bbb] ${listing.owner_avatar ? "hidden" : ""}`}>
+                <FaCircleUser size={40} />
               </div>
             </div>
           </div>

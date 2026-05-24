@@ -10,14 +10,14 @@
       "error_invalid": "Invalid email or password"
     },
     "register": {
-      "section_title": "Invite Required",
+      "section_title": "Register with your invitation",
       "invite_placeholder": "REGIO-XX-XXXXXXXX",
-      "real_name_notice": "Real name required",
-      "first_name_label": "First Name",
-      "middle_name_label": "Middle Name (optional)",
-      "last_name_label": "Last Name",
-      "email_label": "Email",
-      "password_label": "Create Password",
+      "first_name_label": "First Name *",
+      "last_name_label": "Last Name *",
+      "location_label": "Your Location *",
+      "location_placeholder": "City or ZIP",
+      "email_label": "Email Address *",
+      "password_label": "Create Password *",
       "password_placeholder": "Min. 8 chars",
       "terms_checkbox_prefix": "I agree to ",
       "terms_checkbox_link": "terms and conditions",
@@ -62,6 +62,8 @@
       "hint": "Scroll through or use search or filter with the red button"
     },
     "filter_button": "Filter",
+    "original_lang": "Original",
+    "my_lang": "Translated",
     "loading": "Loading listings...",
     "error_chat_start": "Failed to start chat. Please try again.",
     "error_chat_not_connected": "Chat is not connected yet. Please wait a moment and try again.",
@@ -337,7 +339,7 @@
     "tabs": {
       "personal": "Personal",
       "account": "Account",
-      "trust_invites": "Trust & Invites"
+      "trust_invites": "Invitations"
     },
     "personal_tab": {
       "base_data_section": "Base Data (Fixed)",
@@ -359,6 +361,12 @@
     "account_tab": {
       "login_section": "Login Data",
       "email_label": "Email Address",
+      "change_email_button": "Change",
+      "new_email_label": "New Email Address",
+      "new_email_placeholder": "new@email.com",
+      "change_email_send_button": "Send Confirmation",
+      "change_email_sending": "Sending…",
+      "change_email_hint": "A notification will be sent to your current address and a confirmation link to the new one.",
       "change_password_button": "Change Password",
       "notifications_section": "Notifications",
       "email_digest": "Email Digest",
@@ -371,7 +379,7 @@
       "verification_section": "Verification Status",
       "trust_level": "Trust Level: {value}",
       "member_since": "Member since {date}",
-      "verified_message": "Your identity has been confirmed. This gives you full access to trading and inviting friends.",
+      "verified_message": "Your trust level grows with your activity on regio. The more time you contribute to our exchange circle, the higher your level rises. A higher level expands your leeway in the negative balance – allowing you to exchange flexibly and actively stimulate the cycle.",
       "invites_section": "Invite Friends",
       "manage_invites_button": "Manage Invites",
       "manage_invites_hint": "Click to manage your invites",
@@ -427,6 +435,7 @@
     "next_step": "Next Step",
     "call_notice": "Please schedule a 2-minute call with a moderator to activate your account.",
     "book_button": "Book Appointment",
+    "email_reminder_hint": "We'll also send you a reminder email if you'd like to complete this step later.",
     "data_notice": "Your data is secure and will only be used for verification.",
     "logout_button": "Log Out",
     "go_to_app": "Go to App"

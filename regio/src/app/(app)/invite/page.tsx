@@ -20,11 +20,13 @@ import {
 } from "@/lib/api/hooks/use-users";
 import { useLanguage } from "@/context/LanguageContext";
 import { useDialog } from "@/context/DialogContext";
+import { useToast } from "@/context/ToastContext";
 
 export default function InvitePage() {
   const router = useRouter();
   const { t } = useLanguage();
   const dialog = useDialog();
+  const toast = useToast();
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState(0);
 
@@ -40,7 +42,7 @@ export default function InvitePage() {
     if (ok) {
       requestInvitesMutation.mutate(undefined, {
         onSuccess: () => {
-          dialog.alert("Done", "New invites generated!");
+          toast.success("New invites generated!");
           setSelectedCode(null);
         },
       });
@@ -88,7 +90,7 @@ export default function InvitePage() {
 
   const share = async (platform: string) => {
     if (!selectedCode) {
-      await dialog.alert("Select a Code", "Please select an available invite code first.");
+      toast.info("Please select an available invite code first.");
       return;
     }
     const text = getFinalText();
@@ -102,7 +104,7 @@ export default function InvitePage() {
             .catch(console.error);
         } else {
           navigator.clipboard.writeText(text);
-          dialog.alert("Copied", "Text copied to clipboard");
+          toast.success("Text copied to clipboard");
         }
         break;
       case "whatsapp":
@@ -117,7 +119,7 @@ export default function InvitePage() {
         break;
       case "facebook":
         navigator.clipboard.writeText(selectedCode);
-        dialog.alert("Code Copied", "Code copied! You can paste it in your post.");
+        toast.success("Code copied! You can paste it in your post.");
         window.open(
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
             url
@@ -239,12 +241,13 @@ export default function InvitePage() {
         {templates.map((t, i) => (
           <div
             key={i}
-            className={`bg-white border rounded-[8px] p-[12px] mb-[8px] cursor-pointer text-[13px] text-[#555] leading-[1.4] relative pl-[35px] ${
+            className={`bg-white border rounded-[8px] p-[12px] mb-[8px] cursor-pointer text-[13px] text-[#555] leading-[1.4] relative pl-[35px] select-none ${
               selectedTemplate === i
                 ? "border-[var(--color-green-offer)] bg-[#fcfdf9] text-[#222]"
                 : "border-[#eee]"
             }`}
             onClick={() => setSelectedTemplate(i)}
+            onCopy={(e) => e.preventDefault()}
           >
             <div
               className={`absolute left-[10px] top-[12px] w-[16px] h-[16px] border-[2px] rounded-full ${
@@ -260,9 +263,10 @@ export default function InvitePage() {
         ))}
 
         {/* 3. Share Action */}
-        <div className="bg-white border border-[#e0e0e0] rounded-[12px] p-[20px] mt-[25px] mb-[30px] text-center">
-          <div className="text-[16px] font-[700] mb-[15px]">{t.invite.step3_label}</div>
-
+        <div className="text-[14px] font-[700] text-[#888] uppercase tracking-[0.5px] mb-[10px] mt-[20px]">
+          {t.invite.step3_label}
+        </div>
+        <div className="bg-white border border-[#e0e0e0] rounded-[12px] p-[20px] mb-[30px]">
           <div className="grid grid-cols-2 gap-[10px]">
             <button
               className="col-span-2 p-[14px] rounded-[6px] border-none text-white font-[600] text-[14px] cursor-pointer flex items-center justify-center gap-[8px] bg-[#333]"

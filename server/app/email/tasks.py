@@ -4,8 +4,11 @@ from typing import List
 
 from app.email.config import email_settings
 from app.email.schemas import (
+    BookingReminderEmailData,
     BroadcastDigestEmailData,
     DisputeResolvedEmailData,
+    EmailChangeConfirmData,
+    EmailChangeNotifyData,
     PasswordResetEmailData,
     PaymentRequestRejectedEmailData,
     VerificationEmailData,
@@ -23,6 +26,26 @@ async def send_welcome_email_task(data: VerificationEmailData) -> None:
     except Exception as e:
         logger.error(
             f"Background welcome email failed for {data.user_email}: {e}"
+        )
+
+
+BOOKING_REMINDER_DELAY_SECONDS = 30 * 60  # 30 minutes
+
+
+async def send_booking_reminder_email_task(data: BookingReminderEmailData) -> None:
+    """Background task: send booking reminder 30 minutes after registration.
+
+    Waits silently if the user books before the delay elapses — the email
+    will still send, which is acceptable (it acts as a confirmation then).
+    A proper task-queue solution (Celery + Redis) would allow cancellation,
+    but asyncio.sleep is sufficient for the current architecture.
+    """
+    await asyncio.sleep(BOOKING_REMINDER_DELAY_SECONDS)
+    try:
+        await email_service.send_booking_reminder_email(data)
+    except Exception as e:
+        logger.error(
+            f"Background booking reminder failed for {data.user_email}: {e}"
         )
 
 
@@ -120,3 +143,23 @@ async def send_broadcast_digest_emails_task(
                 chunk_delay,
             )
             await asyncio.sleep(chunk_delay)
+
+
+async def send_email_change_notify_task(data: EmailChangeNotifyData) -> None:
+    """Background task: notify old address that an email change was requested."""
+    try:
+        await email_service.send_email_change_notify_email(data)
+    except Exception as e:
+        logger.error(
+            f"Background email-change notify failed for {data.user_email}: {e}"
+        )
+
+
+async def send_email_change_confirm_task(data: EmailChangeConfirmData) -> None:
+    """Background task: send confirmation link to new address."""
+    try:
+        await email_service.send_email_change_confirm_email(data)
+    except Exception as e:
+        logger.error(
+            f"Background email-change confirm failed for {data.user_email}: {e}"
+        )

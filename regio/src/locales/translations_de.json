@@ -10,14 +10,14 @@
       "error_invalid": "Ungültige E-Mail oder Passwort"
     },
     "register": {
-      "section_title": "Einladung erforderlich",
+      "section_title": "Mit Einladung registrieren",
       "invite_placeholder": "REGIO-XX-XXXXXXXX",
-      "real_name_notice": "Echtname erforderlich",
-      "first_name_label": "Vorname",
-      "middle_name_label": "Zweiter Vorname (optional)",
-      "last_name_label": "Nachname",
-      "email_label": "E-Mail",
-      "password_label": "Passwort erstellen",
+      "first_name_label": "Vorname *",
+      "last_name_label": "Nachname *",
+      "location_label": "Dein Wohnort *",
+      "location_placeholder": "Stadt oder PLZ",
+      "email_label": "E-Mail-Adresse *",
+      "password_label": "Passwort erstellen *",
       "password_placeholder": "Min. 8 Zeichen",
       "terms_checkbox_prefix": "Ich akzeptiere die ",
       "terms_checkbox_link": "Nutzungsbedingungen",
@@ -62,6 +62,8 @@
       "hint": "Scrolle durch oder nutze die Suche/Filter mit dem roten Button"
     },
     "filter_button": "Filter",
+    "original_lang": "Original",
+    "my_lang": "Übersetzt",
     "loading": "Anzeigen werden geladen...",
     "error_chat_start": "Chat konnte nicht gestartet werden. Bitte versuche es erneut.",
     "error_chat_not_connected": "Chat noch nicht verbunden. Bitte kurz warten.",
@@ -337,7 +339,7 @@
     "tabs": {
       "personal": "Persönlich",
       "account": "Konto",
-      "trust_invites": "Vertrauen & Einladungen"
+      "trust_invites": "Einladungen"
     },
     "personal_tab": {
       "base_data_section": "Basisdaten (Fixiert)",
@@ -359,6 +361,12 @@
     "account_tab": {
       "login_section": "Login-Daten",
       "email_label": "E-Mail-Adresse",
+      "change_email_button": "Ändern",
+      "new_email_label": "Neue E-Mail-Adresse",
+      "new_email_placeholder": "neu@email.com",
+      "change_email_send_button": "Bestätigung senden",
+      "change_email_sending": "Wird gesendet…",
+      "change_email_hint": "Eine Benachrichtigung wird an deine aktuelle Adresse gesendet und ein Bestätigungslink an die neue.",
       "change_password_button": "Passwort ändern",
       "notifications_section": "Benachrichtigungen",
       "email_digest": "E-Mail-Zusammenfassung",
@@ -371,7 +379,7 @@
       "verification_section": "Verifizierungs-Status",
       "trust_level": "Vertrauensstufe: {value}",
       "member_since": "Mitglied seit {date}",
-      "verified_message": "Deine Identität wurde bestätigt. Du hast vollen Zugriff auf den Handel und Einladungen.",
+      "verified_message": "Deine Vertrauensstufe wächst mit Deiner Aktivität bei regio. Je mehr Zeit Du in unseren Tauschkreis einbringst, desto höher steigt Dein Level. Ein höheres Level erweitert Deinen Spielraum im Minus – so kannst Du flexibel handeln und den Kreislauf aktiv beleben.",
       "invites_section": "Freunde einladen",
       "manage_invites_button": "Einladungen verwalten",
       "manage_invites_hint": "Hier klicken, um deine Einladungen zu verwalten",
@@ -427,6 +435,7 @@
     "next_step": "Nächster Schritt",
     "call_notice": "Bitte vereinbare einen 2-minütigen Termin mit einem Moderator, um dein Konto freizuschalten.",
     "book_button": "Termin buchen",
+    "email_reminder_hint": "Wir senden dir auch eine Erinnerungs-E-Mail, falls du diesen Schritt später machen möchtest.",
     "data_notice": "Deine Daten sind sicher und werden nur für die Verifizierung verwendet.",
     "logout_button": "Abmelden",
     "go_to_app": "Zur App"

@@ -1,11 +1,15 @@
+import secrets
 import uuid
 from datetime import datetime, timezone
 from typing import List, Optional
+from urllib.parse import urlparse
 
 from fastapi import UploadFile
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import func, or_, select
 
+from app.auth.config import auth_settings
 from app.auth.security import get_password_hash
 from app.auth.service import AuthService
 from app.banking.service import BankingService
@@ -36,6 +40,11 @@ _MAX_AVATAR_BYTES = 5 * 1024 * 1024  # 5 MB
 class UserService:
     def __init__(self, session: AsyncSession):
         self.session = session
+        self.redis = Redis.from_url(
+            settings.REDIS_URL,
+            ssl=urlparse(settings.REDIS_URL).scheme == "rediss",
+            decode_responses=True,
+        )
 
     async def get_users(self, skip: int = 0, limit: int = 100) -> UsersPublic:
         # Get total number of rows in table
@@ -298,3 +307,57 @@ class UserService:
         await self.session.commit()
         await self.session.refresh(db_user)
         return db_user
+
+    async def request_email_change(
+        self, user_id: uuid.UUID, new_email: str
+    ) -> tuple[str, str, str, str]:
+        """
+        Initiate an email address change.
+
+        Stores a Redis token mapping to (user_id|new_email) for 24 h and
+        returns (first_name, old_email, new_email, confirm_url).
+        """
+        result = await self.session.execute(
+            select(User).where(User.id == user_id)
+        )
+        user = result.scalar_one_or_none()
+        if not user:
+            raise UserNotFound()
+
+        existing = await self.session.execute(
+            select(User).where(User.email == new_email)
+        )
+        if existing.scalar_one_or_none():
+            raise UserAlreadyExists()
+
+        token = secrets.token_urlsafe(32)
+        ttl = auth_settings.EMAIL_CHANGE_TOKEN_EXPIRE_HOURS * 3600
+        await self.redis.setex(
+            f"email_change:{token}", ttl, f"{user.id}|{new_email}"
+        )
+
+        confirm_url = f"{auth_settings.EMAIL_CHANGE_CONFIRM_URL}?token={token}"
+        return user.first_name, user.email, new_email, confirm_url
+
+    async def confirm_email_change(self, token: str) -> None:
+        """
+        Apply the pending email change identified by *token*.
+
+        Raises ValueError if the token is missing or expired.
+        """
+        raw = await self.redis.get(f"email_change:{token}")
+        if not raw:
+            raise ValueError("Invalid or expired confirmation token.")
+
+        user_id_str, new_email = raw.split("|", 1)
+        result = await self.session.execute(
+            select(User).where(User.id == uuid.UUID(user_id_str))
+        )
+        user = result.scalar_one_or_none()
+        if not user:
+            raise UserNotFound()
+
+        user.email = new_email
+        self.session.add(user)
+        await self.session.commit()
+        await self.redis.delete(f"email_change:{token}")

@@ -35,6 +35,8 @@ export const API_ENDPOINTS = {
     AVATAR_UPLOAD: '/users/me/avatar',
     INVITES: '/users/invites',
     REQUEST_INVITES: '/users/invites/request',
+    REQUEST_EMAIL_CHANGE: '/users/me/request-email-change',
+    CONFIRM_EMAIL_CHANGE: '/users/me/confirm-email-change',
   },
 
   // ============================================================================

@@ -343,26 +343,36 @@ export default function ChatPage() {
                   key={room.roomId}
                   className="flex items-center gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors"
                   onClick={() => {
-                    const params = new URLSearchParams({ room: room.roomId, name: room.name });
+                    const listingLabel = room.name.replace(/\s*—\s*(inquiry|Inquiry)/g, "").trim();
+                    const params = new URLSearchParams({
+                      room: room.roomId,
+                      name: room.partnerName || room.name,
+                      listing: listingLabel,
+                    });
                     router.push(`/chat?${params.toString()}`);
                   }}
                 >
                   {/* Avatar */}
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                     <span className="text-green-700 font-semibold text-lg">
-                      {room.name.charAt(0).toUpperCase()}
+                      {(room.partnerName || room.name).charAt(0).toUpperCase()}
                     </span>
                   </div>
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline">
-                      <span className="font-semibold text-sm text-gray-900 truncate">{room.name}</span>
+                      <span className="font-semibold text-sm text-gray-900 truncate">
+                        {room.partnerName || room.name}
+                      </span>
                       {room.lastTs && (
                         <span className="text-xs text-gray-400 shrink-0 ml-2">
                           {new Date(room.lastTs).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       )}
                     </div>
+                    <p className="text-[10px] text-gray-400 truncate">
+                      {room.name.replace(/\s*—\s*(inquiry|Inquiry)/g, "").trim()}
+                    </p>
                     <p className="text-xs text-gray-500 truncate mt-0.5">
                       {room.lastMessage || "No messages yet"}
                     </p>

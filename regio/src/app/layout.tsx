@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { RealTimeProvider } from "@/context/RealTimeContext";
 import { QueryProvider } from "@/lib/api/query-provider";
 import { DialogProvider } from "@/context/DialogContext";
+import { ToastProvider } from "@/context/ToastContext";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -43,7 +44,9 @@ export default function RootLayout({
             <RealTimeProvider>
               <LanguageProvider>
                 <DialogProvider>
-                  {children}
+                  <ToastProvider>
+                    {children}
+                  </ToastProvider>
                 </DialogProvider>
               </LanguageProvider>
             </RealTimeProvider>

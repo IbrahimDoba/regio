@@ -15,8 +15,11 @@ from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 from app.email.config import email_settings
 from app.email.exceptions import EmailSendFailed, EmailTemplateNotFound
 from app.email.schemas import (
+    BookingReminderEmailData,
     BroadcastDigestEmailData,
     DisputeResolvedEmailData,
+    EmailChangeConfirmData,
+    EmailChangeNotifyData,
     EmailMessage,
     PasswordResetEmailData,
     PaymentEnforcedEmailData,
@@ -282,6 +285,45 @@ class EmailService:
         message = EmailMessage(
             to=data.user_email,
             subject="Reset Your Regio Password",
+            html_body=html,
+            inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_email_change_notify_email(
+        self, data: EmailChangeNotifyData
+    ) -> None:
+        """Notify the OLD address that an email change has been requested."""
+        html = self._render_template("email_change_notify.html", data.model_dump())
+        message = EmailMessage(
+            to=data.user_email,
+            subject="Your Regio email address is being changed",
+            html_body=html,
+            inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_email_change_confirm_email(
+        self, data: EmailChangeConfirmData
+    ) -> None:
+        """Send confirmation link to the NEW address."""
+        html = self._render_template("email_change_confirm.html", data.model_dump())
+        message = EmailMessage(
+            to=data.user_email,
+            subject="Confirm your new Regio email address",
+            html_body=html,
+            inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_booking_reminder_email(
+        self, data: BookingReminderEmailData
+    ) -> None:
+        """Send a reminder to book the verification call (30 min after registration)."""
+        html = self._render_template("booking_reminder.html", data.model_dump())
+        message = EmailMessage(
+            to=data.user_email,
+            subject="Don't forget — Book your Regio verification call",
             html_body=html,
             inline_images={"logo": self._logo_m},
         )

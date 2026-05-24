@@ -130,6 +130,22 @@ export const requestNewInvites = async (): Promise<InvitePublic[]> => {
 // Export
 // ============================================================================
 
+export const requestEmailChange = async (newEmail: string): Promise<{ message: string }> => {
+  const response = await apiClient.post<{ message: string }>(
+    API_ENDPOINTS.USERS.REQUEST_EMAIL_CHANGE,
+    { new_email: newEmail }
+  );
+  return response.data;
+};
+
+export const confirmEmailChange = async (token: string): Promise<{ message: string }> => {
+  const response = await apiClient.post<{ message: string }>(
+    API_ENDPOINTS.USERS.CONFIRM_EMAIL_CHANGE,
+    { token }
+  );
+  return response.data;
+};
+
 export const usersApi = {
   getCurrentUser,
   getUserByCode,
@@ -140,4 +156,6 @@ export const usersApi = {
   uploadAvatar,
   getUserInvites,
   requestNewInvites,
+  requestEmailChange,
+  confirmEmailChange,
 } as const;

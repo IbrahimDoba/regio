@@ -8,17 +8,20 @@ import {
   FaShieldHalved,
   FaRegCopy,
   FaFloppyDisk,
-  FaVideo,
-  FaChevronRight,
   FaSpinner,
+  FaTicket,
 } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useDialog } from "@/context/DialogContext";
+import { useToast } from "@/context/ToastContext";
 import {
   useMe,
   useUpdateUser,
   useUploadAvatar,
+  useUserInvites,
+  useRequestNewInvites,
+  useRequestEmailChange,
 } from "@/lib/api/hooks/use-users";
 import { useRequestPasswordReset } from "@/lib/api";
 import { API_CONFIG } from "@/lib/api/config";
@@ -26,6 +29,7 @@ import { API_CONFIG } from "@/lib/api/config";
 export default function ProfilePage() {
   const { language, setLanguage, t } = useLanguage();
   const dialog = useDialog();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState<"personal" | "account" | "trust">(
     "personal"
   );
@@ -36,6 +40,11 @@ export default function ProfilePage() {
   const updateUser = useUpdateUser();
   const uploadAvatar = useUploadAvatar();
   const requestResetMutation = useRequestPasswordReset();
+  const { data: invites } = useUserInvites();
+  const requestNewInvites = useRequestNewInvites();
+  const requestEmailChange = useRequestEmailChange();
+  const [newEmail, setNewEmail] = useState("");
+  const [showEmailChange, setShowEmailChange] = useState(false);
   const [passwordResetSent, setPasswordResetSent] = useState(false);
   const [passwordResetError, setPasswordResetError] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -92,8 +101,24 @@ export default function ProfilePage() {
     try {
       await requestResetMutation.mutateAsync(user!.email);
       setPasswordResetSent(true);
+      toast.success("Reset link sent! Check your inbox.");
     } catch {
-      setPasswordResetError("Failed to send reset email. Please try again.");
+      const msg = "Failed to send reset email. Please try again.";
+      setPasswordResetError(msg);
+      toast.error(msg);
+    }
+  };
+
+  const handleRequestEmailChange = async () => {
+    if (!newEmail.trim()) return;
+    try {
+      await requestEmailChange.mutateAsync(newEmail.trim().toLowerCase());
+      toast.success("Confirmation emails sent! Check your new inbox.");
+      setShowEmailChange(false);
+      setNewEmail("");
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { detail?: string } } };
+      toast.error(e?.response?.data?.detail || "Failed to request email change.");
     }
   };
 
@@ -105,7 +130,7 @@ export default function ProfilePage() {
       },
       {
         onSuccess: () => {
-          dialog.alert("Profile", "Profile updated!");
+          toast.success("Profile updated!");
         },
       }
     );
@@ -148,7 +173,7 @@ export default function ProfilePage() {
               const file = e.target.files?.[0];
               if (!file) return;
               if (file.size > 5 * 1024 * 1024) {
-                dialog.alert("File Too Large", "Image must be smaller than 5 MB.");
+                toast.error("Image must be smaller than 5 MB.");
                 e.target.value = "";
                 return;
               }
@@ -195,7 +220,7 @@ export default function ProfilePage() {
             className="text-[var(--turquoise)] cursor-pointer text-[14px]"
             onClick={() => {
               navigator.clipboard.writeText(user.user_code);
-              dialog.alert("Copied", "ID copied!");
+              toast.success("ID copied!");
             }}
           />
         </div>
@@ -328,19 +353,78 @@ export default function ProfilePage() {
 
         {activeTab === "account" && (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+            {/* Trust Level Section */}
             <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[10px] border-b border-[#eee] pb-[5px]">
+              {t.profile.trust_tab.verification_section}
+            </div>
+            <div className="bg-white p-[15px] rounded-[8px] border border-[#eee] mb-[30px]">
+              <div className="flex gap-[10px] items-center mb-[10px]">
+                <FaShieldHalved className="text-[var(--color-green-offer)] text-[20px] shrink-0" />
+                <div>
+                  <div className="font-bold text-[14px]">
+                    {t.profile.trust_tab.trust_level.replace('{value}', String(user.trust_level))}
+                  </div>
+                  <div className="text-[12px] text-[#888]">
+                    {t.profile.trust_tab.member_since.replace('{date}', new Date(user.created_at).toLocaleDateString())}
+                  </div>
+                </div>
+              </div>
+              <div className="text-[12px] text-[#555] leading-[1.6]">
+                {t.profile.trust_tab.verified_message}
+              </div>
+            </div>
+
+            <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] border-b border-[#eee] pb-[5px]">
               {t.profile.account_tab.login_section}
             </div>
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
                 {t.profile.account_tab.email_label}
               </label>
-              <input
-                type="email"
-                className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
-                defaultValue={user.email}
-                readOnly
-              />
+              <div className="flex gap-[8px]">
+                <input
+                  type="email"
+                  className="flex-1 p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[#eee] text-[#777] cursor-not-allowed outline-none"
+                  value={user.email}
+                  readOnly
+                />
+                <button
+                  className="px-[12px] py-[10px] bg-white border border-[#ccc] rounded-[6px] text-[12px] font-bold text-[#555] cursor-pointer hover:border-[var(--color-green-offer)] hover:text-[var(--color-green-offer)] transition-colors whitespace-nowrap"
+                  onClick={() => setShowEmailChange((v) => !v)}
+                >
+                  {t.profile.account_tab.change_email_button}
+                </button>
+              </div>
+
+              {showEmailChange && (
+                <div className="mt-[10px] p-[12px] bg-[#f9f9f9] rounded-[6px] border border-[#eee]">
+                  <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
+                    {t.profile.account_tab.new_email_label}
+                  </label>
+                  <input
+                    type="email"
+                    className="w-full p-[10px] border border-[#ddd] rounded-[6px] text-[14px] bg-white focus:border-[var(--color-green-offer)] outline-none mb-[8px]"
+                    placeholder={t.profile.account_tab.new_email_placeholder}
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    disabled={requestEmailChange.isPending}
+                  />
+                  <button
+                    className="w-full p-[10px] bg-[var(--color-green-offer)] text-white border-none rounded-[6px] text-[13px] font-bold cursor-pointer flex justify-center items-center gap-[8px] disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleRequestEmailChange}
+                    disabled={requestEmailChange.isPending || !newEmail.trim()}
+                  >
+                    {requestEmailChange.isPending ? (
+                      <><FaSpinner className="animate-spin" /> {t.profile.account_tab.change_email_sending}</>
+                    ) : (
+                      t.profile.account_tab.change_email_send_button
+                    )}
+                  </button>
+                  <p className="text-[11px] text-[#888] mt-[8px] leading-[1.5]">
+                    {t.profile.account_tab.change_email_hint}
+                  </p>
+                </div>
+              )}
             </div>
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
@@ -375,38 +459,6 @@ export default function ProfilePage() {
               )}
             </div>
 
-            <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[30px] border-b border-[#eee] pb-[5px]">
-              {t.profile.account_tab.notifications_section}
-            </div>
-
-            {[t.profile.account_tab.email_digest, t.profile.account_tab.instant_push, t.profile.account_tab.newsletter].map((label, i) => (
-              <div
-                key={i}
-                className="flex justify-between items-center mb-[15px] py-[10px] border-b border-[#f5f5f5]"
-              >
-                <div>
-                  <span className="text-[14px] font-[600] text-[#333] block">
-                    {label}
-                  </span>
-                  <span className="text-[11px] text-[#888] block mt-[2px]">
-                    Description for {label}
-                  </span>
-                </div>
-                <label className="relative inline-block w-[46px] h-[24px]">
-                  <input
-                    type="checkbox"
-                    defaultChecked={i < 2}
-                    className="opacity-0 w-0 h-0 peer"
-                  />
-                  <span className="absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-[#ccc] transition-[.4s] rounded-[24px] peer-checked:bg-[var(--color-green-offer)] before:absolute before:content-[''] before:h-[18px] before:w-[18px] before:left-[3px] before:bottom-[3px] before:bg-white before:transition-[.4s] before:rounded-full peer-checked:before:translate-x-[22px]"></span>
-                </label>
-              </div>
-            ))}
-
-            <button className="w-full p-[14px] bg-[var(--color-green-offer)] text-white border-none rounded-[6px] text-[14px] font-bold cursor-pointer mt-[10px] flex justify-center items-center gap-[8px]">
-              <FaFloppyDisk /> {t.profile.account_tab.save_button}
-            </button>
-
             <div className="mt-[40px] text-center">
               <button
                 className="bg-none border-none text-[#d32f2f] font-bold cursor-pointer"
@@ -421,46 +473,64 @@ export default function ProfilePage() {
         {activeTab === "trust" && (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[10px] border-b border-[#eee] pb-[5px]">
-              {t.profile.trust_tab.verification_section}
-            </div>
-            <div
-              className="bg-white p-[15px] rounded-[8px] border border-[#eee] mb-[20px] cursor-pointer"
-              onClick={() => (window.location.href = "/verification")}
-            >
-              <div className="flex gap-[10px] items-center mb-[10px]">
-                <FaVideo className="text-[var(--color-green-offer)] text-[20px]" />
-                <div>
-                  <div className="font-bold">
-                    {t.profile.trust_tab.trust_level.replace('{value}', String(user.trust_level))}
-                  </div>
-                  <div className="text-[12px] text-[#888]">
-                    {t.profile.trust_tab.member_since.replace('{date}', new Date(user.created_at).toLocaleDateString())}
-                  </div>
-                </div>
-              </div>
-              <div className="text-[12px] text-[#555] leading-[1.4]">
-                {t.profile.trust_tab.verified_message}
-              </div>
-            </div>
-
-            <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[10px] border-b border-[#eee] pb-[5px]">
               {t.profile.trust_tab.invites_section}
             </div>
-            <div
-              className="bg-[#f0f7e6] border border-[#dcedc8] rounded-[8px] p-[15px] flex justify-between items-center cursor-pointer"
-              onClick={() => router.push("/invite")}
-            >
-              <div>
-                <div className="font-bold text-[var(--color-nav-bg)]">
-                  {t.profile.trust_tab.manage_invites_button}
-                </div>
-                <div className="text-[12px] text-[#666]">
-                  {t.profile.trust_tab.manage_invites_hint}
-                </div>
+
+            {/* Invite codes — shown directly */}
+            {!invites || invites.length === 0 ? (
+              <div className="text-[13px] text-[#888] text-center py-[20px]">
+                {t.invite.no_codes}
               </div>
-              <FaChevronRight className="text-[#ccc]" />
-            </div>
-            <div className="mt-[10px] text-[11px] text-[#888] text-center">
+            ) : (
+              <div className="flex flex-col gap-[8px] mb-[20px]">
+                {invites.map((invite) => {
+                  const isActive = !invite.is_used && (!invite.expires_at || new Date(invite.expires_at) > new Date());
+                  return (
+                    <div
+                      key={invite.code}
+                      className={`bg-white rounded-[8px] border p-[12px_15px] flex items-center gap-[10px] ${isActive ? "border-[#dcedc8]" : "border-[#eee] opacity-60"}`}
+                    >
+                      <FaTicket className={`text-[18px] shrink-0 ${isActive ? "text-[var(--color-green-offer)]" : "text-[#bbb]"}`} />
+                      <span className="font-mono text-[13px] font-bold text-[#333] tracking-[1px] flex-1">
+                        {invite.code}
+                      </span>
+                      <span className={`text-[11px] font-bold px-[8px] py-[2px] rounded-full ${isActive ? "bg-[#e8f5e9] text-[var(--color-green-offer)]" : "bg-[#f5f5f5] text-[#999]"}`}>
+                        {isActive ? t.invite.code_available : t.invite.code_used}
+                      </span>
+                      {isActive && (
+                        <button
+                          onClick={() => { navigator.clipboard.writeText(invite.code); toast.success("Code copied!"); }}
+                          className="text-[#aaa] hover:text-[var(--color-green-offer)] transition-colors"
+                        >
+                          <FaRegCopy size={15} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Request new invites */}
+            <button
+              className="w-full p-[12px] bg-white border border-[#ccc] rounded-[6px] cursor-pointer text-[13px] font-bold flex justify-center items-center gap-[8px] disabled:opacity-50 disabled:cursor-not-allowed hover:border-[var(--color-green-offer)] hover:text-[var(--color-green-offer)] transition-colors"
+              onClick={async () => {
+                const ok = await dialog.confirm(t.invite.request_button, t.invite.why_invite_body);
+                if (!ok) return;
+                requestNewInvites.mutate(undefined, {
+                  onSuccess: () => toast.success("New invites generated!"),
+                });
+              }}
+              disabled={requestNewInvites.isPending}
+            >
+              {requestNewInvites.isPending ? (
+                <><FaSpinner className="animate-spin" /> {t.invite.request_loading}</>
+              ) : (
+                <><FaTicket /> {t.invite.request_button}</>
+              )}
+            </button>
+
+            <div className="mt-[12px] text-[11px] text-[#888] text-center leading-[1.5]">
               {t.profile.trust_tab.invites_reputation_hint}
             </div>
           </div>

@@ -29,6 +29,16 @@ class VerificationStatusEmailData(BaseModel):
     user_email: EmailStr
     new_status: str
     reason: Optional[str] = None
+    app_url: Optional[str] = None
+    how_it_works_video_url: Optional[str] = None
+
+
+class BookingReminderEmailData(BaseModel):
+    """Data for the 30-minute booking reminder email."""
+
+    user_first_name: str
+    user_email: EmailStr
+    calendly_url: str
 
 
 class BroadcastDigestEmailData(BaseModel):
@@ -95,3 +105,19 @@ class PasswordResetEmailData(BaseModel):
     user_first_name: str
     user_email: EmailStr
     reset_url: str
+
+
+class EmailChangeNotifyData(BaseModel):
+    """Notification sent to the OLD email address when a change is requested."""
+
+    user_first_name: str
+    user_email: EmailStr  # old address — this is where the email is sent
+    new_email: str
+
+
+class EmailChangeConfirmData(BaseModel):
+    """Confirmation link sent to the NEW email address."""
+
+    user_first_name: str
+    user_email: EmailStr  # new address — this is where the email is sent
+    confirm_url: str

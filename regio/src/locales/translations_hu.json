@@ -10,14 +10,14 @@
       "error_invalid": "Érvénytelen e-mail vagy jelszó"
     },
     "register": {
-      "section_title": "Meghívó szükséges",
+      "section_title": "Regisztrálj a meghívóddal",
       "invite_placeholder": "REGIO-XX-XXXXXXXX",
-      "real_name_notice": "Valódi név megadása kötelező",
-      "first_name_label": "Keresztnév",
-      "middle_name_label": "Középső név (opcionális)",
-      "last_name_label": "Vezetéknév",
-      "email_label": "E-mail",
-      "password_label": "Jelszó létrehozása",
+      "first_name_label": "Keresztnév *",
+      "last_name_label": "Vezetéknév *",
+      "location_label": "Lakóhelyed *",
+      "location_placeholder": "Város vagy irányítószám",
+      "email_label": "E-mail-cím *",
+      "password_label": "Jelszó létrehozása *",
       "password_placeholder": "Min. 8 karakter",
       "terms_checkbox_prefix": "Elfogadom a ",
       "terms_checkbox_link": "felhasználási feltételeket",
@@ -62,6 +62,8 @@
       "hint": "Böngéssz a listában, vagy használd a keresőt és a szűrőt a piros gombbal"
     },
     "filter_button": "Szűrő",
+    "original_lang": "Eredeti",
+    "my_lang": "Fordítva",
     "loading": "Hirdetések betöltése...",
     "error_chat_start": "Nem sikerült elindítani a chatet. Próbáld újra.",
     "error_chat_not_connected": "A chat még nem csatlakozott. Várj egy pillanatot.",
@@ -337,7 +339,7 @@
     "tabs": {
       "personal": "Személyes",
       "account": "Fiók",
-      "trust_invites": "Bizalom és Meghívók"
+      "trust_invites": "Meghívók"
     },
     "personal_tab": {
       "base_data_section": "Alapadatok (Fix)",
@@ -359,6 +361,12 @@
     "account_tab": {
       "login_section": "Belépési adatok",
       "email_label": "E-mail cím",
+      "change_email_button": "Módosítás",
+      "new_email_label": "Új e-mail cím",
+      "new_email_placeholder": "uj@email.com",
+      "change_email_send_button": "Megerősítés küldése",
+      "change_email_sending": "Küldés…",
+      "change_email_hint": "Értesítést küldünk a jelenlegi címedre és egy megerősítő linket az újra.",
       "change_password_button": "Jelszó módosítása",
       "notifications_section": "Értesítések",
       "email_digest": "E-mail összefoglaló",
@@ -371,7 +379,7 @@
       "verification_section": "Ellenőrzési állapot",
       "trust_level": "Bizalmi szint: {value}",
       "member_since": "Tag ezóta: {date}",
-      "verified_message": "Személyazonosságod megerősítve. Teljes hozzáférésed van a cserekereskedelemhez és a meghívókhoz.",
+      "verified_message": "A bizalmi szinted a regio-s aktivitásoddal együtt nő. Minél több időt adsz bele a cserekörünkbe, annál magasabbra emelkedik a szinted. A magasabb szint bővíti a mozgásteredet a mínuszban – így rugalmasan cserélhetsz, és aktívan élénkítheted a körforgást.",
       "invites_section": "Barátok meghívása",
       "manage_invites_button": "Meghívók kezelése",
       "manage_invites_hint": "Kattints ide a meghívóid kezeléséhez",
@@ -427,6 +435,7 @@
     "next_step": "Következő lépés",
     "call_notice": "Kérünk, foglalj időpontot egy 2 perces hívásra egy moderátorral a fiókod aktiválásához.",
     "book_button": "Időpontfoglalás",
+    "email_reminder_hint": "Emlékeztető e-mailt is küldünk, ha ezt a lépést később szeretnéd elvégezni.",
     "data_notice": "Adataid biztonságban vannak, csak az ellenőrzéshez használjuk őket.",
     "logout_button": "Kijelentkezés",
     "go_to_app": "Ugrás az alkalmazásba"

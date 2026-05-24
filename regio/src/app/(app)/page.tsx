@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FaPlus } from "react-icons/fa6";
+import { FaPlus, FaGlobe } from "react-icons/fa6";
 import Header from "@/components/layout/Header";
 import FilterPanel from "@/components/feed/FilterPanel";
 import FeedList from "@/components/feed/FeedList";
@@ -17,6 +17,7 @@ import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
 import { ListingAttributes } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
 import { useDialog } from "@/context/DialogContext";
+import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { API_CONFIG } from "@/lib/api/config";
 
@@ -45,11 +46,13 @@ export default function FeedPage() {
     max_distance_km?: number | null;
   }>({});
 
+  const [showOriginal, setShowOriginal] = useState(false);
   const [previewListing, setPreviewListing] = useState<ListingPublic | null>(null);
   const [editListing, setEditListing] = useState<ListingPublic | null>(null);
 
   const { t } = useLanguage();
   const dialog = useDialog();
+  const toast = useToast();
   const { isConnected: isChatConnected, createListingRoom } = useRealTime();
   const { mutateAsync: createListingInquiry } = useCreateListingInquiry();
   const [isContacting, setIsContacting] = useState(false);
@@ -97,10 +100,7 @@ export default function FeedPage() {
       router.push(`/chat?${params.toString()}`);
     } catch (error) {
       console.error("Failed to start chat:", error);
-      dialog.alert(
-        "Chat Error",
-        isChatConnected ? t.feed.error_chat_start : t.feed.error_chat_not_connected
-      );
+      toast.error(isChatConnected ? t.feed.error_chat_start : t.feed.error_chat_not_connected);
     } finally {
       setIsContacting(false);
     }
@@ -120,7 +120,7 @@ export default function FeedPage() {
   const addTag = (tag: string) => setStagedTags((prev) => [...prev, tag]);
   const removeTag = (tag: string) => setStagedTags((prev) => prev.filter((t) => t !== tag));
 
-  const { data, isLoading } = useFeed(committedFilters);
+  const { data, isLoading } = useFeed(committedFilters, showOriginal);
   const listings = data?.pages.flatMap((page) => page.data) || [];
 
   const toggleFilter = (category: ListingCategory) => {
@@ -138,6 +138,8 @@ export default function FeedPage() {
         toggleFilter={() => setIsFilterOpen(!isFilterOpen)}
         count={listings.length}
         total={listings.length}
+        showOriginal={showOriginal}
+        onToggleOriginal={() => setShowOriginal((v) => !v)}
       >
         <FilterPanel
           isOpen={isFilterOpen}

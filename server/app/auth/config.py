@@ -12,5 +12,9 @@ class AuthConfig(RegioBaseSettings):
     PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 30
     PASSWORD_RESET_BASE_URL: str = "http://localhost:3000/reset-password"
 
+    # Email change confirmation
+    EMAIL_CHANGE_TOKEN_EXPIRE_HOURS: int = 24
+    EMAIL_CHANGE_CONFIRM_URL: str = "http://localhost:3000/confirm-email"
+
 
 auth_settings = AuthConfig()

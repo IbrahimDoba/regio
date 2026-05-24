@@ -35,9 +35,9 @@ function toApiLang(lang: string): string {
  * Automatically includes the user's current language so the backend returns
  * localised titles and descriptions.
  */
-export function useFeed(params?: Omit<FeedParams, "lang">) {
+export function useFeed(params?: Omit<FeedParams, "lang">, showOriginal = false) {
   const { language } = useLanguage();
-  const lang = toApiLang(language);
+  const lang = showOriginal ? "original" : toApiLang(language);
   const paramsWithLang: FeedParams = { ...params, lang };
 
   return useInfiniteQuery({

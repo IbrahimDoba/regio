@@ -15,8 +15,18 @@ from app.auth.dependencies import AuthServiceDep
 from app.auth.schemas import InvitePublic
 from app.core.file_storage import StorageServiceDep
 from app.email.config import email_settings
-from app.email.schemas import VerificationEmailData
-from app.email.tasks import send_welcome_email_task
+from app.email.schemas import (
+    BookingReminderEmailData,
+    EmailChangeConfirmData,
+    EmailChangeNotifyData,
+    VerificationEmailData,
+)
+from app.email.tasks import (
+    send_booking_reminder_email_task,
+    send_email_change_confirm_task,
+    send_email_change_notify_task,
+    send_welcome_email_task,
+)
 from app.users.config import user_settings
 from app.users.dependencies import (
     CurrentAdmin,
@@ -24,7 +34,7 @@ from app.users.dependencies import (
     CurrentUserAnyStatus,
     UserServiceDep,
 )
-from app.users.exceptions import InvalidAvatarFile, UserNotFound
+from app.users.exceptions import InvalidAvatarFile, UserAlreadyExists, UserNotFound
 from app.users.schemas import UserCreate, UserPublic, UsersPublic, UserUpdate
 
 router = APIRouter()
@@ -118,9 +128,16 @@ async def register_user(
 
     # Only send emails on successful registrations
     if db_user:
+        email_data = VerificationEmailData(
+            user_first_name=db_user.first_name,
+            user_email=db_user.email,
+            calendly_url=email_settings.CALENDLY_URL,
+        )
+        background_tasks.add_task(send_welcome_email_task, email_data)
+        # Schedule a reminder if the user hasn't booked after 30 minutes
         background_tasks.add_task(
-            send_welcome_email_task,
-            VerificationEmailData(
+            send_booking_reminder_email_task,
+            BookingReminderEmailData(
                 user_first_name=db_user.first_name,
                 user_email=db_user.email,
                 calendly_url=email_settings.CALENDLY_URL,
@@ -304,3 +321,89 @@ async def read_user_by_code(
     if not user:
         raise UserNotFound()
     return user
+
+
+@router.post(
+    "/me/request-email-change",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+)
+async def request_email_change(
+    body: dict,
+    current_user: CurrentUser,
+    service: UserServiceDep,
+    background_tasks: BackgroundTasks,
+) -> Any:
+    """
+    Request an email address change.
+
+    Sends a notification to the old address and a confirmation link to the new one.
+    """
+    new_email = body.get("new_email", "").strip().lower()
+    if not new_email:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="new_email is required.",
+        )
+
+    try:
+        first_name, old_email, new_email, confirm_url = (
+            await service.request_email_change(current_user.id, new_email)
+        )
+    except UserAlreadyExists:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This email address is already in use.",
+        )
+
+    background_tasks.add_task(
+        send_email_change_notify_task,
+        EmailChangeNotifyData(
+            user_first_name=first_name,
+            user_email=old_email,
+            new_email=new_email,
+        ),
+    )
+    background_tasks.add_task(
+        send_email_change_confirm_task,
+        EmailChangeConfirmData(
+            user_first_name=first_name,
+            user_email=new_email,
+            confirm_url=confirm_url,
+        ),
+    )
+
+    return {"message": "Confirmation emails sent. Please check your new inbox."}
+
+
+@router.post(
+    "/me/confirm-email-change",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+)
+async def confirm_email_change(
+    body: dict,
+    service: UserServiceDep,
+) -> Any:
+    """
+    Confirm an email address change using the token from the confirmation email.
+
+    This endpoint is intentionally public (no auth required) so that the user
+    can confirm from any device by simply clicking the link.
+    """
+    token = body.get("token", "").strip()
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="token is required.",
+        )
+
+    try:
+        await service.confirm_email_change(token)
+    except (ValueError, UserNotFound) as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e) if isinstance(e, ValueError) else "Invalid or expired confirmation token.",
+        )
+
+    return {"message": "Email address updated successfully."}

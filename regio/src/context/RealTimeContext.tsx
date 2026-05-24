@@ -44,7 +44,8 @@ export interface ReadReceipt {
 
 export interface ChatRoomSummary {
   roomId: string;
-  name: string;
+  name: string;          // Matrix room name (= "ListingTitle — inquiry")
+  partnerName: string;   // Human name of the chat partner
   partnerCode: string;
   lastMessage?: string;
   lastTs?: number;
@@ -317,6 +318,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
         return {
           roomId: room.roomId as string,
           name: (room.name as string) || meta?.partnerName || room.roomId,
+          partnerName: meta?.partnerName || (room.name as string) || "",
           partnerCode: meta?.partnerCode || "",
           lastMessage: lastMsgEvent
             ? (lastMsgEvent.getContent()?.body as string)
