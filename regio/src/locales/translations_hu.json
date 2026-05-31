@@ -126,8 +126,8 @@
       "ends": "Vége",
       "location": "Helyszín",
       "max_participants": "Max. résztvevő",
-      "entry_fee_time": "Belépő (Idő)",
-      "material_fee_garas": "Anyagköltség (Garas)",
+      "entry_fee_time": "Idő",
+      "material_fee_garas": "Garázs",
       "deadline": "Határidő",
       "needed_by": "Szükséges eddig",
       "price_notes": "Ár részletei"
@@ -138,6 +138,15 @@
     "category_label": "Kategória",
     "title_label": "Cím",
     "title_placeholder": "Mit kínálsz vagy mit keresel?",
+    "title_placeholders": {
+      "OFFER_SERVICE": "Milyen szolgáltatást kínálsz?",
+      "SEARCH_SERVICE": "Milyen szolgáltatást keresel?",
+      "SELL_PRODUCT": "Milyen terméket adsz el?",
+      "SEARCH_PRODUCT": "Milyen terméket keresel?",
+      "OFFER_RENTAL": "Mit kínálsz kölcsönzésre?",
+      "RIDE_SHARE": "Írd le az utad...",
+      "EVENT_WORKSHOP": "Add meg az esemény vagy workshop nevét..."
+    },
     "title_counter": "{count}/100",
     "description_label": "Leírás",
     "description_placeholder": "Részletezd a hirdetésed... (min. 20 karakter)",
@@ -176,10 +185,10 @@
     },
     "sell_product": {
       "price_time_label": "Ár időben (perc)",
-      "price_time_placeholder": "pl. 30",
+      "price_time_placeholder": "",
       "price_time_required_hint": "Kötelező. A termékeknek tartalmazniuk kell az élőmunkát.",
       "price_garas_label": "Ár Garasban (opcionális)",
-      "price_garas_placeholder": "pl. 5",
+      "price_garas_placeholder": "",
       "condition_label": "Állapot",
       "condition_new": "Új",
       "condition_used": "Használt",
@@ -191,10 +200,10 @@
     },
     "offer_rental": {
       "handling_fee_label": "Kezelési idő (perc)",
-      "handling_fee_placeholder": "pl. 5",
+      "handling_fee_placeholder": "",
       "handling_fee_hint": "Az átadás-átvétel ideje",
       "usage_fee_label": "Használati díj (Garas)",
-      "usage_fee_placeholder": "pl. 2",
+      "usage_fee_placeholder": "",
       "usage_fee_hint": "Kopás / elhasználódás",
       "max_duration_label": "Max. időtartam (opcionális)",
       "max_duration_placeholder": "pl. 1 hét",
@@ -209,9 +218,9 @@
       "seats_label": "Szabad helyek",
       "seats_placeholder": "pl. 3",
       "price_time_label": "Ár / hely (perc)",
-      "price_time_placeholder": "0",
+      "price_time_placeholder": "",
       "price_garas_label": "Ár / hely (Garas)",
-      "price_garas_placeholder": "0"
+      "price_garas_placeholder": ""
     },
     "event_workshop": {
       "start_label": "Kezdés időpontja",
@@ -220,10 +229,10 @@
       "location_placeholder": "pl. Közösségi ház, 3-as terem",
       "max_participants_label": "Max. résztvevő (opcionális)",
       "max_participants_placeholder": "pl. 20",
-      "entry_fee_label": "Belépő (perc)",
-      "entry_fee_placeholder": "0",
-      "material_fee_label": "Anyagköltség (Garas)",
-      "material_fee_placeholder": "0"
+      "entry_fee_label": "Idő",
+      "entry_fee_placeholder": "",
+      "material_fee_label": "Garázs",
+      "material_fee_placeholder": ""
     },
     "zip_code_label": "Irányítószám",
     "d_class_label": "Láthatóság",
@@ -264,19 +273,28 @@
     "action_sheet": {
       "title": "Műveletek",
       "request_payment": "Fizetés kérése",
+      "send_payment": "Fizetés küldése",
       "send_photo": "Fotó küldése",
       "share_location": "Helyszín megosztása",
       "cancel": "Mégsem"
     },
     "payment_request_modal": {
       "title": "Fizetés kérése",
+      "send_title": "Fizetés küldése",
       "garas_label": "Garas",
       "garas_placeholder": "0.00",
       "time_label": "Idő (Perc)",
       "time_placeholder": "0",
       "description_label": "Leírás",
       "description_placeholder": "pl. Anyagköltség",
-      "submit_button": "Kérés küldése"
+      "submit_button": "Kérés küldése",
+      "send_button": "Fizetés küldése"
+    },
+    "send_payment_confirm": {
+      "title": "Fizetés megerősítése",
+      "body_template": "Szeretnél {minutes} percet és {garas} garast átutalni {name} részére a következő célra: \"{purpose}\"?",
+      "ok": "Átutalás",
+      "cancel": "Mégse"
     }
   },
   "wallet": {

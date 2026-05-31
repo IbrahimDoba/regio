@@ -78,6 +78,7 @@ export default function ChatPage() {
   const typingUsers = roomId ? getTypingUsers(roomId) : [];
   const [isActionSheetOpen, setIsActionSheetOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isSendPaymentModalOpen, setIsSendPaymentModalOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -153,6 +154,51 @@ export default function ChatPage() {
       }
     },
     [roomId, sendMessage, rooms]
+  );
+
+  // Handle sending a direct payment (transfer)
+  const handleSendPayment = useCallback(
+    async (data: { amountGaras: number; amountTime: number; description: string }) => {
+      if (!roomId) return;
+
+      // Build rich confirmation message
+      const spc = t.chat.send_payment_confirm;
+      const bodyHtml = spc.body_template
+        .replace("{minutes}", `<strong>${data.amountTime || 0}</strong>`)
+        .replace("{garas}", `<strong>${data.amountGaras || 0}</strong>`)
+        .replace("{name}", `<strong>${partnerName}</strong>`)
+        .replace("{purpose}", `<em>${data.description || "—"}</em>`);
+
+      const confirmed = await dialog.confirm(spc.title, "", {
+        messageHtml: bodyHtml,
+        okLabel: spc.ok,
+        cancelLabel: spc.cancel,
+      });
+      if (!confirmed) return;
+
+      try {
+        const partnerCode = rooms.find((r) => r.roomId === roomId)?.partnerCode;
+        if (!partnerCode) throw new Error("Could not find chat partner");
+
+        await bankingApi.transferFunds({
+          receiver_code: partnerCode,
+          amount_regio: data.amountGaras ? String(data.amountGaras) : undefined,
+          amount_time: data.amountTime || undefined,
+          reference: data.description || null,
+        });
+
+        await sendMessage(
+          roomId,
+          `💸 Payment sent: ${data.amountGaras ? `${data.amountGaras} RGD` : ''}${data.amountGaras && data.amountTime ? ' + ' : ''}${data.amountTime ? `${data.amountTime} min` : ''}${data.description ? ` — ${data.description}` : ''}`.trim(),
+        );
+
+        queryClient.invalidateQueries({ queryKey: queryKeys.banking.balance() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.banking.transactions.all() });
+      } catch (err) {
+        setActionError(getApiErrorMessage(err, "Failed to send payment"));
+      }
+    },
+    [roomId, sendMessage, rooms, queryClient, t, dialog, partnerName]
   );
 
   // Handle paying a payment request
@@ -482,6 +528,7 @@ export default function ChatPage() {
         isOpen={isActionSheetOpen}
         onClose={() => setIsActionSheetOpen(false)}
         onRequestPayment={() => setIsPaymentModalOpen(true)}
+        onSendPayment={() => setIsSendPaymentModalOpen(true)}
         onSendPhoto={handleSendPhoto}
         onShareLocation={() => {
           setIsActionSheetOpen(false);
@@ -512,6 +559,14 @@ export default function ChatPage() {
         onClose={() => setIsPaymentModalOpen(false)}
         onSubmit={handleSendPaymentRequest}
         initialAmounts={listingInitialAmounts}
+      />
+
+      {/* Send Payment Modal */}
+      <PaymentRequestModal
+        isOpen={isSendPaymentModalOpen}
+        onClose={() => setIsSendPaymentModalOpen(false)}
+        onSubmit={handleSendPayment}
+        mode="send"
       />
 
       {/* Hidden file input for photo upload */}

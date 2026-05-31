@@ -96,18 +96,16 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
                   {listing.d_class ? t.d_class_labels[listing.d_class] ?? listing.d_class : ""}
                 </div>
               </div>
-              {listing.owner_avatar ? (
-                <img
-                  src={`${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar`}
-                  className="w-[40px] h-[40px] rounded-full object-cover border border-[#ccc] block"
-                  alt="User"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    e.currentTarget.nextElementSibling?.classList.remove("hidden");
-                  }}
-                />
-              ) : null}
-              <div className={`w-[40px] h-[40px] flex items-center justify-center text-[#bbb] ${listing.owner_avatar ? "hidden" : ""}`}>
+              <img
+                src={`${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar`}
+                className="w-[40px] h-[40px] rounded-full object-cover border border-[#ccc] block"
+                alt="User"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove("hidden");
+                }}
+              />
+              <div className="w-[40px] h-[40px] flex items-center justify-center text-[#bbb] hidden">
                 <FaCircleUser size={40} />
               </div>
             </div>
@@ -115,14 +113,13 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
         </div>
 
         {/* Meta Row */}
-        <div className="flex justify-between items-center h-[30px] mt-[5px] border-b border-[var(--grey-line)]">
+        <div className="flex justify-between items-center h-[30px] mt-[5px] border-b border-[var(--grey-line)] cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
           <div className="flex items-center gap-[15px] h-full">
             <div
               className={cn(
-                "w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[11px] border-t-[#d32f2f] cursor-pointer ml-[2px] transition-transform duration-300",
+                "w-0 h-0 border-l-[9px] border-l-transparent border-r-[9px] border-r-transparent border-t-[11px] border-t-[#d32f2f] ml-[2px] transition-transform duration-300",
                 isOpen ? "rotate-180" : ""
               )}
-              onClick={() => setIsOpen(!isOpen)}
             />
             <div className="text-[11px] text-[#444] font-[500] inline-flex items-center gap-[6px] h-full">
               <FaLocationDot className="text-[#555] text-[14px]" />

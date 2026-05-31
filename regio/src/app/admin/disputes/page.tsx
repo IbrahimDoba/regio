@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { usePendingDisputes, useResolveDispute } from '@/lib/api';
 import { useDialog } from '@/context/DialogContext';
+import { useToast } from '@/context/ToastContext';
 import ContentCard from '@/components/admin/ui/ContentCard';
 import StatusBadge from '@/components/admin/ui/StatusBadge';
 import CaseModal from '@/components/admin/disputes/CaseModal';
@@ -27,6 +28,7 @@ export default function AdminDisputesPage() {
   const { data: disputes, isLoading } = usePendingDisputes();
   const resolveDisputeMutation = useResolveDispute();
   const dialog = useDialog();
+  const toast = useToast();
 
   const [selectedDispute, setSelectedDispute] = useState<DisputePublic | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,11 +50,11 @@ export default function AdminDisputesPage() {
       },
       {
         onSuccess: () => {
-          dialog.alert('Dispute Resolved', `Dispute ${action.toLowerCase()}d successfully!`);
+          toast.success(`Dispute ${action.toLowerCase()}d successfully!`);
         },
         onError: (error) => {
           console.error('Dispute resolution error:', error);
-          dialog.alert('Error', 'Failed to resolve dispute');
+          toast.error('Failed to resolve dispute');
         },
       }
     );

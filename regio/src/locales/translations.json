@@ -126,8 +126,8 @@
       "ends": "Ends",
       "location": "Location",
       "max_participants": "Max Participants",
-      "entry_fee_time": "Entry Fee (Time)",
-      "material_fee_garas": "Material Fee (Garas)",
+      "entry_fee_time": "Time",
+      "material_fee_garas": "Garage",
       "deadline": "Deadline",
       "needed_by": "Needed By",
       "price_notes": "Price Notes"
@@ -138,6 +138,15 @@
     "category_label": "Category",
     "title_label": "Title",
     "title_placeholder": "What are you offering or looking for?",
+    "title_placeholders": {
+      "OFFER_SERVICE": "What service are you offering?",
+      "SEARCH_SERVICE": "What service are you looking for?",
+      "SELL_PRODUCT": "What product are you selling?",
+      "SEARCH_PRODUCT": "What product are you looking for?",
+      "OFFER_RENTAL": "What are you offering to borrow?",
+      "RIDE_SHARE": "Describe your ride...",
+      "EVENT_WORKSHOP": "Name your event or workshop..."
+    },
     "title_counter": "{count}/100",
     "description_label": "Description",
     "description_placeholder": "Describe your listing in detail... (min 20 characters)",
@@ -176,10 +185,10 @@
     },
     "sell_product": {
       "price_time_label": "Price in Time (min)",
-      "price_time_placeholder": "e.g. 30",
+      "price_time_placeholder": "",
       "price_time_required_hint": "Required. Products must include labor.",
       "price_garas_label": "Price in Garas (optional)",
-      "price_garas_placeholder": "e.g. 5",
+      "price_garas_placeholder": "",
       "condition_label": "Condition",
       "condition_new": "New",
       "condition_used": "Used",
@@ -191,10 +200,10 @@
     },
     "offer_rental": {
       "handling_fee_label": "Handling Fee (minutes)",
-      "handling_fee_placeholder": "e.g. 5",
+      "handling_fee_placeholder": "",
       "handling_fee_hint": "Effort to hand over",
       "usage_fee_label": "Usage Fee (Garas)",
-      "usage_fee_placeholder": "e.g. 2",
+      "usage_fee_placeholder": "",
       "usage_fee_hint": "Wear & tear",
       "max_duration_label": "Max Duration (optional)",
       "max_duration_placeholder": "e.g. 1 week",
@@ -209,9 +218,9 @@
       "seats_label": "Available Seats",
       "seats_placeholder": "e.g. 3",
       "price_time_label": "Price per Seat (minutes)",
-      "price_time_placeholder": "0",
+      "price_time_placeholder": "",
       "price_garas_label": "Price per Seat (Garas)",
-      "price_garas_placeholder": "0"
+      "price_garas_placeholder": ""
     },
     "event_workshop": {
       "start_label": "Start Date & Time",
@@ -220,10 +229,10 @@
       "location_placeholder": "e.g. Community Hall, Room 3",
       "max_participants_label": "Max Participants (optional)",
       "max_participants_placeholder": "e.g. 20",
-      "entry_fee_label": "Entry Fee (minutes)",
-      "entry_fee_placeholder": "0",
-      "material_fee_label": "Material Fee (Garas)",
-      "material_fee_placeholder": "0"
+      "entry_fee_label": "Time",
+      "entry_fee_placeholder": "",
+      "material_fee_label": "Garage",
+      "material_fee_placeholder": ""
     },
     "zip_code_label": "ZIP Code",
     "d_class_label": "Visibility",
@@ -264,19 +273,28 @@
     "action_sheet": {
       "title": "Actions",
       "request_payment": "Request Payment",
+      "send_payment": "Send Payment",
       "send_photo": "Send Photo",
       "share_location": "Share Location",
       "cancel": "Cancel"
     },
     "payment_request_modal": {
       "title": "Request Payment",
+      "send_title": "Send Payment",
       "garas_label": "Garas",
       "garas_placeholder": "0.00",
       "time_label": "Time (Min)",
       "time_placeholder": "0",
       "description_label": "Description",
       "description_placeholder": "e.g. Material costs",
-      "submit_button": "Send Request"
+      "submit_button": "Send Request",
+      "send_button": "Send Payment"
+    },
+    "send_payment_confirm": {
+      "title": "Confirm Payment",
+      "body_template": "Do you want to transfer {minutes} minutes and {garas} Garas to {name} for \u201e{purpose}\u201c?",
+      "ok": "Transfer",
+      "cancel": "Cancel"
     }
   },
   "wallet": {

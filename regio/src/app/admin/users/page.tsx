@@ -12,6 +12,7 @@ import UserTable from "@/components/admin/users/UserTable";
 import EditUserModal from "@/components/admin/users/EditUserModal";
 import StatsGrid from "@/components/admin/dashboard/StatsGrid";
 import { useDialog } from "@/context/DialogContext";
+import { useToast } from "@/context/ToastContext";
 
 interface UserAdminView {
   user_code: string;
@@ -54,6 +55,7 @@ export default function AdminUsersPage() {
 
   const updateUserMutation = useUpdateUserDetails();
   const dialog = useDialog();
+  const toast = useToast();
 
   const handleEditUser = (user: UserAdminView) => {
     setSelectedUser(user);
@@ -68,11 +70,11 @@ export default function AdminUsersPage() {
       },
       {
         onSuccess: () => {
-          dialog.alert("User Verified", `User ${userCode} verified successfully!`);
+          toast.success(`User ${userCode} verified successfully!`);
         },
         onError: (error) => {
           console.error("Verification error:", error);
-          dialog.alert("Error", "Failed to verify user");
+          toast.error("Failed to verify user");
         },
       }
     );
@@ -87,11 +89,11 @@ export default function AdminUsersPage() {
       },
       {
         onSuccess: () => {
-          dialog.alert("User Rejected", `User ${userCode} rejected.`);
+          toast.success(`User ${userCode} rejected.`);
         },
         onError: (error) => {
           console.error("Rejection error:", error);
-          dialog.alert("Error", "Failed to reject user");
+          toast.error("Failed to reject user");
         },
       }
     );
@@ -102,11 +104,11 @@ export default function AdminUsersPage() {
       { userCode, data },
       {
         onSuccess: () => {
-          dialog.alert("User Updated", "User updated successfully!");
+          toast.success("User updated successfully!");
         },
         onError: (error) => {
           console.error("Update error:", error);
-          dialog.alert("Error", "Failed to update user");
+          toast.error("Failed to update user");
         },
       }
     );

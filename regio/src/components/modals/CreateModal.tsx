@@ -11,8 +11,8 @@ import { useCreateListing } from "@/lib/api/hooks/use-listings";
 import { uploadMedia } from "@/lib/api/modules/listings";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
+import { useModalKeyboard } from "@/hooks/useModalKeyboard";
 
-const selectItemClass = "flex-1 min-w-0 p-[10px] border border-[#ccc] rounded-[4px] text-[15px] bg-[var(--input-bg)] cursor-pointer";
 
 /** Max available_until = today + 62 days (~2 months) */
 function getMaxAvailableUntil(): string {
@@ -57,126 +57,8 @@ function FormattedNumberInput({
   );
 }
 
-function DateSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const currentYear = new Date().getFullYear();
-  const initParts = value ? value.split("-") : [];
-  const [selYear, setSelYear] = useState(initParts[0] || "");
-  const [selMonth, setSelMonth] = useState(initParts[1] || "");
-  const [selDay, setSelDay] = useState(initParts[2] || "");
-  const { t } = useLanguage();
-  const ds = t.create_modal.date_select;
 
-  const maxDay = selYear && selMonth ? new Date(+selYear, +selMonth, 0).getDate() : 31;
 
-  const emit = (y: string, m: string, d: string) => {
-    if (y && m && d) onChange(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`);
-    else onChange("");
-  };
-
-  const onYear = (v: string) => { setSelYear(v); emit(v, selMonth, selDay); };
-  const onMonth = (v: string) => {
-    const max = selYear && v ? new Date(+selYear, +v, 0).getDate() : 31;
-    const nd = selDay && +selDay > max ? "" : selDay;
-    setSelMonth(v); setSelDay(nd); emit(selYear, v, nd);
-  };
-  const onDay = (v: string) => { setSelDay(v); emit(selYear, selMonth, v); };
-
-  return (
-    <div className="flex gap-1 w-full">
-      <select value={selYear} onChange={(e) => onYear(e.target.value)} className={selectItemClass}>
-        <option value="">{ds.year}</option>
-        {Array.from({ length: 7 }, (_, i) => currentYear + i).map(yr => (
-          <option key={yr} value={String(yr)}>{yr}</option>
-        ))}
-      </select>
-      <select value={selMonth} onChange={(e) => onMonth(e.target.value)} className={selectItemClass}>
-        <option value="">{ds.month}</option>
-        {Array.from({ length: 12 }, (_, i) => i + 1).map(mo => (
-          <option key={mo} value={String(mo).padStart(2, "0")}>{String(mo).padStart(2, "0")}</option>
-        ))}
-      </select>
-      <select value={selDay} onChange={(e) => onDay(e.target.value)} className={selectItemClass}>
-        <option value="">{ds.day}</option>
-        {Array.from({ length: maxDay }, (_, i) => i + 1).map(day => (
-          <option key={day} value={String(day).padStart(2, "0")}>{String(day).padStart(2, "0")}</option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-function DateTimeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const currentYear = new Date().getFullYear();
-  const initDatePart = value ? value.split("T")[0] : "";
-  const initTimePart = value ? (value.split("T")[1] ?? "") : "";
-  const initDP = initDatePart ? initDatePart.split("-") : [];
-  const initTP = initTimePart ? initTimePart.split(":") : [];
-
-  const [selYear, setSelYear] = useState(initDP[0] || "");
-  const [selMonth, setSelMonth] = useState(initDP[1] || "");
-  const [selDay, setSelDay] = useState(initDP[2] || "");
-  const [selHour, setSelHour] = useState(initTP[0] || "");
-  const [selMin, setSelMin] = useState(initTP[1] || "");
-  const { t } = useLanguage();
-  const ds = t.create_modal.date_select;
-
-  const maxDay = selYear && selMonth ? new Date(+selYear, +selMonth, 0).getDate() : 31;
-
-  const emit = (y: string, m: string, d: string, h: string, mn: string) => {
-    if (y && m && d && h !== "" && mn !== "")
-      onChange(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}T${h.padStart(2, "0")}:${mn.padStart(2, "0")}`);
-    else onChange("");
-  };
-
-  const onYear = (v: string) => { setSelYear(v); emit(v, selMonth, selDay, selHour, selMin); };
-  const onMonth = (v: string) => {
-    const max = selYear && v ? new Date(+selYear, +v, 0).getDate() : 31;
-    const nd = selDay && +selDay > max ? "" : selDay;
-    setSelMonth(v); setSelDay(nd); emit(selYear, v, nd, selHour, selMin);
-  };
-  const onDay = (v: string) => { setSelDay(v); emit(selYear, selMonth, v, selHour, selMin); };
-  const onHour = (v: string) => { setSelHour(v); emit(selYear, selMonth, selDay, v, selMin); };
-  const onMin = (v: string) => { setSelMin(v); emit(selYear, selMonth, selDay, selHour, v); };
-
-  return (
-    <div className="flex flex-col gap-1 w-full">
-      <div className="flex gap-1">
-        <select value={selYear} onChange={(e) => onYear(e.target.value)} className={selectItemClass}>
-          <option value="">{ds.year}</option>
-          {Array.from({ length: 5 }, (_, i) => currentYear + i).map(yr => (
-            <option key={yr} value={String(yr)}>{yr}</option>
-          ))}
-        </select>
-        <select value={selMonth} onChange={(e) => onMonth(e.target.value)} className={selectItemClass}>
-          <option value="">{ds.month}</option>
-          {Array.from({ length: 12 }, (_, i) => i + 1).map(mo => (
-            <option key={mo} value={String(mo).padStart(2, "0")}>{String(mo).padStart(2, "0")}</option>
-          ))}
-        </select>
-        <select value={selDay} onChange={(e) => onDay(e.target.value)} className={selectItemClass}>
-          <option value="">{ds.day}</option>
-          {Array.from({ length: maxDay }, (_, i) => i + 1).map(day => (
-            <option key={day} value={String(day).padStart(2, "0")}>{String(day).padStart(2, "0")}</option>
-          ))}
-        </select>
-      </div>
-      <div className="flex gap-1">
-        <select value={selHour} onChange={(e) => onHour(e.target.value)} className={selectItemClass}>
-          <option value="">{ds.hour}</option>
-          {Array.from({ length: 24 }, (_, i) => i).map(hr => (
-            <option key={hr} value={String(hr).padStart(2, "0")}>{String(hr).padStart(2, "0")}</option>
-          ))}
-        </select>
-        <select value={selMin} onChange={(e) => onMin(e.target.value)} className={selectItemClass}>
-          <option value="">{ds.minute}</option>
-          {Array.from({ length: 12 }, (_, i) => i * 5).map(mn => (
-            <option key={mn} value={String(mn).padStart(2, "0")}>{String(mn).padStart(2, "0")}</option>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
-}
 
 interface CreateModalProps {
   isOpen: boolean;
@@ -196,14 +78,16 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [priceNotes, setPriceNotes] = useState("");
 
   // Location & Visibility (new system)
-  const [zipCode, setZipCode] = useState("");
-  const [dClass, setDClass] = useState<DClass>("D5");
+  const [zipCode, setZipCode] = useState(user?.zip_code ?? "");
+  const [dClass, setDClass] = useState<DClass>("D3");
   const [availableUntil, setAvailableUntil] = useState("");
 
   // Pre-fill ZIP from user profile
   useEffect(() => {
     if (user?.zip_code) setZipCode(user.zip_code);
   }, [user?.zip_code]);
+
+  useModalKeyboard(onClose, undefined, isOpen);
 
   // OFFER_SERVICE
   const [timeFactor, setTimeFactor] = useState(1.0);
@@ -371,7 +255,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     });
   };
 
-  const inputClass = "w-full p-[12px] border border-[#ccc] rounded-[4px] text-[16px] bg-[var(--input-bg)]";
+  const inputClass = "w-full p-[12px] border [border-color:var(--cat-color,#ccc)] rounded-[4px] text-[16px] bg-[var(--input-bg)]";
   const labelClass = "text-[14px] font-[700] text-[#555] block mb-[6px]";
   const fieldClass = "mb-[15px]";
 
@@ -379,7 +263,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const catLabel = t.category_labels[category];
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-[1000] flex justify-center items-center backdrop-blur-[3px] animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[1000] flex flex-col justify-center animate-in fade-in duration-200">
+      <div className="w-full bg-[rgba(160,160,160,0.38)] py-[24px] flex justify-center">
       <div className="w-[95%] max-w-[460px] h-[90vh] bg-white rounded-[8px] p-0 overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-[15px] border-b border-[#eee] flex justify-between items-center bg-[#f9f9f9]">
@@ -398,7 +283,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           </span>
         </div>
 
-        <div className="p-[20px] overflow-y-auto flex-grow">
+        <div className="p-[20px] overflow-y-auto flex-grow" style={{ '--cat-color': catColorVar, '--cat-light-bg': catLightBg } as React.CSSProperties}>
           {/* Category */}
           <div className={fieldClass}>
             <label className={labelClass}>{t.create_modal.category_label}</label>
@@ -421,7 +306,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <input
               type="text"
               className={cn(inputClass, title.length >= 80 ? "border-[var(--color-red-search)]" : "")}
-              placeholder={t.create_modal.title_placeholder}
+              placeholder={t.create_modal.title_placeholders[category] ?? t.create_modal.title_placeholder}
               maxLength={100}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -472,7 +357,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {category === "SEARCH_SERVICE" && (
             <div className={fieldClass}>
               <label className={labelClass}>{t.create_modal.search_service.deadline_label}</label>
-              <DateSelect value={searchServiceDeadline} onChange={setSearchServiceDeadline} />
+              <input type="date" value={searchServiceDeadline} onChange={(e) => setSearchServiceDeadline(e.target.value)} className={inputClass} />
             </div>
           )}
 
@@ -495,7 +380,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {category === "SEARCH_PRODUCT" && (
             <div className={fieldClass}>
               <label className={labelClass}>{t.create_modal.search_product.deadline_label}</label>
-              <DateSelect value={searchProductDeadline} onChange={setSearchProductDeadline} />
+              <input type="date" value={searchProductDeadline} onChange={(e) => setSearchProductDeadline(e.target.value)} className={inputClass} />
             </div>
           )}
 
@@ -545,7 +430,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
                   <label className={labelClass}>{t.create_modal.ride_share.departure_label}</label>
-                  <DateTimeSelect value={rideDeparture} onChange={setRideDeparture} />
+                  <input type="datetime-local" value={rideDeparture} onChange={(e) => setRideDeparture(e.target.value)} className={inputClass} />
                 </div>
                 <div className="flex-1">
                   <label className={labelClass}>{t.create_modal.ride_share.seats_label}</label>
@@ -576,11 +461,11 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
                   <label className={labelClass}>{t.create_modal.event_workshop.start_label}</label>
-                  <DateTimeSelect value={eventStart} onChange={setEventStart} />
+                  <input type="datetime-local" value={eventStart} onChange={(e) => setEventStart(e.target.value)} className={inputClass} />
                 </div>
                 <div className="flex-1">
                   <label className={labelClass}>{t.create_modal.event_workshop.end_label}</label>
-                  <DateTimeSelect value={eventEnd} onChange={setEventEnd} />
+                  <input type="datetime-local" value={eventEnd} onChange={(e) => setEventEnd(e.target.value)} className={inputClass} />
                 </div>
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
@@ -626,11 +511,11 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {/* Tags */}
           <div className={fieldClass}>
             <label className={labelClass}>{t.create_modal.tags_label}</label>
-            <div className="border border-[#ccc] rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]">
+            <div className="border [border-color:var(--cat-color,#ccc)] rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]">
               {tags.map((tag, i) => (
-                <div key={i} className="bg-[#e0e0e0] rounded-[12px] p-[4px_12px] text-[14px] flex items-center gap-[5px]">
+                <div key={i} className="rounded-[12px] p-[4px_12px] text-[14px] flex items-center gap-[5px] border" style={{ backgroundColor: catLightBg, borderColor: catColorVar, color: catColorVar }}>
                   {tag}
-                  <span className="cursor-pointer font-bold text-[#666]" onClick={() => removeTag(i)}>&times;</span>
+                  <span className="cursor-pointer font-bold opacity-60" onClick={() => removeTag(i)}>&times;</span>
                 </div>
               ))}
               <input
@@ -660,7 +545,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <div className="flex-1">
               <label className={labelClass}>{t.create_modal.d_class_label}</label>
               <select
-                className={inputClass}
+                className={cn(inputClass, "h-[50px]")}
                 value={dClass}
                 onChange={(e) => setDClass(e.target.value as DClass)}
               >
@@ -749,6 +634,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

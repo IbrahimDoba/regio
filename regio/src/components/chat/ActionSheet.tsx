@@ -11,6 +11,7 @@ import React, { useEffect } from 'react';
 import {
   FaImage,
   FaLocationDot,
+  FaMoneyBillTransfer,
   FaXmark,
 } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,7 @@ interface ActionSheetProps {
   isOpen: boolean;
   onClose: () => void;
   onRequestPayment: () => void;
+  onSendPayment?: () => void;
   onSendPhoto?: () => void;
   onShareLocation?: () => void;
 }
@@ -28,6 +30,7 @@ export function ActionSheet({
   isOpen,
   onClose,
   onRequestPayment,
+  onSendPayment,
   onSendPhoto,
   onShareLocation,
 }: ActionSheetProps) {
@@ -49,26 +52,22 @@ export function ActionSheet({
     };
   }, [isOpen, onClose]);
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   const { t } = useLanguage();
 
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[250] flex items-end justify-center bg-black/50 backdrop-blur-sm pb-[60px]"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 z-[250] flex flex-col justify-end">
+      <div
+        className="w-full bg-[rgba(160,160,160,0.38)] pb-[60px] pt-[6px] flex justify-center px-4"
+        onClick={onClose}
+      >
       <div
         className={cn(
           'w-full max-w-[480px] bg-white rounded-t-2xl',
           'p-5 animate-slide-up shadow-2xl'
         )}
+        onClick={(e) => e.stopPropagation()}
       >
         <h3 className="font-bold text-gray-800 mb-4">{t.chat.action_sheet.title}</h3>
 
@@ -79,6 +78,14 @@ export function ActionSheet({
             onClick={() => {
               onClose();
               onRequestPayment();
+            }}
+          />
+          <ActionItem
+            icon={<FaMoneyBillTransfer className="w-5 h-5" />}
+            label={t.chat.action_sheet.send_payment}
+            onClick={() => {
+              onClose();
+              onSendPayment?.();
             }}
           />
           <ActionItem
@@ -105,6 +112,7 @@ export function ActionSheet({
         >
           {t.chat.action_sheet.cancel}
         </button>
+      </div>
       </div>
 
       <style jsx>{`

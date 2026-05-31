@@ -126,8 +126,8 @@
       "ends": "Ende",
       "location": "Ort",
       "max_participants": "Max. Teilnehmer",
-      "entry_fee_time": "Teilnahmegebühr (Zeit)",
-      "material_fee_garas": "Materialkosten (Garas)",
+      "entry_fee_time": "Zeit",
+      "material_fee_garas": "Garage",
       "deadline": "Frist",
       "needed_by": "Benötigt bis",
       "price_notes": "Preis-Details"
@@ -138,6 +138,15 @@
     "category_label": "Kategorie",
     "title_label": "Titel",
     "title_placeholder": "Was bietest du an oder was suchst du?",
+    "title_placeholders": {
+      "OFFER_SERVICE": "Welche Dienstleistung bietest du an?",
+      "SEARCH_SERVICE": "Welche Dienstleistung suchst du?",
+      "SELL_PRODUCT": "Welches Produkt verkaufst du?",
+      "SEARCH_PRODUCT": "Welches Produkt suchst du?",
+      "OFFER_RENTAL": "Was bietest du zum Ausleihen an?",
+      "RIDE_SHARE": "Beschreibe deine Fahrt...",
+      "EVENT_WORKSHOP": "Nenne dein Event oder deinen Workshop..."
+    },
     "title_counter": "{count}/100",
     "description_label": "Beschreibung",
     "description_placeholder": "Beschreibe dein Angebot im Detail... (min. 20 Zeichen)",
@@ -176,10 +185,10 @@
     },
     "sell_product": {
       "price_time_label": "Preis in Zeit (Min)",
-      "price_time_placeholder": "z.B. 30",
+      "price_time_placeholder": "",
       "price_time_required_hint": "Erforderlich. Produkte müssen Arbeitszeit enthalten.",
       "price_garas_label": "Preis in Garas (optional)",
-      "price_garas_placeholder": "z.B. 5",
+      "price_garas_placeholder": "",
       "condition_label": "Zustand",
       "condition_new": "Neu",
       "condition_used": "Gebraucht",
@@ -191,7 +200,7 @@
     },
     "offer_rental": {
       "handling_fee_label": "Aufwand Übergabe (Minuten)",
-      "handling_fee_placeholder": "z.B. 5",
+      "handling_fee_placeholder": "",
       "handling_fee_hint": "Zeitaufwand für die Übergabe",
       "usage_fee_label": "Nutzungsgebühr (Garas)",
       "usage_fee_placeholder": "z.B. 2",
@@ -209,9 +218,9 @@
       "seats_label": "Verfügbare Plätze",
       "seats_placeholder": "z.B. 3",
       "price_time_label": "Preis pro Platz (Minuten)",
-      "price_time_placeholder": "0",
+      "price_time_placeholder": "",
       "price_garas_label": "Preis pro Platz (Garas)",
-      "price_garas_placeholder": "0"
+      "price_garas_placeholder": ""
     },
     "event_workshop": {
       "start_label": "Beginn (Datum & Zeit)",
@@ -220,10 +229,10 @@
       "location_placeholder": "z.B. Gemeindesaal, Raum 3",
       "max_participants_label": "Max. Teilnehmer (optional)",
       "max_participants_placeholder": "z.B. 20",
-      "entry_fee_label": "Teilnahmegebühr (Minuten)",
-      "entry_fee_placeholder": "0",
-      "material_fee_label": "Materialkosten (Garas)",
-      "material_fee_placeholder": "0"
+      "entry_fee_label": "Zeit",
+      "entry_fee_placeholder": "",
+      "material_fee_label": "Garage",
+      "material_fee_placeholder": ""
     },
     "zip_code_label": "PLZ",
     "d_class_label": "Sichtbarkeit",
@@ -264,19 +273,28 @@
     "action_sheet": {
       "title": "Aktionen",
       "request_payment": "Zahlung anfordern",
+      "send_payment": "Zahlung senden",
       "send_photo": "Foto senden",
       "share_location": "Standort teilen",
       "cancel": "Abbrechen"
     },
     "payment_request_modal": {
       "title": "Zahlung anfordern",
+      "send_title": "Zahlung senden",
       "garas_label": "Garas",
       "garas_placeholder": "0.00",
       "time_label": "Zeit (Min)",
       "time_placeholder": "0",
       "description_label": "Beschreibung",
       "description_placeholder": "z.B. Materialkosten",
-      "submit_button": "Anforderung senden"
+      "submit_button": "Anforderung senden",
+      "send_button": "Zahlung senden"
+    },
+    "send_payment_confirm": {
+      "title": "Zahlung bestätigen",
+      "body_template": "Möchtest du {minutes} Minuten und {garas} Garas an {name} für den Zweck \"{purpose}\" überweisen?",
+      "ok": "Überweisen",
+      "cancel": "Abbrechen"
     }
   },
   "wallet": {

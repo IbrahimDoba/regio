@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useModalKeyboard } from "@/hooks/useModalKeyboard";
 import { FaXmark, FaFolderOpen, FaEnvelope, FaComments } from 'react-icons/fa6';
 import { useDialog } from '@/context/DialogContext';
 
@@ -32,6 +33,8 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
   const [reason, setReason] = useState('');
   const dialog = useDialog();
 
+  useModalKeyboard(onClose, undefined, isOpen && !!dispute);
+
   if (!isOpen || !dispute) return null;
 
   const handleResolve = async (action: 'APPROVE' | 'REJECT') => {
@@ -41,10 +44,11 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
   };
 
   return (
-    <div
-      className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.5)] z-[1000] flex justify-center items-center backdrop-blur-[3px]"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-[1000] flex flex-col justify-center">
+      <div
+        className="w-full bg-[rgba(160,160,160,0.38)] py-[28px] flex justify-center px-4"
+        onClick={onClose}
+      >
       <div
         className="bg-white rounded-lg flex flex-col overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] w-[800px] max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -188,6 +192,7 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

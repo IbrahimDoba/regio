@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { API_CONFIG } from "@/lib/api/config";
 import type { Translations } from "@/context/LanguageContext";
 import { getEditLog } from "@/lib/listingEditLog";
+import { useModalKeyboard } from "@/hooks/useModalKeyboard";
 
 interface PreviewModalProps {
   listing: ListingPublic | null;
@@ -132,6 +133,7 @@ export default function PreviewModal({
 }: PreviewModalProps) {
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  useModalKeyboard(onClose, undefined, !!listing);
   if (!listing) return null;
 
   const isOwn = !!user && listing.owner_code === user.user_code;
@@ -179,7 +181,8 @@ export default function PreviewModal({
   }
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-[1000] flex justify-center items-center backdrop-blur-[3px] animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[1000] flex flex-col justify-center animate-in fade-in duration-200">
+      <div className="w-full bg-[rgba(160,160,160,0.38)] py-[24px] flex justify-center">
       <div className="w-[95%] max-w-[460px] h-[90vh] bg-white rounded-[8px] p-0 overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
 
         {/* Category Banner — same style as CreateModal */}
@@ -208,18 +211,16 @@ export default function PreviewModal({
           {/* User info row */}
           <div className="flex justify-between items-start mb-[10px]">
             <div className="flex gap-[12px] items-center">
-              {listing.owner_avatar ? (
-                <img
-                  src={`${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar`}
-                  className="w-[44px] h-[44px] rounded-full object-cover border-[2px] border-[#e0e0e0] shrink-0"
-                  alt=""
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    e.currentTarget.nextElementSibling?.classList.remove("hidden");
-                  }}
-                />
-              ) : null}
-              <div className={`w-[44px] h-[44px] flex items-center justify-center text-[#bbb] shrink-0 ${listing.owner_avatar ? "hidden" : ""}`}>
+              <img
+                src={`${API_CONFIG.BASE_URL}/users/${listing.owner_code}/avatar`}
+                className="w-[44px] h-[44px] rounded-full object-cover border-[2px] border-[#e0e0e0] shrink-0"
+                alt=""
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  (e.currentTarget.nextElementSibling as HTMLElement)?.classList.remove("hidden");
+                }}
+              />
+              <div className="w-[44px] h-[44px] flex items-center justify-center text-[#bbb] shrink-0 hidden">
                 <FaCircleUser size={44} />
               </div>
               <div>
@@ -369,6 +370,7 @@ export default function PreviewModal({
             </button>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

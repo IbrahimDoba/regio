@@ -21,6 +21,7 @@ from app.admin.schemas import (
 )
 from app.banking.dependencies import get_banking_service
 from app.banking.service import BankingService
+from app.email.config import email_settings
 from app.email.schemas import (
     DisputeResolvedEmailData,
     VerificationStatusEmailData,
@@ -132,6 +133,8 @@ async def update_user_details(
                     user_first_name=db_user.first_name,
                     user_email=db_user.email,
                     new_status=user_in.verification_status,
+                    app_url=email_settings.APP_URL if user_in.verification_status == "VERIFIED" else None,
+                    how_it_works_video_url=email_settings.HOW_IT_WORKS_VIDEO_URL if user_in.verification_status == "VERIFIED" else None,
                 ),
             )
 
@@ -169,6 +172,8 @@ async def verify_user(
             user_first_name=db_user.first_name,
             user_email=db_user.email,
             new_status="VERIFIED",
+            app_url=email_settings.APP_URL,
+            how_it_works_video_url=email_settings.HOW_IT_WORKS_VIDEO_URL,
         ),
     )
 

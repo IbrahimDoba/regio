@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useModalKeyboard } from "@/hooks/useModalKeyboard";
 import { FaXmark } from 'react-icons/fa6';
 import type { AdminUserUpdate, Language, TrustLevel, VerificationStatus } from '@/lib/api/types';
 
@@ -61,6 +62,8 @@ export default function EditUserModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.user_code]);
 
+  useModalKeyboard(onClose, undefined, isOpen && !!user);
+
   if (!isOpen || !user) return null;
 
   const handleSave = () => {
@@ -92,10 +95,11 @@ export default function EditUserModal({
   const sectionTitleClass = 'text-[11px] font-[800] uppercase tracking-widest text-[#aaa] mb-3';
 
   return (
-    <div
-      className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.5)] z-[1000] flex justify-center items-center backdrop-blur-[3px]"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-[1000] flex flex-col justify-center">
+      <div
+        className="w-full bg-[rgba(160,160,160,0.38)] py-[28px] flex justify-center px-4"
+        onClick={onClose}
+      >
       <div
         className="bg-white rounded-lg flex flex-col overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] w-[500px] max-h-[80vh]"
         onClick={(e) => e.stopPropagation()}
@@ -259,6 +263,7 @@ export default function EditUserModal({
             Save Changes
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

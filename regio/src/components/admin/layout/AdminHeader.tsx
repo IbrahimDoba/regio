@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -8,10 +9,10 @@ export default function AdminHeader() {
   const pathname = usePathname();
   const { language, setLanguage, t } = useLanguage();
 
-  const flags: { [key: string]: string } = {
-    EN: "🇬🇧",
-    HU: "🇭🇺",
-    DE: "🇩🇪",
+  const langIcons: { [key: string]: string } = {
+    EN: "/EN-lang.png",
+    HU: "/HU-lang.png",
+    DE: "/DE-lang.png",
   };
 
   const langOrder: ("EN" | "HU" | "DE")[] = ["EN", "HU", "DE"];
@@ -35,10 +36,10 @@ export default function AdminHeader() {
       <h1 className="text-[28px] font-[800] text-[#333]">{headline}</h1>
 
       <div
-        className="bg-white py-2 px-4 rounded-[20px] cursor-pointer font-bold text-[13px] shadow-[0_2px_5px_rgba(0,0,0,0.05)] border border-[#eee] flex items-center gap-[5px]"
+        className="bg-white py-2 px-4 rounded-[20px] cursor-pointer shadow-[0_2px_5px_rgba(0,0,0,0.05)] border border-[#eee] flex items-center gap-[5px]"
         onClick={toggleLang}
       >
-        {flags[language]}
+        <Image src={langIcons[language]} alt={language} width={24} height={24} className="object-cover rounded-full" />
       </div>
     </div>
   );

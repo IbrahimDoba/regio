@@ -32,6 +32,16 @@ class EmailConfig(RegioBaseSettings):
         description="Video call booking URL for user verification calls.",
     )
 
+    APP_URL: str = Field(
+        default="https://regio.is",
+        description="Public URL of the frontend app, used in email links.",
+    )
+
+    HOW_IT_WORKS_VIDEO_URL: str = Field(
+        default="https://regio.is/how-it-works",
+        description="Link to the 'how it works' video or page, included in the welcome email.",
+    )
+
     BROADCAST_CHUNK_SIZE: int = Field(
         default=50,
         description="Recipients per broadcast send chunk before pacing pause.",

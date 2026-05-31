@@ -8,6 +8,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useModalKeyboard } from "@/hooks/useModalKeyboard";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -19,12 +20,21 @@ interface DialogConfig {
   type: DialogType;
   title: string;
   message: string;
+  messageHtml?: string;
   placeholder?: string;
+  okLabel?: string;
+  cancelLabel?: string;
+}
+
+interface ConfirmOptions {
+  messageHtml?: string;
+  okLabel?: string;
+  cancelLabel?: string;
 }
 
 interface DialogContextValue {
   alert: (title: string, message: string) => Promise<void>;
-  confirm: (title: string, message: string) => Promise<boolean>;
+  confirm: (title: string, message: string, options?: ConfirmOptions) => Promise<boolean>;
   prompt: (title: string, message: string, placeholder?: string) => Promise<string | null>;
 }
 
@@ -89,8 +99,15 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
   );
 
   const confirmFn = useCallback(
-    async (title: string, message: string): Promise<boolean> =>
-      (await showDialog({ type: "confirm", title, message })) as boolean,
+    async (title: string, message: string, options?: ConfirmOptions): Promise<boolean> =>
+      (await showDialog({
+        type: "confirm",
+        title,
+        message,
+        messageHtml: options?.messageHtml,
+        okLabel: options?.okLabel,
+        cancelLabel: options?.cancelLabel,
+      })) as boolean,
     [showDialog]
   );
 
@@ -105,15 +122,18 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
     [alertFn, confirmFn, promptFn]
   );
 
+  useModalKeyboard(handleCancel, handleOk, !!config);
+
   return (
     <DialogContext.Provider value={contextValue}>
       {children}
 
       {config && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4 backdrop-blur-sm"
-          onClick={config.type === "alert" ? handleOk : handleCancel}
-        >
+        <div className="fixed inset-0 z-[9999] flex flex-col justify-center animate-in fade-in duration-150">
+          <div
+            className="w-full bg-[rgba(160,160,160,0.38)] py-[28px] flex justify-center px-4"
+            onClick={config.type === "alert" ? handleOk : handleCancel}
+          >
           <div
             className="bg-white rounded-xl shadow-2xl w-full max-w-[320px] overflow-hidden animate-in zoom-in-95 duration-150"
             onClick={(e) => e.stopPropagation()}
@@ -121,7 +141,11 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
             {/* Title */}
             <div className="px-5 pt-5 pb-3">
               <h3 className="text-[16px] font-[800] text-[#222] mb-2">{config.title}</h3>
-              <p className="text-[14px] text-[#555] leading-[1.5]">{config.message}</p>
+              {config.messageHtml ? (
+                <p className="text-[14px] text-[#555] leading-[1.5]" dangerouslySetInnerHTML={{ __html: config.messageHtml }} />
+              ) : (
+                <p className="text-[14px] text-[#555] leading-[1.5]">{config.message}</p>
+              )}
 
               {config.type === "prompt" && (
                 <input
@@ -132,7 +156,6 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleOk();
-                    if (e.key === "Escape") handleCancel();
                   }}
                   autoFocus
                 />
@@ -146,16 +169,17 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
                   className="px-4 py-2 rounded-[6px] bg-[#f0f0f0] text-[#555] text-[13px] font-[600] hover:bg-[#e5e5e5] transition-colors"
                   onClick={handleCancel}
                 >
-                  Cancel
+                  {config.cancelLabel ?? "Cancel"}
                 </button>
               )}
               <button
                 className="px-4 py-2 rounded-[6px] bg-[var(--color-green-offer)] text-white text-[13px] font-[600] hover:opacity-90 transition-opacity"
                 onClick={handleOk}
               >
-                OK
+                {config.okLabel ?? "OK"}
               </button>
             </div>
+          </div>
           </div>
         </div>
       )}

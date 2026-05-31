@@ -106,7 +106,7 @@ export function MessageInput({
       </button>
 
       {/* Input Wrapper */}
-      <div className="flex-1 bg-white rounded-full shadow-sm px-4 py-2 flex items-center">
+      <div className="flex-1 bg-white rounded-[15px] shadow-sm px-4 py-2 flex items-end">
         <textarea
           ref={textareaRef}
           value={message}

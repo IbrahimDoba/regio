@@ -240,7 +240,12 @@ export default function WalletPage() {
   // ── Derived values ───────────────────────────────────────────────────────
   const pendingOutgoing = outgoingRequests?.filter((r) => r.status === "PENDING") ?? [];
   const rejectedOutgoing = outgoingRequests?.filter((r) => r.status === "REJECTED") ?? [];
+  // Only items that require YOUR action count toward the badge.
+  // Pending outgoing: you're just waiting — the debtor must act, not you.
+  // Rejected outgoing: you CAN raise a dispute (optional action).
   const requestsCount =
+    (incomingRequests?.length ?? 0) + rejectedOutgoing.length;
+  const totalRequestsVisible =
     (incomingRequests?.length ?? 0) + pendingOutgoing.length + rejectedOutgoing.length;
 
   const availableTime = balanceData?.limits.available_time ?? 0;
@@ -520,13 +525,15 @@ export default function WalletPage() {
       )}
 
       {/* ── Requests Section ── */}
-      {requestsCount > 0 && (
+      {totalRequestsVisible > 0 && (
         <div className="px-[15px] mb-[10px]">
           <div className="text-[12px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[10px] flex justify-between items-center">
             {t.wallet.open_requests}
-            <span className="bg-[#f57c00] text-white p-[2px_6px] rounded-[10px] text-[10px]">
-              {requestsCount} {t.wallet.action_needed}
-            </span>
+            {requestsCount > 0 && (
+              <span className="bg-[#f57c00] text-white p-[2px_6px] rounded-[10px] text-[10px]">
+                {requestsCount} {t.wallet.action_needed}
+              </span>
+            )}
           </div>
 
           {/* Incoming requests */}
@@ -609,7 +616,7 @@ export default function WalletPage() {
               <div className="flex justify-between items-center mb-[10px]">
                 <div>
                   <div className="font-bold text-[14px] text-[#333]">
-                    {t.wallet.to.replace("{name}", req.debtor_name)}
+                    {t.wallet.from.replace("{name}", req.debtor_name)}
                   </div>
                   <div className="text-[12px] text-[#666]">
                     {t.wallet.ref.replace("{ref}", req.description || t.wallet.no_ref)}
@@ -663,7 +670,7 @@ export default function WalletPage() {
               <div className="flex justify-between items-center mb-[10px]">
                 <div>
                   <div className="font-bold text-[14px] text-[#333]">
-                    {t.wallet.to.replace("{name}", req.debtor_name)}
+                    {t.wallet.from.replace("{name}", req.debtor_name)}
                   </div>
                   <div className="text-[12px] text-[#666]">
                     {t.wallet.ref.replace("{ref}", req.description || t.wallet.no_ref)}

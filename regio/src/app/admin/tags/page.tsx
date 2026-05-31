@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useAdminTags, useUpdateTag, useDeleteTag } from '@/lib/api';
 import { useDialog } from '@/context/DialogContext';
+import { useToast } from '@/context/ToastContext';
 import ContentCard from '@/components/admin/ui/ContentCard';
 import { FaCheck, FaTrash, FaPen, FaHourglassHalf } from 'react-icons/fa6';
 
@@ -22,6 +23,7 @@ export default function AdminTagsPage() {
   const updateTagMutation = useUpdateTag();
   const deleteTagMutation = useDeleteTag();
   const dialog = useDialog();
+  const toast = useToast();
 
   const [editingTags, setEditingTags] = useState<Record<string, TagAdminView>>({});
 
@@ -50,7 +52,7 @@ export default function AdminTagsPage() {
       },
       {
         onSuccess: () => {
-          dialog.alert('Tag Approved', 'Tag approved successfully!');
+          toast.success('Tag approved successfully!');
           setEditingTags((prev) => {
             const newState = { ...prev };
             delete newState[tag.id];
@@ -59,7 +61,7 @@ export default function AdminTagsPage() {
         },
         onError: (error) => {
           console.error('Tag approval error:', error);
-          dialog.alert('Error', 'Failed to approve tag');
+          toast.error('Failed to approve tag');
         },
       }
     );
@@ -70,11 +72,11 @@ export default function AdminTagsPage() {
 
     deleteTagMutation.mutate(tagId, {
       onSuccess: () => {
-        dialog.alert('Tag Deleted', 'Tag deleted successfully!');
+        toast.success('Tag deleted successfully!');
       },
       onError: (error) => {
         console.error('Tag deletion error:', error);
-        dialog.alert('Error', 'Failed to delete tag');
+        toast.error('Failed to delete tag');
       },
     });
   };

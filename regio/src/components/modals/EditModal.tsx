@@ -9,6 +9,7 @@ import { ListingAttributes } from "@/lib/feed-helpers";
 import { useUpdateListing } from "@/lib/api/hooks/use-listings";
 import { useLanguage } from "@/context/LanguageContext";
 import { appendEditLog, EditLogEntry } from "@/lib/listingEditLog";
+import { useModalKeyboard } from "@/hooks/useModalKeyboard";
 
 interface EditModalProps {
   listing: ListingPublic;
@@ -133,6 +134,7 @@ function buildInitialAttrs(listing: ListingPublic) {
 export default function EditModal({ listing, onClose }: EditModalProps) {
   const { t } = useLanguage();
   const updateMutation = useUpdateListing();
+  useModalKeyboard(onClose);
 
   const [title, setTitle] = useState(listing.title);
   const [description, setDescription] = useState(listing.description);
@@ -329,7 +331,8 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
   const catLabel = t.category_labels[listing.category];
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.6)] z-[1001] flex justify-center items-center backdrop-blur-[3px] animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[1001] flex flex-col justify-center animate-in fade-in duration-200">
+      <div className="w-full bg-[rgba(160,160,160,0.38)] py-[24px] flex justify-center">
       <div className="w-[95%] max-w-[460px] h-[90vh] bg-white rounded-[8px] p-0 overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-[15px] border-b border-[#eee] flex justify-between items-center bg-[#f9f9f9]">
@@ -679,11 +682,10 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
                     {t.create_modal.event_workshop.start_label}
                   </label>
                   <input
-                    type="text"
+                    type="datetime-local"
                     value={eventStart}
                     onChange={(e) => setEventStart(e.target.value)}
                     className={inputClass}
-                    placeholder="YYYY-MM-DDTHH:MM"
                   />
                 </div>
                 <div className="flex-1">
@@ -691,11 +693,10 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
                     {t.create_modal.event_workshop.end_label}
                   </label>
                   <input
-                    type="text"
+                    type="datetime-local"
                     value={eventEnd}
                     onChange={(e) => setEventEnd(e.target.value)}
                     className={inputClass}
-                    placeholder="YYYY-MM-DDTHH:MM"
                   />
                 </div>
               </div>
@@ -886,6 +887,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

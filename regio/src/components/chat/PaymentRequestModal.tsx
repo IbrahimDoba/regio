@@ -21,6 +21,7 @@ interface PaymentRequestModalProps {
     description: string;
   }) => void;
   initialAmounts?: { time?: number; garas?: number; description?: string };
+  mode?: 'request' | 'send';
 }
 
 export function PaymentRequestModal({
@@ -28,6 +29,7 @@ export function PaymentRequestModal({
   onClose,
   onSubmit,
   initialAmounts,
+  mode = 'request',
 }: PaymentRequestModalProps) {
   const { t } = useLanguage();
   const [amountGaras, setAmountGaras] = useState('');
@@ -71,10 +73,11 @@ export function PaymentRequestModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!description.trim()) return;
     onSubmit({
       amountGaras: parseFloat(amountGaras) || 0,
       amountTime: parseInt(amountTime) || 0,
-      description: description || 'Payment Request',
+      description: description.trim(),
     });
     onClose();
   };
@@ -82,14 +85,15 @@ export function PaymentRequestModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[250] flex items-end justify-center bg-black/50 backdrop-blur-sm pb-[60px]"
-      onClick={handleBackdropClick}
-    >
-      <div className="w-full max-w-[480px] bg-white rounded-t-2xl shadow-2xl animate-slide-up">
+    <div className="fixed inset-0 z-[250] flex flex-col justify-end">
+      <div
+        className="w-full bg-[rgba(160,160,160,0.38)] pb-[60px] pt-[24px] flex justify-center px-4"
+        onClick={handleBackdropClick}
+      >
+      <div className="w-full max-w-[480px] bg-white rounded-t-2xl shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h3 className="font-bold text-gray-800">{t.chat.payment_request_modal.title}</h3>
+          <h3 className="font-bold text-gray-800">{mode === 'send' ? t.chat.payment_request_modal.send_title : t.chat.payment_request_modal.title}</h3>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -100,8 +104,28 @@ export function PaymentRequestModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          {/* Amount Inputs */}
+          {/* Amount Inputs — Time always first, Garas always second */}
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
+                {t.chat.payment_request_modal.time_label}
+              </label>
+              <div className="flex items-center gap-2">
+                <img src="/time.png" className="w-[44px] h-[44px] flex-shrink-0" alt="" />
+                <input
+                  type="number"
+                  min="0"
+                  value={amountTime}
+                  onChange={(e) => setAmountTime(e.target.value)}
+                  placeholder={t.chat.payment_request_modal.time_placeholder}
+                  className={cn(
+                    'flex-1 min-w-0 px-4 py-3 bg-white border border-gray-300 rounded-lg',
+                    'text-base text-gray-900 placeholder-gray-400',
+                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                  )}
+                />
+              </div>
+            </div>
             <div>
               <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
                 {t.chat.payment_request_modal.garas_label}
@@ -123,42 +147,25 @@ export function PaymentRequestModal({
                 />
               </div>
             </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-                {t.chat.payment_request_modal.time_label}
-              </label>
-              <div className="flex items-center gap-2">
-                <img src="/time.png" className="w-[44px] h-[44px] flex-shrink-0" alt="" />
-                <input
-                  type="number"
-                  min="0"
-                  value={amountTime}
-                  onChange={(e) => setAmountTime(e.target.value)}
-                  placeholder={t.chat.payment_request_modal.time_placeholder}
-                  className={cn(
-                    'flex-1 min-w-0 px-4 py-3 bg-white border border-gray-300 rounded-lg',
-                    'text-base text-gray-900 placeholder-gray-400',
-                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                  )}
-                />
-              </div>
-            </div>
           </div>
 
-          {/* Description Input */}
+          {/* Description / Reason — required */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5">
-              {t.chat.payment_request_modal.description_label}
+              {t.chat.payment_request_modal.description_label} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
+              required
+              maxLength={140}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t.chat.payment_request_modal.description_placeholder}
               className={cn(
-                'w-full px-4 py-3 bg-white border border-gray-300 rounded-lg',
+                'w-full px-4 py-3 bg-white border rounded-lg',
                 'text-base text-gray-900 placeholder-gray-400',
-                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                description.trim() ? 'border-gray-300' : 'border-red-300'
               )}
             />
           </div>
@@ -172,9 +179,9 @@ export function PaymentRequestModal({
               'transition-colors shadow-sm',
               'disabled:opacity-50 disabled:cursor-not-allowed'
             )}
-            disabled={!amountGaras && !amountTime}
+            disabled={(!amountGaras && !amountTime) || !description.trim()}
           >
-            {t.chat.payment_request_modal.submit_button}
+            {mode === 'send' ? t.chat.payment_request_modal.send_button : t.chat.payment_request_modal.submit_button}
           </button>
         </form>
       </div>
@@ -192,6 +199,7 @@ export function PaymentRequestModal({
           animation: slide-up 0.3s ease-out;
         }
       `}</style>
+      </div>
     </div>
   );
 }
