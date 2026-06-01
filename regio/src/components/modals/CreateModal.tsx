@@ -332,7 +332,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {category === "OFFER_SERVICE" && (
             <div className={fieldClass}>
               <label className={labelClass}>
-                {t.create_modal.offer_service.time_factor_label}{" "}
+                {t.create_modal.offer_service.timefactor_label}{" "}
                 <span className="text-[#999] font-normal">(0.25 – 3.0)</span>
               </label>
               <div className="flex items-center gap-[12px]">
@@ -349,7 +349,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 </div>
               </div>
               <div className="text-[12px] text-[#888] mt-[8px] italic text-center">
-                {t.create_modal.offer_service.time_factor_description.replace("{factor}", String(timeFactor).replace(".", ","))}
+                {t.create_modal.offer_service.timefactor_description.replace("{factor}", String(timeFactor).replace(".", ","))}
               </div>
             </div>
           )}

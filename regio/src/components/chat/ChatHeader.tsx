@@ -94,7 +94,7 @@ export function ChatHeader({
           ) : listingTitle ? (
             <p className="text-xs text-gray-500 flex items-center gap-1 truncate">
               <FaReply className="w-3 h-3 rotate-180" />
-              <span>{t.chat.header.re_listing.replace('{listing}', listingTitle)}</span>
+              <span>{t.chat.header.relisting.replace('{listing}', listingTitle)}</span>
             </p>
           ) : (
             <p className="text-xs text-green-600">{t.chat.header.online}</p>

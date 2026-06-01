@@ -405,7 +405,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
             <div className={fieldClass}>
               <div className="flex justify-between items-center mb-2">
                 <label className={labelClass}>
-                  {t.create_modal.offer_service.time_factor_label}
+                  {t.create_modal.offer_service.timefactor_label}
                   <span className="text-[#999] font-normal ml-1">(0.25 – 3.0)</span>
                 </label>
                 <div className="flex items-center gap-1.5 bg-[#f0f0f0] rounded-[6px] px-2.5 py-1 shrink-0">
@@ -423,7 +423,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
                 className="w-full cursor-pointer accent-[#e05555]"
               />
               <div className="text-[12px] text-[#888] mt-1.5 italic">
-                {t.create_modal.offer_service.time_factor_description.replace(
+                {t.create_modal.offer_service.timefactor_description.replace(
                   "{factor}",
                   timeFactor
                 )}
