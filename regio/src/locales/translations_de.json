@@ -126,8 +126,8 @@
       "ends": "Ende",
       "location": "Ort",
       "max_participants": "Max. Teilnehmer",
-      "entry_fee_time": "Teilnahmegebühr Zeit",
-      "material_fee_garas": "Materialkosten Garas",
+      "entry_fee_time": "Zeit",
+      "material_fee_garas": "Garas",
       "deadline": "Frist",
       "needed_by": "Benötigt bis",
       "price_notes": "Preis-Details"
@@ -135,6 +135,7 @@
   },
   "create_modal": {
     "title": "Neue Anzeige erstellen",
+    "edit_title": "Anzeige bearbeiten",
     "category_label": "Kategorie",
     "title_label": "Titel",
     "title_placeholder": "Was bietest du an oder was suchst du?",
@@ -184,25 +185,25 @@
       "deadline_label": "Frist (optional)"
     },
     "sell_product": {
-      "price_time_label": "Preis in Zeit (Min)",
+      "price_time_label": "Zeit",
       "price_time_placeholder": "",
       "price_time_required_hint": "Erforderlich. Produkte müssen Arbeitszeit enthalten.",
-      "price_garas_label": "Preis in Garas (optional)",
+      "price_garas_label": "Garas",
       "price_garas_placeholder": "",
       "condition_label": "Zustand",
       "condition_new": "Neu",
       "condition_used": "Gebraucht",
-      "stock_label": "Bestand / Menge (optional)",
+      "stock_label": "Bestand / Menge",
       "stock_placeholder": "z. B. 3"
     },
     "search_product": {
       "deadline_label": "Frist / Dringlichkeit (optional)"
     },
     "offer_rental": {
-      "handling_fee_label": "Aufwand Übergabe (Minuten)",
+      "handling_fee_label": "Zeit",
       "handling_fee_placeholder": "",
       "handling_fee_hint": "Zeitaufwand für die Übergabe",
-      "usage_fee_label": "Nutzungsgebühr (Garas)",
+      "usage_fee_label": "Garas",
       "usage_fee_placeholder": "",
       "usage_fee_hint": "Abnutzung / Verschleiß",
       "max_duration_label": "Max. Dauer (optional)",
@@ -217,9 +218,9 @@
       "departure_label": "Datum / Uhrzeit Abfahrt",
       "seats_label": "Verfügbare Plätze",
       "seats_placeholder": "z. B. 3",
-      "price_time_label": "Preis pro Platz (Minuten)",
+      "price_time_label": "Zeit",
       "price_time_placeholder": "",
-      "price_garas_label": "Preis pro Platz Garas",
+      "price_garas_label": "Garas",
       "price_garas_placeholder": ""
     },
     "event_workshop": {
@@ -229,9 +230,9 @@
       "location_placeholder": "z. B. Gemeindesaal, Raum 3",
       "max_participants_label": "Max. Teilnehmer (optional)",
       "max_participants_placeholder": "z. B. 20",
-      "entry_fee_label": "Teilnahmegebühr (Minuten)",
+      "entry_fee_label": "Zeit",
       "entry_fee_placeholder": "",
-      "material_fee_label": "Materialkosten Garas",
+      "material_fee_label": "Garas",
       "material_fee_placeholder": ""
     },
     "zip_code_label": "PLZ",
@@ -371,6 +372,8 @@
       "language_en": "English",
       "language_de": "Deutsch",
       "language_hu": "Magyar",
+      "city_label": "Stadt / Dorf",
+      "city_placeholder": "z.B. Budapest",
       "bio_label": "Über mich / Bio",
       "bio_placeholder": "Erzähl uns etwas über dich...",
       "save_button": "Änderungen speichern",

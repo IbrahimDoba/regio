@@ -150,8 +150,8 @@ export function useUpdateListing() {
         queryKeys.listings.detail(updatedListing.id),
         updatedListing
       );
-      // Invalidate feeds to reflect changes
-      queryClient.invalidateQueries({ queryKey: queryKeys.listings.lists() });
+      // Invalidate all listing queries (feed, lists, my-listings, etc.)
+      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all() });
     },
   });
 }

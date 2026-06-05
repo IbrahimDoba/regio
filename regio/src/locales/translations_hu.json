@@ -126,8 +126,8 @@
       "ends": "Vége",
       "location": "Helyszín",
       "max_participants": "Max. résztvevő",
-      "entry_fee_time": "Belépő időben",
-      "material_fee_garas": "Anyagköltség garasban",
+      "entry_fee_time": "Idő",
+      "material_fee_garas": "Garas",
       "deadline": "Határidő",
       "needed_by": "Szükséges eddig",
       "price_notes": "Ár részletei"
@@ -135,6 +135,7 @@
   },
   "create_modal": {
     "title": "Új hirdetés létrehozása",
+    "edit_title": "Hirdetés szerkesztése",
     "category_label": "Kategória",
     "title_label": "Cím",
     "title_placeholder": "Mit kínálsz, vagy mit keresel?",
@@ -184,25 +185,25 @@
       "deadline_label": "Határidő (opcionális)"
     },
     "sell_product": {
-      "price_time_label": "Ár időben (perc)",
+      "price_time_label": "Idő",
       "price_time_placeholder": "",
       "price_time_required_hint": "Kötelező. A termékeknek tartalmazniuk kell az élőmunkát is.",
-      "price_garas_label": "Ár garasban (opcionális)",
+      "price_garas_label": "Garas",
       "price_garas_placeholder": "",
       "condition_label": "Állapot",
       "condition_new": "Új",
       "condition_used": "Használt",
-      "stock_label": "Készlet / mennyiség (opcionális)",
+      "stock_label": "Készlet / mennyiség",
       "stock_placeholder": "pl. 3"
     },
     "search_product": {
       "deadline_label": "Határidő / sürgősség (opcionális)"
     },
     "offer_rental": {
-      "handling_fee_label": "Átadás kezelési ideje (perc)",
+      "handling_fee_label": "Idő",
       "handling_fee_placeholder": "",
       "handling_fee_hint": "Az átadás-átvétel időráfordítása",
-      "usage_fee_label": "Használati díj (garas)",
+      "usage_fee_label": "Garas",
       "usage_fee_placeholder": "",
       "usage_fee_hint": "Kopás / elhasználódás",
       "max_duration_label": "Max. időtartam (opcionális)",
@@ -217,9 +218,9 @@
       "departure_label": "Indulás dátuma / ideje",
       "seats_label": "Szabad helyek",
       "seats_placeholder": "pl. 3",
-      "price_time_label": "Ár / hely (perc)",
+      "price_time_label": "Idő",
       "price_time_placeholder": "",
-      "price_garas_label": "Ár / hely garasban",
+      "price_garas_label": "Garas",
       "price_garas_placeholder": ""
     },
     "event_workshop": {
@@ -229,9 +230,9 @@
       "location_placeholder": "pl. Közösségi ház, 3-as terem",
       "max_participants_label": "Max. résztvevő (opcionális)",
       "max_participants_placeholder": "pl. 20",
-      "entry_fee_label": "Belépő (perc)",
+      "entry_fee_label": "Idő",
       "entry_fee_placeholder": "",
-      "material_fee_label": "Anyagköltség garasban",
+      "material_fee_label": "Garas",
       "material_fee_placeholder": ""
     },
     "zip_code_label": "Irányítószám",
@@ -371,6 +372,8 @@
       "language_en": "English",
       "language_de": "Deutsch",
       "language_hu": "Magyar",
+      "city_label": "Város / Falu",
+      "city_placeholder": "pl. Budapest",
       "bio_label": "Rólam / bemutatkozás",
       "bio_placeholder": "Mesélj magadról pár szót...",
       "save_button": "Módosítások mentése",

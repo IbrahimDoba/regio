@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { FaSpinner, FaImage, FaXmark, FaPencil, FaClock } from "react-icons/fa6";
+import { uploadMedia } from "@/lib/api/modules/listings";
 import { cn } from "@/lib/utils";
 import { DClass, ListingPublic, ListingUpdate } from "@/lib/api/types";
 import { getCategoryDetails } from "@/lib/feed-helpers";
@@ -145,6 +146,13 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
   const [availableUntil, setAvailableUntil] = useState(
     listing.available_until ? listing.available_until.slice(0, 10) : ""
   );
+  const [availableDateLimits] = useState(() => {
+    const now = Date.now();
+    return {
+      min: new Date(now + 86400000).toISOString().slice(0, 10),
+      max: new Date(now + 62 * 86400000).toISOString().slice(0, 10),
+    };
+  });
 
   const init = buildInitialAttrs(listing);
   const [timeFactor, setTimeFactor] = useState(init.timeFactor);
@@ -181,6 +189,30 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     init.searchProductDeadline
   );
   const [priceNotes, setPriceNotes] = useState(init.priceNotes);
+
+  const [existingUrls, setExistingUrls] = useState<string[]>(listing.media_urls ?? []);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviewUrls, setNewPreviewUrls] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const remaining = 5 - existingUrls.length - newFiles.length;
+    const incoming = Array.from(e.target.files || []).filter(f => f.size <= 1 * 1024 * 1024);
+    const combined = [...newFiles, ...incoming].slice(0, newFiles.length + remaining);
+    setNewFiles(combined);
+    setNewPreviewUrls(combined.map(f => URL.createObjectURL(f)));
+    e.target.value = "";
+  };
+
+  const removeExistingUrl = (index: number) => {
+    setExistingUrls(existingUrls.filter((_, i) => i !== index));
+  };
+
+  const removeNewFile = (index: number) => {
+    const next = newFiles.filter((_, i) => i !== index);
+    setNewFiles(next);
+    setNewPreviewUrls(next.map(f => URL.createObjectURL(f)));
+  };
 
   const handleTagKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === ",") {
@@ -293,7 +325,16 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     return entries;
   };
 
-  const isValid = () => title.length >= 5 && description.length >= 20;
+  const isValid = () => {
+    if (title.length < 5 || description.length < 20) return false;
+    if (listing.category === "SELL_PRODUCT") {
+      if (tags.length === 0) return false;
+      if (!zipCode.trim()) return false;
+      if (!productTime) return false;
+      if (!productStock) return false;
+    }
+    return true;
+  };
 
   const handleSubmit = () => {
     if (!isValid()) return;
@@ -308,22 +349,35 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
       zip_code: zipCode.trim() || null,
       d_class: dClass,
       available_until: availableUntil ? new Date(availableUntil).toISOString() : null,
+      media_urls: existingUrls,
     };
 
     updateMutation.mutate(
       { listingId: listing.id, data: payload },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           appendEditLog(listing.id, diff);
+          if (newFiles.length > 0) {
+            setIsUploading(true);
+            try {
+              await uploadMedia(listing.id, newFiles);
+            } finally {
+              setIsUploading(false);
+            }
+          }
           onClose();
         },
       }
     );
   };
 
+  const isSearchCategory = listing.category === "SEARCH_SERVICE" || listing.category === "SEARCH_PRODUCT";
+  const isSellProduct = listing.category === "SELL_PRODUCT";
   const inputClass =
     "w-full p-[12px] border border-[#ccc] rounded-[4px] text-[16px] bg-[var(--input-bg)]";
   const labelClass = "text-[14px] font-[700] text-[#555] block mb-[6px]";
+  const reqLabelClass = cn(labelClass, "text-[var(--cat-color)]");
+  const reqInputClass = cn(inputClass, "border-[var(--cat-color)]");
   const fieldClass = "mb-[15px]";
 
   const { icon: catIcon, colorVar: catColorVar } =
@@ -331,14 +385,13 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
   const catLabel = t.category_labels[listing.category];
 
   return (
-    <div className="fixed inset-0 z-[1001] flex flex-col justify-center animate-in fade-in duration-200">
-      <div className="w-full bg-[rgba(160,160,160,0.38)] py-[24px] flex justify-center">
-      <div className="w-[95%] max-w-[460px] h-[90vh] bg-white rounded-[8px] p-0 overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[1001] bg-[rgba(160,160,160,0.38)] flex items-center justify-center animate-in fade-in duration-200">
+      <div className="w-[95%] max-w-[460px] h-[90vh] bg-white rounded-[8px] overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-[15px] border-b border-[#eee] flex justify-between items-center bg-[#f9f9f9]">
           <div className="flex items-center gap-2 text-[18px] font-[700] text-[#333]">
             <FaPencil className="text-[14px] text-[#888]" />
-            {t.create_modal.title}
+            {t.create_modal.edit_title}
           </div>
           <div
             className="text-[28px] text-[#999] cursor-pointer leading-none hover:text-[#333]"
@@ -369,16 +422,13 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
           </span>
         </div>
 
-        <div className="p-[20px] overflow-y-auto flex-grow">
+        <div className="p-[20px] overflow-y-auto flex-grow" style={{ '--cat-color': catColorVar } as React.CSSProperties}>
           {/* Title */}
           <div className={fieldClass}>
-            <label className={labelClass}>{t.create_modal.title_label}</label>
+            <label className={reqLabelClass}>{t.create_modal.title_label} *</label>
             <input
               type="text"
-              className={cn(
-                inputClass,
-                title.length >= 80 ? "border-[var(--color-red-search)]" : ""
-              )}
+              className={inputClass}
               maxLength={100}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -390,11 +440,11 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
 
           {/* Description */}
           <div className={fieldClass}>
-            <label className={labelClass}>
-              {t.create_modal.description_label}
+            <label className={reqLabelClass}>
+              {t.create_modal.description_label} *
             </label>
             <textarea
-              className={cn(inputClass, "h-[80px] resize-none")}
+              className={cn(reqInputClass, "h-[80px] resize-none")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
@@ -449,8 +499,8 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
             <>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>
-                    {t.create_modal.sell_product.price_time_label}
+                  <label className={reqLabelClass}>
+                    {t.create_modal.sell_product.price_time_label} *
                   </label>
                   <div className="flex items-center gap-2">
                     <img
@@ -463,7 +513,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
                       min="1"
                       value={productTime}
                       onChange={(e) => setProductTime(e.target.value)}
-                      className={cn(inputClass, "flex-1")}
+                      className={cn(reqInputClass, "flex-1")}
                     />
                   </div>
                 </div>
@@ -489,11 +539,11 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>
-                    {t.create_modal.sell_product.condition_label}
+                  <label className={reqLabelClass}>
+                    {t.create_modal.sell_product.condition_label} *
                   </label>
                   <select
-                    className={inputClass}
+                    className={reqInputClass}
                     value={productCondition}
                     onChange={(e) =>
                       setProductCondition(e.target.value as "NEW" | "USED")
@@ -508,15 +558,15 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>
-                    {t.create_modal.sell_product.stock_label}
+                  <label className={reqLabelClass}>
+                    {t.create_modal.sell_product.stock_label} *
                   </label>
                   <input
                     type="number"
                     min="1"
                     value={productStock}
                     onChange={(e) => setProductStock(e.target.value)}
-                    className={inputClass}
+                    className={reqInputClass}
                   />
                 </div>
               </div>
@@ -541,8 +591,8 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
             <>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>
-                    {t.create_modal.offer_rental.handling_fee_label}
+                  <label className={reqLabelClass}>
+                    {t.create_modal.offer_rental.handling_fee_label} *
                   </label>
                   <div className="flex items-center gap-2">
                     <img
@@ -555,13 +605,13 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
                       min="0"
                       value={rentalFeeTime}
                       onChange={(e) => setRentalFeeTime(e.target.value)}
-                      className={cn(inputClass, "flex-1")}
+                      className={cn(reqInputClass, "flex-1")}
                     />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>
-                    {t.create_modal.offer_rental.usage_fee_label}
+                  <label className={reqLabelClass}>
+                    {t.create_modal.offer_rental.usage_fee_label} *
                   </label>
                   <div className="flex items-center gap-2">
                     <img
@@ -574,7 +624,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
                       min="0"
                       value={rentalFeeGaras}
                       onChange={(e) => setRentalFeeGaras(e.target.value)}
-                      className={cn(inputClass, "flex-1")}
+                      className={cn(reqInputClass, "flex-1")}
                     />
                   </div>
                 </div>
@@ -615,25 +665,25 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
             <>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>
-                    {t.create_modal.ride_share.from_label}
+                  <label className={reqLabelClass}>
+                    {t.create_modal.ride_share.from_label} *
                   </label>
                   <input
                     type="text"
                     value={rideStart}
                     onChange={(e) => setRideStart(e.target.value)}
-                    className={inputClass}
+                    className={reqInputClass}
                   />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>
-                    {t.create_modal.ride_share.to_label}
+                  <label className={reqLabelClass}>
+                    {t.create_modal.ride_share.to_label} *
                   </label>
                   <input
                     type="text"
                     value={rideDestination}
                     onChange={(e) => setRideDestination(e.target.value)}
-                    className={inputClass}
+                    className={reqInputClass}
                   />
                 </div>
               </div>
@@ -676,29 +726,27 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
           {/* EVENT_WORKSHOP */}
           {listing.category === "EVENT_WORKSHOP" && (
             <>
-              <div className={cn(fieldClass, "flex gap-4")}>
-                <div className="flex-1">
-                  <label className={labelClass}>
-                    {t.create_modal.event_workshop.start_label}
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={eventStart}
-                    onChange={(e) => setEventStart(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className={labelClass}>
-                    {t.create_modal.event_workshop.end_label}
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={eventEnd}
-                    onChange={(e) => setEventEnd(e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
+              <div className={fieldClass}>
+                <label className={reqLabelClass}>
+                  {t.create_modal.event_workshop.start_label} *
+                </label>
+                <input
+                  type="datetime-local"
+                  value={eventStart}
+                  onChange={(e) => setEventStart(e.target.value)}
+                  className={reqInputClass}
+                />
+              </div>
+              <div className={fieldClass}>
+                <label className={reqLabelClass}>
+                  {t.create_modal.event_workshop.end_label} *
+                </label>
+                <input
+                  type="datetime-local"
+                  value={eventEnd}
+                  onChange={(e) => setEventEnd(e.target.value)}
+                  className={reqInputClass}
+                />
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
@@ -784,10 +832,12 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
           {/* ZIP Code + Visibility */}
           <div className={cn(fieldClass, "flex gap-[10px]")}>
             <div className="flex-1">
-              <label className={labelClass}>{t.create_modal.zip_code_label}</label>
+              <label className={isSearchCategory || isSellProduct ? reqLabelClass : labelClass}>
+                {t.create_modal.zip_code_label}{(isSearchCategory || isSellProduct) && " *"}
+              </label>
               <input
                 type="text"
-                className={inputClass}
+                className={isSearchCategory || isSellProduct ? reqInputClass : inputClass}
                 placeholder={t.create_modal.zip_placeholder}
                 value={zipCode}
                 onChange={(e) => setZipCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
@@ -795,9 +845,11 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
               />
             </div>
             <div className="flex-1">
-              <label className={labelClass}>{t.create_modal.d_class_label}</label>
+              <label className={isSearchCategory || isSellProduct ? reqLabelClass : labelClass}>
+                {t.create_modal.d_class_label}{(isSearchCategory || isSellProduct) && " *"}
+              </label>
               <select
-                className={inputClass}
+                className={isSearchCategory || isSellProduct ? reqInputClass : inputClass}
                 value={dClass}
                 onChange={(e) => setDClass(e.target.value as DClass)}
               >
@@ -811,17 +863,14 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
           {/* Available Until */}
           <div className={fieldClass}>
             <label className={labelClass}>
-              <span className="flex items-center gap-[6px]">
-                <FaClock className="text-[13px] text-[#888]" />
-                {t.create_modal.available_until_label}
-              </span>
+              {t.create_modal.available_until_label}
             </label>
             <input
               type="date"
               className={inputClass}
               value={availableUntil}
-              min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
-              max={new Date(Date.now() + 62 * 86400000).toISOString().slice(0, 10)}
+              min={availableDateLimits.min}
+              max={availableDateLimits.max}
               onChange={(e) => setAvailableUntil(e.target.value)}
             />
             <div className="text-[12px] text-[#888] mt-[4px]">{t.create_modal.available_until_hint}</div>
@@ -829,8 +878,10 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
 
           {/* Tags */}
           <div className={fieldClass}>
-            <label className={labelClass}>{t.create_modal.tags_label}</label>
-            <div className="border border-[#ccc] rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]">
+            <label className={isSearchCategory || isSellProduct ? reqLabelClass : labelClass}>
+              {t.create_modal.tags_label}{(isSearchCategory || isSellProduct) && " *"}
+            </label>
+            <div className={cn("border rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]", isSearchCategory || isSellProduct ? "border-[var(--cat-color)]" : "border-[#ccc]")}>
               {tags.map((tag, i) => (
                 <div
                   key={i}
@@ -856,6 +907,49 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
             </div>
           </div>
 
+          {/* Photos — hidden for search categories */}
+          {listing.category !== "SEARCH_PRODUCT" && listing.category !== "SEARCH_SERVICE" && <div className={fieldClass}>
+            <label className={labelClass}>{t.create_modal.images_label}</label>
+            <p className="text-[13px] text-[#888] mb-[8px]">{t.create_modal.images_hint}</p>
+
+            {(existingUrls.length > 0 || newPreviewUrls.length > 0) && (
+              <div className="flex gap-[8px] flex-wrap mb-[10px]">
+                {existingUrls.map((url, i) => (
+                  <div key={`existing-${i}`} className="relative w-[80px] h-[80px]">
+                    <img src={url} alt="" className="w-full h-full object-cover rounded-[4px] border border-[#ddd]" />
+                    <button
+                      type="button"
+                      className="absolute top-[2px] right-[2px] bg-black/60 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[11px]"
+                      onClick={() => removeExistingUrl(i)}
+                    >
+                      <FaXmark />
+                    </button>
+                  </div>
+                ))}
+                {newPreviewUrls.map((url, i) => (
+                  <div key={`new-${i}`} className="relative w-[80px] h-[80px]">
+                    <img src={url} alt="" className="w-full h-full object-cover rounded-[4px] border border-[#ddd]" />
+                    <button
+                      type="button"
+                      className="absolute top-[2px] right-[2px] bg-black/60 text-white rounded-full w-[18px] h-[18px] flex items-center justify-center text-[11px]"
+                      onClick={() => removeNewFile(i)}
+                    >
+                      <FaXmark />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {existingUrls.length + newFiles.length < 5 && (
+              <label className="inline-flex items-center gap-[6px] cursor-pointer bg-[#f0f0f0] border border-[#ccc] rounded-[4px] px-[12px] py-[10px] text-[15px] text-[#555] hover:bg-[#e8e8e8] transition-colors">
+                <FaImage className="text-[14px]" />
+                {t.create_modal.images_add}
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple className="hidden" onChange={handleFileSelect} />
+              </label>
+            )}
+          </div>}
+
           {updateMutation.isError && (
             <p className="text-[12px] text-red-500 mt-1">
               {t.create_modal.error_failed}
@@ -874,20 +968,22 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
               {t.create_modal.cancel_button}
             </button>
             <button
-              className="flex-1 p-[12px] border-none rounded-[4px] font-bold cursor-pointer bg-[var(--color-green-offer)] text-white flex justify-center items-center gap-2 disabled:opacity-50"
+              className="flex-1 p-[12px] border-none rounded-[4px] font-bold cursor-pointer text-white flex justify-center items-center gap-2 disabled:opacity-50"
+              style={{ backgroundColor: catColorVar }}
               onClick={handleSubmit}
-              disabled={updateMutation.isPending || !isValid()}
+              disabled={updateMutation.isPending || isUploading || !isValid()}
             >
-              {updateMutation.isPending && (
+              {(updateMutation.isPending || isUploading) && (
                 <FaSpinner className="animate-spin" />
               )}
-              {updateMutation.isPending
+              {isUploading
+                ? t.create_modal.images_uploading
+                : updateMutation.isPending
                 ? t.preview_modal.modify_loading
                 : t.preview_modal.modify_button}
             </button>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );

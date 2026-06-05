@@ -251,6 +251,9 @@ class ListingPublic(BaseModel):
 
     zip_code: Optional[str] = None
     d_class: Optional[str] = None
+    owner_zip_code: Optional[str] = None
+    owner_city: Optional[str] = None
+    distance_km: Optional[int] = None
     available_until: Optional[datetime] = None
 
     attributes: Dict[str, Any]

@@ -72,6 +72,7 @@ export interface UserPublic {
   is_system_admin?: boolean;
   avatar_url?: string | null;
   zip_code?: string | null;
+  city?: string | null;
   address?: string | null;
   language?: string | null;
 }
@@ -104,6 +105,7 @@ export interface UserCreate {
 export interface UserUpdate {
   address?: string | null;
   zip_code?: string | null;
+  city?: string | null;
   language?: Language;
 }
 
@@ -247,6 +249,9 @@ export interface ListingPublic {
   tags: string[];
   zip_code?: string | null;
   d_class?: DClass | null;
+  owner_zip_code?: string | null;
+  owner_city?: string | null;
+  distance_km?: number | null;
   available_until?: string | null;
   attributes: Record<string, unknown>;
   created_at: string;

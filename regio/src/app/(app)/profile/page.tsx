@@ -55,6 +55,7 @@ export default function ProfilePage() {
   // Local state for form fields
   const [bio, setBio] = useState("");
   const [location, setLocation] = useState("");
+  const [city, setCity] = useState("");
   const [avatarCacheBust, setAvatarCacheBust] = useState(() => Date.now());
 
   // Update local state when user data is loaded
@@ -76,7 +77,8 @@ export default function ProfilePage() {
       // "About me" might not be supported in backend yet. I'll comment it out or leave it local for now/map to something else if found.
       // For now I'll map Location -> address.
       if (user) {
-        setLocation((user as { address?: string }).address || ""); // user object might come with extra fields if backend sends Pydantic model dump?
+        setLocation((user as { address?: string }).address || "");
+        setCity((user as { city?: string }).city || ""); // user object might come with extra fields if backend sends Pydantic model dump?
         // But strict typing says UserPublic.
         // Let's check if UserPublic has address. It does NOT.
         // This suggests /me might satisfy UserRich?
@@ -126,6 +128,7 @@ export default function ProfilePage() {
     updateUser.mutate(
       {
         address: location,
+        city: city || null,
         language: language as "EN" | "DE" | "HU",
       },
       {
@@ -308,6 +311,19 @@ export default function ProfilePage() {
 
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
+                {t.profile.personal_tab.city_label}
+              </label>
+              <input
+                type="text"
+                className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder={t.profile.personal_tab.city_placeholder}
+              />
+            </div>
+
+            <div className="mb-[20px]">
+              <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
                 {t.profile.personal_tab.language_label}
               </label>
               <select
@@ -432,7 +448,7 @@ export default function ProfilePage() {
               </label>
               {passwordResetSent ? (
                 <div className="text-center py-[10px]">
-                  <span className="text-[24px] block mb-[6px]">📬</span>
+                  <img src="/mail-sent.jpg" alt="" className="w-[60px] h-[60px] object-contain mx-auto mb-[6px]" />
                   <p className="text-[13px] text-[#555]">
                     Reset link sent to <strong>{user.email}</strong>. Check your inbox.
                   </p>

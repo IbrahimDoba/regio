@@ -159,7 +159,7 @@ function AuthForm() {
 
             {forgotSent ? (
               <div className="text-center py-[20px]">
-                <div className="text-[40px] mb-[15px]">📬</div>
+                <img src="/mail-sent.jpg" alt="" className="w-[80px] h-[80px] object-contain mx-auto mb-[15px]" />
                 <div className="font-bold text-[18px] text-[#333] mb-[10px]">{t.auth.forgot_password.sent_title}</div>
                 <div className="text-[14px] text-[#666] leading-[1.6] mb-[30px]">{t.auth.forgot_password.sent_body}</div>
                 <span

@@ -228,6 +228,8 @@ class ListingService:
             tags=listing.tags,
             zip_code=listing.zip_code,
             d_class=listing.d_class,
+            owner_zip_code=listing.owner.zip_code,
+            owner_city=listing.owner.city,
             available_until=listing.available_until,
             attributes=listing.attributes,
             created_at=listing.created_at,
@@ -384,7 +386,7 @@ class ListingService:
                 # Join zip_distances to apply an additional viewer-side distance cap
                 # D5/D6 listings bypass this cap.
                 query = (
-                    select(Listing)
+                    select(Listing, ZipDistance.distance_km.label("dist"))
                     .outerjoin(
                         PostVisibility,
                         sa.and_(
@@ -419,9 +421,16 @@ class ListingService:
             else:
                 # Basic ZIP-based visibility (client's exact SQL pattern)
                 query = (
-                    select(Listing)
+                    select(Listing, ZipDistance.distance_km.label("dist"))
                     .outerjoin(
                         PostVisibility, PostVisibility.post_id == Listing.id
+                    )
+                    .outerjoin(
+                        ZipDistance,
+                        sa.and_(
+                            ZipDistance.zip_from == viewer_zip,
+                            ZipDistance.zip_to == Listing.zip_code,
+                        ),
                     )
                     .where(Listing.status == ListingStatus.ACTIVE)
                     .where(
@@ -472,10 +481,14 @@ class ListingService:
         )
 
         results = await self.session.execute(query)
-        listings = results.scalars().all()
+        rows = results.all() if viewer_zip else results.scalars().all()
 
         feed_items = []
-        for listing in listings:
+        for row in rows:
+            if viewer_zip:
+                listing, dist_km = row[0], row[1]
+            else:
+                listing, dist_km = row, None
             title, description = _localize(listing, user_lang)
             feed_items.append(
                 ListingPublic(
@@ -494,11 +507,14 @@ class ListingService:
                     tags=listing.tags,
                     zip_code=listing.zip_code,
                     d_class=listing.d_class,
+                    owner_zip_code=listing.owner.zip_code,
+                    owner_city=listing.owner.city,
+                    distance_km=dist_km,
                     available_until=listing.available_until,
                     attributes=listing.attributes,
                     created_at=listing.created_at,
                 )
             )
 
-        next_cursor = offset + limit if len(listings) == limit else None
+        next_cursor = offset + limit if len(rows) == limit else None
         return FeedResponse(data=feed_items, next_cursor=next_cursor)

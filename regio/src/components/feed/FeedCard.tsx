@@ -93,7 +93,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
                   {listing.owner_name}
                 </div>
                 <div className="text-[11px] text-[#777] whitespace-nowrap">
-                  {listing.d_class ? t.d_class_labels[listing.d_class] ?? listing.d_class : ""}
+                  {listing.owner_city ?? listing.owner_zip_code ?? ""}
                 </div>
               </div>
               <img
@@ -123,9 +123,11 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
             />
             <div className="text-[11px] text-[#444] font-[500] inline-flex items-center gap-[6px] h-full">
               <FaLocationDot className="text-[#555] text-[14px]" />
-              {listing.d_class && (
-                <span>{listing.d_class} · {t.d_class_labels[listing.d_class] ?? listing.d_class}</span>
-              )}
+              {listing.distance_km != null ? (
+                <span>{listing.distance_km} km</span>
+              ) : listing.d_class ? (
+                <span>{t.d_class_labels[listing.d_class] ?? listing.d_class}</span>
+              ) : null}
             </div>
           </div>
           <div className="flex gap-[5px] items-center">

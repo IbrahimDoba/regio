@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  FaSpinner, FaImage, FaXmark, FaClock,
+  FaSpinner, FaImage, FaXmark,
 } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { DClass, ListingCategory, ListingCreate } from "@/lib/api/types";
@@ -95,6 +95,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   // SELL_PRODUCT
   const [productCondition, setProductCondition] = useState<"NEW" | "USED">("NEW");
   const [productStock, setProductStock] = useState("");
+  const [productTime, setProductTime] = useState("");
+  const [productGaras, setProductGaras] = useState("");
 
   // OFFER_RENTAL
   const [rentalFeeTime, setRentalFeeTime] = useState("");
@@ -150,6 +152,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
         return { deadline: searchServiceDeadline || undefined, price_notes: notes };
       case "SELL_PRODUCT":
         return {
+          time_amount: productTime ? parseInt(productTime) : undefined,
+          regio_amount: productGaras ? parseInt(productGaras) : undefined,
           condition: productCondition,
           stock: productStock ? parseInt(productStock) : undefined,
           price_notes: notes,
@@ -192,6 +196,14 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const isValid = (): boolean => {
     if (!title || title.length < 2) return false;
     if (!description) return false;
+    if (isSearchCategory || category === "SELL_PRODUCT") {
+      if (tags.length === 0) return false;
+      if (!zipCode.trim()) return false;
+    }
+    if (category === "SELL_PRODUCT") {
+      if (!productTime) return false;
+      if (!productStock) return false;
+    }
     switch (category) {
       case "OFFER_RENTAL":
         return !!(rentalFeeTime || rentalFeeGaras);
@@ -255,17 +267,20 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     });
   };
 
-  const inputClass = "w-full p-[12px] border [border-color:var(--cat-color,#ccc)] rounded-[4px] text-[16px] bg-[var(--input-bg)]";
+  const isSearchCategory = category === "SEARCH_SERVICE" || category === "SEARCH_PRODUCT";
+  const isSellProduct = category === "SELL_PRODUCT";
+  const inputClass = "w-full p-[12px] border border-[#ccc] rounded-[4px] text-[16px] bg-[var(--input-bg)]";
   const labelClass = "text-[14px] font-[700] text-[#555] block mb-[6px]";
+  const reqLabelClass = cn(labelClass, "text-[var(--cat-color)]");
+  const reqInputClass = cn(inputClass, "border-[var(--cat-color)]");
   const fieldClass = "mb-[15px]";
 
   const { icon: catIcon, colorVar: catColorVar, lightBg: catLightBg } = getCategoryDetails(category);
   const catLabel = t.category_labels[category];
 
   return (
-    <div className="fixed inset-0 z-[1000] flex flex-col justify-center animate-in fade-in duration-200">
-      <div className="w-full bg-[rgba(160,160,160,0.38)] py-[24px] flex justify-center">
-      <div className="w-[95%] max-w-[460px] h-[90vh] bg-white rounded-[8px] p-0 overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[1000] bg-[rgba(160,160,160,0.38)] flex items-center justify-center animate-in fade-in duration-200">
+      <div className="w-[95%] max-w-[460px] h-[90vh] bg-white rounded-[8px] overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-[15px] border-b border-[#eee] flex justify-between items-center bg-[#f9f9f9]">
           <div className="text-[18px] font-[700] text-[#333]">{t.create_modal.title}</div>
@@ -302,10 +317,10 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
           {/* Title */}
           <div className={fieldClass}>
-            <label className={labelClass}>{t.create_modal.title_label}</label>
+            <label className={reqLabelClass}>{t.create_modal.title_label} *</label>
             <input
               type="text"
-              className={cn(inputClass, title.length >= 80 ? "border-[var(--color-red-search)]" : "")}
+              className={cn(reqInputClass, title.length >= 80 ? "border-[var(--color-red-search)]" : "")}
               placeholder={t.create_modal.title_placeholders[category] ?? t.create_modal.title_placeholder}
               maxLength={100}
               value={title}
@@ -318,9 +333,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
           {/* Description */}
           <div className={fieldClass}>
-            <label className={labelClass}>{t.create_modal.description_label}</label>
+            <label className={reqLabelClass}>{t.create_modal.description_label} *</label>
             <textarea
-              className={cn(inputClass, "h-[80px] resize-none")}
+              className={cn(reqInputClass, "h-[80px] resize-none")}
               placeholder={t.create_modal.description_placeholder}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -362,19 +377,37 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           )}
 
           {category === "SELL_PRODUCT" && (
-            <div className={cn(fieldClass, "flex gap-4")}>
-              <div className="flex-1">
-                <label className={labelClass}>{t.create_modal.sell_product.condition_label}</label>
-                <select className={inputClass} value={productCondition} onChange={(e) => setProductCondition(e.target.value as "NEW" | "USED")}>
-                  <option value="NEW">{t.create_modal.sell_product.condition_new}</option>
-                  <option value="USED">{t.create_modal.sell_product.condition_used}</option>
-                </select>
+            <>
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={reqLabelClass}>{t.create_modal.sell_product.condition_label} *</label>
+                  <select className={reqInputClass} value={productCondition} onChange={(e) => setProductCondition(e.target.value as "NEW" | "USED")}>
+                    <option value="NEW">{t.create_modal.sell_product.condition_new}</option>
+                    <option value="USED">{t.create_modal.sell_product.condition_used}</option>
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className={reqLabelClass}>{t.create_modal.sell_product.stock_label} *</label>
+                  <input type="number" min="1" value={productStock} onChange={(e) => setProductStock(e.target.value)} placeholder={t.create_modal.sell_product.stock_placeholder} className={reqInputClass} />
+                </div>
               </div>
-              <div className="flex-1">
-                <label className={labelClass}>{t.create_modal.sell_product.stock_label}</label>
-                <input type="number" min="1" value={productStock} onChange={(e) => setProductStock(e.target.value)} placeholder={t.create_modal.sell_product.stock_placeholder} className={inputClass} />
+              <div className={cn(fieldClass, "flex gap-4")}>
+                <div className="flex-1">
+                  <label className={reqLabelClass}>{t.create_modal.sell_product.price_time_label} *</label>
+                  <div className="flex items-center gap-2">
+                    <img src="/time.png" className="w-[44px] h-[44px] flex-shrink-0" alt="" />
+                    <FormattedNumberInput format="time" value={productTime} onChange={setProductTime} placeholder={t.create_modal.sell_product.price_time_placeholder} className={cn(reqInputClass, "flex-1")} />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <label className={labelClass}>{t.create_modal.sell_product.price_garas_label}</label>
+                  <div className="flex items-center gap-2">
+                    <img src="/garas.png" className="w-[44px] h-[44px] flex-shrink-0" alt="" />
+                    <FormattedNumberInput format="garas" value={productGaras} onChange={setProductGaras} placeholder={t.create_modal.sell_product.price_garas_placeholder} className={cn(inputClass, "flex-1")} />
+                  </div>
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           {category === "SEARCH_PRODUCT" && (
@@ -388,17 +421,17 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.offer_rental.handling_fee_label}</label>
+                  <label className={reqLabelClass}>{t.create_modal.offer_rental.handling_fee_label} *</label>
                   <div className="flex items-center gap-2">
                     <img src="/time.png" className="w-[44px] h-[44px] flex-shrink-0" alt="" />
-                    <FormattedNumberInput format="time" value={rentalFeeTime} onChange={setRentalFeeTime} placeholder={t.create_modal.offer_rental.handling_fee_placeholder} className={cn(inputClass, "flex-1")} />
+                    <FormattedNumberInput format="time" value={rentalFeeTime} onChange={setRentalFeeTime} placeholder={t.create_modal.offer_rental.handling_fee_placeholder} className={cn(reqInputClass, "flex-1")} />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.offer_rental.usage_fee_label}</label>
+                  <label className={reqLabelClass}>{t.create_modal.offer_rental.usage_fee_label} *</label>
                   <div className="flex items-center gap-2">
                     <img src="/garas.png" className="w-[44px] h-[44px] flex-shrink-0" alt="" />
-                    <FormattedNumberInput format="garas" value={rentalFeeGaras} onChange={setRentalFeeGaras} placeholder={t.create_modal.offer_rental.usage_fee_placeholder} className={cn(inputClass, "flex-1")} />
+                    <FormattedNumberInput format="garas" value={rentalFeeGaras} onChange={setRentalFeeGaras} placeholder={t.create_modal.offer_rental.usage_fee_placeholder} className={cn(reqInputClass, "flex-1")} />
                   </div>
                 </div>
               </div>
@@ -419,12 +452,12 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.ride_share.from_label}</label>
-                  <input type="text" value={rideStart} onChange={(e) => setRideStart(e.target.value)} placeholder={t.create_modal.ride_share.from_placeholder} className={inputClass} />
+                  <label className={reqLabelClass}>{t.create_modal.ride_share.from_label} *</label>
+                  <input type="text" value={rideStart} onChange={(e) => setRideStart(e.target.value)} placeholder={t.create_modal.ride_share.from_placeholder} className={reqInputClass} />
                 </div>
                 <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.ride_share.to_label}</label>
-                  <input type="text" value={rideDestination} onChange={(e) => setRideDestination(e.target.value)} placeholder={t.create_modal.ride_share.to_placeholder} className={inputClass} />
+                  <label className={reqLabelClass}>{t.create_modal.ride_share.to_label} *</label>
+                  <input type="text" value={rideDestination} onChange={(e) => setRideDestination(e.target.value)} placeholder={t.create_modal.ride_share.to_placeholder} className={reqInputClass} />
                 </div>
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
@@ -458,15 +491,13 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
           {category === "EVENT_WORKSHOP" && (
             <>
-              <div className={cn(fieldClass, "flex gap-4")}>
-                <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.event_workshop.start_label}</label>
-                  <input type="datetime-local" value={eventStart} onChange={(e) => setEventStart(e.target.value)} className={inputClass} />
-                </div>
-                <div className="flex-1">
-                  <label className={labelClass}>{t.create_modal.event_workshop.end_label}</label>
-                  <input type="datetime-local" value={eventEnd} onChange={(e) => setEventEnd(e.target.value)} className={inputClass} />
-                </div>
+              <div className={fieldClass}>
+                <label className={reqLabelClass}>{t.create_modal.event_workshop.start_label} *</label>
+                <input type="datetime-local" value={eventStart} onChange={(e) => setEventStart(e.target.value)} className={reqInputClass} />
+              </div>
+              <div className={fieldClass}>
+                <label className={reqLabelClass}>{t.create_modal.event_workshop.end_label} *</label>
+                <input type="datetime-local" value={eventEnd} onChange={(e) => setEventEnd(e.target.value)} className={reqInputClass} />
               </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
@@ -510,8 +541,12 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
           {/* Tags */}
           <div className={fieldClass}>
-            <label className={labelClass}>{t.create_modal.tags_label}</label>
-            <div className="border [border-color:var(--cat-color,#ccc)] rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]">
+            <label className={isSearchCategory || isSellProduct ? reqLabelClass : labelClass}>
+              {t.create_modal.tags_label}{(isSearchCategory || isSellProduct) && " *"}
+            </label>
+            <div className={cn(
+              "border border-[var(--cat-color)] rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]",
+            )}>
               {tags.map((tag, i) => (
                 <div key={i} className="rounded-[12px] p-[4px_12px] text-[14px] flex items-center gap-[5px] border" style={{ backgroundColor: catLightBg, borderColor: catColorVar, color: catColorVar }}>
                   {tag}
@@ -532,10 +567,12 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {/* ── Location & Visibility (ZIP-based, replaces old map) ── */}
           <div className={cn(fieldClass, "flex gap-[10px]")}>
             <div className="flex-1">
-              <label className={labelClass}>{t.create_modal.zip_code_label}</label>
+              <label className={isSearchCategory || isSellProduct ? reqLabelClass : labelClass}>
+                {t.create_modal.zip_code_label}{(isSearchCategory || isSellProduct) && " *"}
+              </label>
               <input
                 type="text"
-                className={inputClass}
+                className={isSearchCategory || isSellProduct ? reqInputClass : inputClass}
                 placeholder={t.create_modal.zip_placeholder}
                 value={zipCode}
                 onChange={(e) => setZipCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
@@ -543,9 +580,11 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
               />
             </div>
             <div className="flex-1">
-              <label className={labelClass}>{t.create_modal.d_class_label}</label>
+              <label className={isSearchCategory || isSellProduct ? reqLabelClass : labelClass}>
+                {t.create_modal.d_class_label}{(isSearchCategory || isSellProduct) && " *"}
+              </label>
               <select
-                className={cn(inputClass, "h-[50px]")}
+                className={cn(isSearchCategory || isSellProduct ? reqInputClass : inputClass, "h-[50px]")}
                 value={dClass}
                 onChange={(e) => setDClass(e.target.value as DClass)}
               >
@@ -561,10 +600,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
           {/* Available Until */}
           <div className={fieldClass}>
             <label className={labelClass}>
-              <span className="flex items-center gap-[6px]">
-                <FaClock className="text-[13px] text-[#888]" />
-                {t.create_modal.available_until_label}
-              </span>
+              {t.create_modal.available_until_label}
             </label>
             <input
               type="date"
@@ -577,8 +613,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <div className="text-[12px] text-[#888] mt-[4px]">{t.create_modal.available_until_hint}</div>
           </div>
 
-          {/* Photos */}
-          <div className={fieldClass}>
+          {/* Photos — hidden for search categories (no product to show) */}
+          {category !== "SEARCH_PRODUCT" && category !== "SEARCH_SERVICE" && <div className={fieldClass}>
             <label className={labelClass}>{t.create_modal.images_label}</label>
             <p className="text-[13px] text-[#888] mb-[8px]">{t.create_modal.images_hint}</p>
 
@@ -606,7 +642,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
                 <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple className="hidden" onChange={handleFileSelect} />
               </label>
             )}
-          </div>
+          </div>}
 
           {createMutation.isError && (
             <p className="text-[12px] text-red-500 mt-1">{t.create_modal.error_failed}</p>
@@ -634,7 +670,6 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             </button>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );

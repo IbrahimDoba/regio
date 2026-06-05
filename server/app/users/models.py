@@ -47,6 +47,7 @@ class User(SQLModel, table=True):
         max_length=10,
         description="User's home ZIP code. Pre-fills the listing creation form.",
     )
+    city: Optional[str] = Field(default=None, max_length=100)
     language: Language = Field(default=Language.EN)
 
     # Notification Settings
