@@ -104,15 +104,32 @@ class ListingService:
         return [
             TagPublic(
                 id=tag.id,
-                name=getattr(tag, f"name_{lang}", None) or tag.name,
+                name=tag.name,  # canonical English — client submits this when creating listings
+                label=getattr(tag, f"name_{lang}", None) or tag.name,
                 is_official=tag.is_official,
             )
             for tag in tags
         ]
 
+    async def _localize_tags(
+        self, canonical_names: List[str], lang: str
+    ) -> List[str]:
+        """Translate a list of canonical tag names to the given language."""
+        if not canonical_names:
+            return []
+        lang = lang.lower()
+        stmt = select(Tag).where(col(Tag.name).in_(canonical_names))
+        res = await self.session.execute(stmt)
+        tag_map: dict[str, str] = {
+            tag.name: getattr(tag, f"name_{lang}", None) or tag.name
+            for tag in res.scalars().all()
+        }
+        # Preserve order; fall back to canonical for user-suggested tags
+        return [tag_map.get(name, name) for name in canonical_names]
+
     async def _process_tags(self, raw_tags: List[str]) -> List[str]:
         """Validates tags. Reuses existing or creates them as suggestions."""
-        cleaned_tags = [t.lower().strip() for t in raw_tags if t.strip()]
+        cleaned_tags = [t.strip() for t in raw_tags if t.strip()]
         if not cleaned_tags:
             return []
 
@@ -213,6 +230,7 @@ class ListingService:
     ) -> ListingPublic:
         """Format a DB Listing (with eager-loaded owner) into ListingPublic."""
         title, description = _localize(listing, user_lang)
+        tags = await self._localize_tags(listing.tags or [], user_lang)
 
         return ListingPublic(
             id=listing.id,
@@ -225,7 +243,7 @@ class ListingService:
             description=description,
             payment_notes=listing.payment_notes,
             media_urls=[_ensure_url(k) for k in (listing.media_urls or [])],
-            tags=listing.tags,
+            tags=tags,
             zip_code=listing.zip_code,
             d_class=listing.d_class,
             owner_zip_code=listing.owner.zip_code,
@@ -483,6 +501,19 @@ class ListingService:
         results = await self.session.execute(query)
         rows = results.all() if viewer_zip else results.scalars().all()
 
+        # Batch-fetch tag translations for all listings in one query
+        all_listings = [row[0] if viewer_zip else row for row in rows]
+        all_tag_names = list(
+            {t for listing in all_listings for t in (listing.tags or [])}
+        )
+        tag_label_map: dict[str, str] = {}
+        if all_tag_names:
+            tag_stmt = select(Tag).where(col(Tag.name).in_(all_tag_names))
+            tag_res = await self.session.execute(tag_stmt)
+            for tag in tag_res.scalars().all():
+                localized = getattr(tag, f"name_{user_lang}", None)
+                tag_label_map[tag.name] = localized if localized else tag.name
+
         feed_items = []
         for row in rows:
             if viewer_zip:
@@ -490,6 +521,7 @@ class ListingService:
             else:
                 listing, dist_km = row, None
             title, description = _localize(listing, user_lang)
+            tags = [tag_label_map.get(t, t) for t in (listing.tags or [])]
             feed_items.append(
                 ListingPublic(
                     id=listing.id,
@@ -504,7 +536,7 @@ class ListingService:
                     media_urls=[
                         _ensure_url(k) for k in (listing.media_urls or [])
                     ],
-                    tags=listing.tags,
+                    tags=tags,
                     zip_code=listing.zip_code,
                     d_class=listing.d_class,
                     owner_zip_code=listing.owner.zip_code,

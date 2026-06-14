@@ -67,7 +67,10 @@ class TagCreate(BaseModel):
 
 class TagPublic(BaseModel):
     id: int
-    name: str
+    name: (
+        str  # canonical (English) — submitted when creating/filtering listings
+    )
+    label: str  # localized display name — shown in the UI
     is_official: bool
 
 
