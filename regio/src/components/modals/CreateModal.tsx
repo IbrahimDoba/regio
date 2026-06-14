@@ -5,9 +5,9 @@ import {
   FaSpinner, FaImage, FaXmark, FaCalendarDays,
 } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
-import { DClass, ListingCategory, ListingCreate } from "@/lib/api/types";
+import { DClass, ListingCategory, ListingCreate, TagAutocomplete } from "@/lib/api/types";
 import { CATEGORY_CONFIG, getCategoryDetails } from "@/lib/feed-helpers";
-import { useCreateListing } from "@/lib/api/hooks/use-listings";
+import { useCreateListing, useSearchTags } from "@/lib/api/hooks/use-listings";
 import { uploadMedia } from "@/lib/api/modules/listings";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
@@ -128,6 +128,27 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [debouncedTagInput, setDebouncedTagInput] = useState("");
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const [tagDisplayLabels, setTagDisplayLabels] = useState<Record<string, string>>({});
+  const tagContainerRef = useRef<HTMLDivElement>(null);
+  const { data: tagSuggestionData } = useSearchTags(debouncedTagInput);
+  const tagSuggestionsList = (tagSuggestionData ?? []).filter((s) => !tags.includes(s.name));
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedTagInput(tagInput), 300);
+    return () => clearTimeout(timer);
+  }, [tagInput]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (tagContainerRef.current && !tagContainerRef.current.contains(e.target as Node)) {
+        setShowTagDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -138,8 +159,21 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
       if (val && !tags.includes(val)) {
         setTags([...tags, val]);
         setTagInput("");
+        setShowTagDropdown(false);
       }
+    } else if (e.key === "Escape") {
+      setShowTagDropdown(false);
     }
+  };
+
+  const handleSelectTagSuggestion = (tag: TagAutocomplete) => {
+    if (!tags.includes(tag.name)) {
+      setTags([...tags, tag.name]);
+      setTagDisplayLabels((prev) => ({ ...prev, [tag.name]: tag.label }));
+    }
+    setTagInput("");
+    setDebouncedTagInput("");
+    setShowTagDropdown(false);
   };
 
   const removeTag = (index: number) => setTags(tags.filter((_, i) => i !== index));
@@ -545,23 +579,40 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <label className={isSearchCategory || isSellProduct ? reqLabelClass : labelClass}>
               {t.create_modal.tags_label}{(isSearchCategory || isSellProduct) && " *"}
             </label>
-            <div className={cn(
-              "border border-[var(--cat-color)] rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]",
-            )}>
-              {tags.map((tag, i) => (
-                <div key={i} className="rounded-[12px] p-[4px_12px] text-[14px] flex items-center gap-[5px] border" style={{ backgroundColor: catLightBg, borderColor: catColorVar, color: catColorVar }}>
-                  {tag}
-                  <span className="cursor-pointer font-bold opacity-60" onClick={() => removeTag(i)}>&times;</span>
+            <div ref={tagContainerRef} className="relative">
+              <div className={cn(
+                "border border-[var(--cat-color)] rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]",
+              )}>
+                {tags.map((tag, i) => (
+                  <div key={i} className="rounded-[12px] p-[4px_12px] text-[14px] flex items-center gap-[5px] border" style={{ backgroundColor: catLightBg, borderColor: catColorVar, color: catColorVar }}>
+                    {tagDisplayLabels[tag] ?? tag}
+                    <span className="cursor-pointer font-bold opacity-60" onClick={() => removeTag(i)}>&times;</span>
+                  </div>
+                ))}
+                <input
+                  type="text"
+                  className="border-none outline-none bg-transparent text-[16px] flex-grow p-[5px]"
+                  placeholder={t.create_modal.tags_placeholder}
+                  value={tagInput}
+                  onChange={(e) => { setTagInput(e.target.value); setShowTagDropdown(e.target.value.length > 0); }}
+                  onKeyDown={handleTagKeyDown}
+                  onFocus={() => tagInput.length > 0 && setShowTagDropdown(true)}
+                />
+              </div>
+              {showTagDropdown && tagSuggestionsList.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white border border-[#ccc] border-t-0 rounded-b-[4px] shadow-md z-20 max-h-[160px] overflow-y-auto">
+                  {tagSuggestionsList.map((s) => (
+                    <div
+                      key={s.id}
+                      className="px-[12px] py-[8px] text-[14px] cursor-pointer hover:bg-[#f5f5f5] flex items-center gap-[6px]"
+                      onMouseDown={(e) => { e.preventDefault(); handleSelectTagSuggestion(s); }}
+                    >
+                      <span>{s.label}</span>
+                      {s.is_official && <span className="text-[11px] text-[#999]">✓</span>}
+                    </div>
+                  ))}
                 </div>
-              ))}
-              <input
-                type="text"
-                className="border-none outline-none bg-transparent text-[16px] flex-grow p-[5px]"
-                placeholder={t.create_modal.tags_placeholder}
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={handleTagKeyDown}
-              />
+              )}
             </div>
           </div>
 

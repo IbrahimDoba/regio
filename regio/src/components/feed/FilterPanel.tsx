@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { ListingCategory } from "@/lib/api/types";
+import { ListingCategory, TagAutocomplete } from "@/lib/api/types";
 import { CATEGORY_CONFIG } from "@/lib/feed-helpers";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSearchTags } from "@/lib/api";
@@ -15,9 +15,9 @@ interface FilterPanelProps {
   toggleFilter: (category: ListingCategory) => void;
   q: string;
   setQ: (q: string) => void;
-  tags: string[];
-  addTag: (tag: string) => void;
-  removeTag: (tag: string) => void;
+  tags: TagAutocomplete[];
+  addTag: (tag: TagAutocomplete) => void;
+  removeTag: (tagName: string) => void;
   viewerZip: string;
   setViewerZip: (zip: string) => void;
   maxDistanceKm: number | undefined;
@@ -59,7 +59,7 @@ export default function FilterPanel({
   }, [inputValue]);
 
   const { data: tagSuggestions } = useSearchTags(debouncedInput);
-  const suggestions = (tagSuggestions ?? []).filter((s) => !tags.includes(s.name));
+  const suggestions = (tagSuggestions ?? []).filter((s) => !tags.some((t) => t.name === s.name));
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -90,8 +90,8 @@ export default function FilterPanel({
     }
   };
 
-  const handleSelectTag = (tagName: string) => {
-    if (!tags.includes(tagName)) addTag(tagName);
+  const handleSelectTag = (tag: TagAutocomplete) => {
+    if (!tags.some((t) => t.name === tag.name)) addTag(tag);
     setInputValue("");
     setQ("");
     setDebouncedInput("");
@@ -121,13 +121,13 @@ export default function FilterPanel({
           <div className="flex flex-wrap items-center gap-[6px] p-[8px] border border-[#ccc] rounded-[5px] bg-[var(--input-bg)] min-h-[40px]">
             {tags.map((tag) => (
               <span
-                key={tag}
+                key={tag.name}
                 className="inline-flex items-center gap-[4px] px-[8px] py-[2px] bg-[var(--color-green-offer)] text-white text-[13px] rounded-full"
               >
-                {tag}
+                {tag.label}
                 <button
                   type="button"
-                  onClick={() => removeTag(tag)}
+                  onClick={() => removeTag(tag.name)}
                   className="opacity-80 hover:opacity-100 flex items-center"
                 >
                   <FaXmark size={10} />
@@ -151,9 +151,9 @@ export default function FilterPanel({
                 <div
                   key={s.id}
                   className="px-[12px] py-[8px] text-[14px] cursor-pointer hover:bg-[#f5f5f5] flex items-center gap-[6px]"
-                  onMouseDown={(e) => { e.preventDefault(); handleSelectTag(s.name); }}
+                  onMouseDown={(e) => { e.preventDefault(); handleSelectTag(s); }}
                 >
-                  <span>{s.name}</span>
+                  <span>{s.label}</span>
                   {s.is_official && <span className="text-[11px] text-[#999]">✓</span>}
                 </div>
               ))}

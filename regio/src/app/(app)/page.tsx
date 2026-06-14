@@ -9,7 +9,7 @@ import FeedList from "@/components/feed/FeedList";
 import PreviewModal from "@/components/modals/PreviewModal";
 import CreateModal from "@/components/modals/CreateModal";
 import EditModal from "@/components/modals/EditModal";
-import { ListingCategory, ListingPublic } from "@/lib/api/types";
+import { ListingCategory, ListingPublic, TagAutocomplete } from "@/lib/api/types";
 import { useFeed, useCreateListingInquiry } from "@/lib/api";
 import { getStoredHomebaseZip } from "@/lib/api/hooks/use-listings";
 import { useRealTime } from "@/context/RealTimeContext";
@@ -34,7 +34,7 @@ export default function FeedPage() {
 
   // Staged filter state (assembled in UI, not yet sent to API)
   const [stagedQ, setStagedQ] = useState("");
-  const [stagedTags, setStagedTags] = useState<string[]>([]);
+  const [stagedTags, setStagedTags] = useState<TagAutocomplete[]>([]);
   const [stagedViewerZip, setStagedViewerZip] = useState<string>("");
   const [stagedMaxDistanceKm, setStagedMaxDistanceKm] = useState<number | undefined>(undefined);
 
@@ -109,7 +109,7 @@ export default function FeedPage() {
   const handleSearch = () => {
     setCommittedFilters({
       ...(stagedQ ? { q: stagedQ } : {}),
-      ...(stagedTags.length > 0 ? { tags: stagedTags } : {}),
+      ...(stagedTags.length > 0 ? { tags: stagedTags.map((t) => t.name) } : {}),
       ...(stagedViewerZip ? { viewer_zip: stagedViewerZip } : {}),
       ...(stagedViewerZip && stagedMaxDistanceKm !== undefined
         ? { max_distance_km: stagedMaxDistanceKm }
@@ -117,8 +117,8 @@ export default function FeedPage() {
     });
   };
 
-  const addTag = (tag: string) => setStagedTags((prev) => [...prev, tag]);
-  const removeTag = (tag: string) => setStagedTags((prev) => prev.filter((t) => t !== tag));
+  const addTag = (tag: TagAutocomplete) => setStagedTags((prev) => [...prev, tag]);
+  const removeTag = (tagName: string) => setStagedTags((prev) => prev.filter((t) => t.name !== tagName));
 
   const { data, isLoading } = useFeed(committedFilters, showOriginal);
   const listings = data?.pages.flatMap((page) => page.data) || [];

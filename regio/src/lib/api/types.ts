@@ -311,6 +311,7 @@ export interface TagPublic {
 export interface TagAutocomplete {
   id: string;
   name: string;
+  label: string;
   is_official: boolean;
 }
 
