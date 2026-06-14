@@ -947,7 +947,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
             <label className={isSearchCategory || isSellProduct ? reqLabelClass : labelClass}>
               {t.create_modal.tags_label}{(isSearchCategory || isSellProduct) && " *"}
             </label>
-            <div ref={tagContainerRef} className="relative">
+            <div ref={tagContainerRef}>
               <div className={cn("border rounded-[4px] bg-[var(--input-bg)] p-[5px] flex flex-wrap gap-[5px]", isSearchCategory || isSellProduct ? "border-[var(--cat-color)]" : "border-[#ccc]")}>
                 {tags.map((tag, i) => (
                   <div
@@ -974,7 +974,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
                 />
               </div>
               {showTagDropdown && tagSuggestionsList.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-[#ccc] border-t-0 rounded-b-[4px] shadow-md z-20 max-h-[160px] overflow-y-auto">
+                <div className="bg-white border border-[#ccc] border-t-0 rounded-b-[4px] shadow-md max-h-[160px] overflow-y-auto">
                   {tagSuggestionsList.map((s) => (
                     <div
                       key={s.id}
