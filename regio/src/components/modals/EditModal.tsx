@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
-import { FaSpinner, FaImage, FaXmark, FaPencil, FaClock } from "react-icons/fa6";
+import React, { useState, useRef } from "react";
+import { FaSpinner, FaImage, FaXmark, FaPencil, FaClock, FaCalendarDays, FaTrash } from "react-icons/fa6";
 import { uploadMedia } from "@/lib/api/modules/listings";
 import { cn } from "@/lib/utils";
 import { DClass, ListingPublic, ListingUpdate } from "@/lib/api/types";
 import { getCategoryDetails } from "@/lib/feed-helpers";
 import { ListingAttributes } from "@/lib/feed-helpers";
-import { useUpdateListing } from "@/lib/api/hooks/use-listings";
+import { useUpdateListing, useDeleteListing } from "@/lib/api/hooks/use-listings";
 import { useLanguage } from "@/context/LanguageContext";
 import { appendEditLog, EditLogEntry } from "@/lib/listingEditLog";
 import { useModalKeyboard } from "@/hooks/useModalKeyboard";
+import { useDialog } from "@/context/DialogContext";
+import { useToast } from "@/context/ToastContext";
 
 interface EditModalProps {
   listing: ListingPublic;
@@ -135,6 +137,9 @@ function buildInitialAttrs(listing: ListingPublic) {
 export default function EditModal({ listing, onClose }: EditModalProps) {
   const { t } = useLanguage();
   const updateMutation = useUpdateListing();
+  const deleteMutation = useDeleteListing();
+  const dialog = useDialog();
+  const toast = useToast();
   useModalKeyboard(onClose);
 
   const [title, setTitle] = useState(listing.title);
@@ -146,6 +151,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
   const [availableUntil, setAvailableUntil] = useState(
     listing.available_until ? listing.available_until.slice(0, 10) : ""
   );
+  const availableUntilRef = useRef<HTMLInputElement>(null);
   const [availableDateLimits] = useState(() => {
     const now = Date.now();
     return {
@@ -334,6 +340,21 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
       if (!productStock) return false;
     }
     return true;
+  };
+
+  const handleDelete = async () => {
+    const confirmed = await dialog.confirm(
+      "Delete post?",
+      "This action cannot be undone. The post will be permanently deleted."
+    );
+    if (!confirmed) return;
+    deleteMutation.mutate(listing.id, {
+      onSuccess: () => {
+        toast.success("Post deleted.");
+        onClose();
+      },
+      onError: () => toast.error("Failed to delete post."),
+    });
   };
 
   const handleSubmit = () => {
@@ -865,14 +886,25 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
             <label className={labelClass}>
               {t.create_modal.available_until_label}
             </label>
-            <input
-              type="date"
-              className={inputClass}
-              value={availableUntil}
-              min={availableDateLimits.min}
-              max={availableDateLimits.max}
-              onChange={(e) => setAvailableUntil(e.target.value)}
-            />
+            <div className="relative">
+              <input
+                ref={availableUntilRef}
+                type="date"
+                className={cn(inputClass, "pr-[40px] cursor-pointer")}
+                value={availableUntil}
+                min={availableDateLimits.min}
+                max={availableDateLimits.max}
+                onChange={(e) => setAvailableUntil(e.target.value)}
+                onClick={() => availableUntilRef.current?.showPicker()}
+              />
+              <button
+                type="button"
+                onClick={() => availableUntilRef.current?.showPicker()}
+                className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[#888] hover:text-[var(--color-green-offer)] transition-colors"
+              >
+                <FaCalendarDays size={16} />
+              </button>
+            </div>
             <div className="text-[12px] text-[#888] mt-[4px]">{t.create_modal.available_until_hint}</div>
           </div>
 
@@ -959,6 +991,16 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
 
         {/* Footer */}
         <div className="p-[15px] border-t border-[#eee] bg-white">
+          <div className="flex gap-[10px] mb-[10px]">
+            <button
+              className="flex-1 p-[12px] border-none rounded-[4px] font-bold cursor-pointer bg-[#fee2e2] text-[#dc2626] flex justify-center items-center gap-2 disabled:opacity-50"
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending || updateMutation.isPending}
+            >
+              {deleteMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaTrash size={14} />}
+              Delete Post
+            </button>
+          </div>
           <div className="flex gap-[10px]">
             <button
               className="flex-1 p-[12px] border-none rounded-[4px] font-bold cursor-pointer bg-[#ddd] text-[#333]"

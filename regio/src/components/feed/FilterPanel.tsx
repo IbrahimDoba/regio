@@ -189,7 +189,7 @@ export default function FilterPanel({
       {/* Settings panel: ZIP + Distance */}
       {showSettings && (
         <div className="flex gap-[8px] mb-[6px]">
-          <div className="relative flex-1">
+          <div className="relative w-[180px] shrink-0">
             <FaLocationDot className="absolute left-[9px] top-1/2 -translate-y-1/2 text-[#888] text-[13px] pointer-events-none" />
             <input
               type="text"
@@ -201,7 +201,7 @@ export default function FilterPanel({
             />
           </div>
           <select
-            className="w-[130px] p-[8px] border border-[#ccc] rounded-[5px] bg-[var(--input-bg)] text-[14px]"
+            className="flex-1 p-[8px] border border-[#ccc] rounded-[5px] bg-[var(--input-bg)] text-[14px]"
             value={maxDistanceKm ?? ""}
             onChange={(e) => setMaxDistanceKm(e.target.value ? parseInt(e.target.value) : undefined)}
           >

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
-  FaSpinner, FaImage, FaXmark,
+  FaSpinner, FaImage, FaXmark, FaCalendarDays,
 } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { DClass, ListingCategory, ListingCreate } from "@/lib/api/types";
@@ -81,6 +81,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [zipCode, setZipCode] = useState(user?.zip_code ?? "");
   const [dClass, setDClass] = useState<DClass>("D3");
   const [availableUntil, setAvailableUntil] = useState("");
+  const availableUntilRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill ZIP from user profile
   useEffect(() => {
@@ -602,14 +603,25 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
             <label className={labelClass}>
               {t.create_modal.available_until_label}
             </label>
-            <input
-              type="date"
-              className={inputClass}
-              value={availableUntil}
-              min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
-              max={getMaxAvailableUntil()}
-              onChange={(e) => setAvailableUntil(e.target.value)}
-            />
+            <div className="relative">
+              <input
+                ref={availableUntilRef}
+                type="date"
+                className={cn(inputClass, "pr-[40px] cursor-pointer")}
+                value={availableUntil}
+                min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
+                max={getMaxAvailableUntil()}
+                onChange={(e) => setAvailableUntil(e.target.value)}
+                onClick={() => availableUntilRef.current?.showPicker()}
+              />
+              <button
+                type="button"
+                onClick={() => availableUntilRef.current?.showPicker()}
+                className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[#888] hover:text-[var(--color-green-offer)] transition-colors"
+              >
+                <FaCalendarDays size={16} />
+              </button>
+            </div>
             <div className="text-[12px] text-[#888] mt-[4px]">{t.create_modal.available_until_hint}</div>
           </div>
 

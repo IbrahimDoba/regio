@@ -60,7 +60,7 @@ export default function FeedPage() {
   // Restore homebase ZIP on mount and immediately apply it to the feed
   useEffect(() => {
     const stored = getStoredHomebaseZip();
-    const zip = stored || user?.zip_code || "";
+    const zip = user?.zip_code || stored || "";
     if (zip) {
       setStagedViewerZip(zip);
       setCommittedFilters((prev) => ({ ...prev, viewer_zip: zip }));

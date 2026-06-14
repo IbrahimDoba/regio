@@ -700,13 +700,20 @@ export default function WalletPage() {
               )}
 
               <div className="flex gap-[10px] mt-[8px]">
+                <button
+                  className="flex-1 p-[8px] rounded-[4px] border border-[#e0e0e0] bg-[#f5f5f5] text-[#555] text-[12px] font-[600] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => handleCancelRequest(req.id)}
+                  disabled={cancelRequest.isPending}
+                >
+                  {cancelRequest.isPending ? "..." : "Accept"}
+                </button>
                 {req.dispute_raised ? (
-                  <div className="w-full p-[8px] rounded-[4px] bg-[#fff3e0] border border-[#ffe0b2] text-[#f57c00] text-[12px] font-[600] text-center">
+                  <div className="flex-1 p-[8px] rounded-[4px] bg-[#fff3e0] border border-[#ffe0b2] text-[#f57c00] text-[12px] font-[600] text-center">
                     Dispute Under Review
                   </div>
                 ) : (
                   <button
-                    className="w-full p-[8px] rounded-[4px] border border-[#ffe0b2] bg-[#fff3e0] text-[#f57c00] text-[12px] font-[600] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 p-[8px] rounded-[4px] border border-[#ffe0b2] bg-[#fff3e0] text-[#f57c00] text-[12px] font-[600] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={() => handleRaiseDispute(req.id)}
                     disabled={raiseDisputeMutation.isPending}
                   >

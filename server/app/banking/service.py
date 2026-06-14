@@ -566,7 +566,7 @@ class BankingService:
         if req.creditor_id != creditor_id:
             raise UnauthorizedPaymentRequestAccess()
 
-        if req.status != PaymentStatus.PENDING:
+        if req.status not in (PaymentStatus.PENDING, PaymentStatus.REJECTED):
             raise InvalidPaymentRequestStatus(req.status)
 
         req.status = PaymentStatus.CANCELLED

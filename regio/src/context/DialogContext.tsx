@@ -129,9 +129,9 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
       {children}
 
       {config && (
-        <div className="fixed inset-0 z-[9999] flex flex-col justify-center animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-[9999] flex flex-col justify-center animate-in fade-in duration-150 bg-[rgba(160,160,160,0.38)]">
           <div
-            className="w-full bg-[rgba(160,160,160,0.38)] py-[28px] flex justify-center px-4"
+            className="w-full py-[28px] flex justify-center px-4"
             onClick={config.type === "alert" ? handleOk : handleCancel}
           >
           <div

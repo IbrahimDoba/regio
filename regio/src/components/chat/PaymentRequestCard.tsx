@@ -18,6 +18,7 @@ interface PaymentRequestCardProps {
   onPay?: (id: string) => void;
   onDeny?: (id: string) => void;
   onDispute?: (id: string) => void;
+  onAcceptDecline?: (id: string) => void;
   className?: string;
 }
 
@@ -59,6 +60,7 @@ export function PaymentRequestCard({
   onPay,
   onDeny,
   onDispute,
+  onAcceptDecline,
   className,
 }: PaymentRequestCardProps) {
   const { id, amountGaras, amountTime, description, status } = data;
@@ -66,6 +68,7 @@ export function PaymentRequestCard({
   const handlePay = () => onPay?.(id);
   const handleDeny = () => onDeny?.(id);
   const handleDispute = () => onDispute?.(id);
+  const handleAcceptDecline = () => onAcceptDecline?.(id);
 
   if (status === 'paid') {
     return (
@@ -162,16 +165,31 @@ export function PaymentRequestCard({
           <p className="text-xs text-red-500 text-center font-medium">
             Request declined
           </p>
-          {isOwn && onDispute && (
-            <button
-              onClick={handleDispute}
-              className={cn(
-                'w-full py-1.5 text-xs font-bold',
-                'text-orange-600 hover:bg-orange-50 rounded transition-colors'
+          {isOwn && (
+            <div className="flex gap-1">
+              {onAcceptDecline && (
+                <button
+                  onClick={handleAcceptDecline}
+                  className={cn(
+                    'flex-1 py-1.5 text-xs font-bold',
+                    'text-gray-500 hover:bg-gray-50 rounded transition-colors'
+                  )}
+                >
+                  Accept
+                </button>
               )}
-            >
-              Raise Dispute
-            </button>
+              {onDispute && (
+                <button
+                  onClick={handleDispute}
+                  className={cn(
+                    'flex-1 py-1.5 text-xs font-bold',
+                    'text-orange-600 hover:bg-orange-50 rounded transition-colors'
+                  )}
+                >
+                  Raise Dispute
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}

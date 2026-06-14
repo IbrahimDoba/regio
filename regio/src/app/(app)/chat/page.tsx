@@ -236,6 +236,21 @@ export default function ChatPage() {
     [roomId, updatePaymentRequestStatus, sendMessage, queryClient]
   );
 
+  // Handle accepting a decline — creditor cancels the request to dismiss it
+  const handleAcceptDeclineRequest = useCallback(
+    async (requestId: string) => {
+      if (!roomId) return;
+      try {
+        await bankingApi.cancelPaymentRequest(requestId);
+        updatePaymentRequestStatus(roomId, requestId, "denied");
+        queryClient.invalidateQueries({ queryKey: queryKeys.banking.paymentRequests.all() });
+      } catch (err) {
+        setActionError(getApiErrorMessage(err, "Failed to dismiss request"));
+      }
+    },
+    [roomId, updatePaymentRequestStatus, queryClient]
+  );
+
   // Handle raising a dispute on a rejected payment request (creditor only)
   const handleDisputeRequest = useCallback(
     async (requestId: string) => {
@@ -505,6 +520,7 @@ export default function ChatPage() {
           onPayRequest={handlePayRequest}
           onDenyRequest={handleDenyRequest}
           onDisputeRequest={handleDisputeRequest}
+          onAcceptDeclineRequest={handleAcceptDeclineRequest}
           getReadReceipts={handleGetReadReceipts}
         />
       </div>

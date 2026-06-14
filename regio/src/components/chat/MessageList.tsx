@@ -82,6 +82,7 @@ interface MessageListProps {
   onPayRequest?: (id: string) => void;
   onDenyRequest?: (id: string) => void;
   onDisputeRequest?: (id: string) => void;
+  onAcceptDeclineRequest?: (id: string) => void;
   getReadReceipts?: (eventId: string) => ReadReceipt[];
 }
 
@@ -131,6 +132,7 @@ export function MessageList({
   onPayRequest,
   onDenyRequest,
   onDisputeRequest,
+  onAcceptDeclineRequest,
   getReadReceipts,
 }: MessageListProps) {
   const { t } = useLanguage();
@@ -199,6 +201,7 @@ export function MessageList({
               onPayRequest={onPayRequest}
               onDenyRequest={onDenyRequest}
               onDisputeRequest={onDisputeRequest}
+              onAcceptDeclineRequest={onAcceptDeclineRequest}
               readReceipts={getReadReceipts ? getReadReceipts(message.id) : []}
             />
           ))}
@@ -220,6 +223,7 @@ interface MessageItemProps {
   onPayRequest?: (id: string) => void;
   onDenyRequest?: (id: string) => void;
   onDisputeRequest?: (id: string) => void;
+  onAcceptDeclineRequest?: (id: string) => void;
   readReceipts?: ReadReceipt[];
 }
 
@@ -229,6 +233,7 @@ function MessageItem({
   onPayRequest,
   onDenyRequest,
   onDisputeRequest,
+  onAcceptDeclineRequest,
   readReceipts = [],
 }: MessageItemProps) {
   const isOwn = message.isOwn;
@@ -310,6 +315,7 @@ function MessageItem({
             onPay={onPayRequest}
             onDeny={onDenyRequest}
             onDispute={onDisputeRequest}
+            onAcceptDecline={onAcceptDeclineRequest}
           />
           <MessageTime 
             timestamp={message.timestamp} 
