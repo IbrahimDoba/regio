@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import (
 
 from app.core.config import settings
 
-DEFAULT_JSON = Path(__file__).parent.parent.parent / "tags_regio.json"
+DEFAULT_JSON = Path(__file__).parent.parent / "tags_regio.json"
 
 
 async def seed(json_path: Path) -> None:
