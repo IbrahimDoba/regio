@@ -141,9 +141,8 @@ function AuthForm() {
 
       {/* Hero */}
       <div className="p-[20px_20px_40px_20px] text-center">
-        <div className="mb-[10px] flex items-center justify-center gap-[2px]">
-          <Image src="/favicon.png" alt="REGIO" width={64} height={64} priority />
-          <span className="text-[52px] font-black tracking-[0px] text-[var(--color-nav-bg)] uppercase" style={{ fontFamily: "var(--font-roboto-condensed), 'Roboto Condensed', sans-serif" }}>REGIO</span>
+        <div className="mb-[10px] flex items-center justify-center">
+          <Image src="/Logo-L.png" alt="REGIO" width={280} height={102} priority className="w-auto h-[64px]" />
         </div>
         <div className="text-[15px] font-bold tracking-widest text-[#555] max-w-[280px] mx-auto uppercase" style={{ fontFamily: "var(--font-roboto-condensed), 'Roboto Condensed', sans-serif" }}>
           {t.auth.subtitle}
