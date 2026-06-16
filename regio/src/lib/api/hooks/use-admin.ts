@@ -9,6 +9,7 @@ import { adminApi } from '../modules/admin';
 import { queryKeys } from '../query-keys';
 import type {
   AdminUserUpdate,
+  TagsAdminListResponse,
   TagUpdate,
   DisputeResolveRequest,
 } from '../types';
@@ -124,8 +125,20 @@ export function useDeleteTag() {
 
   return useMutation({
     mutationFn: (tagId: string) => adminApi.deleteTag(tagId),
-    onSuccess: () => {
-      // Invalidate tag queries
+    onSuccess: (_, tagId) => {
+      // Optimistically remove the deleted tag from all cached admin tag lists
+      // so the UI updates instantly without waiting for the background refetch.
+      queryClient.setQueriesData<TagsAdminListResponse>(
+        { queryKey: queryKeys.admin.tags.all() },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            data: old.data.filter((t) => String(t.id) !== tagId),
+            count: Math.max(0, old.count - 1),
+          };
+        }
+      );
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.tags.all() });
       queryClient.invalidateQueries({ queryKey: queryKeys.listings.tags.all() });
     },
