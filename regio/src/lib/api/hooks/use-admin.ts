@@ -85,11 +85,16 @@ export function useToggleUserActive() {
 // ============================================================================
 
 /**
- * Get tags with usage counts
+ * Get tags with usage counts, search, and pagination
  */
-export function useAdminTags(params?: { pending?: boolean }) {
+export function useAdminTags(params?: {
+  pending?: boolean;
+  skip?: number;
+  limit?: number;
+  q?: string;
+}) {
   return useQuery({
-    queryKey: queryKeys.admin.tags.all(),
+    queryKey: queryKeys.admin.tags.list(params),
     queryFn: () => adminApi.getTags(params),
   });
 }

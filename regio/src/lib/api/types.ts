@@ -315,6 +315,11 @@ export interface TagAutocomplete {
   is_official: boolean;
 }
 
+export interface TagsAdminListResponse {
+  data: TagPublic[];
+  count: number;
+}
+
 export interface TagUpdate {
   name_de?: string | null;
   name_en?: string | null;

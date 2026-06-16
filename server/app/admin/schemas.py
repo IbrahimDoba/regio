@@ -149,6 +149,11 @@ class TagAdminView(BaseModel):
     )
 
 
+class TagsAdminListResponse(BaseModel):
+    data: List[TagAdminView] = Field(..., description="Page of tags.")
+    count: int = Field(..., description="Total matching tags (for pagination).")
+
+
 # DISPUTES
 class DisputeAction(BaseModel):
     action: Literal["APPROVE", "REJECT"] = Field(

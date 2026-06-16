@@ -16,7 +16,7 @@ from app.admin.schemas import (
     DisputePublic,
     SystemStats,
     TagAdminUpdate,
-    TagAdminView,
+    TagsAdminListResponse,
     UserListResponse,
 )
 from app.banking.dependencies import get_banking_service
@@ -219,7 +219,7 @@ async def toggle_user_active(
 
 @router.get(
     "/tags",
-    response_model=List[TagAdminView],
+    response_model=TagsAdminListResponse,
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
@@ -229,16 +229,18 @@ async def toggle_user_active(
 )
 async def get_tags(
     service: AdminServiceDep,
-    pending: bool = Query(
-        False, description="If True, returns only tags waiting for approval."
-    ),
+    pending: bool = Query(False, description="If True, returns only tags waiting for approval."),
+    skip: int = Query(0, ge=0, description="Pagination offset."),
+    limit: int = Query(50, le=200, description="Pagination limit."),
+    q: Optional[str] = Query(None, description="Search across name, name_de, name_en, name_hu."),
 ) -> Any:
     """
-    Get tags with usage counts.
+    Get tags with usage counts, search, and pagination.
 
-    - **pending**: Filter for user-suggested tags that need approval.
+    - **pending**: Filter for user-suggested tags awaiting approval.
+    - **q**: Full-text search across all language name fields.
     """
-    return await service.get_tags_with_usage(pending_only=pending)
+    return await service.get_tags_with_usage(pending_only=pending, skip=skip, limit=limit, q=q)
 
 
 @router.patch(

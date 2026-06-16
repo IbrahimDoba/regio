@@ -11,7 +11,7 @@ import type {
   UsersRichListResponse,
   AdminUserUpdate,
   UserPublic,
-  TagPublic,
+  TagsAdminListResponse,
   TagUpdate,
   DisputePublic,
   DisputeResolveRequest,
@@ -80,12 +80,15 @@ export const toggleUserActive = async (userCode: string): Promise<UserPublic> =>
 // ============================================================================
 
 /**
- * Get tags with usage counts
+ * Get tags with usage counts, search, and pagination
  */
 export const getTags = async (params?: {
   pending?: boolean;
-}): Promise<TagPublic[]> => {
-  const response = await apiClient.get<TagPublic[]>(
+  skip?: number;
+  limit?: number;
+  q?: string;
+}): Promise<TagsAdminListResponse> => {
+  const response = await apiClient.get<TagsAdminListResponse>(
     API_ENDPOINTS.ADMIN.TAGS,
     { params }
   );

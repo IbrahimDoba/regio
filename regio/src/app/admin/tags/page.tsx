@@ -1,52 +1,69 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAdminTags, useUpdateTag, useDeleteTag } from '@/lib/api';
 import { useDialog } from '@/context/DialogContext';
 import { useToast } from '@/context/ToastContext';
 import ContentCard from '@/components/admin/ui/ContentCard';
 import { FaCheck, FaTrash, FaPen, FaHourglassHalf } from 'react-icons/fa6';
+import type { TagPublic } from '@/lib/api/types';
 
-interface TagAdminView {
-  id: string;
-  name: string;
-  name_de?: string | null;
-  name_en?: string | null;
-  name_hu?: string | null;
-  is_official: boolean;
-  usage_count?: number;
-}
+const PAGE_SIZE = 50;
 
 export default function AdminTagsPage() {
-  const { data: pendingTags, isLoading: pendingLoading } = useAdminTags({ pending: true });
-  const { data: officialTags, isLoading: officialLoading } = useAdminTags({ pending: false });
+  const [officialSearch, setOfficialSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [officialPage, setOfficialPage] = useState(0);
+
+  const [editingTags, setEditingTags] = useState<Record<string, TagPublic>>({});
+
   const updateTagMutation = useUpdateTag();
   const deleteTagMutation = useDeleteTag();
   const dialog = useDialog();
   const toast = useToast();
 
-  const [editingTags, setEditingTags] = useState<Record<string, TagAdminView>>({});
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(officialSearch);
+      setOfficialPage(0);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [officialSearch]);
+
+  const { data: pendingData, isLoading: pendingLoading } = useAdminTags({ pending: true });
+  const { data: officialData, isLoading: officialLoading } = useAdminTags({
+    pending: false,
+    skip: officialPage * PAGE_SIZE,
+    limit: PAGE_SIZE,
+    q: debouncedSearch || undefined,
+  });
+
+  const pendingTags = pendingData?.data ?? [];
+  const officialTags = officialData?.data ?? [];
+  const officialTotal = officialData?.count ?? 0;
+  const totalPages = Math.ceil(officialTotal / PAGE_SIZE);
 
   const handleEditChange = (tagId: string, field: string, value: string) => {
-    setEditingTags((prev) => ({
-      ...prev,
-      [tagId]: {
-        ...(prev[tagId] || (pendingTags?.find((t) => t.id === tagId) || officialTags?.find((t) => t.id === tagId))!),
-        [field]: value,
-      },
-    }));
+    setEditingTags((prev) => {
+      const base =
+        prev[tagId] ??
+        pendingTags.find((t) => String(t.id) === tagId) ??
+        officialTags.find((t) => String(t.id) === tagId);
+      if (!base) return prev;
+      return { ...prev, [tagId]: { ...base, [field]: value } };
+    });
   };
 
-  const handleApproveTag = (tag: TagAdminView) => {
-    const editedTag = editingTags[tag.id] || tag;
+  const handleApproveTag = (tag: TagPublic) => {
+    const edited = editingTags[String(tag.id)] ?? tag;
 
     updateTagMutation.mutate(
       {
         tagId: String(tag.id),
         data: {
-          name_de: editedTag.name_de || undefined,
-          name_en: editedTag.name_en || undefined,
-          name_hu: editedTag.name_hu || undefined,
+          name_de: edited.name_de ?? undefined,
+          name_en: edited.name_en ?? undefined,
+          name_hu: edited.name_hu ?? undefined,
           is_official: true,
         },
       },
@@ -54,30 +71,21 @@ export default function AdminTagsPage() {
         onSuccess: () => {
           toast.success('Tag approved successfully!');
           setEditingTags((prev) => {
-            const newState = { ...prev };
-            delete newState[tag.id];
-            return newState;
+            const next = { ...prev };
+            delete next[String(tag.id)];
+            return next;
           });
         },
-        onError: (error) => {
-          console.error('Tag approval error:', error);
-          toast.error('Failed to approve tag');
-        },
+        onError: () => toast.error('Failed to approve tag'),
       }
     );
   };
 
   const handleDeleteTag = async (tagId: string) => {
     if (!await dialog.confirm('Delete Tag', 'Are you sure you want to delete this tag?')) return;
-
     deleteTagMutation.mutate(tagId, {
-      onSuccess: () => {
-        toast.success('Tag deleted successfully!');
-      },
-      onError: (error) => {
-        console.error('Tag deletion error:', error);
-        toast.error('Failed to delete tag');
-      },
+      onSuccess: () => toast.success('Tag deleted successfully!'),
+      onError: () => toast.error('Failed to delete tag'),
     });
   };
 
@@ -105,27 +113,17 @@ export default function AdminTagsPage() {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  Original Input
-                </th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  DE (German)
-                </th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  EN (English)
-                </th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  HU (Hungarian)
-                </th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  Action
-                </th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">Original Input</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">DE (German)</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">EN (English)</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">HU (Hungarian)</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">Action</th>
               </tr>
             </thead>
             <tbody>
-              {pendingTags && pendingTags.length > 0 ? (
+              {pendingTags.length > 0 ? (
                 pendingTags.map((tag) => {
-                  const edited = editingTags[tag.id] || tag;
+                  const edited = editingTags[String(tag.id)] ?? tag;
                   return (
                     <tr key={tag.id} className="hover:bg-[#fafafa]">
                       <td className="p-3 border-b border-[#eee]">
@@ -134,8 +132,8 @@ export default function AdminTagsPage() {
                       <td className="p-3 border-b border-[#eee]">
                         <input
                           type="text"
-                          value={edited.name_de || ''}
-                          onChange={(e) => handleEditChange(tag.id, 'name_de', e.target.value)}
+                          value={edited.name_de ?? ''}
+                          onChange={(e) => handleEditChange(String(tag.id), 'name_de', e.target.value)}
                           placeholder="German..."
                           className="w-full p-[5px] border border-[#ddd] rounded text-[13px]"
                         />
@@ -143,8 +141,8 @@ export default function AdminTagsPage() {
                       <td className="p-3 border-b border-[#eee]">
                         <input
                           type="text"
-                          value={edited.name_en || ''}
-                          onChange={(e) => handleEditChange(tag.id, 'name_en', e.target.value)}
+                          value={edited.name_en ?? ''}
+                          onChange={(e) => handleEditChange(String(tag.id), 'name_en', e.target.value)}
                           placeholder="English..."
                           className="w-full p-[5px] border border-[#ddd] rounded text-[13px]"
                         />
@@ -152,8 +150,8 @@ export default function AdminTagsPage() {
                       <td className="p-3 border-b border-[#eee]">
                         <input
                           type="text"
-                          value={edited.name_hu || ''}
-                          onChange={(e) => handleEditChange(tag.id, 'name_hu', e.target.value)}
+                          value={edited.name_hu ?? ''}
+                          onChange={(e) => handleEditChange(String(tag.id), 'name_hu', e.target.value)}
                           placeholder="Hungarian..."
                           className="w-full p-[5px] border border-[#ddd] rounded text-[13px]"
                         />
@@ -166,7 +164,7 @@ export default function AdminTagsPage() {
                           <FaCheck /> Add
                         </button>
                         <button
-                          onClick={() => handleDeleteTag(tag.id)}
+                          onClick={() => handleDeleteTag(String(tag.id))}
                           className="py-[5px] px-[10px] text-[11px] rounded border-none font-semibold cursor-pointer transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#d32f2f] text-white"
                         >
                           <FaTrash />
@@ -177,9 +175,7 @@ export default function AdminTagsPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-[#888]">
-                    No pending tags
-                  </td>
+                  <td colSpan={5} className="p-8 text-center text-[#888]">No pending tags</td>
                 </tr>
               )}
             </tbody>
@@ -188,39 +184,38 @@ export default function AdminTagsPage() {
       </ContentCard>
 
       {/* Global Tags */}
-      <ContentCard title="Global Tag Library (Active)">
+      <ContentCard title={`Global Tag Library (Active) — ${officialTotal} tags`}>
+        {/* Search */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search tags (DE / EN / HU)..."
+            value={officialSearch}
+            onChange={(e) => setOfficialSearch(e.target.value)}
+            className="p-[10px] rounded border border-[#ccc] w-full"
+          />
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  Tag ID
-                </th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  DE
-                </th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  EN
-                </th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  HU
-                </th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  Usage
-                </th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-                  Action
-                </th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">Tag ID</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">DE</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">EN</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">HU</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">Usage</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">Action</th>
               </tr>
             </thead>
             <tbody>
-              {officialTags && officialTags.length > 0 ? (
+              {officialTags.length > 0 ? (
                 officialTags.map((tag) => (
                   <tr key={tag.id} className="hover:bg-[#fafafa]">
-                    <td className="p-3 border-b border-[#eee]">#{tag.id}</td>
-                    <td className="p-3 border-b border-[#eee]">{tag.name_de || '-'}</td>
-                    <td className="p-3 border-b border-[#eee]">{tag.name_en || '-'}</td>
-                    <td className="p-3 border-b border-[#eee]">{tag.name_hu || '-'}</td>
+                    <td className="p-3 border-b border-[#eee] text-[#888]">#{tag.id}</td>
+                    <td className="p-3 border-b border-[#eee]">{tag.name_de ?? '-'}</td>
+                    <td className="p-3 border-b border-[#eee]">{tag.name_en ?? '-'}</td>
+                    <td className="p-3 border-b border-[#eee]">{tag.name_hu ?? '-'}</td>
                     <td className="p-3 border-b border-[#eee]">{(tag.usage_count ?? 0).toLocaleString()}</td>
                     <td className="p-3 border-b border-[#eee]">
                       <FaPen className="text-[#666] cursor-pointer hover:text-[#8cb348]" />
@@ -230,13 +225,38 @@ export default function AdminTagsPage() {
               ) : (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-[#888]">
-                    No official tags
+                    {debouncedSearch ? `No tags matching "${debouncedSearch}"` : 'No official tags'}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#eee]">
+            <span className="text-[13px] text-[#888]">
+              Page {officialPage + 1} of {totalPages} ({officialTotal} tags)
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setOfficialPage((p) => Math.max(0, p - 1))}
+                disabled={officialPage === 0}
+                className="px-3 py-1 text-[13px] rounded border border-[#ccc] disabled:opacity-40 hover:border-[#8cb348] hover:text-[#8cb348] transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setOfficialPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={officialPage >= totalPages - 1}
+                className="px-3 py-1 text-[13px] rounded border border-[#ccc] disabled:opacity-40 hover:border-[#8cb348] hover:text-[#8cb348] transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </ContentCard>
     </>
   );

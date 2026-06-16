@@ -112,6 +112,8 @@ export const queryKeys = {
     all: () => ['admin'] as const,
     tags: {
       all: () => [...queryKeys.admin.all(), 'tags'] as const,
+      list: (params?: { pending?: boolean; skip?: number; limit?: number; q?: string }) =>
+        [...queryKeys.admin.tags.all(), 'list', params] as const,
       detail: (id: number) => [...queryKeys.admin.tags.all(), 'detail', id] as const,
     },
   },

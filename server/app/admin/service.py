@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -13,6 +13,7 @@ from app.admin.schemas import (
     SystemStats,
     TagAdminUpdate,
     TagAdminView,
+    TagsAdminListResponse,
     UserAdminView,
     UserListResponse,
 )
@@ -184,23 +185,47 @@ class AdminService:
 
     # TAG MANAGEMENT
     async def get_tags_with_usage(
-        self, pending_only: bool = False
-    ) -> List[TagAdminView]:
+        self,
+        pending_only: bool = False,
+        skip: int = 0,
+        limit: int = 50,
+        q: Optional[str] = None,
+    ) -> TagsAdminListResponse:
         """
-        Fetches tags and calculates usage count from Active Listings using PostgreSQL JSONB aggregation.
+        Fetches tags with usage counts; supports search and pagination.
         """
-        # Fetch the definitions from Tag table
-        stmt = select(Tag)
+        base_stmt = select(Tag)
         if pending_only:
-            stmt = stmt.where(Tag.is_official.is_(False))
+            base_stmt = base_stmt.where(Tag.is_official.is_(False))
         else:
-            stmt = stmt.where(Tag.is_official)
+            base_stmt = base_stmt.where(Tag.is_official)
 
-        tags = (await self.session.execute(stmt)).scalars().all()
+        if q:
+            ilike = f"%{q}%"
+            base_stmt = base_stmt.where(
+                or_(
+                    Tag.name.ilike(ilike),
+                    Tag.name_de.ilike(ilike),
+                    Tag.name_en.ilike(ilike),
+                    Tag.name_hu.ilike(ilike),
+                )
+            )
 
-        # Calculate Usage Counts
-        # We unroll the JSONB array 'tags' in the listings table into rows and count them
-        # Query equivalent: SELECT jsonb_array_elements_text(tags), count(*) FROM listings WHERE status='ACTIVE' GROUP BY 1
+        total = (
+            await self.session.execute(
+                select(func.count()).select_from(base_stmt.subquery())
+            )
+        ).scalar_one()
+
+        tags = (
+            await self.session.execute(
+                base_stmt.order_by(Tag.name).offset(skip).limit(limit)
+            )
+        ).scalars().all()
+
+        if not tags:
+            return TagsAdminListResponse(data=[], count=total)
+
         stats_stmt = (
             select(
                 func.jsonb_array_elements_text(Listing.tags).label("tag_str"),
@@ -209,27 +234,22 @@ class AdminService:
             .where(Listing.status == ListingStatus.ACTIVE)
             .group_by(func.jsonb_array_elements_text(Listing.tags))
         )
+        usage_map = {row[0]: row[1] for row in (await self.session.execute(stats_stmt)).all()}
 
-        stats_results = await self.session.execute(stats_stmt)
-        # Create map: {"vegan": 12, "bio": 5}
-        usage_map = {row[0]: row[1] for row in stats_results.all()}
-
-        # Merge Data
-        results = []
-        for t in tags:
-            results.append(
-                TagAdminView(
-                    id=t.id,
-                    name=t.name,
-                    name_de=t.name_de,
-                    name_en=t.name_en,
-                    name_hu=t.name_hu,
-                    is_official=t.is_official,
-                    usage_count=usage_map.get(t.name, 0),
-                )
+        results = [
+            TagAdminView(
+                id=t.id,
+                name=t.name,
+                name_de=t.name_de,
+                name_en=t.name_en,
+                name_hu=t.name_hu,
+                is_official=t.is_official,
+                usage_count=usage_map.get(t.name, 0),
             )
+            for t in tags
+        ]
 
-        return results
+        return TagsAdminListResponse(data=results, count=total)
 
     async def update_tag(self, tag_id: int, update_data: TagAdminUpdate):
         tag = await self.session.get(Tag, tag_id)
