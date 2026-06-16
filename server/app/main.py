@@ -44,11 +44,13 @@ from app.listings.exceptions import (
     InvalidListingData,
     ListingNotFound,
     ListingNotOwned,
+    TagNotFound,
 )
 from app.listings.handlers import (
     invalid_listing_data_handler,
     listing_not_found_handler,
     listing_permission_handler,
+    tag_not_found_handler,
 )
 from app.listings.routes import router as listing_router
 from app.users.exceptions import (
@@ -202,6 +204,7 @@ app.add_exception_handler(SystemFailure, system_failure_handler)  # type: ignore
 
 # Listing handlers
 app.add_exception_handler(ListingNotFound, listing_not_found_handler)  # type: ignore
+app.add_exception_handler(TagNotFound, tag_not_found_handler)  # type: ignore
 app.add_exception_handler(ListingNotOwned, listing_permission_handler)  # type: ignore
 app.add_exception_handler(InvalidListingData, invalid_listing_data_handler)  # type: ignore
 

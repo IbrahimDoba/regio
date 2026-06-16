@@ -5,6 +5,7 @@ from app.listings.exceptions import (
     InvalidListingData,
     ListingNotFound,
     ListingNotOwned,
+    TagNotFound,
 )
 
 
@@ -18,6 +19,13 @@ async def listing_not_found_handler(request: Request, exc: ListingNotFound):
 async def listing_permission_handler(request: Request, exc: ListingNotOwned):
     return JSONResponse(
         status_code=status.HTTP_403_FORBIDDEN,
+        content={"detail": exc.detail},
+    )
+
+
+async def tag_not_found_handler(request: Request, exc: TagNotFound):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
         content={"detail": exc.detail},
     )
 
