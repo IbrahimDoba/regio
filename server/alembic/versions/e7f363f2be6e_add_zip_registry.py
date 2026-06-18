@@ -36,14 +36,21 @@ def upgrade() -> None:
     if conn.execute(sa.text("SELECT COUNT(*) FROM zip_registry")).scalar() == 0:
         if _CSV_PATH.exists():
             batch: list[dict] = []
+            seen: set[tuple[str, str]] = set()
             with open(_CSV_PATH, "r", encoding="utf-8-sig") as f:
                 for line in f:
                     parts = line.strip().split(";", 1)
                     if len(parts) != 2:
                         continue
                     zip_code, city_name = parts[0].strip(), parts[1].strip()
-                    if zip_code and city_name:
-                        batch.append({"zip_code": zip_code, "city_name": city_name})
+                    if not zip_code or not city_name:
+                        continue
+                    # Skip duplicate (zip, city) pairs — the composite PK
+                    # rejects them and the source CSV has a few.
+                    if (zip_code, city_name) in seen:
+                        continue
+                    seen.add((zip_code, city_name))
+                    batch.append({"zip_code": zip_code, "city_name": city_name})
                     if len(batch) >= _BATCH_SIZE:
                         conn.execute(sa.text("INSERT INTO zip_registry (zip_code, city_name) VALUES (:zip_code, :city_name)"), batch)
                         batch = []
