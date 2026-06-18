@@ -93,8 +93,10 @@ class ListingCreateBase(BaseModel):
     # ZIP-code based visibility (replaces the old radius_km / lat / lng system)
     zip_code: Optional[str] = Field(
         default=None,
-        max_length=10,
-        description="Hungarian ZIP code. Pre-filled from user profile, overridable.",
+        min_length=4,
+        max_length=4,
+        pattern=r"^\d{4}$",
+        description="Hungarian 4-digit ZIP code. Pre-filled from user profile, overridable.",
     )
     d_class: DClass = Field(
         default=DClass.D5,
@@ -208,7 +210,7 @@ class ListingUpdate(BaseModel):
     media_urls: Optional[List[str]] = Field(default=None)
     tags: Optional[List[str]] = Field(default=None)
 
-    zip_code: Optional[str] = Field(default=None, max_length=10)
+    zip_code: Optional[str] = Field(default=None, min_length=4, max_length=4, pattern=r"^\d{4}$")
     d_class: Optional[DClass] = Field(default=None)
 
     available_until: Optional[datetime] = Field(default=None)

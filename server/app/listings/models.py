@@ -129,7 +129,7 @@ class Listing(SQLModel, table=True):
     # LOCATION & VISIBILITY (ZIP-code based system)
     zip_code: Optional[str] = Field(
         default=None,
-        sa_column=Column(String(10), nullable=True),
+        sa_column=Column(String(4), nullable=True),
         description="Hungarian ZIP code of the listing's origin.",
     )
     d_class: Optional[str] = Field(

@@ -42,8 +42,8 @@ class User(SQLModel, table=True):
         default=None, max_length=500, description="Short about me"
     )
     zip_code: str = Field(
-        max_length=10,
-        description="User's home ZIP code. Pre-fills the listing creation form.",
+        max_length=4,
+        description="Hungarian 4-digit ZIP code. Pre-fills the listing creation form.",
     )
     city: str = Field(max_length=100)
     language: Language = Field(default=Language.EN)
