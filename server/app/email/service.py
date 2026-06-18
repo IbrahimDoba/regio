@@ -148,8 +148,8 @@ class EmailService:
                 msg,
                 hostname=self.config.SMTP_HOST,
                 port=self.config.SMTP_PORT,
-                username=self.config.SMTP_USERNAME,
-                password=self.config.SMTP_PASSWORD,
+                username=self.config.SMTP_USERNAME or None,
+                password=self.config.SMTP_PASSWORD or None,
                 use_tls=self.config.SMTP_SECURE,
             )
             logger.info(f"Email sent to {message.to}: {message.subject}")
