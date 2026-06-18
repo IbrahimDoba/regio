@@ -339,6 +339,10 @@ export interface AdminStatsResponse {
   pending_disputes: number;
 }
 
+export type DisputeResolution = 'UNRESOLVED' | 'APPROVED' | 'CANCELLED';
+
+export type DisputeFilter = 'unresolved' | 'resolved' | 'all';
+
 export interface DisputePublic {
   request_id: string;
   debtor_code: string;
@@ -348,6 +352,7 @@ export interface DisputePublic {
   amount_time: number;
   amount_regio: string;
   status: PaymentRequestStatus;
+  resolution: DisputeResolution;
   description: string | null;
   created_at: string;
   dispute_reason: string | null;

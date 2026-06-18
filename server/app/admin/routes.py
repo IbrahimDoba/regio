@@ -1,5 +1,5 @@
 import uuid
-from typing import Any, List, Optional
+from typing import Any, List, Literal, Optional
 
 from fastapi import (
     APIRouter,
@@ -302,11 +302,26 @@ async def delete_tag(tag_id: int, service: AdminServiceDep) -> None:
         }
     },
 )
-async def list_pending_disputes(admin_service: AdminServiceDep) -> Any:
+async def list_disputes(
+    admin_service: AdminServiceDep,
+    filter: Literal["unresolved", "resolved", "all"] = Query(
+        "unresolved",
+        description=(
+            "Which disputes to return. "
+            "'unresolved': awaiting admin action (default). "
+            "'resolved': already approved or cancelled by an admin. "
+            "'all': every dispute ever raised, for record keeping."
+        ),
+    ),
+) -> Any:
     """
-    List all payment requests marked as DISPUTED.
+    List disputed payment requests.
+
+    Every payment request that ever had a dispute raised is retained for the
+    record. Use the `filter` query param to scope the result to the actionable
+    queue, the resolved archive, or everything.
     """
-    return await admin_service.get_pending_disputes()
+    return await admin_service.get_disputes(filter=filter)
 
 
 @router.post(

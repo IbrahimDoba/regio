@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useModalKeyboard } from "@/hooks/useModalKeyboard";
 import { FaXmark, FaFolderOpen, FaEnvelope, FaComments } from 'react-icons/fa6';
 import { useDialog } from '@/context/DialogContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface DisputePublic {
   request_id: string;
@@ -14,6 +15,7 @@ interface DisputePublic {
   amount_time: number;
   amount_regio: string;
   status: string;
+  resolution: 'UNRESOLVED' | 'APPROVED' | 'CANCELLED';
   description: string | null;
   created_at: string;
   dispute_reason: string | null;
@@ -32,13 +34,46 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
   const [consentGranted, setConsentGranted] = useState(false);
   const [reason, setReason] = useState('');
   const dialog = useDialog();
+  const { t } = useLanguage();
+  const cm = t.admin.disputes.case_modal;
 
   useModalKeyboard(onClose, undefined, isOpen && !!dispute);
 
   if (!isOpen || !dispute) return null;
 
+  const isResolved = dispute.resolution !== 'UNRESOLVED';
+
+  // Human-readable amount fragment, e.g. "15 minutes and 3.00 Garas".
+  // Only includes currencies that are actually involved in the transfer.
+  const amountParts: string[] = [];
+  if (dispute.amount_time > 0) {
+    amountParts.push(`${dispute.amount_time} ${cm.amount_time_unit}`);
+  }
+  if (Number(dispute.amount_regio) > 0) {
+    amountParts.push(`${dispute.amount_regio} ${cm.unit_garas}`);
+  }
+  const amountStr = amountParts.join(` ${cm.amount_and} `);
+
+  const debtorLabel = `${dispute.debtor_name} (${dispute.debtor_code})`;
+  const creditorLabel = `${dispute.creditor_name} (${dispute.creditor_code})`;
+
   const handleResolve = async (action: 'APPROVE' | 'REJECT') => {
-    if (!await dialog.confirm('Confirm Action', `Are you sure you want to ${action} this dispute?`)) return;
+    // Spell out exactly what the action does so the admin can't act blindly.
+    // APPROVE forces the transfer debtor → creditor; REJECT cancels it outright.
+    const messageHtml =
+      action === 'APPROVE'
+        ? cm.confirm_approve_html
+            .replace('{amount}', amountStr)
+            .replace('{debtor}', debtorLabel)
+            .replace('{creditor}', creditorLabel)
+        : cm.confirm_reject_html.replace('{debtor}', debtorLabel);
+
+    const confirmed = await dialog.confirm(cm.confirm_title, '', {
+      messageHtml,
+      okLabel: action === 'APPROVE' ? cm.confirm_ok_approve : cm.confirm_ok_reject,
+      cancelLabel: cm.confirm_cancel,
+    });
+    if (!confirmed) return;
     onResolve(dispute.request_id, action, reason);
     onClose();
   };
@@ -67,6 +102,21 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
 
         {/* Body */}
         <div className="p-[30px] overflow-y-auto">
+          {/* Resolution banner (resolved cases only) */}
+          {isResolved && (
+            <div
+              className={`p-4 rounded-md mb-5 text-[14px] font-semibold border ${
+                dispute.resolution === 'APPROVED'
+                  ? 'bg-[#e8f5e9] border-[#c8e6c9] text-[#33691e]'
+                  : 'bg-[#fff3e0] border-[#ffe0b2] text-[#e65100]'
+              }`}
+            >
+              {dispute.resolution === 'APPROVED'
+                ? cm.resolved_banner_approved
+                : cm.resolved_banner_cancelled}
+            </div>
+          )}
+
           {/* Creditor Dispute Statement */}
           <div className="bg-white border border-[#eee] p-5 rounded-md mb-5">
             <span className="text-[12px] font-bold text-[#888] uppercase mb-[10px] block border-b border-[#eee] pb-[5px]">
@@ -121,7 +171,8 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
             </div>
           </div>
 
-          {/* Consent Status (Mock) */}
+          {/* Consent Status (Mock) — only relevant while a case is open */}
+          {!isResolved && (
           <div className="bg-[#f0f7ff] border border-[#bbdefb] p-5 rounded-md mb-5">
             <span className="text-[12px] font-bold text-[#4285f4] uppercase mb-[10px] block border-b border-[#bbdefb] pb-[5px]">
               Arbitration Consent Status
@@ -159,38 +210,53 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
               {consentGranted ? 'Request Sent to ' + dispute.debtor_name : 'Request Consent & Info from ' + dispute.debtor_name}
             </button>
           </div>
+          )}
 
-          {/* Admin Note */}
-          <div className="mb-5">
-            <label className="block mb-2 font-bold text-[13px] text-[#555]">
-              Admin Resolution Note (Optional)
-            </label>
-            <textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Provide a reason for your decision..."
-              className="w-full p-3 border border-[#ccc] rounded text-[14px] resize-none"
-              rows={3}
-            />
-          </div>
+          {isResolved ? (
+            /* Read-only resolution note for already-resolved cases */
+            <div className="mb-2">
+              <label className="block mb-2 font-bold text-[13px] text-[#555]">
+                {cm.admin_note_label}
+              </label>
+              <p className="text-[14px] text-[#333] leading-[1.5] italic bg-[#f9f9f9] p-[10px] border-l-[3px] border-[#ccc] rounded">
+                {dispute.dispute_admin_note || cm.no_admin_note}
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Admin Note */}
+              <div className="mb-5">
+                <label className="block mb-2 font-bold text-[13px] text-[#555]">
+                  {cm.resolution_label}
+                </label>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder={cm.resolution_placeholder}
+                  className="w-full p-3 border border-[#ccc] rounded text-[14px] resize-none"
+                  rows={3}
+                />
+              </div>
 
-          {/* Actions */}
-          <div
-            className={`flex gap-[10px] justify-end ${!consentGranted ? 'opacity-50 pointer-events-none' : ''}`}
-          >
-            <button
-              onClick={() => handleResolve('REJECT')}
-              className="py-2 px-4 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#d32f2f] text-white"
-            >
-              Reject Claim
-            </button>
-            <button
-              onClick={() => handleResolve('APPROVE')}
-              className="py-2 px-4 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#8cb348] text-white"
-            >
-              Issue Refund (Force)
-            </button>
-          </div>
+              {/* Actions */}
+              <div
+                className={`flex gap-[10px] justify-end ${!consentGranted ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                <button
+                  onClick={() => handleResolve('REJECT')}
+                  className="py-2 px-4 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#d32f2f] text-white"
+                >
+                  {cm.reject_button}
+                </button>
+                <button
+                  onClick={() => handleResolve('APPROVE')}
+                  className="py-2 px-4 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#8cb348] text-white"
+                >
+                  {cm.refund_button}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
       </div>

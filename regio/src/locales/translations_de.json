@@ -535,6 +535,16 @@
       "col_controls": "Steuerung",
       "empty": "Keine offenen Konflikte",
       "manage_button": "Fall bearbeiten",
+      "view_button": "Fall ansehen",
+      "title": "Konflikte",
+      "filter_unresolved": "Offen",
+      "filter_resolved": "Gelöst",
+      "filter_all": "Alle",
+      "status_unresolved": "Offener Konflikt",
+      "status_approved": "Gelöst · Bezahlt",
+      "status_cancelled": "Gelöst · Storniert",
+      "empty_resolved": "Keine gelösten Konflikte",
+      "empty_all": "Keine Konflikte vorhanden",
       "loading": "Lade Konflikte...",
       "case_modal": {
         "title": "Fall {id} - Konflikt",
@@ -555,7 +565,19 @@
         "resolution_label": "Admin-Entscheidungsnotiz (optional)",
         "resolution_placeholder": "Begründe deine Entscheidung...",
         "reject_button": "Forderung ablehnen",
-        "refund_button": "Erstattung erzwingen"
+        "refund_button": "Erstattung erzwingen",
+        "unit_garas": "Garas",
+        "amount_and": "und",
+        "admin_note_label": "Admin-Entscheidungsnotiz",
+        "no_admin_note": "Keine Notiz erfasst.",
+        "resolved_banner_approved": "Dieser Konflikt wurde gelöst. Die Zahlung wurde erzwungen und dem Schuldner belastet.",
+        "resolved_banner_cancelled": "Dieser Konflikt wurde gelöst. Die Anforderung wurde storniert und dem Schuldner nicht belastet.",
+        "confirm_title": "Lösung bestätigen",
+        "confirm_approve_html": "Das System zieht <strong>{amount}</strong> von <strong>{debtor}</strong> ab und schreibt es <strong>{creditor}</strong> gut. Dies erzwingt die Zahlung und <strong>kann nicht rückgängig gemacht werden</strong>.",
+        "confirm_reject_html": "Dies <strong>storniert die Zahlungsanforderung dauerhaft</strong>. Es werden keine Gelder bewegt und <strong>{debtor}</strong> wird nicht belastet. Dies <strong>kann nicht rückgängig gemacht werden</strong>.",
+        "confirm_ok_approve": "Ja, Zahlung erzwingen",
+        "confirm_ok_reject": "Ja, Anforderung stornieren",
+        "confirm_cancel": "Zurück"
       }
     },
     "tags": {

@@ -535,6 +535,16 @@
       "col_controls": "Kezelés",
       "empty": "Nincs függőben lévő ügy",
       "manage_button": "Ügy kezelése",
+      "view_button": "Ügy megtekintése",
+      "title": "Konfliktusok",
+      "filter_unresolved": "Nyitott",
+      "filter_resolved": "Lezárt",
+      "filter_all": "Összes",
+      "status_unresolved": "Nyitott konfliktus",
+      "status_approved": "Lezárva · Kifizetve",
+      "status_cancelled": "Lezárva · Visszavonva",
+      "empty_resolved": "Nincs lezárt ügy",
+      "empty_all": "Nincs rögzített ügy",
       "loading": "Konfliktusok betöltése...",
       "case_modal": {
         "title": "Ügy {id} - Konfliktus",
@@ -555,7 +565,19 @@
         "resolution_label": "Adminisztrátori döntés indoklása (opcionális)",
         "resolution_placeholder": "Indokold meg a döntésed...",
         "reject_button": "Követelés elutasítása",
-        "refund_button": "Visszatérítés kényszerítése"
+        "refund_button": "Visszatérítés kényszerítése",
+        "unit_garas": "garas",
+        "amount_and": "és",
+        "admin_note_label": "Adminisztrátori döntés indoklása",
+        "no_admin_note": "Nem rögzítettek megjegyzést.",
+        "resolved_banner_approved": "Ezt az ügyet lezárták. A fizetést kikényszerítették, és az adóst megterhelték.",
+        "resolved_banner_cancelled": "Ezt az ügyet lezárták. A kérelmet visszavonták, és az adóst nem terhelték meg.",
+        "confirm_title": "Döntés megerősítése",
+        "confirm_approve_html": "A rendszer levon <strong>{amount}</strong> összeget <strong>{debtor}</strong> egyenlegéből, és jóváírja <strong>{creditor}</strong> javára. Ez kikényszeríti a fizetést, és <strong>nem vonható vissza</strong>.",
+        "confirm_reject_html": "Ez <strong>véglegesen visszavonja</strong> a fizetési kérelmet. Nem történik pénzmozgás, és <strong>{debtor}</strong> nem kerül megterhelésre. Ez <strong>nem vonható vissza</strong>.",
+        "confirm_ok_approve": "Igen, fizetés kikényszerítése",
+        "confirm_ok_reject": "Igen, kérelem visszavonása",
+        "confirm_cancel": "Vissza"
       }
     },
     "tags": {

@@ -183,6 +183,15 @@ class DisputePublic(BaseModel):
     amount_time: int
     amount_regio: Decimal
     status: PaymentStatus
+    resolution: Literal["UNRESOLVED", "APPROVED", "CANCELLED"] = Field(
+        ...,
+        description=(
+            "Derived resolution state of the dispute. "
+            "UNRESOLVED: still awaiting admin action (status REJECTED). "
+            "APPROVED: admin forced the payment through (status EXECUTED). "
+            "CANCELLED: admin sided with the debtor (status CANCELLED)."
+        ),
+    )
     description: Optional[str]
     dispute_reason: Optional[str]
     dispute_raised_at: Optional[datetime]

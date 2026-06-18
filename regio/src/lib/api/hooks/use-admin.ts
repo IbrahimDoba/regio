@@ -11,6 +11,7 @@ import type {
   AdminUserUpdate,
   TagsAdminListResponse,
   TagUpdate,
+  DisputeFilter,
   DisputeResolveRequest,
 } from '../types';
 
@@ -150,12 +151,12 @@ export function useDeleteTag() {
 // ============================================================================
 
 /**
- * List pending disputes
+ * List disputes, scoped by filter (unresolved | resolved | all).
  */
-export function usePendingDisputes() {
+export function useDisputes(filter: DisputeFilter = 'unresolved') {
   return useQuery({
-    queryKey: [...queryKeys.admin.all(), 'disputes'] as const,
-    queryFn: () => adminApi.listPendingDisputes(),
+    queryKey: [...queryKeys.admin.all(), 'disputes', filter] as const,
+    queryFn: () => adminApi.listDisputes(filter),
   });
 }
 

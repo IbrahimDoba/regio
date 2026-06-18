@@ -14,6 +14,7 @@ import type {
   TagsAdminListResponse,
   TagUpdate,
   DisputePublic,
+  DisputeFilter,
   DisputeResolveRequest,
   Message,
 } from '../types';
@@ -121,11 +122,15 @@ export const deleteTag = async (tagId: string): Promise<void> => {
 // ============================================================================
 
 /**
- * List pending disputes
+ * List disputes, scoped by filter (unresolved | resolved | all).
+ * Defaults to the unresolved work queue.
  */
-export const listPendingDisputes = async (): Promise<DisputePublic[]> => {
+export const listDisputes = async (
+  filter: DisputeFilter = 'unresolved'
+): Promise<DisputePublic[]> => {
   const response = await apiClient.get<DisputePublic[]>(
-    API_ENDPOINTS.ADMIN.DISPUTES
+    API_ENDPOINTS.ADMIN.DISPUTES,
+    { params: { filter } }
   );
   return response.data;
 };
@@ -156,6 +161,6 @@ export const adminApi = {
   getTags,
   updateTag,
   deleteTag,
-  listPendingDisputes,
+  listDisputes,
   resolveDispute,
 } as const;

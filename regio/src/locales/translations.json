@@ -535,6 +535,16 @@
       "col_controls": "Controls",
       "empty": "No pending disputes",
       "manage_button": "Manage Case",
+      "view_button": "View Case",
+      "title": "Disputes",
+      "filter_unresolved": "Unresolved",
+      "filter_resolved": "Resolved",
+      "filter_all": "All",
+      "status_unresolved": "Open Conflict",
+      "status_approved": "Resolved · Paid",
+      "status_cancelled": "Resolved · Cancelled",
+      "empty_resolved": "No resolved disputes",
+      "empty_all": "No disputes on record",
       "loading": "Loading disputes...",
       "case_modal": {
         "title": "Case {id} - Dispute",
@@ -555,7 +565,19 @@
         "resolution_label": "Admin Resolution Note (Optional)",
         "resolution_placeholder": "Provide a reason for your decision...",
         "reject_button": "Reject Claim",
-        "refund_button": "Issue Refund (Force)"
+        "refund_button": "Issue Refund (Force)",
+        "unit_garas": "Garas",
+        "amount_and": "and",
+        "admin_note_label": "Admin Resolution Note",
+        "no_admin_note": "No note was recorded.",
+        "resolved_banner_approved": "This dispute has been resolved. The payment was forced through and the debtor was charged.",
+        "resolved_banner_cancelled": "This dispute has been resolved. The request was cancelled and the debtor was not charged.",
+        "confirm_title": "Confirm Resolution",
+        "confirm_approve_html": "The system will deduct <strong>{amount}</strong> from <strong>{debtor}</strong> and credit it to <strong>{creditor}</strong>. This forces the payment through and <strong>cannot be undone</strong>.",
+        "confirm_reject_html": "This will <strong>permanently cancel</strong> the payment request. No funds will move and <strong>{debtor}</strong> will not be charged. This <strong>cannot be undone</strong>.",
+        "confirm_ok_approve": "Yes, force payment",
+        "confirm_ok_reject": "Yes, cancel request",
+        "confirm_cancel": "Go back"
       }
     },
     "tags": {

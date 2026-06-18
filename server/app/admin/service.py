@@ -296,19 +296,51 @@ class AdminService:
         }
 
     # DISPUTES
-    async def get_pending_disputes(self) -> List[DisputePublic]:
+    @staticmethod
+    def _resolution_for_status(status: PaymentStatus) -> str:
+        """
+        Derives the dispute resolution state from the payment request status.
+
+        A disputed request stays REJECTED until an admin acts. Resolving it sets
+        the status to EXECUTED (admin forced the payment) or CANCELLED (admin
+        sided with the debtor). ``dispute_raised`` is never reset, so resolved
+        disputes remain identifiable for the record.
+        """
+        if status == PaymentStatus.EXECUTED:
+            return "APPROVED"
+        if status == PaymentStatus.CANCELLED:
+            return "CANCELLED"
+        return "UNRESOLVED"
+
+    async def get_disputes(
+        self, filter: str = "unresolved"
+    ) -> List[DisputePublic]:
+        """
+        Lists disputed payment requests, scoped by ``filter``.
+
+        - **unresolved**: still awaiting admin action (status REJECTED).
+        - **resolved**: already approved (EXECUTED) or cancelled (CANCELLED).
+        - **all**: every request that ever had a dispute raised.
+        """
         stmt = (
             select(PaymentRequest)
-            .where(
-                PaymentRequest.dispute_raised.is_(True),
-                PaymentRequest.status == PaymentStatus.REJECTED,
-            )
+            .where(PaymentRequest.dispute_raised.is_(True))
             .options(
                 selectinload(PaymentRequest.creditor),
                 selectinload(PaymentRequest.debtor),
             )
             .order_by(desc(PaymentRequest.created_at))
         )
+
+        if filter == "unresolved":
+            stmt = stmt.where(PaymentRequest.status == PaymentStatus.REJECTED)
+        elif filter == "resolved":
+            stmt = stmt.where(
+                PaymentRequest.status.in_(
+                    [PaymentStatus.EXECUTED, PaymentStatus.CANCELLED]
+                )
+            )
+
         results = await self.session.execute(stmt)
         reqs = results.scalars().all()
 
@@ -324,6 +356,7 @@ class AdminService:
                     amount_time=r.amount_time,
                     amount_regio=r.amount_regio,
                     status=r.status,
+                    resolution=self._resolution_for_status(r.status),
                     description=r.description,
                     dispute_reason=r.dispute_reason,
                     dispute_raised_at=r.dispute_raised_at,
