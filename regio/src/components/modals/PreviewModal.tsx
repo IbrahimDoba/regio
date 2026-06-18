@@ -133,6 +133,7 @@ export default function PreviewModal({
 }: PreviewModalProps) {
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  const [lightboxUrl, setLightboxUrl] = React.useState<string | null>(null);
   useModalKeyboard(onClose, undefined, !!listing);
   if (!listing) return null;
 
@@ -291,13 +292,18 @@ export default function PreviewModal({
               </div>
               <div className="flex gap-[8px] overflow-x-auto pb-[4px]">
                 {listing.media_urls.map((url, i) => (
-                  <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setLightboxUrl(url)}
+                    className="shrink-0 cursor-pointer border-none bg-transparent p-0"
+                  >
                     <img
                       src={url}
                       alt={`Photo ${i + 1}`}
                       className="h-[120px] w-auto rounded-[6px] object-cover border border-[#eee] hover:opacity-90 transition-opacity"
                     />
-                  </a>
+                  </button>
                 ))}
               </div>
             </div>
@@ -372,6 +378,31 @@ export default function PreviewModal({
         </div>
       </div>
       </div>
+
+      {/* Image lightbox — constrained to the device frame (max-w-[480px]) */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-[1100] flex justify-center bg-[rgba(0,0,0,0.6)] backdrop-blur-[3px] animate-in fade-in duration-150"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <div className="relative w-full max-w-[480px] h-full flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() => setLightboxUrl(null)}
+              aria-label="Close"
+              className="absolute top-[16px] right-[16px] text-white text-[32px] leading-none cursor-pointer bg-transparent border-none z-[1] hover:opacity-80"
+            >
+              &times;
+            </button>
+            <img
+              src={lightboxUrl}
+              alt=""
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -285,12 +285,20 @@ export default function TermsPage() {
     setLanguage(order[(idx + 1) % order.length]);
   };
 
+  const handleClose = () => {
+    // Terms opens in a new tab (target="_blank"), so close that tab.
+    window.close();
+    // Fallback: if the browser blocked window.close() (e.g. tab wasn't
+    // script-opened), navigate back instead so the button still does something.
+    setTimeout(() => router.back(), 100);
+  };
+
   return (
     <MobileContainer className="flex flex-col bg-[#f8f8f8]">
       {/* Top bar */}
       <div className="sticky top-0 z-10 bg-white border-b border-[#eee] px-[15px] py-[12px] flex items-center justify-between shadow-sm">
         <button
-          onClick={() => router.back()}
+          onClick={handleClose}
           className="cursor-pointer flex items-center gap-[8px] text-[#999] font-[700] text-[14px]"
         >
           <FaXmark className="text-[16px]" />

@@ -2,12 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FaPlus, FaGlobe } from "react-icons/fa6";
 import Header from "@/components/layout/Header";
 import FilterPanel from "@/components/feed/FilterPanel";
 import FeedList from "@/components/feed/FeedList";
 import PreviewModal from "@/components/modals/PreviewModal";
-import CreateModal from "@/components/modals/CreateModal";
 import EditModal from "@/components/modals/EditModal";
 import { ListingCategory, ListingPublic, TagAutocomplete } from "@/lib/api/types";
 import { useFeed, useCreateListingInquiry } from "@/lib/api";
@@ -25,7 +23,6 @@ export default function FeedPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [isFilterOpen, setIsFilterOpen] = useState(true);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   // Category toggles
   const [activeFilters, setActiveFilters] = useState<ListingCategory[]>(
@@ -178,11 +175,6 @@ export default function FeedPage() {
         onModify={(listing) => { setPreviewListing(null); setEditListing(listing); }}
       />
 
-      <CreateModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-      />
-
       {editListing && (
         <EditModal
           key={editListing.id}
@@ -190,13 +182,6 @@ export default function FeedPage() {
           onClose={() => setEditListing(null)}
         />
       )}
-
-      <button
-        className="fixed bottom-[20px] right-[20px] w-[60px] h-[60px] rounded-full bg-[var(--color-green-offer)] text-white text-[24px] flex justify-center items-center shadow-[0_4px_10px_rgba(0,0,0,0.3)] border-none cursor-pointer z-50 hover:brightness-110 transition-all active:scale-95"
-        onClick={() => setIsCreateOpen(true)}
-      >
-        <FaPlus />
-      </button>
     </>
   );
 }
