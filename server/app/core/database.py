@@ -118,7 +118,7 @@ async def init_db() -> None:
                     ),
                     first_name=user_settings.SYSTEM_SINK_FIRST_NAME,
                     last_name=user_settings.SYSTEM_SINK_LAST_NAME,
-                    city="SYSTEM",
+                    city="Budapest - I.Kerület",
                     zip_code="1015",
                     verification_status=VerificationStatus.VERIFIED,
                     verified_at=datetime.now(timezone.utc),
