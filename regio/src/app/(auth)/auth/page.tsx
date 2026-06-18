@@ -452,7 +452,7 @@ function AuthForm() {
                   required
                 />
                 <label htmlFor="agb">
-                  {t.auth.register.terms_checkbox_prefix}
+                  {t.auth.register.terms_checkbox_prefix}{' '}
                   <Link href="/terms" target="_blank" className="underline text-[var(--color-nav-bg)] font-[600]">
                     {t.auth.register.terms_checkbox_link}
                   </Link>
