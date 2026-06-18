@@ -137,6 +137,15 @@ export function useConfirmEmailChange() {
  * Request new invites mutation
  * Voids existing unused invites and generates 3 new ones
  */
+export function useGetCitiesByZip(zipCode: string) {
+  return useQuery({
+    queryKey: ["zip-cities", zipCode],
+    queryFn: () => usersApi.getCitiesByZip(zipCode),
+    enabled: /^\d{4}$/.test(zipCode),
+    staleTime: Infinity,
+  });
+}
+
 export function useRequestNewInvites() {
   const queryClient = useQueryClient();
 

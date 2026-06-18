@@ -52,6 +52,10 @@ class InvalidAvatarFile(InvalidUserRequest):
     detail = "Only JPEG and PNG images are allowed (max 5 MB)"
 
 
+class InvalidZipCity(InvalidUserRequest):
+    detail = "The selected city does not match the provided ZIP code."
+
+
 # ==========================================
 # Category: 403 Forbidden
 # ==========================================

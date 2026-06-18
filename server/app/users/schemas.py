@@ -1,7 +1,13 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import ConfigDict, EmailStr, Field, field_validator, model_validator
+from pydantic import (
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
 from sqlmodel import SQLModel
 
 from app.users.enums import TrustLevel, VerificationStatus
@@ -43,8 +49,17 @@ class UserCreate(SQLModel):
     invite_code: str = Field(
         ..., description="Valid invite code required for registration."
     )
-    zip_code: str = Field(..., max_length=10, description="User's home ZIP code.")
+    zip_code: str = Field(
+        ..., max_length=4, description="Hungarian 4-digit ZIP code."
+    )
     city: str = Field(..., max_length=100, description="User's home city.")
+
+    @field_validator("zip_code")
+    @classmethod
+    def zip_must_be_4_digits(cls, v: str) -> str:
+        if not v.isdigit() or len(v) != 4:
+            raise ValueError("ZIP code must be exactly 4 digits.")
+        return v
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -54,9 +69,9 @@ class UserCreate(SQLModel):
                 "first_name": "Jane",
                 "middle_name": "Marie",
                 "last_name": "Doe",
-                "invite_code": "INV-123",
-                "zip_code": "10115",
-                "city": "Berlin",
+                "invite_code": "REGIO-XX-XXXXXXXX",
+                "zip_code": "1011",
+                "city": "Budapest - I.Kerület",
             }
         }
     )
@@ -98,15 +113,23 @@ class UserUpdate(SQLModel):
 
     @model_validator(mode="after")
     def location_fields_cannot_be_cleared(self) -> "UserUpdate":
-        if "zip_code" in self.model_fields_set and not (self.zip_code or "").strip():
-            raise ValueError("zip_code cannot be removed.")
+        if "zip_code" in self.model_fields_set:
+            v = (self.zip_code or "").strip()
+            if not v:
+                raise ValueError("zip_code cannot be removed.")
+            if not v.isdigit() or len(v) != 4:
+                raise ValueError("ZIP code must be exactly 4 digits.")
         if "city" in self.model_fields_set and not (self.city or "").strip():
             raise ValueError("city cannot be removed.")
         return self
 
     model_config = ConfigDict(
         json_schema_extra={
-            "example": {"zip_code": "80331", "city": "Munich", "language": "DE"}
+            "example": {
+                "zip_code": "80331",
+                "city": "Munich",
+                "language": "DE",
+            }
         }
     )
 

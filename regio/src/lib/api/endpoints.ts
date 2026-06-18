@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
     REQUEST_INVITES: '/users/invites/request',
     REQUEST_EMAIL_CHANGE: '/users/me/request-email-change',
     CONFIRM_EMAIL_CHANGE: '/users/me/confirm-email-change',
+    ZIP_CITIES: (zipCode: string) => `/users/zip/${zipCode}/cities`,
   },
 
   // ============================================================================

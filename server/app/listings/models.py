@@ -58,6 +58,21 @@ class PostVisibility(SQLModel, table=True):
     )
 
 
+class ZipRegistry(SQLModel, table=True):
+    """Hungarian irányítószám → city/village name reference. Read-only after migration."""
+
+    __tablename__ = "zip_registry"
+
+    zip_code: str = Field(
+        sa_column=Column(String(4), primary_key=True, nullable=False)
+    )
+    city_name: str = Field(
+        sa_column=Column(String(200), primary_key=True, nullable=False)
+    )
+
+    __table_args__ = (sa.Index("ix_zip_registry_zip_code", "zip_code"),)
+
+
 class Tag(SQLModel, table=True):
     __tablename__ = "tags"
 

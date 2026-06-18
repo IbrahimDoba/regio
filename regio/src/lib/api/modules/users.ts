@@ -146,6 +146,13 @@ export const confirmEmailChange = async (token: string): Promise<{ message: stri
   return response.data;
 };
 
+export const getCitiesByZip = async (zipCode: string): Promise<string[]> => {
+  const response = await apiClient.get<string[]>(
+    API_ENDPOINTS.USERS.ZIP_CITIES(zipCode)
+  );
+  return response.data;
+};
+
 export const usersApi = {
   getCurrentUser,
   getUserByCode,
@@ -158,4 +165,5 @@ export const usersApi = {
   requestNewInvites,
   requestEmailChange,
   confirmEmailChange,
+  getCitiesByZip,
 } as const;

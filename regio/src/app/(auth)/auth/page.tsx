@@ -9,7 +9,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useDialog } from "@/context/DialogContext";
 import { useToast } from "@/context/ToastContext";
-import { useRegisterUser, useRequestPasswordReset } from "@/lib/api";
+import { useRegisterUser, useRequestPasswordReset, useGetCitiesByZip } from "@/lib/api";
 import MobileContainer from "@/components/layout/MobileContainer";
 import ErrorMessage from "@/components/auth/ErrorMessage";
 
@@ -50,8 +50,25 @@ function AuthForm() {
   const [registerError, setRegisterError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
 
+  const { data: zipCities = [], isFetching: citiesFetching } = useGetCitiesByZip(registerZip);
+
   const flags: { [key: string]: string } = { 'EN': '🇬🇧', 'HU': '🇭🇺', 'DE': '🇩🇪' };
   const langOrder: ('EN' | 'HU' | 'DE')[] = ['EN', 'HU', 'DE'];
+
+  // When ZIP changes, validate against registry and derive the city.
+  // Single match -> auto-fill (read-only). Multiple -> let the user pick.
+  // No match -> surface an error and clear the city.
+  React.useEffect(() => {
+    if (registerZip.length !== 4 || citiesFetching) return;
+    if (zipCities.length === 0) {
+      toast.error("Invalid zip code");
+      setRegisterCity('');
+    } else if (zipCities.length === 1) {
+      setRegisterCity(zipCities[0]);
+    } else if (!zipCities.includes(registerCity)) {
+      setRegisterCity('');
+    }
+  }, [registerZip, zipCities, citiesFetching]);
 
   const toggleLang = () => {
     const idx = langOrder.indexOf(language);
@@ -348,29 +365,53 @@ function AuthForm() {
               </div>
 
               <div className="flex gap-[10px] mb-[20px]">
-                <div className="flex-1">
-                  <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.city_label}</label>
-                  <input
-                    type="text"
-                    className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[var(--input-bg)] outline-none"
-                    placeholder={t.auth.register.city_placeholder}
-                    value={registerCity}
-                    onChange={(e) => setRegisterCity(e.target.value)}
-                    disabled={isRegistering}
-                    required
-                  />
-                </div>
                 <div className="w-[120px]">
                   <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.zip_label}</label>
                   <input
                     type="text"
+                    inputMode="numeric"
                     className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[var(--input-bg)] outline-none"
                     placeholder={t.auth.register.zip_placeholder}
                     value={registerZip}
-                    onChange={(e) => setRegisterZip(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                    onChange={(e) => setRegisterZip(e.target.value.replace(/\D/g, "").slice(0, 4))}
                     disabled={isRegistering}
                     required
                   />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.city_label}</label>
+                  {citiesFetching ? (
+                    <div className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[14px] text-[#aaa] bg-[var(--input-bg)] flex items-center gap-[8px]">
+                      <FaSpinner className="animate-spin" /> Loading...
+                    </div>
+                  ) : zipCities.length > 1 ? (
+                    <select
+                      className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[var(--input-bg)] outline-none"
+                      value={registerCity}
+                      onChange={(e) => setRegisterCity(e.target.value)}
+                      disabled={isRegistering}
+                      required
+                    >
+                      <option value="">{t.auth.register.city_placeholder}</option>
+                      {zipCities.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  ) : zipCities.length === 1 ? (
+                    <input
+                      type="text"
+                      className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[#f5f5f5] text-[#777] outline-none cursor-not-allowed"
+                      value={zipCities[0]}
+                      readOnly
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[#f5f5f5] text-[#aaa] outline-none cursor-not-allowed"
+                      placeholder={registerZip.length === 4 ? "Invalid zip code" : t.auth.register.city_placeholder}
+                      value=""
+                      readOnly
+                      disabled
+                    />
+                  )}
                 </div>
               </div>
 

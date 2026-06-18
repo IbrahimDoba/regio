@@ -20,10 +20,12 @@ from app.users.exceptions import (
     ActionNotPermitted,
     ImmutableFieldUpdate,
     InvalidAvatarFile,
+    InvalidZipCity,
     SystemSaturated,
     UserAlreadyExists,
     UserNotFound,
 )
+from app.listings.models import ZipRegistry
 from app.users.models import User
 from app.users.schemas import (
     UserAdminUpdate,
@@ -130,11 +132,25 @@ class UserService:
         results = await self.session.execute(statement)
         return results.scalars().all()
 
+    async def _validate_zip_city(self, zip_code: str, city: str) -> None:
+        """
+        Ensure the (zip_code, city) pair exists in the ZIP registry.
+
+        The frontend constrains city selection to the values returned for a
+        ZIP, but a direct API call can bypass that, so we enforce it here too.
+        """
+        cities = await self.get_cities_by_zip(zip_code)
+        if city not in cities:
+            raise InvalidZipCity()
+
     async def create_user(self, user_in: UserCreate) -> User:
         # Check Email Uniqueness
         existing_user = await self.get_user_by_email(user_in.email)
         if existing_user:
             raise UserAlreadyExists()
+
+        # Reject any (zip_code, city) pair not present in the registry
+        await self._validate_zip_city(user_in.zip_code, user_in.city)
 
         # Generate Unique User Code (Retry Logic)
         user_code = generate_user_code()
@@ -227,6 +243,14 @@ class UserService:
         if any(field in update_data for field in immutable_fields):
             raise ImmutableFieldUpdate()
 
+        # If either location field is changing, the resulting (zip, city)
+        # pair must still be a valid combination in the registry.
+        if "zip_code" in update_data or "city" in update_data:
+            await self._validate_zip_city(
+                update_data.get("zip_code", db_user.zip_code),
+                update_data.get("city", db_user.city),
+            )
+
         if "password" in update_data:
             hashed = get_password_hash(update_data["password"])
             update_data["password_hash"] = hashed
@@ -307,6 +331,15 @@ class UserService:
         await self.session.commit()
         await self.session.refresh(db_user)
         return db_user
+
+    async def get_cities_by_zip(self, zip_code: str) -> list[str]:
+        stmt = (
+            select(ZipRegistry.city_name)
+            .where(ZipRegistry.zip_code == zip_code)
+            .order_by(ZipRegistry.city_name)
+        )
+        result = await self.session.execute(stmt)
+        return [row[0] for row in result]
 
     async def request_email_change(
         self, user_id: uuid.UUID, new_email: str

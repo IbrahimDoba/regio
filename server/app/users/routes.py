@@ -323,6 +323,27 @@ async def read_user_by_code(
     return user
 
 
+@router.get(
+    "/zip/{zip_code}/cities",
+    response_model=list[str],
+    status_code=status.HTTP_200_OK,
+)
+async def get_cities_by_zip(zip_code: str, service: UserServiceDep) -> Any:
+    """
+    Return the valid city/village names for a Hungarian ZIP code.
+
+    Public endpoint — used during registration to populate the city picker.
+    Returns an empty list (not 404) when the ZIP has no matches, so the
+    frontend can show a "no cities found" message without treating it as an error.
+    """
+    if len(zip_code) != 4 or not zip_code.isdigit():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="ZIP code must be exactly 4 digits.",
+        )
+    return await service.get_cities_by_zip(zip_code)
+
+
 @router.post(
     "/me/request-email-change",
     response_model=dict,

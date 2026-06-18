@@ -22,6 +22,7 @@ import {
   useUserInvites,
   useRequestNewInvites,
   useRequestEmailChange,
+  useGetCitiesByZip,
 } from "@/lib/api/hooks/use-users";
 import { useRequestPasswordReset } from "@/lib/api";
 import { API_CONFIG } from "@/lib/api/config";
@@ -57,6 +58,7 @@ export default function ProfilePage() {
   const [city, setCity] = useState("");
   const [zip, setZip] = useState("");
   const [avatarCacheBust, setAvatarCacheBust] = useState(() => Date.now());
+  const { data: zipCities = [], isFetching: citiesFetching } = useGetCitiesByZip(zip);
 
   // Update local state when user data is loaded
   React.useEffect(() => {
@@ -65,6 +67,21 @@ export default function ProfilePage() {
       setZip(user.zip_code || "");
     }
   }, [user]);
+
+  // When ZIP changes, validate against registry and derive the city.
+  // Single match -> auto-fill (read-only). Multiple -> let the user pick.
+  // No match -> surface an error and clear the city.
+  React.useEffect(() => {
+    if (zip.length !== 4 || citiesFetching) return;
+    if (zipCities.length === 0) {
+      toast.error("Invalid zip code");
+      setCity("");
+    } else if (zipCities.length === 1) {
+      setCity(zipCities[0]);
+    } else if (!zipCities.includes(city)) {
+      setCity("");
+    }
+  }, [zip, zipCities, citiesFetching]);
 
   if (isLoading) {
     return <div className="p-10 text-center">Loading profile...</div>;
@@ -271,28 +288,55 @@ export default function ProfilePage() {
             </div>
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
-                {t.profile.personal_tab.city_label}
+                {t.profile.personal_tab.zip_label}
               </label>
               <input
                 type="text"
+                inputMode="numeric"
                 className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder={t.profile.personal_tab.city_placeholder}
+                value={zip}
+                onChange={(e) => setZip(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder={t.profile.personal_tab.zip_placeholder}
               />
             </div>
 
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
-                {t.profile.personal_tab.zip_label}
+                {t.profile.personal_tab.city_label}
               </label>
-              <input
-                type="text"
-                className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
-                value={zip}
-                onChange={(e) => setZip(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                placeholder={t.profile.personal_tab.zip_placeholder}
-              />
+              {citiesFetching ? (
+                <div className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] flex items-center gap-[8px] text-[#888]">
+                  <FaSpinner className="animate-spin" /> Loading...
+                </div>
+              ) : zipCities.length > 1 ? (
+                <select
+                  className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                >
+                  <option value="">{t.profile.personal_tab.city_placeholder}</option>
+                  {zipCities.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              ) : zipCities.length === 1 ? (
+                <input
+                  type="text"
+                  readOnly
+                  className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[#eee] text-[#777] cursor-not-allowed outline-none"
+                  value={zipCities[0]}
+                />
+              ) : (
+                <input
+                  type="text"
+                  readOnly
+                  disabled
+                  className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[#eee] text-[#aaa] cursor-not-allowed outline-none"
+                  placeholder={zip.length === 4 ? "Invalid zip code" : t.profile.personal_tab.city_placeholder}
+                  value=""
+                />
+              )}
             </div>
 
             <div className="mb-[20px]">
