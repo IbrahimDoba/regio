@@ -54,7 +54,6 @@ export default function ProfilePage() {
 
   // Local state for form fields
   const [bio, setBio] = useState("");
-  const [location, setLocation] = useState("");
   const [city, setCity] = useState("");
   const [zip, setZip] = useState("");
   const [avatarCacheBust, setAvatarCacheBust] = useState(() => Date.now());
@@ -62,33 +61,8 @@ export default function ProfilePage() {
   // Update local state when user data is loaded
   React.useEffect(() => {
     if (user) {
-      // Attributes are in a separate field or just not in UserPublic?
-      // UserPublic has: user_code, email, first_name, last_name, trust_level, created_at.
-      // UserRich (which /me returns usually? No, routes say UserPublic)
-      // Wait, let's check backend route /me again. It returns UserPublic.
-      // UserUpdate allows updating address and language.
-      // Where is "BIO"? UserUpdate doesn't have Bio.
-      // Let's check UserUpdate type in types.ts: { address?: string | null; language?: Language; }
-      // So Bio is NOT supported yet? Or is it "address"?
-      // The frontend has "About me (Bio)". Backend UserUpdate has "address".
-      // Maybe "address" is used for location?
-      // Re-checking types.ts: UserCreate has address. UserUpdate has address.
-      // There is no "bio" field in UserPublic or UserUpdate.
-      // I will assume "Location" maps to "address".
-      // "About me" might not be supported in backend yet. I'll comment it out or leave it local for now/map to something else if found.
-      // For now I'll map Location -> address.
-      if (user) {
-        setLocation((user as { address?: string }).address || "");
-        setCity((user as { city?: string }).city || "");
-        setZip(user.zip_code || ""); // user object might come with extra fields if backend sends Pydantic model dump?
-        // But strict typing says UserPublic.
-        // Let's check if UserPublic has address. It does NOT.
-        // This suggests /me might satisfy UserRich?
-        // Backend route: response_model=UserPublic.
-        // This is a potential issue. The backend might validly strip fields not in UserPublic.
-        // I will proceed with what is available: Email, Name, Code, Trust Level.
-        // I will try to use "address" if it comes through, otherwise I'll need to update backend or types.
-      }
+      setCity(user.city || "");
+      setZip(user.zip_code || "");
     }
   }, [user]);
 
@@ -129,7 +103,6 @@ export default function ProfilePage() {
   const handleSavePersonal = () => {
     updateUser.mutate(
       {
-        address: location,
         city: city || null,
         zip_code: zip || null,
         language: language as "EN" | "DE" | "HU",
@@ -296,22 +269,6 @@ export default function ProfilePage() {
             <div className="text-[14px] font-bold text-[#888] uppercase tracking-[0.5px] mb-[15px] mt-[30px] border-b border-[#eee] pb-[5px]">
               {t.profile.personal_tab.public_info_section}
             </div>
-            <div className="mb-[20px]">
-              <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
-                {t.profile.personal_tab.location_label}
-              </label>
-              <input
-                type="text"
-                className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] focus:bg-white focus:border-[var(--color-green-offer)] outline-none transition-colors"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder={t.profile.personal_tab.location_placeholder}
-              />
-              <small className="text-[#888] text-[10px]">
-                {t.profile.personal_tab.location_hint}
-              </small>
-            </div>
-
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
                 {t.profile.personal_tab.city_label}

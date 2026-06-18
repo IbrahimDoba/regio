@@ -73,7 +73,6 @@ export interface UserPublic {
   avatar_url?: string | null;
   zip_code?: string | null;
   city?: string | null;
-  address?: string | null;
   language?: string | null;
 }
 
@@ -99,11 +98,11 @@ export interface UserCreate {
   email: string;
   password: string;
   invite_code: string;
-  address?: string | null;
+  zip_code: string;
+  city: string;
 }
 
 export interface UserUpdate {
-  address?: string | null;
   zip_code?: string | null;
   city?: string | null;
   language?: Language;

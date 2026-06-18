@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Optional
 
-from pydantic import ConfigDict, EmailStr, Field, field_validator
+from pydantic import ConfigDict, EmailStr, Field, field_validator, model_validator
 from sqlmodel import SQLModel
 
 from app.users.enums import TrustLevel, VerificationStatus
@@ -43,9 +43,8 @@ class UserCreate(SQLModel):
     invite_code: str = Field(
         ..., description="Valid invite code required for registration."
     )
-    address: Optional[str] = Field(
-        default=None, description="Physical address of user."
-    )
+    zip_code: str = Field(..., max_length=10, description="User's home ZIP code.")
+    city: str = Field(..., max_length=100, description="User's home city.")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -56,7 +55,8 @@ class UserCreate(SQLModel):
                 "middle_name": "Marie",
                 "last_name": "Doe",
                 "invite_code": "INV-123",
-                "address": "123 Maple Street, Berlin",
+                "zip_code": "10115",
+                "city": "Berlin",
             }
         }
     )
@@ -71,9 +71,6 @@ class UserUpdate(SQLModel):
         default=None, description="New email address."
     )
     password: Optional[str] = Field(default=None, description="New password.")
-    address: Optional[str] = Field(
-        default=None, description="Updated physical address."
-    )
     language: Optional[str] = Field(
         default=None, description="Preferred interface language (EN, DE, HU)."
     )
@@ -99,9 +96,17 @@ class UserUpdate(SQLModel):
         default=None, description="Receive newsletter."
     )
 
+    @model_validator(mode="after")
+    def location_fields_cannot_be_cleared(self) -> "UserUpdate":
+        if "zip_code" in self.model_fields_set and not (self.zip_code or "").strip():
+            raise ValueError("zip_code cannot be removed.")
+        if "city" in self.model_fields_set and not (self.city or "").strip():
+            raise ValueError("city cannot be removed.")
+        return self
+
     model_config = ConfigDict(
         json_schema_extra={
-            "example": {"address": "456 Oak Avenue, Munich", "language": "DE"}
+            "example": {"zip_code": "80331", "city": "Munich", "language": "DE"}
         }
     )
 
@@ -155,7 +160,6 @@ class UserPublic(SQLModel):
         default=None, description="URL to profile image."
     )
     bio: Optional[str] = Field(default=None, description="Short about me.")
-    address: Optional[str] = Field(..., description="User's physical address.")
     zip_code: Optional[str] = Field(
         default=None, description="User's home ZIP code."
     )

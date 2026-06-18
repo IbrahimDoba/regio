@@ -42,7 +42,8 @@ function AuthForm() {
   const [inviteCode, setInviteCode] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [location, setLocation] = useState('');
+  const [registerCity, setRegisterCity] = useState('');
+  const [registerZip, setRegisterZip] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
@@ -105,7 +106,8 @@ function AuthForm() {
         email: registerEmail,
         password: registerPassword,
         invite_code: inviteCode,
-        address: location || undefined,
+        zip_code: registerZip,
+        city: registerCity,
       });
       await login({ username: registerEmail, password: registerPassword });
     } catch (error: unknown) {
@@ -345,17 +347,31 @@ function AuthForm() {
                 </div>
               </div>
 
-              <div className="mb-[20px]">
-                <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.location_label}</label>
-                <input
-                  type="text"
-                  className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[var(--input-bg)] outline-none"
-                  placeholder={t.auth.register.location_placeholder}
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  disabled={isRegistering}
-                  required
-                />
+              <div className="flex gap-[10px] mb-[20px]">
+                <div className="flex-1">
+                  <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.city_label}</label>
+                  <input
+                    type="text"
+                    className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[var(--input-bg)] outline-none"
+                    placeholder={t.auth.register.city_placeholder}
+                    value={registerCity}
+                    onChange={(e) => setRegisterCity(e.target.value)}
+                    disabled={isRegistering}
+                    required
+                  />
+                </div>
+                <div className="w-[120px]">
+                  <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.zip_label}</label>
+                  <input
+                    type="text"
+                    className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[var(--input-bg)] outline-none"
+                    placeholder={t.auth.register.zip_placeholder}
+                    value={registerZip}
+                    onChange={(e) => setRegisterZip(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                    disabled={isRegistering}
+                    required
+                  />
+                </div>
               </div>
 
               <div className="mb-[20px]">
