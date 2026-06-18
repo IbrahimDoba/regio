@@ -13,6 +13,7 @@ import EditUserModal from "@/components/admin/users/EditUserModal";
 import StatsGrid from "@/components/admin/dashboard/StatsGrid";
 import { useDialog } from "@/context/DialogContext";
 import { useToast } from "@/context/ToastContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface UserAdminView {
   user_code: string;
@@ -56,6 +57,7 @@ export default function AdminUsersPage() {
   const updateUserMutation = useUpdateUserDetails();
   const dialog = useDialog();
   const toast = useToast();
+  const { t } = useLanguage();
 
   const handleEditUser = (user: UserAdminView) => {
     setSelectedUser(user);
@@ -70,11 +72,11 @@ export default function AdminUsersPage() {
       },
       {
         onSuccess: () => {
-          toast.success(`User ${userCode} verified successfully!`);
+          toast.success(t.admin.users.toast_verify_success.replace('{userCode}', userCode));
         },
         onError: (error) => {
           console.error("Verification error:", error);
-          toast.error("Failed to verify user");
+          toast.error(t.admin.users.toast_verify_error);
         },
       }
     );
@@ -89,11 +91,11 @@ export default function AdminUsersPage() {
       },
       {
         onSuccess: () => {
-          toast.success(`User ${userCode} rejected.`);
+          toast.success(t.admin.users.toast_reject_success.replace('{userCode}', userCode));
         },
         onError: (error) => {
           console.error("Rejection error:", error);
-          toast.error("Failed to reject user");
+          toast.error(t.admin.users.toast_reject_error);
         },
       }
     );
@@ -104,11 +106,11 @@ export default function AdminUsersPage() {
       { userCode, data },
       {
         onSuccess: () => {
-          toast.success("User updated successfully!");
+          toast.success(t.admin.users.toast_update_success);
         },
         onError: (error) => {
           console.error("Update error:", error);
-          toast.error("Failed to update user");
+          toast.error(t.admin.users.toast_update_error);
         },
       }
     );

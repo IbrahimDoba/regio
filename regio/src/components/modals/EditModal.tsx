@@ -384,10 +384,10 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     if (!confirmed) return;
     deleteMutation.mutate(listing.id, {
       onSuccess: () => {
-        toast.success("Post deleted.");
+        toast.success(t.preview_modal.toast_deleted);
         onClose();
       },
-      onError: () => toast.error("Failed to delete post."),
+      onError: () => toast.error(t.preview_modal.toast_delete_error),
     });
   };
 

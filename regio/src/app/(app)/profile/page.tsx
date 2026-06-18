@@ -74,7 +74,7 @@ export default function ProfilePage() {
   React.useEffect(() => {
     if (zip.length !== 4 || citiesFetching) return;
     if (zipCities.length === 0) {
-      toast.error("Invalid zip code");
+      toast.error(t.profile.personal_tab.toast_invalid_zip);
       setCity("");
     } else if (zipCities.length === 1) {
       setCity(zipCities[0]);
@@ -96,9 +96,9 @@ export default function ProfilePage() {
     try {
       await requestResetMutation.mutateAsync(user!.email);
       setPasswordResetSent(true);
-      toast.success("Reset link sent! Check your inbox.");
+      toast.success(t.profile.account_tab.toast_reset_link_sent);
     } catch {
-      const msg = "Failed to send reset email. Please try again.";
+      const msg = t.profile.account_tab.toast_reset_link_failed;
       setPasswordResetError(msg);
       toast.error(msg);
     }
@@ -108,12 +108,12 @@ export default function ProfilePage() {
     if (!newEmail.trim()) return;
     try {
       await requestEmailChange.mutateAsync(newEmail.trim().toLowerCase());
-      toast.success("Confirmation emails sent! Check your new inbox.");
+      toast.success(t.profile.account_tab.toast_email_change_sent);
       setShowEmailChange(false);
       setNewEmail("");
     } catch (err: unknown) {
       const e = err as { response?: { data?: { detail?: string } } };
-      toast.error(e?.response?.data?.detail || "Failed to request email change.");
+      toast.error(e?.response?.data?.detail || t.profile.account_tab.toast_email_change_failed);
     }
   };
 
@@ -126,7 +126,7 @@ export default function ProfilePage() {
       },
       {
         onSuccess: () => {
-          toast.success("Profile updated!");
+          toast.success(t.profile.personal_tab.toast_profile_updated);
         },
       }
     );
@@ -169,7 +169,7 @@ export default function ProfilePage() {
               const file = e.target.files?.[0];
               if (!file) return;
               if (file.size > 5 * 1024 * 1024) {
-                toast.error("Image must be smaller than 5 MB.");
+                toast.error(t.profile.personal_tab.toast_avatar_too_large);
                 e.target.value = "";
                 return;
               }
@@ -216,7 +216,7 @@ export default function ProfilePage() {
             className="text-[var(--turquoise)] cursor-pointer text-[14px]"
             onClick={() => {
               navigator.clipboard.writeText(user.user_code);
-              toast.success("ID copied!");
+              toast.success(t.profile.personal_tab.toast_id_copied);
             }}
           />
         </div>
@@ -532,7 +532,7 @@ export default function ProfilePage() {
                       </span>
                       {isActive && (
                         <button
-                          onClick={() => { navigator.clipboard.writeText(invite.code); toast.success("Code copied!"); }}
+                          onClick={() => { navigator.clipboard.writeText(invite.code); toast.success(t.profile.trust_tab.toast_code_copied); }}
                           className="text-[#aaa] hover:text-[var(--color-green-offer)] transition-colors"
                         >
                           <FaRegCopy size={15} />
@@ -551,7 +551,7 @@ export default function ProfilePage() {
                 const ok = await dialog.confirm(t.invite.request_button, t.invite.why_invite_body);
                 if (!ok) return;
                 requestNewInvites.mutate(undefined, {
-                  onSuccess: () => toast.success("New invites generated!"),
+                  onSuccess: () => toast.success(t.profile.trust_tab.toast_invites_generated),
                 });
               }}
               disabled={requestNewInvites.isPending}

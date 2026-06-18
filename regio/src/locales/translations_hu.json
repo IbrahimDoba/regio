@@ -26,7 +26,9 @@
       "terms_checkbox_link": "felhasználási feltételeket",
       "submit_loading": "Fiók létrehozása...",
       "submit": "Regisztráció",
-      "toggle_to_login": "Már van fiókod? Lépj be itt"
+      "toggle_to_login": "Már van fiókod? Lépj be itt",
+      "toast_invalid_zip": "Érvénytelen irányítószám",
+      "toast_coming_soon": "Ez a funkció hamarosan elérhető lesz."
     },
     "no_code_modal": {
       "title": "Nincs meghívókódod?",
@@ -107,6 +109,8 @@
     "show_map": "Térkép megjelenítése",
     "hide_map": "Térkép elrejtése",
     "edit_log_title": "Módosítási előzmények",
+    "toast_deleted": "Bejegyzés törölve.",
+    "toast_delete_error": "Nem sikerült törölni a bejegyzést.",
     "attributes": {
       "time_factor": "Időfaktor",
       "price_time": "Ár időben",
@@ -380,7 +384,11 @@
       "bio_label": "Rólam / bemutatkozás",
       "bio_placeholder": "Mesélj magadról pár szót...",
       "save_button": "Módosítások mentése",
-      "save_loading": "Mentés..."
+      "save_loading": "Mentés...",
+      "toast_invalid_zip": "Érvénytelen irányítószám",
+      "toast_profile_updated": "Profil frissítve!",
+      "toast_avatar_too_large": "A kép kisebb kell legyen, mint 5 MB.",
+      "toast_id_copied": "Azonosító másolva!"
     },
     "account_tab": {
       "login_section": "Belépési adatok",
@@ -397,7 +405,11 @@
       "instant_push": "Azonnali push értesítés",
       "newsletter": "Hírlevél",
       "save_button": "Beállítások mentése",
-      "logout_button": "Kijelentkezés"
+      "logout_button": "Kijelentkezés",
+      "toast_reset_link_sent": "Visszaállítási link elküldve! Ellenőrizd a postaládádat.",
+      "toast_reset_link_failed": "Nem sikerült az e-mailt elküldeni. Kérjük, próbáld újra.",
+      "toast_email_change_sent": "Megerősítő e-mailek elküldve! Ellenőrizd az új postaládádat.",
+      "toast_email_change_failed": "Az e-mail változtatási kérés sikertelen."
     },
     "trust_tab": {
       "verification_section": "Ellenőrzési állapot",
@@ -407,7 +419,9 @@
       "invites_section": "Barátok meghívása",
       "manage_invites_button": "Meghívások kezelése",
       "manage_invites_hint": "Kattints ide a meghívóid kezeléséhez",
-      "invites_reputation_hint": "Aktív tagok meghívásával hírnévpontokat szerezhetsz."
+      "invites_reputation_hint": "Aktív tagok meghívásával hírnévpontokat szerezhetsz.",
+      "toast_code_copied": "Kód másolva!",
+      "toast_invites_generated": "Új meghívók létrehozva!"
     }
   },
   "notifications": {
@@ -446,7 +460,11 @@
     "share_whatsapp": "WhatsApp",
     "share_telegram": "Telegram",
     "share_facebook": "Facebook",
-    "share_email": "E-mail"
+    "share_email": "E-mail",
+    "toast_invites_generated": "Új meghívók létrehozva!",
+    "toast_select_code_first": "Kérjük, először válassz egy elérhető meghívókódot.",
+    "toast_text_copied": "Szöveg vágólapra másolva",
+    "toast_code_copied_facebook": "Kód másolva! Illesztheted a bejegyzésedbe."
   },
   "verification": {
     "title": "Ellenőrzés folyamatban",
@@ -508,6 +526,12 @@
         "verify_button": "Igazolás",
         "edit_button": "Szerkesztés"
       },
+      "toast_verify_success": "{userCode} felhasználó sikeresen ellenőrizve!",
+      "toast_reject_success": "{userCode} felhasználó elutasítva.",
+      "toast_update_success": "Felhasználó sikeresen frissítve!",
+      "toast_verify_error": "Az ellenőrzés sikertelen",
+      "toast_reject_error": "Az elutasítás sikertelen",
+      "toast_update_error": "A frissítés sikertelen",
       "edit_modal": {
         "title": "Felhasználó szerkesztése: {name}",
         "trust_label": "Bizalmi szint / kézi felülbírálás",
@@ -580,7 +604,10 @@
         "confirm_ok_approve": "Igen, fizetés kikényszerítése",
         "confirm_ok_reject": "Igen, kérelem visszavonása",
         "confirm_cancel": "Vissza"
-      }
+      },
+      "toast_approve_success": "Vita sikeresen jóváhagyva!",
+      "toast_reject_success": "Vita sikeresen elutasítva!",
+      "toast_error": "A vita megoldása sikertelen"
     },
     "tags": {
       "pending_title": "Függőben lévő címkék (fordítás szükséges)",

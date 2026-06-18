@@ -26,7 +26,9 @@
       "terms_checkbox_link": "Nutzungsbedingungen",
       "submit_loading": "Konto wird erstellt...",
       "submit": "Konto erstellen",
-      "toggle_to_login": "Bereits registriert? Hier einloggen"
+      "toggle_to_login": "Bereits registriert? Hier einloggen",
+      "toast_invalid_zip": "Ungültige Postleitzahl",
+      "toast_coming_soon": "Diese Funktion kommt bald."
     },
     "no_code_modal": {
       "title": "Du hast keinen Code?",
@@ -107,6 +109,8 @@
     "show_map": "Karte anzeigen",
     "hide_map": "Karte ausblenden",
     "edit_log_title": "Änderungsprotokoll",
+    "toast_deleted": "Beitrag gelöscht.",
+    "toast_delete_error": "Beitrag konnte nicht gelöscht werden.",
     "attributes": {
       "time_factor": "Zeitfaktor",
       "price_time": "Preis Zeit",
@@ -380,7 +384,11 @@
       "bio_label": "Über mich / Bio",
       "bio_placeholder": "Erzähl uns etwas über dich...",
       "save_button": "Änderungen speichern",
-      "save_loading": "Wird gespeichert..."
+      "save_loading": "Wird gespeichert...",
+      "toast_invalid_zip": "Ungültige Postleitzahl",
+      "toast_profile_updated": "Profil aktualisiert!",
+      "toast_avatar_too_large": "Bild muss kleiner als 5 MB sein.",
+      "toast_id_copied": "ID kopiert!"
     },
     "account_tab": {
       "login_section": "Login-Daten",
@@ -397,7 +405,11 @@
       "instant_push": "Sofortige Push-Nachricht",
       "newsletter": "Newsletter",
       "save_button": "Einstellungen speichern",
-      "logout_button": "Abmelden"
+      "logout_button": "Abmelden",
+      "toast_reset_link_sent": "Reset-Link gesendet! Überprüfe dein Postfach.",
+      "toast_reset_link_failed": "E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.",
+      "toast_email_change_sent": "Bestätigungs-E-Mails gesendet! Überprüfe dein neues Postfach.",
+      "toast_email_change_failed": "Anfrage zur E-Mail-Änderung fehlgeschlagen."
     },
     "trust_tab": {
       "verification_section": "Verifizierungs-Status",
@@ -407,7 +419,9 @@
       "invites_section": "Freunde einladen",
       "manage_invites_button": "Einladungen verwalten",
       "manage_invites_hint": "Hier klicken, um deine Einladungen zu verwalten",
-      "invites_reputation_hint": "Das Einladen aktiver Mitglieder steigert deine Reputation."
+      "invites_reputation_hint": "Das Einladen aktiver Mitglieder steigert deine Reputation.",
+      "toast_code_copied": "Code kopiert!",
+      "toast_invites_generated": "Neue Einladungen erstellt!"
     }
   },
   "notifications": {
@@ -446,7 +460,11 @@
     "share_whatsapp": "WhatsApp",
     "share_telegram": "Telegram",
     "share_facebook": "Facebook",
-    "share_email": "E-Mail"
+    "share_email": "E-Mail",
+    "toast_invites_generated": "Neue Einladungen erstellt!",
+    "toast_select_code_first": "Bitte zuerst einen verfügbaren Einladungscode auswählen.",
+    "toast_text_copied": "Text in die Zwischenablage kopiert",
+    "toast_code_copied_facebook": "Code kopiert! Du kannst ihn in deinen Beitrag einfügen."
   },
   "verification": {
     "title": "Verifizierung ausstehend",
@@ -508,6 +526,12 @@
         "verify_button": "Verifizieren",
         "edit_button": "Bearbeiten"
       },
+      "toast_verify_success": "Benutzer {userCode} erfolgreich verifiziert!",
+      "toast_reject_success": "Benutzer {userCode} abgelehnt.",
+      "toast_update_success": "Benutzer erfolgreich aktualisiert!",
+      "toast_verify_error": "Verifizierung fehlgeschlagen",
+      "toast_reject_error": "Ablehnung fehlgeschlagen",
+      "toast_update_error": "Aktualisierung fehlgeschlagen",
       "edit_modal": {
         "title": "Nutzer bearbeiten: {name}",
         "trust_label": "Vertrauensstufe / Manueller Override",
@@ -580,7 +604,10 @@
         "confirm_ok_approve": "Ja, Zahlung erzwingen",
         "confirm_ok_reject": "Ja, Anforderung stornieren",
         "confirm_cancel": "Zurück"
-      }
+      },
+      "toast_approve_success": "Streitfall erfolgreich genehmigt!",
+      "toast_reject_success": "Streitfall erfolgreich abgelehnt!",
+      "toast_error": "Streitfall konnte nicht gelöst werden"
     },
     "tags": {
       "pending_title": "Ausstehende Tags (Übersetzung nötig)",

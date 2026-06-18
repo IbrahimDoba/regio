@@ -42,7 +42,7 @@ export default function InvitePage() {
     if (ok) {
       requestInvitesMutation.mutate(undefined, {
         onSuccess: () => {
-          toast.success("New invites generated!");
+          toast.success(t.invite.toast_invites_generated);
           setSelectedCode(null);
         },
       });
@@ -90,7 +90,7 @@ export default function InvitePage() {
 
   const share = async (platform: string) => {
     if (!selectedCode) {
-      toast.info("Please select an available invite code first.");
+      toast.info(t.invite.toast_select_code_first);
       return;
     }
     const text = getFinalText();
@@ -104,7 +104,7 @@ export default function InvitePage() {
             .catch(console.error);
         } else {
           navigator.clipboard.writeText(text);
-          toast.success("Text copied to clipboard");
+          toast.success(t.invite.toast_text_copied);
         }
         break;
       case "whatsapp":
@@ -119,7 +119,7 @@ export default function InvitePage() {
         break;
       case "facebook":
         navigator.clipboard.writeText(selectedCode);
-        toast.success("Code copied! You can paste it in your post.");
+        toast.success(t.invite.toast_code_copied_facebook);
         window.open(
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
             url

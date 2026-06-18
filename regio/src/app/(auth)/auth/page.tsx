@@ -61,7 +61,7 @@ function AuthForm() {
   React.useEffect(() => {
     if (registerZip.length !== 4 || citiesFetching) return;
     if (zipCities.length === 0) {
-      toast.error("Invalid zip code");
+      toast.error(t.auth.register.toast_invalid_zip);
       setRegisterCity('');
     } else if (zipCities.length === 1) {
       setRegisterCity(zipCities[0]);
@@ -496,7 +496,7 @@ function AuthForm() {
 
             <div
               className="bg-[#f9f9f9] p-[15px] rounded-[8px] mb-[10px] border border-[#eee] cursor-pointer hover:bg-[#f0f7e6] hover:border-[var(--color-green-offer)] transition-colors"
-              onClick={() => toast.info('This feature is coming soon.')}
+              onClick={() => toast.info(t.auth.register.toast_coming_soon)}
             >
               <span className="font-bold text-[14px] text-[var(--color-nav-bg)] block mb-[4px]">
                 <FaUsers className="inline mr-[5px]" /> {t.auth.no_code_modal.request_community}
@@ -505,7 +505,7 @@ function AuthForm() {
 
             <div
               className="bg-[#f9f9f9] p-[15px] rounded-[8px] mb-[10px] border border-[#eee] cursor-pointer hover:bg-[#f0f7e6] hover:border-[var(--color-green-offer)] transition-colors"
-              onClick={() => toast.info('This feature is coming soon.')}
+              onClick={() => toast.info(t.auth.register.toast_coming_soon)}
             >
               <span className="font-bold text-[14px] text-[var(--color-nav-bg)] block mb-[4px]">
                 <FaPenNib className="inline mr-[5px]" /> {t.auth.no_code_modal.apply_access}

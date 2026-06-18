@@ -26,7 +26,9 @@
       "terms_checkbox_link": "terms and conditions",
       "submit_loading": "Creating account...",
       "submit": "Create Account",
-      "toggle_to_login": "Already have an account? Login"
+      "toggle_to_login": "Already have an account? Login",
+      "toast_invalid_zip": "Invalid zip code",
+      "toast_coming_soon": "This feature is coming soon."
     },
     "no_code_modal": {
       "title": "Don't have an invite code?",
@@ -107,6 +109,8 @@
     "show_map": "Show map",
     "hide_map": "Hide map",
     "edit_log_title": "Edit History",
+    "toast_deleted": "Post deleted.",
+    "toast_delete_error": "Failed to delete post.",
     "attributes": {
       "time_factor": "Time Factor",
       "price_time": "Price Time",
@@ -380,7 +384,11 @@
       "bio_label": "About me / Bio",
       "bio_placeholder": "Tell us about yourself...",
       "save_button": "Save Changes",
-      "save_loading": "Saving..."
+      "save_loading": "Saving...",
+      "toast_invalid_zip": "Invalid zip code",
+      "toast_profile_updated": "Profile updated!",
+      "toast_avatar_too_large": "Image must be smaller than 5 MB.",
+      "toast_id_copied": "ID copied!"
     },
     "account_tab": {
       "login_section": "Login Data",
@@ -397,7 +405,11 @@
       "instant_push": "Instant Push",
       "newsletter": "Newsletter",
       "save_button": "Save Settings",
-      "logout_button": "Log Out"
+      "logout_button": "Log Out",
+      "toast_reset_link_sent": "Reset link sent! Check your inbox.",
+      "toast_reset_link_failed": "Failed to send reset email. Please try again.",
+      "toast_email_change_sent": "Confirmation emails sent! Check your new inbox.",
+      "toast_email_change_failed": "Failed to request email change."
     },
     "trust_tab": {
       "verification_section": "Verification Status",
@@ -407,7 +419,9 @@
       "invites_section": "Invite Friends",
       "manage_invites_button": "Manage Invites",
       "manage_invites_hint": "Click to manage your invites",
-      "invites_reputation_hint": "Inviting active members earns you reputation points."
+      "invites_reputation_hint": "Inviting active members earns you reputation points.",
+      "toast_code_copied": "Code copied!",
+      "toast_invites_generated": "New invites generated!"
     }
   },
   "notifications": {
@@ -446,7 +460,11 @@
     "share_whatsapp": "WhatsApp",
     "share_telegram": "Telegram",
     "share_facebook": "Facebook",
-    "share_email": "Email"
+    "share_email": "Email",
+    "toast_invites_generated": "New invites generated!",
+    "toast_select_code_first": "Please select an available invite code first.",
+    "toast_text_copied": "Text copied to clipboard",
+    "toast_code_copied_facebook": "Code copied! You can paste it in your post."
   },
   "verification": {
     "title": "Verification Pending",
@@ -508,6 +526,12 @@
         "verify_button": "Verify",
         "edit_button": "Edit"
       },
+      "toast_verify_success": "User {userCode} verified successfully!",
+      "toast_reject_success": "User {userCode} rejected.",
+      "toast_update_success": "User updated successfully!",
+      "toast_verify_error": "Failed to verify user",
+      "toast_reject_error": "Failed to reject user",
+      "toast_update_error": "Failed to update user",
       "edit_modal": {
         "title": "Edit User {name}",
         "trust_label": "Trust Level / Manual Override",
@@ -580,7 +604,10 @@
         "confirm_ok_approve": "Yes, force payment",
         "confirm_ok_reject": "Yes, cancel request",
         "confirm_cancel": "Go back"
-      }
+      },
+      "toast_approve_success": "Dispute approved successfully!",
+      "toast_reject_success": "Dispute rejected successfully!",
+      "toast_error": "Failed to resolve dispute"
     },
     "tags": {
       "pending_title": "Pending User Tags (Translation needed)",

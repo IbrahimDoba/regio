@@ -44,11 +44,11 @@ export default function AdminDisputesPage() {
       },
       {
         onSuccess: () => {
-          toast.success(`Dispute ${action.toLowerCase()}d successfully!`);
+          toast.success(action === 'APPROVE' ? t.admin.disputes.toast_approve_success : t.admin.disputes.toast_reject_success);
         },
         onError: (error) => {
           console.error('Dispute resolution error:', error);
-          toast.error('Failed to resolve dispute');
+          toast.error(t.admin.disputes.toast_error);
         },
       }
     );
