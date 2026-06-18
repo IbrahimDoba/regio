@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
 import FilterPanel from "@/components/feed/FilterPanel";
@@ -117,8 +117,32 @@ export default function FeedPage() {
   const addTag = (tag: TagAutocomplete) => setStagedTags((prev) => [...prev, tag]);
   const removeTag = (tagName: string) => setStagedTags((prev) => prev.filter((t) => t.name !== tagName));
 
-  const { data, isLoading } = useFeed(committedFilters, showOriginal);
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useFeed(committedFilters, showOriginal);
   const listings = data?.pages.flatMap((page) => page.data) || [];
+
+  // Infinite scroll: observe a sentinel near the bottom of the feed and load
+  // the next page (20 listings at a time) as it scrolls into view.
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const toggleFilter = (category: ListingCategory) => {
     if (activeFilters.includes(category)) {
@@ -164,6 +188,9 @@ export default function FeedPage() {
           onOpenPreview={setPreviewListing}
           onContact={handleContact}
           onModify={(listing) => { setPreviewListing(null); setEditListing(listing); }}
+          sentinelRef={loadMoreRef}
+          isFetchingMore={isFetchingNextPage}
+          loadingLabel={t.feed.loading}
         />
       )}
 
