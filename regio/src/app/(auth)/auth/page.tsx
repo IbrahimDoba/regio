@@ -392,7 +392,7 @@ function AuthForm() {
                       disabled={isRegistering}
                       required
                     >
-                      <option value="">{t.auth.register.city_placeholder}</option>
+                      <option value="">{t.auth.register.city_pick}</option>
                       {zipCities.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   ) : zipCities.length === 1 ? (

@@ -315,7 +315,7 @@ export default function ProfilePage() {
                   onChange={(e) => setCity(e.target.value)}
                   required
                 >
-                  <option value="">{t.profile.personal_tab.city_placeholder}</option>
+                  <option value="">{t.profile.personal_tab.city_pick}</option>
                   {zipCities.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
