@@ -178,7 +178,7 @@ export default function FilterPanel({
           className={cn(
             "h-[40px] w-[40px] flex items-center justify-center rounded-[5px] border-[2px] transition-all shrink-0",
             showSettings
-              ? "border-green-500 text-green-500 bg-white"
+              ? "border-[var(--color-nav-bg)] text-[var(--color-nav-bg)] bg-white"
               : "border-[#ccc] text-[#888] bg-[var(--input-bg)]"
           )}
         >
