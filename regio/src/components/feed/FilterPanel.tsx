@@ -214,7 +214,7 @@ export default function FilterPanel({
       )}
 
       {/* Category filter buttons */}
-      <div className="flex justify-between flex-wrap gap-[10px] mt-[16px]">
+      <div className="flex justify-between gap-[4px] sm:gap-[10px] mt-[16px]">
         {categoryFilters.map((f) => {
           const isActive = activeFilters.includes(f.category);
           return (
@@ -222,7 +222,7 @@ export default function FilterPanel({
               key={f.category}
               onClick={() => toggleFilter(f.category)}
               className={cn(
-                "w-[44px] h-[44px] rounded-full border-[2px] border-[#eee] flex justify-center items-center cursor-pointer transition-all duration-200",
+                "w-[36px] h-[36px] sm:w-[44px] sm:h-[44px] rounded-full border-[2px] border-[#eee] flex justify-center items-center cursor-pointer transition-all duration-200 shrink-0",
                 isActive ? "border-transparent scale-110" : "bg-white"
               )}
               style={{
@@ -233,7 +233,7 @@ export default function FilterPanel({
               <img
                 src={f.icon}
                 alt={f.label}
-                className="w-[26px] h-[26px] object-contain"
+                className="w-[20px] h-[20px] sm:w-[26px] sm:h-[26px] object-contain"
                 style={{ filter: isActive ? "brightness(0) invert(1)" : "none" }}
               />
             </div>
