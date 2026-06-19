@@ -83,7 +83,7 @@ export default function AdminUsersPage() {
   };
 
   const handleRejectUser = async (userCode: string) => {
-    if (!await dialog.confirm("Reject User", `Reject verification for user ${userCode}?`)) return;
+    if (!await dialog.confirm(t.admin.users.reject_dialog_title, t.admin.users.reject_dialog_body.replace('{userCode}', userCode))) return;
     updateUserMutation.mutate(
       {
         userCode,
@@ -121,7 +121,7 @@ export default function AdminUsersPage() {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#8cb348]"></div>
-          <p className="mt-4 text-[#666] text-sm">Loading users...</p>
+          <p className="mt-4 text-[#666] text-sm">{t.admin.users.loading}</p>
         </div>
       </div>
     );
@@ -131,7 +131,7 @@ export default function AdminUsersPage() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center text-[#d32f2f]">
-          <p className="text-lg font-bold">Error loading users</p>
+          <p className="text-lg font-bold">{t.admin.users.error}</p>
           <p className="text-sm mt-2">{error.message}</p>
         </div>
       </div>
@@ -147,7 +147,7 @@ export default function AdminUsersPage() {
       <div className="mb-5">
         <input
           type="text"
-          placeholder="Search User (ID, Name, Email)..."
+          placeholder={t.admin.users.search_placeholder}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="p-[10px] rounded border border-[#ccc] w-full"
@@ -155,7 +155,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* User Table */}
-      <ContentCard title="User List & Balances">
+      <ContentCard title={t.admin.users.table_title}>
         {listData && listData.data.length > 0 ? (
           <UserTable
             users={listData.data}
@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
             onRejectUser={handleRejectUser}
           />
         ) : (
-          <p className="text-center text-[#888] py-8">No users found</p>
+          <p className="text-center text-[#888] py-8">{t.admin.users.empty}</p>
         )}
       </ContentCard>
 

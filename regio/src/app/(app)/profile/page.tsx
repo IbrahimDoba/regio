@@ -84,11 +84,11 @@ export default function ProfilePage() {
   }, [zip, zipCities, citiesFetching]);
 
   if (isLoading) {
-    return <div className="p-10 text-center">Loading profile...</div>;
+    return <div className="p-10 text-center">{t.profile.loading}</div>;
   }
 
   if (!user) {
-    return <div className="p-10 text-center">Error loading profile.</div>; // Should probably redirect to login
+    return <div className="p-10 text-center">{t.profile.error_loading}</div>; // Should probably redirect to login
   }
 
   const handleChangePassword = async () => {
@@ -193,7 +193,7 @@ export default function ProfilePage() {
         {uploadAvatar.isError && (
           <p className="text-[11px] text-[#d32f2f] mt-[-8px] mb-[8px]">
             {(uploadAvatar.error as { response?: { data?: { detail?: string } } })
-              ?.response?.data?.detail ?? "Upload failed. Please try again."}
+              ?.response?.data?.detail ?? t.profile.personal_tab.avatar_upload_error}
           </p>
         )}
 
@@ -207,7 +207,7 @@ export default function ProfilePage() {
 
         <div className="bg-white border border-dashed border-[#ccc] inline-flex items-center gap-[10px] p-[8px_15px] rounded-[6px] mx-auto">
           <span className="text-[10px] uppercase text-[#888] font-bold tracking-[1px]">
-            User ID:
+            {t.profile.personal_tab.user_id_label}
           </span>
           <span className="font-mono text-[18px] font-bold text-[#333] tracking-[2px]">
             {user.user_code}
@@ -306,7 +306,7 @@ export default function ProfilePage() {
               </label>
               {citiesFetching ? (
                 <div className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[var(--input-bg)] flex items-center gap-[8px] text-[#888]">
-                  <FaSpinner className="animate-spin" /> Loading...
+                  <FaSpinner className="animate-spin" /> {t.common.loading}
                 </div>
               ) : zipCities.length > 1 ? (
                 <select
@@ -333,7 +333,7 @@ export default function ProfilePage() {
                   readOnly
                   disabled
                   className="w-full p-[12px] border border-[#ddd] rounded-[6px] text-[14px] bg-[#eee] text-[#aaa] cursor-not-allowed outline-none"
-                  placeholder={zip.length === 4 ? "Invalid zip code" : t.profile.personal_tab.city_placeholder}
+                  placeholder={zip.length === 4 ? t.profile.personal_tab.toast_invalid_zip : t.profile.personal_tab.city_placeholder}
                   value=""
                 />
               )}
@@ -461,13 +461,13 @@ export default function ProfilePage() {
             </div>
             <div className="mb-[20px]">
               <label className="block text-[12px] font-bold text-[#555] mb-[6px]">
-                Password
+                {t.profile.account_tab.password_label}
               </label>
               {passwordResetSent ? (
                 <div className="text-center py-[10px]">
                   <img src="/mail-sent.jpg" alt="" className="w-[60px] h-[60px] object-contain mx-auto mb-[6px]" />
                   <p className="text-[13px] text-[#555]">
-                    Reset link sent to <strong>{user.email}</strong>. Check your inbox.
+                    {t.profile.account_tab.password_reset_sent_prefix}<strong>{user.email}</strong>{t.profile.account_tab.password_reset_sent_suffix}
                   </p>
                 </div>
               ) : (
@@ -482,7 +482,7 @@ export default function ProfilePage() {
                   >
                     {requestResetMutation.isPending ? (
                       <>
-                        <FaSpinner className="animate-spin" /> Sending...
+                        <FaSpinner className="animate-spin" /> {t.profile.account_tab.password_sending}
                       </>
                     ) : (
                       t.profile.account_tab.change_password_button

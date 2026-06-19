@@ -36,8 +36,8 @@ export default function InvitePage() {
 
   const handleRequestInvites = async () => {
     const ok = await dialog.confirm(
-      "Request New Invites",
-      "Are you sure you want to void current invites and request new ones?"
+      t.invite.dialog_request_title,
+      t.invite.dialog_request_body
     );
     if (ok) {
       requestInvitesMutation.mutate(undefined, {
@@ -100,7 +100,7 @@ export default function InvitePage() {
       case "native":
         if (navigator.share) {
           navigator
-            .share({ title: "Join regio.is", text: text })
+            .share({ title: t.invite.share_title, text: text })
             .catch(console.error);
         } else {
           navigator.clipboard.writeText(text);
@@ -128,14 +128,14 @@ export default function InvitePage() {
         break;
       case "email":
         window.open(`mailto:?subject=${encodeURIComponent(
-          "Invite to regio.is"
+          t.invite.email_subject
         )}&body=${encodeURIComponent(text)}`, "_self");
         break;
     }
   };
 
   if (isLoading)
-    return <div className="p-10 text-center">Loading invites...</div>;
+    return <div className="p-10 text-center">{t.invite.loading}</div>;
 
   const availableCount = invites?.filter((i) => !i.is_used).length || 0;
 

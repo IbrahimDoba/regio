@@ -3,6 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import AdminSidebar from "@/components/admin/layout/AdminSidebar";
 import AdminHeader from "@/components/admin/layout/AdminHeader";
 
@@ -13,6 +14,7 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const { t } = useLanguage();
 
   /* Prevent hydration mismatch by only rendering after mount */
   const [mounted, setMounted] = React.useState(false);
@@ -34,7 +36,7 @@ export default function AdminLayout({
       <div className="flex items-center justify-center min-h-screen bg-[#f0f2f5]">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#8cb348]"></div>
-          <p className="mt-4 text-[#666] text-sm">Loading admin panel...</p>
+          <p className="mt-4 text-[#666] text-sm">{t.admin.layout.loading}</p>
         </div>
       </div>
     );
@@ -50,13 +52,9 @@ export default function AdminLayout({
       {/* Mobile Blocker */}
       <div className="flex flex-col justify-center items-center h-screen text-center p-5 bg-white min-[1280px]:hidden">
         <div className="text-[60px] text-[#d32f2f] mb-5">🖥️</div>
-        <div className="text-[24px] font-[800] mb-[10px]">Desktop Only</div>
+        <div className="text-[24px] font-[800] mb-[10px]">{t.admin.layout.desktop_only_title}</div>
         <p className="text-[14px] text-[#666]">
-          The Administration Dashboard requires a larger screen resolution (min.
-          1280 x 768).
-          <br />
-          <br />
-          Please log in from a Desktop PC.
+          {t.admin.layout.desktop_only_body}
         </p>
       </div>
 

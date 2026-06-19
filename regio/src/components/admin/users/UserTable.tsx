@@ -5,6 +5,7 @@ import { FaSort, FaPen, FaCheck, FaXmark } from 'react-icons/fa6';
 import { API_CONFIG } from '@/lib/api/config';
 import TrustBadge from '../ui/TrustBadge';
 import StatusBadge from '../ui/StatusBadge';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface UserAdminView {
   user_code: string;
@@ -28,6 +29,7 @@ interface UserTableProps {
 }
 
 export default function UserTable({ users, onEditUser, onVerifyUser, onRejectUser }: UserTableProps) {
+  const { t } = useLanguage();
   const [sortColumn, setSortColumn] = useState<number | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -62,37 +64,37 @@ export default function UserTable({ users, onEditUser, onVerifyUser, onRejectUse
               className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase cursor-pointer select-none hover:text-[#8cb348]"
               onClick={() => handleSort(0)}
             >
-              Name <FaSort className="inline ml-1" />
+              {t.admin.users.table.col_name} <FaSort className="inline ml-1" />
             </th>
             <th
               className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase cursor-pointer select-none hover:text-[#8cb348]"
               onClick={() => handleSort(1)}
             >
-              Role <FaSort className="inline ml-1" />
+              {t.admin.users.table.col_role} <FaSort className="inline ml-1" />
             </th>
             <th
               className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase cursor-pointer select-none hover:text-[#8cb348]"
               onClick={() => handleSort(2)}
             >
-              Trust <FaSort className="inline ml-1" />
+              {t.admin.users.table.col_trust} <FaSort className="inline ml-1" />
             </th>
             <th
               className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase cursor-pointer select-none hover:text-[#8cb348]"
               onClick={() => handleSort(3)}
             >
-              Garas Bal. <FaSort className="inline ml-1" />
+              {t.admin.users.table.col_garas_balance} <FaSort className="inline ml-1" />
             </th>
             <th
               className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase cursor-pointer select-none hover:text-[#8cb348]"
               onClick={() => handleSort(4)}
             >
-              Time Bal. <FaSort className="inline ml-1" />
+              {t.admin.users.table.col_time_balance} <FaSort className="inline ml-1" />
             </th>
             <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-              Status
+              {t.admin.users.table.col_status}
             </th>
             <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">
-              Action
+              {t.admin.users.table.col_action}
             </th>
           </tr>
         </thead>
@@ -135,11 +137,11 @@ export default function UserTable({ users, onEditUser, onVerifyUser, onRejectUse
               </td>
               <td className="p-3 border-b border-[#eee]">
                 {user.verification_status === 'PENDING' ? (
-                  <StatusBadge variant="pending" label="Pending Verify" />
+                  <StatusBadge variant="pending" label={t.admin.users.table.status_pending} />
                 ) : user.verification_status === 'REJECTED' ? (
-                  <StatusBadge variant="conflict" label="Rejected" />
+                  <StatusBadge variant="conflict" label={t.admin.users.table.status_rejected} />
                 ) : (
-                  <StatusBadge variant="active" label="Active" />
+                  <StatusBadge variant="active" label={t.admin.users.table.status_active} />
                 )}
               </td>
               <td className="p-3 border-b border-[#eee]">
@@ -149,13 +151,13 @@ export default function UserTable({ users, onEditUser, onVerifyUser, onRejectUse
                       onClick={() => onVerifyUser(user.user_code)}
                       className="py-2 px-3 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#8cb348] text-white"
                     >
-                      <FaCheck /> Verify
+                      <FaCheck /> {t.admin.users.table.verify_button}
                     </button>
                     <button
                       onClick={() => onRejectUser(user.user_code)}
                       className="py-2 px-3 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#d32f2f] text-white"
                     >
-                      <FaXmark /> Reject
+                      <FaXmark /> {t.admin.users.table.reject_button}
                     </button>
                   </div>
                 ) : (
@@ -163,7 +165,7 @@ export default function UserTable({ users, onEditUser, onVerifyUser, onRejectUse
                     onClick={() => onEditUser(user)}
                     className="py-2 px-4 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#eee] text-[#333]"
                   >
-                    <FaPen /> Edit
+                    <FaPen /> {t.admin.users.table.edit_button}
                   </button>
                 )}
               </td>

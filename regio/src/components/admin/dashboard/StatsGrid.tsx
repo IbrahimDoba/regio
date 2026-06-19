@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa6";
 import { AdminStatsResponse } from "@/lib/api/types";
 import ContentCard from "@/components/admin/ui/ContentCard";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface StatsGridProps {
   stats: AdminStatsResponse | undefined;
@@ -17,6 +18,7 @@ interface StatsGridProps {
 }
 
 export default function StatsGrid({ stats, isLoading }: StatsGridProps) {
+  const { t } = useLanguage();
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-5">
@@ -38,7 +40,7 @@ export default function StatsGrid({ stats, isLoading }: StatsGridProps) {
       <ContentCard className="!p-5 flex items-center justify-between">
         <div>
           <p className="text-[#888] text-[12px] font-bold uppercase mb-1">
-            Total Users
+            {t.admin.stats.total_users}
           </p>
           <div className="text-[28px] font-[800] text-[#333]">
             {stats.total_users}
@@ -53,7 +55,7 @@ export default function StatsGrid({ stats, isLoading }: StatsGridProps) {
       <ContentCard className="!p-5 flex items-center justify-between">
         <div>
           <p className="text-[#888] text-[12px] font-bold uppercase mb-1">
-            Active / Pending
+            {t.admin.stats.active_pending}
           </p>
           <div className="flex items-baseline gap-2">
             <span className="text-[28px] font-[800] text-[#8cb348]">
@@ -73,11 +75,11 @@ export default function StatsGrid({ stats, isLoading }: StatsGridProps) {
       <ContentCard className="!p-5 flex items-center justify-between">
         <div>
           <p className="text-[#888] text-[12px] font-bold uppercase mb-1">
-            Total Time Volume
+            {t.admin.stats.time_volume}
           </p>
           <div className="text-[28px] font-[800] text-[#333]">
             {stats.total_time_volume}{" "}
-            <span className="text-[14px] font-normal text-[#888]">hrs</span>
+            <span className="text-[14px] font-normal text-[#888]">{t.admin.stats.time_unit}</span>
           </div>
         </div>
         <div className="w-[50px] h-[50px] rounded-full bg-[#fff3e0] flex items-center justify-center text-[#f57c00] text-[20px]">
@@ -89,7 +91,7 @@ export default function StatsGrid({ stats, isLoading }: StatsGridProps) {
       <ContentCard className="!p-5 flex items-center justify-between">
         <div>
           <p className="text-[#888] text-[12px] font-bold uppercase mb-1">
-            Total Garas Vol.
+            {t.admin.stats.garas_volume}
           </p>
           <div className="text-[28px] font-[800] text-[#333]">
             {parseFloat(stats.total_regio_volume).toFixed(0)}
@@ -105,12 +107,12 @@ export default function StatsGrid({ stats, isLoading }: StatsGridProps) {
         <ContentCard className="!p-5 flex items-center justify-between border-l-4 border-l-[#d32f2f]">
           <div>
             <p className="text-[#d32f2f] text-[12px] font-bold uppercase mb-1">
-              Action Required
+              {t.admin.stats.action_required}
             </p>
             <div className="text-[28px] font-[800] text-[#d32f2f]">
               {stats.pending_disputes}{" "}
               <span className="text-[14px] font-normal text-[#333]">
-                Disputes
+                {t.admin.stats.disputes}
               </span>
             </div>
           </div>

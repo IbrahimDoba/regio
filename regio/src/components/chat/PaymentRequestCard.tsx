@@ -3,6 +3,7 @@
 import React from 'react';
 import { FaFileInvoice, FaCheck } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 
 export interface PaymentRequestData {
   id: string;
@@ -63,6 +64,7 @@ export function PaymentRequestCard({
   onAcceptDecline,
   className,
 }: PaymentRequestCardProps) {
+  const { t } = useLanguage();
   const { id, amountGaras, amountTime, description, status } = data;
 
   const handlePay = () => onPay?.(id);
@@ -83,7 +85,7 @@ export function PaymentRequestCard({
         <div className="bg-green-50 px-3 py-2 flex items-center justify-between">
           <span className="text-xs font-bold text-green-600 flex items-center gap-1">
             <FaFileInvoice className="w-3 h-3" />
-            Payment Request
+            {t.chat.payment_card.title}
           </span>
           <span className="text-xs text-green-600">#{id.slice(-4)}</span>
         </div>
@@ -97,7 +99,7 @@ export function PaymentRequestCard({
         <div className="border-t border-gray-100 px-3 py-2 text-center">
           <div className="inline-flex items-center gap-1 text-green-600 font-bold text-sm">
             <FaCheck className="w-4 h-4" />
-            <span>Paid</span>
+            <span>{t.chat.payment_card.paid}</span>
           </div>
         </div>
       </div>
@@ -137,7 +139,7 @@ export function PaymentRequestCard({
               'border-r border-gray-100 transition-colors'
             )}
           >
-            Pay
+            {t.chat.payment_card.pay}
           </button>
           <button
             onClick={handleDeny}
@@ -147,7 +149,7 @@ export function PaymentRequestCard({
               'transition-colors'
             )}
           >
-            Deny
+            {t.chat.payment_card.deny}
           </button>
         </div>
       )}
@@ -155,7 +157,7 @@ export function PaymentRequestCard({
       {status === 'pending' && isOwn && (
         <div className="border-t border-gray-100 px-3 py-2">
           <p className="text-xs text-gray-500 text-center">
-            Waiting for confirmation...
+            {t.chat.payment_card.waiting}
           </p>
         </div>
       )}
@@ -163,7 +165,7 @@ export function PaymentRequestCard({
       {status === 'denied' && (
         <div className="border-t border-gray-100 px-3 py-2 flex flex-col gap-1">
           <p className="text-xs text-red-500 text-center font-medium">
-            Request declined
+            {t.chat.payment_card.declined}
           </p>
           {isOwn && (
             <div className="flex gap-1">
@@ -175,7 +177,7 @@ export function PaymentRequestCard({
                     'text-gray-500 hover:bg-gray-50 rounded transition-colors'
                   )}
                 >
-                  Accept
+                  {t.chat.payment_card.accept}
                 </button>
               )}
               {onDispute && (
@@ -186,7 +188,7 @@ export function PaymentRequestCard({
                     'text-orange-600 hover:bg-orange-50 rounded transition-colors'
                   )}
                 >
-                  Raise Dispute
+                  {t.chat.payment_card.raise_dispute}
                 </button>
               )}
             </div>
@@ -197,7 +199,7 @@ export function PaymentRequestCard({
       {status === 'disputed' && (
         <div className="border-t border-gray-100 px-3 py-2">
           <p className="text-xs text-orange-500 text-center font-medium">
-            Dispute under review
+            {t.chat.payment_card.dispute_under_review}
           </p>
         </div>
       )}

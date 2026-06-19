@@ -12,6 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaRegComments, FaXmark } from "react-icons/fa6";
 import { useRealTime, type LocalNotification } from "@/context/RealTimeContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ToastState {
   notification: LocalNotification;
@@ -20,6 +21,7 @@ interface ToastState {
 
 export default function ChatToast() {
   const router = useRouter();
+  const { t } = useLanguage();
   const { notifications } = useRealTime();
   const [toast, setToast] = useState<ToastState | null>(null);
   const seenIds = useRef<Set<string>>(new Set());
@@ -93,10 +95,10 @@ export default function ChatToast() {
         {/* Text */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-900 truncate">
-            {toast.notification.sender_name || "New message"}
+            {toast.notification.sender_name || t.chat.toast.new_message}
           </p>
           <p className="text-xs text-gray-500 truncate">
-            {toast.notification.message || "Sent you a message"}
+            {toast.notification.message || t.chat.toast.sent_you_message}
           </p>
         </div>
 

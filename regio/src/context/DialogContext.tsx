@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import { useModalKeyboard } from "@/hooks/useModalKeyboard";
+import { useLanguage } from "@/context/LanguageContext";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -55,6 +56,7 @@ export function useDialog(): DialogContextValue {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function DialogProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useLanguage();
   const [config, setConfig] = useState<DialogConfig | null>(null);
   const [inputValue, setInputValue] = useState("");
   const resolveRef = useRef<((value: boolean | string | null) => void) | null>(null);
@@ -169,14 +171,14 @@ export function DialogProvider({ children }: { children: React.ReactNode }) {
                   className="px-4 py-2 rounded-[6px] bg-[#f0f0f0] text-[#555] text-[13px] font-[600] hover:bg-[#e5e5e5] transition-colors"
                   onClick={handleCancel}
                 >
-                  {config.cancelLabel ?? "Cancel"}
+                  {config.cancelLabel ?? t.common.cancel}
                 </button>
               )}
               <button
                 className="px-4 py-2 rounded-[6px] bg-[var(--color-green-offer)] text-white text-[13px] font-[600] hover:opacity-90 transition-opacity"
                 onClick={handleOk}
               >
-                {config.okLabel ?? "OK"}
+                {config.okLabel ?? t.common.ok}
               </button>
             </div>
           </div>

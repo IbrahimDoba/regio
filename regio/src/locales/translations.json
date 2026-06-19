@@ -28,7 +28,10 @@
       "submit": "Create Account",
       "toggle_to_login": "Already have an account? Login",
       "toast_invalid_zip": "Invalid zip code",
-      "toast_coming_soon": "This feature is coming soon."
+      "toast_coming_soon": "This feature is coming soon.",
+      "error_password_too_short": "Password must be at least 8 characters long.",
+      "error_terms_required": "You must agree to the terms and conditions.",
+      "error_generic": "Registration failed. Please try again."
     },
     "no_code_modal": {
       "title": "Don't have an invite code?",
@@ -59,6 +62,16 @@
       "error_mismatch": "Passwords do not match.",
       "error_too_short": "Password must be at least 8 characters.",
       "error_generic": "This link is invalid or has expired. Please request a new one."
+    },
+    "confirm_email": {
+      "loading": "Confirming your new email address…",
+      "success_title": "Email updated!",
+      "success_body": "Your email address has been changed successfully. Please log in with your new address.",
+      "go_to_login": "Go to Login",
+      "error_title": "Confirmation failed",
+      "error_no_token": "No confirmation token found.",
+      "error_generic": "Invalid or expired link.",
+      "back_to_login": "Back to Login"
     }
   },
   "feed": {
@@ -138,7 +151,9 @@
       "deadline": "Deadline",
       "needed_by": "Needed By",
       "price_notes": "Price Notes"
-    }
+    },
+    "delete_confirm_title": "Delete post?",
+    "delete_confirm_body": "This action cannot be undone. The post will be permanently deleted."
   },
   "create_modal": {
     "title": "Create New Listing",
@@ -258,7 +273,9 @@
       "error_title": "Connection Error",
       "error_description": "Failed to connect to chat server",
       "retry_button": "Try Again",
-      "reconnecting": "Reconnecting..."
+      "reconnecting": "Reconnecting...",
+      "default_partner": "Chat",
+      "no_last_message": "No messages yet"
     },
     "header": {
       "typing_one": "{name} is typing...",
@@ -273,7 +290,9 @@
       "today": "Today",
       "yesterday": "Yesterday",
       "read_by": "Read by {count} users",
-      "delivered": "Delivered"
+      "delivered": "Delivered",
+      "shared_location": "Shared Location",
+      "open_in_maps": "Open in Maps →"
     },
     "message_input": {
       "placeholder": "Message..."
@@ -303,6 +322,46 @@
       "body_template": "Do you want to transfer {minutes} minutes and {garas} Garas to {name} for \"{purpose}\"?",
       "ok": "Transfer",
       "cancel": "Cancel"
+    },
+    "errors": {
+      "send_message_failed": "Failed to send message",
+      "partner_not_found": "Could not find chat partner",
+      "send_request_failed": "Failed to send payment request",
+      "send_payment_failed": "Failed to send payment",
+      "process_payment_failed": "Failed to process payment",
+      "decline_failed": "Failed to decline request",
+      "dismiss_failed": "Failed to dismiss request",
+      "raise_dispute_failed": "Failed to raise dispute",
+      "photo_not_image": "Only images can be sent. Videos and other files are not supported.",
+      "photo_too_large": "Image is too large. Maximum size is {max} MB.",
+      "send_photo_failed": "Failed to send photo",
+      "geolocation_unsupported": "Geolocation is not supported by your browser",
+      "send_location_failed": "Failed to send location",
+      "get_location_failed": "Could not get location: {error}"
+    },
+    "dialogs": {
+      "dispute_title": "Raise Dispute",
+      "dispute_body": "Optionally provide a reason for raising this dispute (max 500 chars):",
+      "dispute_placeholder": "Reason..."
+    },
+    "messages": {
+      "payment_request_text": "Payment request: {garas} RGD ({time} min) - {description}",
+      "payment_sent_label": "💸 Payment sent:"
+    },
+    "payment_card": {
+      "title": "Payment Request",
+      "paid": "Paid",
+      "pay": "Pay",
+      "deny": "Deny",
+      "waiting": "Waiting for confirmation...",
+      "declined": "Request declined",
+      "accept": "Accept",
+      "raise_dispute": "Raise Dispute",
+      "dispute_under_review": "Dispute under review"
+    },
+    "toast": {
+      "new_message": "New message",
+      "sent_you_message": "Sent you a message"
     }
   },
   "wallet": {
@@ -357,7 +416,36 @@
         "transaction_id": "Transaction ID",
         "close_button": "Close"
       }
-    }
+    },
+    "error_unexpected": "An unexpected error occurred.",
+    "autocomplete_selected": "Selected:",
+    "autocomplete_searching": "Searching...",
+    "autocomplete_no_results": "No matching users",
+    "error_recipient_required": "Please search and choose a recipient from the dropdown.",
+    "error_amount_required": "Enter a valid amount for Time (minutes) or Garas — at least one must be greater than 0.",
+    "error_reference_required": "A reference note is required (e.g. 'For the gardening help').",
+    "error_user_required": "Please search and choose a user from the dropdown.",
+    "error_description_required": "A description is required (e.g. 'Lunch split').",
+    "confirm_transfer_title": "Confirm Transfer",
+    "confirm_transfer_body": "Send to {recipient}?",
+    "confirm_payment_title": "Confirm Payment",
+    "confirm_payment_body": "Pay {amount}?",
+    "decline_request_title": "Decline Request",
+    "decline_request_body": "Decline this payment request?",
+    "cancel_request_title": "Cancel Request",
+    "cancel_request_body": "Cancel this request?",
+    "dispute_title": "Raise Dispute",
+    "dispute_body": "Optionally provide a reason for this dispute (max 500 chars):",
+    "dispute_placeholder": "Reason...",
+    "declined_request": "Declined Request",
+    "accept_button": "Accept",
+    "dispute_under_review": "Dispute Under Review",
+    "raise_dispute_button": "Raise Dispute",
+    "available_to_send": "Available to send:",
+    "transfer_success": "Transfer sent successfully!",
+    "request_success": "Payment request sent!",
+    "system_badge": "System",
+    "system_charge": "System charge"
   },
   "profile": {
     "header": "My Profile",
@@ -388,7 +476,9 @@
       "toast_invalid_zip": "Invalid zip code",
       "toast_profile_updated": "Profile updated!",
       "toast_avatar_too_large": "Image must be smaller than 5 MB.",
-      "toast_id_copied": "ID copied!"
+      "toast_id_copied": "ID copied!",
+      "user_id_label": "User ID:",
+      "avatar_upload_error": "Upload failed. Please try again."
     },
     "account_tab": {
       "login_section": "Login Data",
@@ -409,7 +499,11 @@
       "toast_reset_link_sent": "Reset link sent! Check your inbox.",
       "toast_reset_link_failed": "Failed to send reset email. Please try again.",
       "toast_email_change_sent": "Confirmation emails sent! Check your new inbox.",
-      "toast_email_change_failed": "Failed to request email change."
+      "toast_email_change_failed": "Failed to request email change.",
+      "password_label": "Password",
+      "password_sending": "Sending...",
+      "password_reset_sent_prefix": "Reset link sent to ",
+      "password_reset_sent_suffix": ". Check your inbox."
     },
     "trust_tab": {
       "verification_section": "Verification Status",
@@ -422,7 +516,9 @@
       "invites_reputation_hint": "Inviting active members earns you reputation points.",
       "toast_code_copied": "Code copied!",
       "toast_invites_generated": "New invites generated!"
-    }
+    },
+    "loading": "Loading profile...",
+    "error_loading": "Error loading profile."
   },
   "notifications": {
     "header": "Notifications",
@@ -432,7 +528,12 @@
     "empty": "No notifications.",
     "section_messages": "Messages",
     "section_activity": "Activity",
-    "section_broadcasts": "Announcements"
+    "section_broadcasts": "Announcements",
+    "time_just_now": "Just now",
+    "time_minutes": "{count}m ago",
+    "time_hours": "{count}h ago",
+    "time_days": "{count}d ago",
+    "broadcast_label": "Broadcast"
   },
   "invite": {
     "header": "Invite Friends",
@@ -464,7 +565,12 @@
     "toast_invites_generated": "New invites generated!",
     "toast_select_code_first": "Please select an available invite code first.",
     "toast_text_copied": "Text copied to clipboard",
-    "toast_code_copied_facebook": "Code copied! You can paste it in your post."
+    "toast_code_copied_facebook": "Code copied! You can paste it in your post.",
+    "loading": "Loading invites...",
+    "dialog_request_title": "Request New Invites",
+    "dialog_request_body": "Are you sure you want to void current invites and request new ones?",
+    "share_title": "Join regio.is",
+    "email_subject": "Invite to regio.is"
   },
   "verification": {
     "title": "Verification Pending",
@@ -524,7 +630,9 @@
         "status_pending": "Pending Verify",
         "status_active": "Active",
         "verify_button": "Verify",
-        "edit_button": "Edit"
+        "edit_button": "Edit",
+        "status_rejected": "Rejected",
+        "reject_button": "Reject"
       },
       "toast_verify_success": "User {userCode} verified successfully!",
       "toast_reject_success": "User {userCode} rejected.",
@@ -548,8 +656,32 @@
         "account_active": "Active",
         "account_banned": "Banned",
         "cancel_button": "Cancel",
-        "save_button": "Save Changes"
-      }
+        "save_button": "Save Changes",
+        "identity_section": "Identity Corrections",
+        "identity_hint": "Leave blank to keep unchanged.",
+        "first_name_label": "First Name",
+        "last_name_label": "Last Name",
+        "account_info_section": "Account Info",
+        "email_label": "Email",
+        "language_label": "Language",
+        "language_no_change": "No change",
+        "language_en": "English (EN)",
+        "language_de": "German (DE)",
+        "language_hu": "Hungarian (HU)",
+        "status_section": "Status & Privileges",
+        "system_admin_label": "System Admin",
+        "admin_no_change": "No change",
+        "admin_grant": "Yes — Grant admin",
+        "admin_revoke": "No — Revoke admin",
+        "verification_rejected": "Rejected",
+        "verification_action_required": "Action Required",
+        "trust_override_label": "Trust Level (Manual Override)",
+        "financials_section": "Financials",
+        "time_earned_label": "Total Time Earned (minutes)",
+        "time_earned_placeholder": "Leave blank to keep unchanged"
+      },
+      "reject_dialog_title": "Reject User",
+      "reject_dialog_body": "Reject verification for user {userCode}?"
     },
     "disputes": {
       "header": "Open Conflicts",
@@ -603,7 +735,11 @@
         "confirm_reject_html": "This will <strong>permanently cancel</strong> the payment request. No funds will move and <strong>{debtor}</strong> will not be charged. This <strong>cannot be undone</strong>.",
         "confirm_ok_approve": "Yes, force payment",
         "confirm_ok_reject": "Yes, cancel request",
-        "confirm_cancel": "Go back"
+        "confirm_cancel": "Go back",
+        "statement_by": "Dispute Statement by {name}",
+        "raised_suffix": "raised {date}",
+        "no_dispute_reason": "No dispute reason provided",
+        "original_description_section": "Original Request Description"
       },
       "toast_approve_success": "Dispute approved successfully!",
       "toast_reject_success": "Dispute rejected successfully!",
@@ -629,7 +765,49 @@
       "approve_success": "Tag approved successfully!",
       "approve_error": "Failed to approve tag",
       "delete_success": "Tag deleted successfully!",
-      "delete_error": "Failed to delete tag"
+      "delete_error": "Failed to delete tag",
+      "delete_title": "Delete Tag",
+      "usage_col": "Usage",
+      "tags_count_suffix": "tags",
+      "pagination_info": "Page {current} of {total} ({count} tags)",
+      "pagination_previous": "Previous",
+      "pagination_next": "Next",
+      "no_match": "No tags matching \"{query}\"",
+      "search_placeholder": "Search tags (DE / EN / HU)..."
+    },
+    "layout": {
+      "loading": "Loading admin panel...",
+      "desktop_only_title": "Desktop Only",
+      "desktop_only_body": "The Administration Dashboard requires a larger screen resolution (min. 1280 x 768). Please log in from a Desktop PC."
+    },
+    "redirecting": "Redirecting...",
+    "broadcast": {
+      "card_title": "Send Message to All Users",
+      "title_label": "Message Title",
+      "body_label": "Message Body",
+      "body_placeholder": "Write your message to all users...",
+      "link_label": "Link (optional)",
+      "audience_label": "Target Audience",
+      "audience_all": "All Users",
+      "audience_verified": "Only Verified",
+      "audience_pending": "Only Pending",
+      "audience_t1_t2": "Trust T1-T2 (Beginners)",
+      "audience_t5_t6": "Trust T5-T6 (Leaders)",
+      "send_button": "Send Broadcast",
+      "sending": "Sending...",
+      "note_label": "Note:",
+      "note_body": "Broadcast messages will be sent as system notifications to all users matching the selected criteria. Use this feature responsibly.",
+      "error_fill_fields": "Please fill in both title and message body.",
+      "error_failed": "Failed to send broadcast. Please try again.",
+      "success": "Broadcast sent to {audience} successfully."
+    },
+    "trust_levels": {
+      "T1": "Beginner",
+      "T2": "Active",
+      "T3": "Trusted",
+      "T4": "Professional",
+      "T5": "Ambassador",
+      "T6": "Legend"
     }
   },
   "nav": {
@@ -651,5 +829,10 @@
     "D4": "Wider area (40 km)",
     "D5": "Nationwide",
     "D6": "Online"
+  },
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "ok": "OK"
   }
 }

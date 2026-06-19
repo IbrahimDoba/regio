@@ -41,7 +41,7 @@ export default function ChatPage() {
 
   // URL parameters for contextual chat
   const roomId = searchParams.get("room");
-  const partnerName = searchParams.get("name") || "Chat";
+  const partnerName = searchParams.get("name") || t.chat.page.default_partner;
   const partnerAvatar = searchParams.get("avatar");
   const listingTitle = searchParams.get("listing");
   const prefillMessage = searchParams.get("prefill") || "";
@@ -114,7 +114,7 @@ export default function ChatPage() {
       try {
         await sendMessage(roomId, content);
       } catch (err) {
-        setLocalError(err instanceof Error ? err.message : "Failed to send message");
+        setLocalError(err instanceof Error ? err.message : t.chat.errors.send_message_failed);
       }
     },
     [roomId, sendMessage]
@@ -127,7 +127,7 @@ export default function ChatPage() {
       try {
         // Find the partner's user code to create a banking PaymentRequest
         const partnerCode = rooms.find((r) => r.roomId === roomId)?.partnerCode;
-        if (!partnerCode) throw new Error("Could not find chat partner");
+        if (!partnerCode) throw new Error(t.chat.errors.partner_not_found);
 
         // Create a banking PaymentRequest so Pay/Deny can settle funds
         const bankingRequest = await bankingApi.createPaymentRequest({
@@ -140,7 +140,10 @@ export default function ChatPage() {
         // Send the chat message with the banking_request_id in meta
         await sendMessage(
           roomId,
-          `Payment request: ${data.amountGaras} RGD (${data.amountTime} min) - ${data.description}`,
+          t.chat.messages.payment_request_text
+            .replace("{garas}", String(data.amountGaras))
+            .replace("{time}", String(data.amountTime))
+            .replace("{description}", data.description),
           "payment_request",
           {
             regio_amount: data.amountGaras,
@@ -150,7 +153,7 @@ export default function ChatPage() {
           }
         );
       } catch (err) {
-        setActionError(getApiErrorMessage(err, "Failed to send payment request"));
+        setActionError(getApiErrorMessage(err, t.chat.errors.send_request_failed));
       }
     },
     [roomId, sendMessage, rooms]
@@ -178,7 +181,7 @@ export default function ChatPage() {
 
       try {
         const partnerCode = rooms.find((r) => r.roomId === roomId)?.partnerCode;
-        if (!partnerCode) throw new Error("Could not find chat partner");
+        if (!partnerCode) throw new Error(t.chat.errors.partner_not_found);
 
         await bankingApi.transferFunds({
           receiver_code: partnerCode,
@@ -189,13 +192,13 @@ export default function ChatPage() {
 
         await sendMessage(
           roomId,
-          `💸 Payment sent: ${data.amountGaras ? `${data.amountGaras} RGD` : ''}${data.amountGaras && data.amountTime ? ' + ' : ''}${data.amountTime ? `${data.amountTime} min` : ''}${data.description ? ` — ${data.description}` : ''}`.trim(),
+          `${t.chat.messages.payment_sent_label} ${data.amountGaras ? `${data.amountGaras} RGD` : ''}${data.amountGaras && data.amountTime ? ' + ' : ''}${data.amountTime ? `${data.amountTime} min` : ''}${data.description ? ` — ${data.description}` : ''}`.trim(),
         );
 
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.balance() });
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.transactions.all() });
       } catch (err) {
-        setActionError(getApiErrorMessage(err, "Failed to send payment"));
+        setActionError(getApiErrorMessage(err, t.chat.errors.send_payment_failed));
       }
     },
     [roomId, sendMessage, rooms, queryClient, t, dialog, partnerName]
@@ -214,7 +217,7 @@ export default function ChatPage() {
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.transactions.all() });
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.paymentRequests.all() });
       } catch (err) {
-        setActionError(getApiErrorMessage(err, "Failed to process payment"));
+        setActionError(getApiErrorMessage(err, t.chat.errors.process_payment_failed));
       }
     },
     [roomId, updatePaymentRequestStatus, sendMessage, queryClient]
@@ -230,7 +233,7 @@ export default function ChatPage() {
         await sendMessage(roomId, "", "payment_status", { banking_request_id: requestId, status: "denied" });
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.paymentRequests.all() });
       } catch (err) {
-        setActionError(getApiErrorMessage(err, "Failed to decline request"));
+        setActionError(getApiErrorMessage(err, t.chat.errors.decline_failed));
       }
     },
     [roomId, updatePaymentRequestStatus, sendMessage, queryClient]
@@ -245,7 +248,7 @@ export default function ChatPage() {
         updatePaymentRequestStatus(roomId, requestId, "denied");
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.paymentRequests.all() });
       } catch (err) {
-        setActionError(getApiErrorMessage(err, "Failed to dismiss request"));
+        setActionError(getApiErrorMessage(err, t.chat.errors.dismiss_failed));
       }
     },
     [roomId, updatePaymentRequestStatus, queryClient]
@@ -256,9 +259,9 @@ export default function ChatPage() {
     async (requestId: string) => {
       if (!roomId) return;
       const reason = await dialog.prompt(
-        "Raise Dispute",
-        "Optionally provide a reason for raising this dispute (max 500 chars):",
-        "Reason..."
+        t.chat.dialogs.dispute_title,
+        t.chat.dialogs.dispute_body,
+        t.chat.dialogs.dispute_placeholder
       );
       if (reason === null) return; // user cancelled
       try {
@@ -267,7 +270,7 @@ export default function ChatPage() {
         await sendMessage(roomId, "", "payment_status", { banking_request_id: requestId, status: "disputed" });
         queryClient.invalidateQueries({ queryKey: queryKeys.banking.paymentRequests.all() });
       } catch (err) {
-        setActionError(getApiErrorMessage(err, "Failed to raise dispute"));
+        setActionError(getApiErrorMessage(err, t.chat.errors.raise_dispute_failed));
       }
     },
     [roomId, updatePaymentRequestStatus, sendMessage, queryClient, dialog]
@@ -286,13 +289,13 @@ export default function ChatPage() {
       e.target.value = "";
 
       if (!file.type.startsWith("image/")) {
-        setActionError("Only images can be sent. Videos and other files are not supported.");
+        setActionError(t.chat.errors.photo_not_image);
         return;
       }
 
       const MAX_MB = 10;
       if (file.size > MAX_MB * 1024 * 1024) {
-        setActionError(`Image is too large. Maximum size is ${MAX_MB} MB.`);
+        setActionError(t.chat.errors.photo_too_large.replace("{max}", String(MAX_MB)));
         return;
       }
 
@@ -300,7 +303,7 @@ export default function ChatPage() {
         await uploadImage(roomId, file);
       } catch (err) {
         // Parse Matrix JSON errors into readable messages
-        let msg = "Failed to send photo";
+        let msg = t.chat.errors.send_photo_failed;
         if (err instanceof Error) {
           try {
             const parsed = JSON.parse(err.message) as { error?: string };
@@ -435,7 +438,7 @@ export default function ChatPage() {
                       {room.name.replace(/\s*—\s*(inquiry|Inquiry)/g, "").trim()}
                     </p>
                     <p className="text-xs text-gray-500 truncate mt-0.5">
-                      {room.lastMessage || "No messages yet"}
+                      {room.lastMessage || t.chat.page.no_last_message}
                     </p>
                   </div>
                   {/* Unread badge */}
@@ -550,7 +553,7 @@ export default function ChatPage() {
           setIsActionSheetOpen(false);
           if (!roomId) return;
           if (!navigator.geolocation) {
-            setActionError("Geolocation is not supported by your browser");
+            setActionError(t.chat.errors.geolocation_unsupported);
             return;
           }
           navigator.geolocation.getCurrentPosition(
@@ -561,10 +564,10 @@ export default function ChatPage() {
                   lng: position.coords.longitude,
                 });
               } catch (err) {
-                setActionError(err instanceof Error ? err.message : "Failed to send location");
+                setActionError(err instanceof Error ? err.message : t.chat.errors.send_location_failed);
               }
             },
-            (err) => setActionError(`Could not get location: ${err.message}`)
+            (err) => setActionError(t.chat.errors.get_location_failed.replace("{error}", err.message))
           );
         }}
       />

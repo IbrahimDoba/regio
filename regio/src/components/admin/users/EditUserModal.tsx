@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useModalKeyboard } from "@/hooks/useModalKeyboard";
 import { FaXmark } from 'react-icons/fa6';
+import { useLanguage } from '@/context/LanguageContext';
 import type { AdminUserUpdate, Language, TrustLevel, VerificationStatus } from '@/lib/api/types';
 
 interface UserAdminView {
@@ -32,6 +33,8 @@ export default function EditUserModal({
   onClose,
   onSave,
 }: EditUserModalProps) {
+  const { t } = useLanguage();
+  const em = t.admin.users.edit_modal;
   // Pre-populated from list response
   const [email, setEmail] = useState('');
   const [trustLevel, setTrustLevel] = useState<TrustLevel>('T1');
@@ -107,7 +110,7 @@ export default function EditUserModal({
         {/* Header */}
         <div className="p-5 bg-[#f9f9f9] border-b border-[#eee] flex justify-between items-center">
           <h2 className="text-[20px] font-[800] text-[#333]">
-            Edit User: {user.full_name}
+            {em.title.replace('{name}', user.full_name)}
           </h2>
           <FaXmark
             className="text-[24px] cursor-pointer text-[#999] hover:text-[#333]"
@@ -120,10 +123,10 @@ export default function EditUserModal({
 
           {/* Identity Corrections */}
           <div className={sectionClass}>
-            <p className={sectionTitleClass}>Identity Corrections</p>
-            <p className="text-[12px] text-[#999] mb-3">Leave blank to keep unchanged.</p>
+            <p className={sectionTitleClass}>{em.identity_section}</p>
+            <p className="text-[12px] text-[#999] mb-3">{em.identity_hint}</p>
             <div className="mb-4">
-              <label className={labelClass}>First Name</label>
+              <label className={labelClass}>{em.first_name_label}</label>
               <input
                 type="text"
                 value={firstName}
@@ -133,7 +136,7 @@ export default function EditUserModal({
               />
             </div>
             <div className="mb-4">
-              <label className={labelClass}>Last Name</label>
+              <label className={labelClass}>{em.last_name_label}</label>
               <input
                 type="text"
                 value={lastName}
@@ -146,9 +149,9 @@ export default function EditUserModal({
 
           {/* Account Info */}
           <div className={sectionClass}>
-            <p className={sectionTitleClass}>Account Info</p>
+            <p className={sectionTitleClass}>{em.account_info_section}</p>
             <div className="mb-4">
-              <label className={labelClass}>Email</label>
+              <label className={labelClass}>{em.email_label}</label>
               <input
                 type="email"
                 value={email}
@@ -157,36 +160,36 @@ export default function EditUserModal({
               />
             </div>
             <div className="mb-4">
-              <label className={labelClass}>Language</label>
+              <label className={labelClass}>{em.language_label}</label>
               <select
                 value={language ?? ''}
                 onChange={(e) => setLanguage((e.target.value as Language) || null)}
                 className={inputClass}
               >
-                <option value="">No change</option>
-                <option value="EN">English (EN)</option>
-                <option value="DE">German (DE)</option>
-                <option value="HU">Hungarian (HU)</option>
+                <option value="">{em.language_no_change}</option>
+                <option value="EN">{em.language_en}</option>
+                <option value="DE">{em.language_de}</option>
+                <option value="HU">{em.language_hu}</option>
               </select>
             </div>
           </div>
 
           {/* Status & Privileges */}
           <div className={sectionClass}>
-            <p className={sectionTitleClass}>Status &amp; Privileges</p>
+            <p className={sectionTitleClass}>{em.status_section}</p>
             <div className="mb-4">
-              <label className={labelClass}>Account Status</label>
+              <label className={labelClass}>{em.account_label}</label>
               <select
                 value={isActive ? 'active' : 'banned'}
                 onChange={(e) => setIsActive(e.target.value === 'active')}
                 className={inputClass}
               >
-                <option value="active">Active</option>
-                <option value="banned">Banned</option>
+                <option value="active">{em.account_active}</option>
+                <option value="banned">{em.account_banned}</option>
               </select>
             </div>
             <div className="mb-4">
-              <label className={labelClass}>System Admin</label>
+              <label className={labelClass}>{em.system_admin_label}</label>
               <select
                 value={isSystemAdmin === null ? '' : isSystemAdmin ? 'yes' : 'no'}
                 onChange={(e) => {
@@ -195,52 +198,52 @@ export default function EditUserModal({
                 }}
                 className={inputClass}
               >
-                <option value="">No change</option>
-                <option value="yes">Yes — Grant admin</option>
-                <option value="no">No — Revoke admin</option>
+                <option value="">{em.admin_no_change}</option>
+                <option value="yes">{em.admin_grant}</option>
+                <option value="no">{em.admin_revoke}</option>
               </select>
             </div>
             <div className="mb-4">
-              <label className={labelClass}>Verification Status</label>
+              <label className={labelClass}>{em.verification_label}</label>
               <select
                 value={verificationStatus}
                 onChange={(e) => setVerificationStatus(e.target.value as VerificationStatus)}
                 className={inputClass}
               >
-                <option value="PENDING">Pending</option>
-                <option value="VERIFIED">Verified</option>
-                <option value="REJECTED">Rejected</option>
-                <option value="ACTION_REQUIRED">Action Required</option>
+                <option value="PENDING">{em.verification_pending}</option>
+                <option value="VERIFIED">{em.verification_verified}</option>
+                <option value="REJECTED">{em.verification_rejected}</option>
+                <option value="ACTION_REQUIRED">{em.verification_action_required}</option>
               </select>
             </div>
             <div className="mb-4">
-              <label className={labelClass}>Trust Level (Manual Override)</label>
+              <label className={labelClass}>{em.trust_override_label}</label>
               <select
                 value={trustLevel}
                 onChange={(e) => setTrustLevel(e.target.value as TrustLevel)}
                 className={inputClass}
               >
-                <option value="T1">T1 Beginner</option>
-                <option value="T2">T2 Active</option>
-                <option value="T3">T3 Trusted</option>
-                <option value="T4">T4 Professional</option>
-                <option value="T5">T5 Ambassador</option>
-                <option value="T6">T6 Legend</option>
+                <option value="T1">{em.trust_t1}</option>
+                <option value="T2">{em.trust_t2}</option>
+                <option value="T3">{em.trust_t3}</option>
+                <option value="T4">{em.trust_t4}</option>
+                <option value="T5">{em.trust_t5}</option>
+                <option value="T6">{em.trust_t6}</option>
               </select>
             </div>
           </div>
 
           {/* Financials */}
           <div className={sectionClass}>
-            <p className={sectionTitleClass}>Financials</p>
+            <p className={sectionTitleClass}>{em.financials_section}</p>
             <div className="mb-4">
-              <label className={labelClass}>Total Time Earned (minutes)</label>
+              <label className={labelClass}>{em.time_earned_label}</label>
               <input
                 type="number"
                 min="0"
                 value={totalTimeEarned}
                 onChange={(e) => setTotalTimeEarned(e.target.value)}
-                placeholder="Leave blank to keep unchanged"
+                placeholder={em.time_earned_placeholder}
                 className={inputClass}
               />
             </div>
@@ -254,13 +257,13 @@ export default function EditUserModal({
             onClick={onClose}
             className="py-2 px-4 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#eee] text-[#333] mr-2"
           >
-            Cancel
+            {em.cancel_button}
           </button>
           <button
             onClick={handleSave}
             className="py-2 px-4 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#8cb348] text-white"
           >
-            Save Changes
+            {em.save_button}
           </button>
         </div>
       </div>

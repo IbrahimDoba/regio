@@ -84,7 +84,7 @@ export default function AdminTagsPage() {
   };
 
   const handleDeleteTag = async (tagId: string) => {
-    if (!await dialog.confirm('Delete Tag', 'Are you sure you want to delete this tag?')) return;
+    if (!await dialog.confirm(t.admin.tags.delete_title, t.admin.tags.delete_confirm)) return;
     deleteTagMutation.mutate(tagId, {
       onSuccess: () => toast.success(t.admin.tags.delete_success),
       onError: () => toast.error(t.admin.tags.delete_error),
@@ -96,7 +96,7 @@ export default function AdminTagsPage() {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#8cb348]"></div>
-          <p className="mt-4 text-[#666] text-sm">Loading tags...</p>
+          <p className="mt-4 text-[#666] text-sm">{t.admin.tags.loading}</p>
         </div>
       </div>
     );
@@ -108,18 +108,18 @@ export default function AdminTagsPage() {
       <ContentCard borderColor="#f57c00">
         <div className="flex items-center gap-2 text-[18px] font-bold mb-5 text-[#f57c00] border-b-2 border-[#ffe0b2] pb-[10px]">
           <FaHourglassHalf />
-          Pending User Tags (Require Translation)
+          {t.admin.tags.pending_title}
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">Original Input</th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">DE (German)</th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">EN (English)</th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">HU (Hungarian)</th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">Action</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">{t.admin.tags.col_original}</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">{t.admin.tags.col_de}</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">{t.admin.tags.col_en}</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">{t.admin.tags.col_hu}</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">{t.admin.tags.col_action}</th>
               </tr>
             </thead>
             <tbody>
@@ -136,7 +136,7 @@ export default function AdminTagsPage() {
                           type="text"
                           value={edited.name_de ?? ''}
                           onChange={(e) => handleEditChange(String(tag.id), 'name_de', e.target.value)}
-                          placeholder="German..."
+                          placeholder={t.admin.tags.placeholder_de}
                           className="w-full p-[5px] border border-[#ddd] rounded text-[13px]"
                         />
                       </td>
@@ -145,7 +145,7 @@ export default function AdminTagsPage() {
                           type="text"
                           value={edited.name_en ?? ''}
                           onChange={(e) => handleEditChange(String(tag.id), 'name_en', e.target.value)}
-                          placeholder="English..."
+                          placeholder={t.admin.tags.placeholder_en}
                           className="w-full p-[5px] border border-[#ddd] rounded text-[13px]"
                         />
                       </td>
@@ -154,7 +154,7 @@ export default function AdminTagsPage() {
                           type="text"
                           value={edited.name_hu ?? ''}
                           onChange={(e) => handleEditChange(String(tag.id), 'name_hu', e.target.value)}
-                          placeholder="Hungarian..."
+                          placeholder={t.admin.tags.placeholder_hu}
                           className="w-full p-[5px] border border-[#ddd] rounded text-[13px]"
                         />
                       </td>
@@ -163,7 +163,7 @@ export default function AdminTagsPage() {
                           onClick={() => handleApproveTag(tag)}
                           className="py-[5px] px-[10px] text-[11px] rounded border-none font-semibold cursor-pointer transition-transform active:scale-95 inline-flex items-center gap-[5px] bg-[#8cb348] text-white mr-2"
                         >
-                          <FaCheck /> Add
+                          <FaCheck /> {t.admin.tags.add_button}
                         </button>
                         <button
                           onClick={() => handleDeleteTag(String(tag.id))}
@@ -177,7 +177,7 @@ export default function AdminTagsPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-[#888]">No pending tags</td>
+                  <td colSpan={5} className="p-8 text-center text-[#888]">{t.admin.tags.pending_empty}</td>
                 </tr>
               )}
             </tbody>
@@ -186,12 +186,12 @@ export default function AdminTagsPage() {
       </ContentCard>
 
       {/* Global Tags */}
-      <ContentCard title={`Global Tag Library (Active) — ${officialTotal} tags`}>
+      <ContentCard title={`${t.admin.tags.library_title} — ${officialTotal} ${t.admin.tags.tags_count_suffix}`}>
         {/* Search */}
         <div className="mb-4">
           <input
             type="text"
-            placeholder="Search tags (DE / EN / HU)..."
+            placeholder={t.admin.tags.search_placeholder}
             value={officialSearch}
             onChange={(e) => setOfficialSearch(e.target.value)}
             className="p-[10px] rounded border border-[#ccc] w-full"
@@ -202,12 +202,12 @@ export default function AdminTagsPage() {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">Tag ID</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">{t.admin.tags.col_tag_id}</th>
                 <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">DE</th>
                 <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">EN</th>
                 <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">HU</th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">Usage</th>
-                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">Action</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">{t.admin.tags.usage_col}</th>
+                <th className="text-left p-3 border-b-2 border-[#eee] text-[#888] text-[12px] uppercase">{t.admin.tags.col_action}</th>
               </tr>
             </thead>
             <tbody>
@@ -227,7 +227,7 @@ export default function AdminTagsPage() {
               ) : (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-[#888]">
-                    {debouncedSearch ? `No tags matching "${debouncedSearch}"` : 'No official tags'}
+                    {debouncedSearch ? t.admin.tags.no_match.replace('{query}', debouncedSearch) : t.admin.tags.library_empty}
                   </td>
                 </tr>
               )}
@@ -239,7 +239,10 @@ export default function AdminTagsPage() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#eee]">
             <span className="text-[13px] text-[#888]">
-              Page {officialPage + 1} of {totalPages} ({officialTotal} tags)
+              {t.admin.tags.pagination_info
+                .replace('{current}', String(officialPage + 1))
+                .replace('{total}', String(totalPages))
+                .replace('{count}', String(officialTotal))}
             </span>
             <div className="flex gap-2">
               <button
@@ -247,14 +250,14 @@ export default function AdminTagsPage() {
                 disabled={officialPage === 0}
                 className="px-3 py-1 text-[13px] rounded border border-[#ccc] disabled:opacity-40 hover:border-[#8cb348] hover:text-[#8cb348] transition-colors"
               >
-                Previous
+                {t.admin.tags.pagination_previous}
               </button>
               <button
                 onClick={() => setOfficialPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={officialPage >= totalPages - 1}
                 className="px-3 py-1 text-[13px] rounded border border-[#ccc] disabled:opacity-40 hover:border-[#8cb348] hover:text-[#8cb348] transition-colors"
               >
-                Next
+                {t.admin.tags.pagination_next}
               </button>
             </div>
           </div>

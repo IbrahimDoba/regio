@@ -28,7 +28,10 @@
       "submit": "Konto erstellen",
       "toggle_to_login": "Bereits registriert? Hier einloggen",
       "toast_invalid_zip": "Ungültige Postleitzahl",
-      "toast_coming_soon": "Diese Funktion kommt bald."
+      "toast_coming_soon": "Diese Funktion kommt bald.",
+      "error_password_too_short": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+      "error_terms_required": "Du musst den Nutzungsbedingungen zustimmen.",
+      "error_generic": "Registrierung fehlgeschlagen. Bitte versuche es erneut."
     },
     "no_code_modal": {
       "title": "Du hast keinen Code?",
@@ -59,6 +62,16 @@
       "error_mismatch": "Passwörter stimmen nicht überein.",
       "error_too_short": "Das Passwort muss mindestens 8 Zeichen lang sein.",
       "error_generic": "Dieser Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an."
+    },
+    "confirm_email": {
+      "loading": "Deine neue E-Mail-Adresse wird bestätigt…",
+      "success_title": "E-Mail aktualisiert!",
+      "success_body": "Deine E-Mail-Adresse wurde erfolgreich geändert. Bitte melde dich mit deiner neuen Adresse an.",
+      "go_to_login": "Zum Login",
+      "error_title": "Bestätigung fehlgeschlagen",
+      "error_no_token": "Kein Bestätigungs-Token gefunden.",
+      "error_generic": "Ungültiger oder abgelaufener Link.",
+      "back_to_login": "Zurück zum Login"
     }
   },
   "feed": {
@@ -138,7 +151,9 @@
       "deadline": "Frist",
       "needed_by": "Benötigt bis",
       "price_notes": "Preis-Details"
-    }
+    },
+    "delete_confirm_title": "Beitrag löschen?",
+    "delete_confirm_body": "Diese Aktion kann nicht rückgängig gemacht werden. Der Beitrag wird dauerhaft gelöscht."
   },
   "create_modal": {
     "title": "Neue Anzeige erstellen",
@@ -258,7 +273,9 @@
       "error_title": "Verbindungsfehler",
       "error_description": "Verbindung zum Chat-Server fehlgeschlagen",
       "retry_button": "Erneut versuchen",
-      "reconnecting": "Verbindung wird wiederhergestellt..."
+      "reconnecting": "Verbindung wird wiederhergestellt...",
+      "default_partner": "Chat",
+      "no_last_message": "Noch keine Nachrichten"
     },
     "header": {
       "typing_one": "{name} schreibt...",
@@ -273,7 +290,9 @@
       "today": "Heute",
       "yesterday": "Gestern",
       "read_by": "Gelesen von {count} Nutzern",
-      "delivered": "Zugestellt"
+      "delivered": "Zugestellt",
+      "shared_location": "Geteilter Standort",
+      "open_in_maps": "In Karten öffnen →"
     },
     "message_input": {
       "placeholder": "Nachricht..."
@@ -303,6 +322,46 @@
       "body_template": "Möchtest du {minutes} Minuten und {garas} Garas an {name} für \"{purpose}\" überweisen?",
       "ok": "Überweisen",
       "cancel": "Abbrechen"
+    },
+    "errors": {
+      "send_message_failed": "Nachricht konnte nicht gesendet werden",
+      "partner_not_found": "Chat-Partner konnte nicht gefunden werden",
+      "send_request_failed": "Zahlungsanfrage konnte nicht gesendet werden",
+      "send_payment_failed": "Zahlung konnte nicht gesendet werden",
+      "process_payment_failed": "Zahlung konnte nicht verarbeitet werden",
+      "decline_failed": "Anfrage konnte nicht abgelehnt werden",
+      "dismiss_failed": "Anfrage konnte nicht entfernt werden",
+      "raise_dispute_failed": "Konflikt konnte nicht gemeldet werden",
+      "photo_not_image": "Es können nur Bilder gesendet werden. Videos und andere Dateien werden nicht unterstützt.",
+      "photo_too_large": "Das Bild ist zu groß. Die maximale Größe beträgt {max} MB.",
+      "send_photo_failed": "Foto konnte nicht gesendet werden",
+      "geolocation_unsupported": "Standortbestimmung wird von deinem Browser nicht unterstützt",
+      "send_location_failed": "Standort konnte nicht gesendet werden",
+      "get_location_failed": "Standort konnte nicht ermittelt werden: {error}"
+    },
+    "dialogs": {
+      "dispute_title": "Konflikt melden",
+      "dispute_body": "Optional einen Grund für diesen Konflikt angeben (max. 500 Zeichen):",
+      "dispute_placeholder": "Grund..."
+    },
+    "messages": {
+      "payment_request_text": "Zahlungsanfrage: {garas} RGD ({time} Min) - {description}",
+      "payment_sent_label": "💸 Zahlung gesendet:"
+    },
+    "payment_card": {
+      "title": "Zahlungsanfrage",
+      "paid": "Bezahlt",
+      "pay": "Bezahlen",
+      "deny": "Ablehnen",
+      "waiting": "Warte auf Bestätigung...",
+      "declined": "Anfrage abgelehnt",
+      "accept": "Akzeptieren",
+      "raise_dispute": "Konflikt melden",
+      "dispute_under_review": "Konflikt in Prüfung"
+    },
+    "toast": {
+      "new_message": "Neue Nachricht",
+      "sent_you_message": "Hat dir eine Nachricht gesendet"
     }
   },
   "wallet": {
@@ -357,7 +416,36 @@
         "transaction_id": "Transaktions-ID",
         "close_button": "Schließen"
       }
-    }
+    },
+    "error_unexpected": "Ein unerwarteter Fehler ist aufgetreten.",
+    "autocomplete_selected": "Ausgewählt:",
+    "autocomplete_searching": "Suche...",
+    "autocomplete_no_results": "Keine passenden Nutzer",
+    "error_recipient_required": "Bitte suche und wähle einen Empfänger aus der Liste.",
+    "error_amount_required": "Gib einen gültigen Betrag für Zeit (Minuten) oder Garas ein — mindestens einer muss größer als 0 sein.",
+    "error_reference_required": "Eine Referenznotiz ist erforderlich (z. B. 'Für die Gartenhilfe').",
+    "error_user_required": "Bitte suche und wähle einen Nutzer aus der Liste.",
+    "error_description_required": "Eine Beschreibung ist erforderlich (z. B. 'Mittagessen geteilt').",
+    "confirm_transfer_title": "Überweisung bestätigen",
+    "confirm_transfer_body": "An {recipient} senden?",
+    "confirm_payment_title": "Zahlung bestätigen",
+    "confirm_payment_body": "{amount} bezahlen?",
+    "decline_request_title": "Anfrage ablehnen",
+    "decline_request_body": "Diese Zahlungsanfrage ablehnen?",
+    "cancel_request_title": "Anfrage stornieren",
+    "cancel_request_body": "Diese Anfrage stornieren?",
+    "dispute_title": "Konflikt melden",
+    "dispute_body": "Optional einen Grund für diesen Konflikt angeben (max. 500 Zeichen):",
+    "dispute_placeholder": "Grund...",
+    "declined_request": "Abgelehnte Anfrage",
+    "accept_button": "Akzeptieren",
+    "dispute_under_review": "Konflikt in Prüfung",
+    "raise_dispute_button": "Konflikt melden",
+    "available_to_send": "Verfügbar zum Senden:",
+    "transfer_success": "Überweisung erfolgreich gesendet!",
+    "request_success": "Zahlungsanfrage gesendet!",
+    "system_badge": "System",
+    "system_charge": "Systemgebühr"
   },
   "profile": {
     "header": "Mein Profil",
@@ -388,7 +476,9 @@
       "toast_invalid_zip": "Ungültige Postleitzahl",
       "toast_profile_updated": "Profil aktualisiert!",
       "toast_avatar_too_large": "Bild muss kleiner als 5 MB sein.",
-      "toast_id_copied": "ID kopiert!"
+      "toast_id_copied": "ID kopiert!",
+      "user_id_label": "Nutzer-ID:",
+      "avatar_upload_error": "Upload fehlgeschlagen. Bitte versuche es erneut."
     },
     "account_tab": {
       "login_section": "Login-Daten",
@@ -409,7 +499,11 @@
       "toast_reset_link_sent": "Reset-Link gesendet! Überprüfe dein Postfach.",
       "toast_reset_link_failed": "E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.",
       "toast_email_change_sent": "Bestätigungs-E-Mails gesendet! Überprüfe dein neues Postfach.",
-      "toast_email_change_failed": "Anfrage zur E-Mail-Änderung fehlgeschlagen."
+      "toast_email_change_failed": "Anfrage zur E-Mail-Änderung fehlgeschlagen.",
+      "password_label": "Passwort",
+      "password_sending": "Wird gesendet...",
+      "password_reset_sent_prefix": "Reset-Link gesendet an ",
+      "password_reset_sent_suffix": ". Prüfe dein Postfach."
     },
     "trust_tab": {
       "verification_section": "Verifizierungs-Status",
@@ -422,7 +516,9 @@
       "invites_reputation_hint": "Das Einladen aktiver Mitglieder steigert deine Reputation.",
       "toast_code_copied": "Code kopiert!",
       "toast_invites_generated": "Neue Einladungen erstellt!"
-    }
+    },
+    "loading": "Profil wird geladen...",
+    "error_loading": "Fehler beim Laden des Profils."
   },
   "notifications": {
     "header": "Benachrichtigungen",
@@ -432,7 +528,12 @@
     "empty": "Keine Benachrichtigungen.",
     "section_messages": "Nachrichten",
     "section_activity": "Aktivität",
-    "section_broadcasts": "Ankündigungen"
+    "section_broadcasts": "Ankündigungen",
+    "time_just_now": "Gerade eben",
+    "time_minutes": "vor {count} Min",
+    "time_hours": "vor {count} Std",
+    "time_days": "vor {count} T",
+    "broadcast_label": "Rundnachricht"
   },
   "invite": {
     "header": "Freunde einladen",
@@ -464,7 +565,12 @@
     "toast_invites_generated": "Neue Einladungen erstellt!",
     "toast_select_code_first": "Bitte zuerst einen verfügbaren Einladungscode auswählen.",
     "toast_text_copied": "Text in die Zwischenablage kopiert",
-    "toast_code_copied_facebook": "Code kopiert! Du kannst ihn in deinen Beitrag einfügen."
+    "toast_code_copied_facebook": "Code kopiert! Du kannst ihn in deinen Beitrag einfügen.",
+    "loading": "Einladungen werden geladen...",
+    "dialog_request_title": "Neue Einladungen anfordern",
+    "dialog_request_body": "Möchtest du wirklich die aktuellen Einladungen verwerfen und neue anfordern?",
+    "share_title": "Tritt regio.is bei",
+    "email_subject": "Einladung zu regio.is"
   },
   "verification": {
     "title": "Verifizierung ausstehend",
@@ -524,7 +630,9 @@
         "status_pending": "Wartet auf Verif.",
         "status_active": "Aktiv",
         "verify_button": "Verifizieren",
-        "edit_button": "Bearbeiten"
+        "edit_button": "Bearbeiten",
+        "status_rejected": "Abgelehnt",
+        "reject_button": "Ablehnen"
       },
       "toast_verify_success": "Benutzer {userCode} erfolgreich verifiziert!",
       "toast_reject_success": "Benutzer {userCode} abgelehnt.",
@@ -548,8 +656,32 @@
         "account_active": "Aktiv",
         "account_banned": "Gesperrt",
         "cancel_button": "Abbrechen",
-        "save_button": "Änderungen speichern"
-      }
+        "save_button": "Änderungen speichern",
+        "identity_section": "Identitätskorrekturen",
+        "identity_hint": "Leer lassen, um unverändert zu lassen.",
+        "first_name_label": "Vorname",
+        "last_name_label": "Nachname",
+        "account_info_section": "Kontoinformationen",
+        "email_label": "E-Mail",
+        "language_label": "Sprache",
+        "language_no_change": "Keine Änderung",
+        "language_en": "Englisch (EN)",
+        "language_de": "Deutsch (DE)",
+        "language_hu": "Ungarisch (HU)",
+        "status_section": "Status & Berechtigungen",
+        "system_admin_label": "System-Admin",
+        "admin_no_change": "Keine Änderung",
+        "admin_grant": "Ja — Admin gewähren",
+        "admin_revoke": "Nein — Admin entziehen",
+        "verification_rejected": "Abgelehnt",
+        "verification_action_required": "Aktion erforderlich",
+        "trust_override_label": "Vertrauensstufe (manuelle Übersteuerung)",
+        "financials_section": "Finanzen",
+        "time_earned_label": "Gesamte verdiente Zeit (Minuten)",
+        "time_earned_placeholder": "Leer lassen, um unverändert zu lassen"
+      },
+      "reject_dialog_title": "Nutzer ablehnen",
+      "reject_dialog_body": "Verifizierung für Nutzer {userCode} ablehnen?"
     },
     "disputes": {
       "header": "Offene Konflikte",
@@ -603,7 +735,11 @@
         "confirm_reject_html": "Dies <strong>storniert die Zahlungsanforderung dauerhaft</strong>. Es werden keine Gelder bewegt und <strong>{debtor}</strong> wird nicht belastet. Dies <strong>kann nicht rückgängig gemacht werden</strong>.",
         "confirm_ok_approve": "Ja, Zahlung erzwingen",
         "confirm_ok_reject": "Ja, Anforderung stornieren",
-        "confirm_cancel": "Zurück"
+        "confirm_cancel": "Zurück",
+        "statement_by": "Konfliktaussage von {name}",
+        "raised_suffix": "gemeldet {date}",
+        "no_dispute_reason": "Kein Konfliktgrund angegeben",
+        "original_description_section": "Ursprüngliche Anfragebeschreibung"
       },
       "toast_approve_success": "Streitfall erfolgreich genehmigt!",
       "toast_reject_success": "Streitfall erfolgreich abgelehnt!",
@@ -629,7 +765,49 @@
       "approve_success": "Tag erfolgreich freigegeben!",
       "approve_error": "Fehler bei Freigabe",
       "delete_success": "Tag gelöscht!",
-      "delete_error": "Fehler beim Löschen"
+      "delete_error": "Fehler beim Löschen",
+      "delete_title": "Tag löschen",
+      "usage_col": "Verwendung",
+      "tags_count_suffix": "Tags",
+      "pagination_info": "Seite {current} von {total} ({count} Tags)",
+      "pagination_previous": "Zurück",
+      "pagination_next": "Weiter",
+      "no_match": "Keine Tags für \"{query}\"",
+      "search_placeholder": "Tags suchen (DE / EN / HU)..."
+    },
+    "layout": {
+      "loading": "Admin-Bereich wird geladen...",
+      "desktop_only_title": "Nur Desktop",
+      "desktop_only_body": "Das Administrations-Dashboard benötigt eine größere Bildschirmauflösung (min. 1280 x 768). Bitte melde dich von einem Desktop-PC an."
+    },
+    "redirecting": "Weiterleitung...",
+    "broadcast": {
+      "card_title": "Nachricht an alle Nutzer senden",
+      "title_label": "Titel der Nachricht",
+      "body_label": "Nachrichtentext",
+      "body_placeholder": "Schreibe deine Nachricht an alle Nutzer...",
+      "link_label": "Link (optional)",
+      "audience_label": "Zielgruppe",
+      "audience_all": "Alle Nutzer",
+      "audience_verified": "Nur verifizierte",
+      "audience_pending": "Nur ausstehende",
+      "audience_t1_t2": "Vertrauen T1-T2 (Anfänger)",
+      "audience_t5_t6": "Vertrauen T5-T6 (Führende)",
+      "send_button": "Rundnachricht senden",
+      "sending": "Wird gesendet...",
+      "note_label": "Hinweis:",
+      "note_body": "Rundnachrichten werden als Systembenachrichtigungen an alle Nutzer gesendet, die den ausgewählten Kriterien entsprechen. Nutze diese Funktion verantwortungsvoll.",
+      "error_fill_fields": "Bitte fülle sowohl Titel als auch Nachrichtentext aus.",
+      "error_failed": "Senden der Rundnachricht fehlgeschlagen. Bitte versuche es erneut.",
+      "success": "Rundnachricht erfolgreich an {audience} gesendet."
+    },
+    "trust_levels": {
+      "T1": "Anfänger",
+      "T2": "Aktiv",
+      "T3": "Vertraut",
+      "T4": "Profi",
+      "T5": "Botschafter",
+      "T6": "Legende"
     }
   },
   "nav": {
@@ -651,5 +829,10 @@
     "D4": "Weiterer Umkreis (40 km)",
     "D5": "Landesweit",
     "D6": "Online"
+  },
+  "common": {
+    "loading": "Lädt...",
+    "cancel": "Abbrechen",
+    "ok": "OK"
   }
 }

@@ -29,6 +29,7 @@ function DateSelect({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const { t } = useLanguage();
   const currentYear = new Date().getFullYear();
   const initParts = value ? value.split("-") : [];
   const [selYear, setSelYear] = useState(initParts[0] || "");
@@ -69,7 +70,7 @@ function DateSelect({
         onChange={(e) => onYear(e.target.value)}
         className={selectItemClass}
       >
-        <option value="">Year</option>
+        <option value="">{t.create_modal.date_select.year}</option>
         {Array.from({ length: 7 }, (_, i) => currentYear + i).map((yr) => (
           <option key={yr} value={String(yr)}>
             {yr}
@@ -81,7 +82,7 @@ function DateSelect({
         onChange={(e) => onMonth(e.target.value)}
         className={selectItemClass}
       >
-        <option value="">Month</option>
+        <option value="">{t.create_modal.date_select.month}</option>
         {Array.from({ length: 12 }, (_, i) => i + 1).map((mo) => (
           <option key={mo} value={String(mo).padStart(2, "0")}>
             {String(mo).padStart(2, "0")}
@@ -93,7 +94,7 @@ function DateSelect({
         onChange={(e) => onDay(e.target.value)}
         className={selectItemClass}
       >
-        <option value="">Day</option>
+        <option value="">{t.create_modal.date_select.day}</option>
         {Array.from({ length: maxDay }, (_, i) => i + 1).map((day) => (
           <option key={day} value={String(day).padStart(2, "0")}>
             {String(day).padStart(2, "0")}
@@ -378,8 +379,8 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
 
   const handleDelete = async () => {
     const confirmed = await dialog.confirm(
-      "Delete post?",
-      "This action cannot be undone. The post will be permanently deleted."
+      t.preview_modal.delete_confirm_title,
+      t.preview_modal.delete_confirm_body
     );
     if (!confirmed) return;
     deleteMutation.mutate(listing.id, {

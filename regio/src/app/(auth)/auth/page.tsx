@@ -107,11 +107,11 @@ function AuthForm() {
     setRegisterError(null);
 
     if (registerPassword.length < 8) {
-      setRegisterError('Password must be at least 8 characters long.');
+      setRegisterError(t.auth.register.error_password_too_short);
       return;
     }
     if (!agreeToTerms) {
-      setRegisterError('You must agree to the terms and conditions.');
+      setRegisterError(t.auth.register.error_terms_required);
       return;
     }
 
@@ -129,7 +129,7 @@ function AuthForm() {
       await login({ username: registerEmail, password: registerPassword });
     } catch (error: unknown) {
       console.error('Registration error:', error);
-      let message = 'Registration failed. Please try again.';
+      let message = t.auth.register.error_generic;
       const err = error as { response?: { data?: { detail?: unknown } } };
       if (err?.response?.data?.detail) {
         const detail = err.response.data.detail;
@@ -382,7 +382,7 @@ function AuthForm() {
                   <label className="block text-[12px] font-bold text-[#555] mb-[8px]">{t.auth.register.city_label}</label>
                   {citiesFetching ? (
                     <div className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[14px] text-[#aaa] bg-[var(--input-bg)] flex items-center gap-[8px]">
-                      <FaSpinner className="animate-spin" /> Loading...
+                      <FaSpinner className="animate-spin" /> {t.common.loading}
                     </div>
                   ) : zipCities.length > 1 ? (
                     <select
@@ -406,7 +406,7 @@ function AuthForm() {
                     <input
                       type="text"
                       className="w-full p-[14px] border border-[#ddd] rounded-[8px] text-[15px] bg-[#f5f5f5] text-[#aaa] outline-none cursor-not-allowed"
-                      placeholder={registerZip.length === 4 ? "Invalid zip code" : t.auth.register.city_placeholder}
+                      placeholder={registerZip.length === 4 ? t.auth.register.toast_invalid_zip : t.auth.register.city_placeholder}
                       value=""
                       readOnly
                       disabled

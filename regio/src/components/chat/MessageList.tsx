@@ -34,6 +34,7 @@ function ChatImage({ mxcUrl, alt, className, onClick }: {
   className?: string;
   onClick?: () => void;
 }) {
+  const { t } = useLanguage();
   const [src, setSrc] = useState<string | null>(null);
   const { matrixAccessToken } = useMatrixStore();
 
@@ -66,7 +67,7 @@ function ChatImage({ mxcUrl, alt, className, onClick }: {
   if (!src) {
     return (
       <div className="w-[240px] h-[160px] bg-gray-200 animate-pulse rounded-lg flex items-center justify-center">
-        <span className="text-xs text-gray-400">Loading...</span>
+        <span className="text-xs text-gray-400">{t.common.loading}</span>
       </div>
     );
   }
@@ -236,6 +237,7 @@ function MessageItem({
   onAcceptDeclineRequest,
   readReceipts = [],
 }: MessageItemProps) {
+  const { t } = useLanguage();
   const isOwn = message.isOwn;
   const hasReadReceipts = readReceipts.length > 0;
 
@@ -258,13 +260,13 @@ function MessageItem({
             <div className="w-[220px] bg-white">
               <div className="bg-green-50 px-3 py-2 flex items-center gap-2">
                 <FaLocationDot className="text-green-600 text-sm shrink-0" />
-                <span className="text-sm font-semibold text-green-700">Shared Location</span>
+                <span className="text-sm font-semibold text-green-700">{t.chat.message_list.shared_location}</span>
               </div>
               <div className="px-3 py-1.5 text-xs text-gray-500">
                 {lat.toFixed(5)}, {lng.toFixed(5)}
               </div>
               <div className="px-3 pb-2 text-xs text-blue-500 font-medium">
-                Open in Maps →
+                {t.chat.message_list.open_in_maps}
               </div>
             </div>
           </a>
@@ -399,12 +401,13 @@ interface ReadReceiptIndicatorProps {
 }
 
 function ReadReceiptIndicator({ readReceipts }: ReadReceiptIndicatorProps) {
+  const { t } = useLanguage();
   const hasReadReceipts = readReceipts.length > 0;
-  
+
   if (hasReadReceipts) {
     // Message has been read - show colored double check
     return (
-      <div className="flex items-center gap-0.5" title={`Read by ${readReceipts.length} user(s)`}>
+      <div className="flex items-center gap-0.5" title={t.chat.message_list.read_by.replace("{count}", String(readReceipts.length))}>
         <FaCheckDouble className="w-3 h-3 text-sky-500" />
         {readReceipts.length > 1 && (
           <span className="text-[8px] text-sky-500 ml-0.5">
@@ -414,13 +417,13 @@ function ReadReceiptIndicator({ readReceipts }: ReadReceiptIndicatorProps) {
       </div>
     );
   }
-  
+
   // Message delivered but not read - show gray double check
   // For now, we assume delivered if no error
   return (
-    <FaCheckDouble 
-      className="w-3 h-3 text-gray-400" 
-      title="Delivered"
+    <FaCheckDouble
+      className="w-3 h-3 text-gray-400"
+      title={t.chat.message_list.delivered}
     />
   );
 }

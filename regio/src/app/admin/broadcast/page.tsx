@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import ContentCard from '@/components/admin/ui/ContentCard';
 import { FaPaperPlane } from 'react-icons/fa6';
 import { useSendBroadcast } from '@/lib/api/hooks/use-broadcasts';
+import { useLanguage } from '@/context/LanguageContext';
 
 const AUDIENCE_TO_TRUST_LEVELS: Record<string, string[]> = {
   ALL: ['ALL'],
@@ -14,6 +15,7 @@ const AUDIENCE_TO_TRUST_LEVELS: Record<string, string[]> = {
 };
 
 export default function AdminBroadcastPage() {
+  const { t } = useLanguage();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [link, setLink] = useState('');
@@ -24,7 +26,7 @@ export default function AdminBroadcastPage() {
 
   const handleSendBroadcast = () => {
     if (!title.trim() || !body.trim()) {
-      setFeedback({ type: 'error', message: 'Please fill in both title and message body.' });
+      setFeedback({ type: 'error', message: t.admin.broadcast.error_fill_fields });
       return;
     }
 
@@ -38,14 +40,14 @@ export default function AdminBroadcastPage() {
       },
       {
         onSuccess: () => {
-          setFeedback({ type: 'success', message: `Broadcast sent to ${targetAudience} successfully.` });
+          setFeedback({ type: 'success', message: t.admin.broadcast.success.replace('{audience}', targetAudience) });
           setTitle('');
           setBody('');
           setLink('');
           setTargetAudience('ALL');
         },
         onError: () => {
-          setFeedback({ type: 'error', message: 'Failed to send broadcast. Please try again.' });
+          setFeedback({ type: 'error', message: t.admin.broadcast.error_failed });
         },
       }
     );
@@ -53,10 +55,10 @@ export default function AdminBroadcastPage() {
 
   return (
     <div className="max-w-[700px]">
-      <ContentCard title="Send Message to All Users">
+      <ContentCard title={t.admin.broadcast.card_title}>
         <div className="mb-4">
           <label className="block mb-[5px] font-bold text-[13px] text-[#555]">
-            Message Title
+            {t.admin.broadcast.title_label}
           </label>
           <input
             type="text"
@@ -69,12 +71,12 @@ export default function AdminBroadcastPage() {
 
         <div className="mb-4">
           <label className="block mb-[5px] font-bold text-[13px] text-[#555]">
-            Message Body
+            {t.admin.broadcast.body_label}
           </label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Write your message to all users..."
+            placeholder={t.admin.broadcast.body_placeholder}
             className="w-full p-[10px] border border-[#ccc] rounded resize-none"
             rows={8}
           />
@@ -82,7 +84,7 @@ export default function AdminBroadcastPage() {
 
         <div className="mb-4">
           <label className="block mb-[5px] font-bold text-[13px] text-[#555]">
-            Link (optional)
+            {t.admin.broadcast.link_label}
           </label>
           <input
             type="url"
@@ -95,18 +97,18 @@ export default function AdminBroadcastPage() {
 
         <div className="mb-4">
           <label className="block mb-[5px] font-bold text-[13px] text-[#555]">
-            Target Audience
+            {t.admin.broadcast.audience_label}
           </label>
           <select
             value={targetAudience}
             onChange={(e) => setTargetAudience(e.target.value)}
             className="w-full p-[10px] border border-[#ccc] rounded"
           >
-            <option value="ALL">All Users</option>
-            <option value="VERIFIED">Only Verified</option>
-            <option value="PENDING">Only Pending</option>
-            <option value="T1_T2">Trust T1-T2 (Beginners)</option>
-            <option value="T5_T6">Trust T5-T6 (Leaders)</option>
+            <option value="ALL">{t.admin.broadcast.audience_all}</option>
+            <option value="VERIFIED">{t.admin.broadcast.audience_verified}</option>
+            <option value="PENDING">{t.admin.broadcast.audience_pending}</option>
+            <option value="T1_T2">{t.admin.broadcast.audience_t1_t2}</option>
+            <option value="T5_T6">{t.admin.broadcast.audience_t5_t6}</option>
           </select>
         </div>
 
@@ -128,13 +130,12 @@ export default function AdminBroadcastPage() {
           className="w-full py-4 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center justify-center gap-[5px] bg-[#8cb348] text-white disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <FaPaperPlane />
-          {isPending ? 'Sending...' : 'Send Broadcast'}
+          {isPending ? t.admin.broadcast.sending : t.admin.broadcast.send_button}
         </button>
 
         <div className="mt-5 p-4 bg-[#f0f7ff] border border-[#bbdefb] rounded">
           <p className="text-[12px] text-[#555]">
-            <strong>Note:</strong> Broadcast messages will be sent as system notifications to all
-            users matching the selected criteria. Use this feature responsibly.
+            <strong>{t.admin.broadcast.note_label}</strong> {t.admin.broadcast.note_body}
           </p>
         </div>
       </ContentCard>

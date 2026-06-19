@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 type TrustLevel = 'T1' | 'T2' | 'T3' | 'T4' | 'T5' | 'T6';
 
@@ -35,8 +36,9 @@ const trustLevelConfig = {
 };
 
 export default function TrustBadge({ level, label }: TrustBadgeProps) {
+  const { t } = useLanguage();
   const config = trustLevelConfig[level];
-  const displayLabel = label || config.label;
+  const displayLabel = label || t.admin.trust_levels[level];
 
   return (
     <span

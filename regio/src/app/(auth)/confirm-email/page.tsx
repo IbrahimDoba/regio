@@ -6,8 +6,10 @@ import { FaSpinner } from "react-icons/fa6";
 import Image from "next/image";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useConfirmEmailChange } from "@/lib/api/hooks/use-users";
+import { useLanguage } from "@/context/LanguageContext";
 
 function ConfirmEmailForm() {
+  const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const confirmMutation = useConfirmEmailChange();
@@ -19,7 +21,7 @@ function ConfirmEmailForm() {
   useEffect(() => {
     if (!token) {
       setStatus("error");
-      setErrorMsg("No confirmation token found.");
+      setErrorMsg(t.auth.confirm_email.error_no_token);
       return;
     }
 
@@ -27,7 +29,7 @@ function ConfirmEmailForm() {
       onSuccess: () => setStatus("success"),
       onError: (err: unknown) => {
         const e = err as { response?: { data?: { detail?: string } } };
-        setErrorMsg(e?.response?.data?.detail || "Invalid or expired link.");
+        setErrorMsg(e?.response?.data?.detail || t.auth.confirm_email.error_generic);
         setStatus("error");
       },
     });
@@ -48,22 +50,22 @@ function ConfirmEmailForm() {
         {status === "loading" && (
           <div className="animate-in fade-in duration-300">
             <FaSpinner className="animate-spin text-[var(--color-green-offer)] text-[40px] mb-[20px] mx-auto" />
-            <p className="text-[15px] text-[#555]">Confirming your new email address…</p>
+            <p className="text-[15px] text-[#555]">{t.auth.confirm_email.loading}</p>
           </div>
         )}
 
         {status === "success" && (
           <div className="animate-in fade-in duration-300">
             <div className="text-[48px] mb-[15px]">✅</div>
-            <h2 className="text-[20px] font-bold text-[#333] mb-[10px]">Email updated!</h2>
+            <h2 className="text-[20px] font-bold text-[#333] mb-[10px]">{t.auth.confirm_email.success_title}</h2>
             <p className="text-[14px] text-[#666] leading-[1.6] mb-[25px]">
-              Your email address has been changed successfully. Please log in with your new address.
+              {t.auth.confirm_email.success_body}
             </p>
             <button
               className="px-[30px] py-[12px] bg-[var(--color-green-offer)] text-white rounded-[8px] font-bold text-[14px] cursor-pointer"
               onClick={() => router.replace("/auth")}
             >
-              Go to Login
+              {t.auth.confirm_email.go_to_login}
             </button>
           </div>
         )}
@@ -71,13 +73,13 @@ function ConfirmEmailForm() {
         {status === "error" && (
           <div className="animate-in fade-in duration-300">
             <div className="text-[48px] mb-[15px]">❌</div>
-            <h2 className="text-[20px] font-bold text-[#333] mb-[10px]">Confirmation failed</h2>
+            <h2 className="text-[20px] font-bold text-[#333] mb-[10px]">{t.auth.confirm_email.error_title}</h2>
             <p className="text-[14px] text-[#d32f2f] leading-[1.6] mb-[25px]">{errorMsg}</p>
             <button
               className="px-[30px] py-[12px] bg-white border border-[#ccc] rounded-[8px] font-bold text-[14px] cursor-pointer"
               onClick={() => router.replace("/auth")}
             >
-              Back to Login
+              {t.auth.confirm_email.back_to_login}
             </button>
           </div>
         )}

@@ -28,7 +28,10 @@
       "submit": "Regisztráció",
       "toggle_to_login": "Már van fiókod? Lépj be itt",
       "toast_invalid_zip": "Érvénytelen irányítószám",
-      "toast_coming_soon": "Ez a funkció hamarosan elérhető lesz."
+      "toast_coming_soon": "Ez a funkció hamarosan elérhető lesz.",
+      "error_password_too_short": "A jelszónak legalább 8 karakter hosszúnak kell lennie.",
+      "error_terms_required": "El kell fogadnod a felhasználási feltételeket.",
+      "error_generic": "A regisztráció sikertelen. Kérjük, próbáld újra."
     },
     "no_code_modal": {
       "title": "Nincs meghívókódod?",
@@ -59,6 +62,16 @@
       "error_mismatch": "A jelszavak nem egyeznek.",
       "error_too_short": "A jelszónak legalább 8 karakter hosszúnak kell lennie.",
       "error_generic": "Ez a link érvénytelen vagy lejárt. Kérj újat."
+    },
+    "confirm_email": {
+      "loading": "Az új e-mail-címed megerősítése folyamatban…",
+      "success_title": "E-mail frissítve!",
+      "success_body": "Az e-mail-címed sikeresen megváltozott. Kérjük, jelentkezz be az új címeddel.",
+      "go_to_login": "Tovább a bejelentkezéshez",
+      "error_title": "A megerősítés sikertelen",
+      "error_no_token": "Nem található megerősítő token.",
+      "error_generic": "Érvénytelen vagy lejárt link.",
+      "back_to_login": "Vissza a bejelentkezéshez"
     }
   },
   "feed": {
@@ -138,7 +151,9 @@
       "deadline": "Határidő",
       "needed_by": "Szükséges eddig",
       "price_notes": "Ár részletei"
-    }
+    },
+    "delete_confirm_title": "Törlöd a bejegyzést?",
+    "delete_confirm_body": "Ez a művelet nem vonható vissza. A bejegyzés véglegesen törlődik."
   },
   "create_modal": {
     "title": "Új hirdetés létrehozása",
@@ -258,7 +273,9 @@
       "error_title": "Kapcsolódási hiba",
       "error_description": "Nem sikerült csatlakozni a chat szerverhez",
       "retry_button": "Próbáld újra",
-      "reconnecting": "Újracsatlakozás..."
+      "reconnecting": "Újracsatlakozás...",
+      "default_partner": "Csevegés",
+      "no_last_message": "Még nincsenek üzenetek"
     },
     "header": {
       "typing_one": "{name} éppen ír...",
@@ -273,7 +290,9 @@
       "today": "Ma",
       "yesterday": "Tegnap",
       "read_by": "{count} felhasználó olvasta",
-      "delivered": "Kézbesítve"
+      "delivered": "Kézbesítve",
+      "shared_location": "Megosztott helyzet",
+      "open_in_maps": "Megnyitás a Térképen →"
     },
     "message_input": {
       "placeholder": "Üzenet..."
@@ -303,6 +322,46 @@
       "body_template": "Szeretnél {minutes} percet és {garas} garast átutalni {name} részére ezért: \"{purpose}\"?",
       "ok": "Átutalás",
       "cancel": "Mégse"
+    },
+    "errors": {
+      "send_message_failed": "Az üzenet küldése sikertelen",
+      "partner_not_found": "A csevegőpartner nem található",
+      "send_request_failed": "A fizetési kérés küldése sikertelen",
+      "send_payment_failed": "A fizetés küldése sikertelen",
+      "process_payment_failed": "A fizetés feldolgozása sikertelen",
+      "decline_failed": "A kérés elutasítása sikertelen",
+      "dismiss_failed": "A kérés elvetése sikertelen",
+      "raise_dispute_failed": "A vita indítása sikertelen",
+      "photo_not_image": "Csak képeket lehet küldeni. Videók és más fájlok nem támogatottak.",
+      "photo_too_large": "A kép túl nagy. A maximális méret {max} MB.",
+      "send_photo_failed": "A fotó küldése sikertelen",
+      "geolocation_unsupported": "A böngésződ nem támogatja a helymeghatározást",
+      "send_location_failed": "A helyzet küldése sikertelen",
+      "get_location_failed": "A helyzet nem határozható meg: {error}"
+    },
+    "dialogs": {
+      "dispute_title": "Vita indítása",
+      "dispute_body": "Opcionálisan adj meg indokot a vita indításához (max. 500 karakter):",
+      "dispute_placeholder": "Indok..."
+    },
+    "messages": {
+      "payment_request_text": "Fizetési kérés: {garas} RGD ({time} perc) - {description}",
+      "payment_sent_label": "💸 Fizetés elküldve:"
+    },
+    "payment_card": {
+      "title": "Fizetési kérés",
+      "paid": "Kifizetve",
+      "pay": "Fizetés",
+      "deny": "Elutasítás",
+      "waiting": "Megerősítésre vár...",
+      "declined": "Kérés elutasítva",
+      "accept": "Elfogadás",
+      "raise_dispute": "Vita indítása",
+      "dispute_under_review": "Vita elbírálás alatt"
+    },
+    "toast": {
+      "new_message": "Új üzenet",
+      "sent_you_message": "Üzenetet küldött neked"
     }
   },
   "wallet": {
@@ -357,7 +416,36 @@
         "transaction_id": "Tranzakció azonosító",
         "close_button": "Bezárás"
       }
-    }
+    },
+    "error_unexpected": "Váratlan hiba történt.",
+    "autocomplete_selected": "Kiválasztva:",
+    "autocomplete_searching": "Keresés...",
+    "autocomplete_no_results": "Nincs találat a felhasználókra",
+    "error_recipient_required": "Kérjük, keress és válassz címzettet a listából.",
+    "error_amount_required": "Adj meg érvényes összeget Időre (perc) vagy Garasra — legalább az egyiknek nagyobbnak kell lennie 0-nál.",
+    "error_reference_required": "Hivatkozási megjegyzés szükséges (pl. 'A kerti segítségért').",
+    "error_user_required": "Kérjük, keress és válassz felhasználót a listából.",
+    "error_description_required": "Leírás szükséges (pl. 'Ebéd megosztva').",
+    "confirm_transfer_title": "Átutalás megerősítése",
+    "confirm_transfer_body": "Küldés {recipient} részére?",
+    "confirm_payment_title": "Fizetés megerősítése",
+    "confirm_payment_body": "{amount} kifizetése?",
+    "decline_request_title": "Kérés elutasítása",
+    "decline_request_body": "Elutasítod ezt a fizetési kérést?",
+    "cancel_request_title": "Kérés visszavonása",
+    "cancel_request_body": "Visszavonod ezt a kérést?",
+    "dispute_title": "Vita indítása",
+    "dispute_body": "Opcionálisan adj meg indokot ehhez a vitához (max. 500 karakter):",
+    "dispute_placeholder": "Indok...",
+    "declined_request": "Elutasított kérés",
+    "accept_button": "Elfogadás",
+    "dispute_under_review": "Vita elbírálás alatt",
+    "raise_dispute_button": "Vita indítása",
+    "available_to_send": "Elküldhető:",
+    "transfer_success": "Az átutalás sikeresen elküldve!",
+    "request_success": "Fizetési kérés elküldve!",
+    "system_badge": "Rendszer",
+    "system_charge": "Rendszerdíj"
   },
   "profile": {
     "header": "Profilom",
@@ -388,7 +476,9 @@
       "toast_invalid_zip": "Érvénytelen irányítószám",
       "toast_profile_updated": "Profil frissítve!",
       "toast_avatar_too_large": "A kép kisebb kell legyen, mint 5 MB.",
-      "toast_id_copied": "Azonosító másolva!"
+      "toast_id_copied": "Azonosító másolva!",
+      "user_id_label": "Felhasználói azonosító:",
+      "avatar_upload_error": "A feltöltés sikertelen. Kérjük, próbáld újra."
     },
     "account_tab": {
       "login_section": "Belépési adatok",
@@ -409,7 +499,11 @@
       "toast_reset_link_sent": "Visszaállítási link elküldve! Ellenőrizd a postaládádat.",
       "toast_reset_link_failed": "Nem sikerült az e-mailt elküldeni. Kérjük, próbáld újra.",
       "toast_email_change_sent": "Megerősítő e-mailek elküldve! Ellenőrizd az új postaládádat.",
-      "toast_email_change_failed": "Az e-mail változtatási kérés sikertelen."
+      "toast_email_change_failed": "Az e-mail változtatási kérés sikertelen.",
+      "password_label": "Jelszó",
+      "password_sending": "Küldés...",
+      "password_reset_sent_prefix": "Visszaállító link elküldve ide: ",
+      "password_reset_sent_suffix": ". Ellenőrizd a postaládád."
     },
     "trust_tab": {
       "verification_section": "Ellenőrzési állapot",
@@ -422,7 +516,9 @@
       "invites_reputation_hint": "Aktív tagok meghívásával hírnévpontokat szerezhetsz.",
       "toast_code_copied": "Kód másolva!",
       "toast_invites_generated": "Új meghívók létrehozva!"
-    }
+    },
+    "loading": "Profil betöltése...",
+    "error_loading": "Hiba a profil betöltésekor."
   },
   "notifications": {
     "header": "Értesítések",
@@ -432,7 +528,12 @@
     "empty": "Nincsenek értesítéseid.",
     "section_messages": "Üzenetek",
     "section_activity": "Aktivitás",
-    "section_broadcasts": "Közlemények"
+    "section_broadcasts": "Közlemények",
+    "time_just_now": "Az imént",
+    "time_minutes": "{count} perce",
+    "time_hours": "{count} órája",
+    "time_days": "{count} napja",
+    "broadcast_label": "Közlemény"
   },
   "invite": {
     "header": "Barátok meghívása",
@@ -464,7 +565,12 @@
     "toast_invites_generated": "Új meghívók létrehozva!",
     "toast_select_code_first": "Kérjük, először válassz egy elérhető meghívókódot.",
     "toast_text_copied": "Szöveg vágólapra másolva",
-    "toast_code_copied_facebook": "Kód másolva! Illesztheted a bejegyzésedbe."
+    "toast_code_copied_facebook": "Kód másolva! Illesztheted a bejegyzésedbe.",
+    "loading": "Meghívók betöltése...",
+    "dialog_request_title": "Új meghívók igénylése",
+    "dialog_request_body": "Biztosan érvényteleníted a jelenlegi meghívókat, és újakat igényelsz?",
+    "share_title": "Csatlakozz a regio.is-hez",
+    "email_subject": "Meghívó a regio.is-re"
   },
   "verification": {
     "title": "Ellenőrzés folyamatban",
@@ -524,7 +630,9 @@
         "status_pending": "Ellenőrzésre vár",
         "status_active": "Aktív",
         "verify_button": "Igazolás",
-        "edit_button": "Szerkesztés"
+        "edit_button": "Szerkesztés",
+        "status_rejected": "Elutasítva",
+        "reject_button": "Elutasítás"
       },
       "toast_verify_success": "{userCode} felhasználó sikeresen ellenőrizve!",
       "toast_reject_success": "{userCode} felhasználó elutasítva.",
@@ -548,8 +656,32 @@
         "account_active": "Aktív",
         "account_banned": "Kitiltva",
         "cancel_button": "Mégsem",
-        "save_button": "Mentés"
-      }
+        "save_button": "Mentés",
+        "identity_section": "Személyazonosság javítása",
+        "identity_hint": "Hagyd üresen, ha nem akarod megváltoztatni.",
+        "first_name_label": "Keresztnév",
+        "last_name_label": "Vezetéknév",
+        "account_info_section": "Fiókinformációk",
+        "email_label": "E-mail",
+        "language_label": "Nyelv",
+        "language_no_change": "Nincs változás",
+        "language_en": "Angol (EN)",
+        "language_de": "Német (DE)",
+        "language_hu": "Magyar (HU)",
+        "status_section": "Állapot és jogosultságok",
+        "system_admin_label": "Rendszergazda",
+        "admin_no_change": "Nincs változás",
+        "admin_grant": "Igen — Adminjog megadása",
+        "admin_revoke": "Nem — Adminjog visszavonása",
+        "verification_rejected": "Elutasítva",
+        "verification_action_required": "Beavatkozás szükséges",
+        "trust_override_label": "Bizalmi szint (kézi felülírás)",
+        "financials_section": "Pénzügyek",
+        "time_earned_label": "Összesen szerzett idő (perc)",
+        "time_earned_placeholder": "Hagyd üresen, ha nem akarod megváltoztatni"
+      },
+      "reject_dialog_title": "Felhasználó elutasítása",
+      "reject_dialog_body": "Elutasítod a(z) {userCode} felhasználó igazolását?"
     },
     "disputes": {
       "header": "Nyitott konfliktusok",
@@ -603,7 +735,11 @@
         "confirm_reject_html": "Ez <strong>véglegesen visszavonja</strong> a fizetési kérelmet. Nem történik pénzmozgás, és <strong>{debtor}</strong> nem kerül megterhelésre. Ez <strong>nem vonható vissza</strong>.",
         "confirm_ok_approve": "Igen, fizetés kikényszerítése",
         "confirm_ok_reject": "Igen, kérelem visszavonása",
-        "confirm_cancel": "Vissza"
+        "confirm_cancel": "Vissza",
+        "statement_by": "{name} vitanyilatkozata",
+        "raised_suffix": "bejelentve: {date}",
+        "no_dispute_reason": "Nincs megadva vita indok",
+        "original_description_section": "Eredeti kérés leírása"
       },
       "toast_approve_success": "Vita sikeresen jóváhagyva!",
       "toast_reject_success": "Vita sikeresen elutasítva!",
@@ -629,7 +765,49 @@
       "approve_success": "Címke sikeresen jóváhagyva!",
       "approve_error": "Hiba a jóváhagyáskor",
       "delete_success": "Címke törölve!",
-      "delete_error": "Hiba a törléskor"
+      "delete_error": "Hiba a törléskor",
+      "delete_title": "Címke törlése",
+      "usage_col": "Használat",
+      "tags_count_suffix": "címke",
+      "pagination_info": "{total} / {current}. oldal ({count} címke)",
+      "pagination_previous": "Előző",
+      "pagination_next": "Következő",
+      "no_match": "Nincs találat a következőre: \"{query}\"",
+      "search_placeholder": "Címkék keresése (DE / EN / HU)..."
+    },
+    "layout": {
+      "loading": "Adminfelület betöltése...",
+      "desktop_only_title": "Csak asztali gépen",
+      "desktop_only_body": "Az adminisztrációs irányítópult nagyobb képernyőfelbontást igényel (min. 1280 x 768). Kérjük, jelentkezz be asztali számítógépről."
+    },
+    "redirecting": "Átirányítás...",
+    "broadcast": {
+      "card_title": "Üzenet küldése minden felhasználónak",
+      "title_label": "Üzenet címe",
+      "body_label": "Üzenet szövege",
+      "body_placeholder": "Írd meg az üzeneted minden felhasználónak...",
+      "link_label": "Link (opcionális)",
+      "audience_label": "Célközönség",
+      "audience_all": "Minden felhasználó",
+      "audience_verified": "Csak igazoltak",
+      "audience_pending": "Csak függőben lévők",
+      "audience_t1_t2": "Bizalom T1-T2 (Kezdők)",
+      "audience_t5_t6": "Bizalom T5-T6 (Vezetők)",
+      "send_button": "Közlemény küldése",
+      "sending": "Küldés...",
+      "note_label": "Megjegyzés:",
+      "note_body": "A közlemények rendszerértesítésként kerülnek elküldésre minden, a kiválasztott feltételeknek megfelelő felhasználónak. Használd ezt a funkciót felelősségteljesen.",
+      "error_fill_fields": "Kérjük, töltsd ki a címet és az üzenet szövegét is.",
+      "error_failed": "A közlemény küldése sikertelen. Kérjük, próbáld újra.",
+      "success": "A közlemény sikeresen elküldve a következőnek: {audience}."
+    },
+    "trust_levels": {
+      "T1": "Kezdő",
+      "T2": "Aktív",
+      "T3": "Megbízható",
+      "T4": "Profi",
+      "T5": "Nagykövet",
+      "T6": "Legenda"
     }
   },
   "nav": {
@@ -651,5 +829,10 @@
     "D4": "Tágabb körzet (40 km)",
     "D5": "Országos",
     "D6": "Online"
+  },
+  "common": {
+    "loading": "Betöltés...",
+    "cancel": "Mégse",
+    "ok": "OK"
   }
 }

@@ -3,6 +3,7 @@
 import React, { useEffect, type ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -13,6 +14,7 @@ export default function ProtectedRoute({ children, verifiedOnly = false }: Prote
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (isLoading) return;
@@ -32,7 +34,7 @@ export default function ProtectedRoute({ children, verifiedOnly = false }: Prote
       <div className="w-full max-w-[480px] mx-auto min-h-screen bg-[#f8f8f8] flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-green-offer)]"></div>
-          <p className="mt-4 text-[#666] text-sm">Loading...</p>
+          <p className="mt-4 text-[#666] text-sm">{t.common.loading}</p>
         </div>
       </div>
     );

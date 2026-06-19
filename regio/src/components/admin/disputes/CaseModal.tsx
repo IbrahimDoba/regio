@@ -92,7 +92,7 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
         <div className="p-5 bg-[#f9f9f9] border-b border-[#eee] flex justify-between items-center">
           <h2 className="text-[20px] font-[800] text-[#333] flex items-center gap-2">
             <FaFolderOpen className="text-[#d32f2f]" />
-            Case: {dispute.request_id.slice(0, 8)}... - Dispute
+            {cm.title.replace('{id}', dispute.request_id.slice(0, 8) + '...')}
           </h2>
           <FaXmark
             className="text-[24px] cursor-pointer text-[#999] hover:text-[#333]"
@@ -120,15 +120,15 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
           {/* Creditor Dispute Statement */}
           <div className="bg-white border border-[#eee] p-5 rounded-md mb-5">
             <span className="text-[12px] font-bold text-[#888] uppercase mb-[10px] block border-b border-[#eee] pb-[5px]">
-              Dispute Statement by {dispute.creditor_name}
+              {cm.statement_by.replace('{name}', dispute.creditor_name)}
               {dispute.dispute_raised_at && (
                 <span className="ml-2 font-normal normal-case text-[11px] text-[#aaa]">
-                  — raised {new Date(dispute.dispute_raised_at).toLocaleString()}
+                  — {cm.raised_suffix.replace('{date}', new Date(dispute.dispute_raised_at).toLocaleString())}
                 </span>
               )}
             </span>
             <p className="text-[14px] text-[#333] leading-[1.5] italic bg-[#fff8e1] p-[10px] border-l-[3px] border-[#f9a825]">
-              {dispute.dispute_reason || 'No dispute reason provided'}
+              {dispute.dispute_reason || cm.no_dispute_reason}
             </p>
           </div>
 
@@ -136,7 +136,7 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
           {dispute.description && (
             <div className="bg-white border border-[#eee] p-5 rounded-md mb-5">
               <span className="text-[12px] font-bold text-[#888] uppercase mb-[10px] block border-b border-[#eee] pb-[5px]">
-                Original Request Description
+                {cm.original_description_section}
               </span>
               <p className="text-[14px] text-[#333] leading-[1.5] italic bg-[#f9f9f9] p-[10px] border-l-[3px] border-[#ccc]">
                 {dispute.description}
@@ -147,16 +147,16 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
           {/* Case Details */}
           <div className="bg-white border border-[#eee] p-5 rounded-md mb-5">
             <span className="text-[12px] font-bold text-[#888] uppercase mb-[10px] block border-b border-[#eee] pb-[5px]">
-              Case Details
+              {cm.details_section}
             </span>
             <div className="grid grid-cols-2 gap-4 mt-3">
               <div>
-                <p className="text-[11px] text-[#888] uppercase">Creditor (Requesting)</p>
+                <p className="text-[11px] text-[#888] uppercase">{cm.creditor_label}</p>
                 <p className="text-[14px] font-bold">{dispute.creditor_name}</p>
                 <p className="text-[12px] text-[#666]">{dispute.creditor_code}</p>
               </div>
               <div>
-                <p className="text-[11px] text-[#888] uppercase">Debtor (Owes)</p>
+                <p className="text-[11px] text-[#888] uppercase">{cm.debtor_label}</p>
                 <p className="text-[14px] font-bold">{dispute.debtor_name}</p>
                 <p className="text-[12px] text-[#666]">{dispute.debtor_code}</p>
               </div>
@@ -175,11 +175,10 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
           {!isResolved && (
           <div className="bg-[#f0f7ff] border border-[#bbdefb] p-5 rounded-md mb-5">
             <span className="text-[12px] font-bold text-[#4285f4] uppercase mb-[10px] block border-b border-[#bbdefb] pb-[5px]">
-              Arbitration Consent Status
+              {cm.consent_section}
             </span>
             <p className="text-[13px] mb-4 text-[#555]">
-              To view the private chat history and intervene, we need active consent from both
-              parties to lift E2E privacy for this case.
+              {cm.consent_description}
             </p>
 
             <div className="flex gap-5 mb-5">
@@ -188,7 +187,7 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
                 <div>
                   <strong>{dispute.creditor_name}</strong>
                   <br />
-                  <span className="text-[11px] text-[#888]">Granted: Today, 10:05</span>
+                  <span className="text-[11px] text-[#888]">{cm.consent_granted.replace('{time}', '10:05')}</span>
                 </div>
               </div>
               <div className="flex-1 p-3 bg-white border border-[#eee] rounded flex items-center gap-[10px] text-[13px]">
@@ -196,7 +195,7 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
                 <div>
                   <strong>{dispute.debtor_name}</strong>
                   <br />
-                  <span className="text-[11px] text-[#888]">Waiting for response...</span>
+                  <span className="text-[11px] text-[#888]">{cm.consent_waiting}</span>
                 </div>
               </div>
             </div>
@@ -207,7 +206,9 @@ export default function CaseModal({ dispute, isOpen, onClose, onResolve }: CaseM
               className="w-full py-3 rounded border-none font-semibold cursor-pointer text-[13px] transition-transform active:scale-95 inline-flex items-center justify-center gap-[5px] bg-[#4285f4] text-white disabled:bg-[#ccc] disabled:cursor-not-allowed"
             >
               <FaEnvelope />
-              {consentGranted ? 'Request Sent to ' + dispute.debtor_name : 'Request Consent & Info from ' + dispute.debtor_name}
+              {consentGranted
+                ? cm.consent_sent.replace('{name}', dispute.debtor_name)
+                : cm.request_consent_button.replace('{name}', dispute.debtor_name)}
             </button>
           </div>
           )}

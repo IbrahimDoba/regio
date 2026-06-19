@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { FaBell, FaBullhorn, FaCoins, FaClock, FaUserPlus, FaArrowLeft } from "react-icons/fa6";
 import { FaRegComments, FaRegBellSlash, FaMessage } from "react-icons/fa6";
 import { useRealTime, type LocalNotification } from "@/context/RealTimeContext";
-import { useLanguage } from "@/context/LanguageContext";
+import { useLanguage, type Translations } from "@/context/LanguageContext";
 import { useBroadcastInbox, useMarkBroadcastRead } from "@/lib/api/hooks/use-broadcasts";
 import type { BroadcastMessage } from "@/lib/api/types";
 
@@ -29,7 +29,7 @@ const getNotificationIcon = (type: string) => {
 };
 
 // Format relative time
-const formatRelativeTime = (dateString: string) => {
+const formatRelativeTime = (dateString: string, t: Translations) => {
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -37,10 +37,10 @@ const formatRelativeTime = (dateString: string) => {
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffMins < 1) return t.notifications.time_just_now;
+  if (diffMins < 60) return t.notifications.time_minutes.replace("{count}", String(diffMins));
+  if (diffHours < 24) return t.notifications.time_hours.replace("{count}", String(diffHours));
+  if (diffDays < 7) return t.notifications.time_days.replace("{count}", String(diffDays));
   return date.toLocaleDateString();
 };
 
@@ -124,7 +124,7 @@ export default function NotificationsPage() {
           <div className="text-[13px] text-[#666] leading-[1.3] line-clamp-2">{item.message}</div>
           <div className="flex justify-between items-center mt-[6px] text-[11px] text-[#999]">
             <span className="capitalize">{item.type.replace("_", " ")}</span>
-            <span>{formatRelativeTime(item.created_at)}</span>
+            <span>{formatRelativeTime(item.created_at, t)}</span>
           </div>
         </div>
         {isUnread && (
@@ -156,8 +156,8 @@ export default function NotificationsPage() {
             <div className="text-[11px] text-[#1e88e5] mt-[3px] truncate">{item.link}</div>
           )}
           <div className="flex justify-between items-center mt-[6px] text-[11px] text-[#999]">
-            <span>Broadcast</span>
-            <span>{formatRelativeTime(item.sent_at)}</span>
+            <span>{t.notifications.broadcast_label}</span>
+            <span>{formatRelativeTime(item.sent_at, t)}</span>
           </div>
         </div>
         {isUnread && (
