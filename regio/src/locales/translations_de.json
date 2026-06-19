@@ -592,14 +592,14 @@
     "sidebar": {
       "brand": "ADMIN",
       "user_management": "Nutzerverwaltung",
-      "tag_management": "Tag-Management",
+      "tag_management": "Tag-Verwaltung",
       "disputes": "Konflikte",
       "broadcasts": "Rundnachrichten",
       "super_admin": "Super Admin"
     },
     "header": {
       "user_management": "Nutzerverwaltung",
-      "tag_management": "Tag-Management",
+      "tag_management": "Tag-Verwaltung",
       "disputes": "Konflikte",
       "broadcasts": "Rundnachrichten",
       "default": "Admin-Übersicht"
