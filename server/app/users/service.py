@@ -42,10 +42,18 @@ _MAX_AVATAR_BYTES = 5 * 1024 * 1024  # 5 MB
 class UserService:
     def __init__(self, session: AsyncSession):
         self.session = session
+        # Initialize Redis; only pass SSL options for rediss:// URLs since the
+        # plain Connection class rejects an `ssl` kwarg (from_url derives the
+        # connection class from the URL scheme).
+        _ssl_kwargs = (
+            {"ssl_cert_reqs": None}
+            if urlparse(settings.REDIS_URL).scheme == "rediss"
+            else {}
+        )
         self.redis = Redis.from_url(
             settings.REDIS_URL,
-            ssl=urlparse(settings.REDIS_URL).scheme == "rediss",
             decode_responses=True,
+            **_ssl_kwargs,
         )
 
     async def get_users(self, skip: int = 0, limit: int = 100) -> UsersPublic:
