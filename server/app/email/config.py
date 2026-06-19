@@ -14,8 +14,14 @@ class EmailConfig(RegioBaseSettings):
 
     SMTP_HOST: str = Field(description="SMTP server hostname.")
     SMTP_PORT: int = Field(default=587, description="SMTP server port.")
-    SMTP_USERNAME: str = Field(description="SMTP authentication username.")
-    SMTP_PASSWORD: str = Field(description="SMTP authentication password.")
+    SMTP_USERNAME: str = Field(
+        default="",
+        description="SMTP authentication username. Empty for an unauthenticated local relay.",
+    )
+    SMTP_PASSWORD: str = Field(
+        default="",
+        description="SMTP authentication password. Empty for an unauthenticated local relay.",
+    )
     SMTP_FROM_ADDRESS: str = Field(
         description="Sender address for outgoing emails."
     )
