@@ -74,11 +74,19 @@ export function ChatHeader({
       <div className="flex-1 flex items-center gap-3 min-w-0">
         {/* Avatar */}
         <div className="relative flex-shrink-0">
-          <img
-            src={partnerAvatar || `https://i.pravatar.cc/100?u=${partnerName}`}
-            alt={partnerName}
-            className="w-10 h-10 rounded-full object-cover border border-gray-200"
-          />
+          {partnerAvatar ? (
+            <img
+              src={partnerAvatar}
+              alt={partnerName}
+              className="w-10 h-10 rounded-full object-cover border border-gray-200"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center border border-gray-200">
+              <span className="text-green-700 font-semibold text-sm">
+                {partnerName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
           <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
         </div>
 

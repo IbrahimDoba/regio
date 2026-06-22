@@ -135,7 +135,7 @@ function saveLS(key: string, data: unknown) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function matrixEventToChatMessage(event: any, myUserId: string, client?: any): ChatMessage | null {
+function matrixEventToChatMessage(event: any, myUserId: string, client?: any, roomMeta?: Map<string, { partnerCode: string; partnerName: string }>): ChatMessage | null {
   if (event.getType() !== "m.room.message") return null;
   const content = event.getContent();
   if (!content) return null;
@@ -145,7 +145,8 @@ function matrixEventToChatMessage(event: any, myUserId: string, client?: any): C
 
   const sender = event.getSender() as string;
   const isOwn = sender === myUserId;
-  const senderName = isOwn ? "Me" : (event.sender?.name || sender.split(":")[0].replace("@", "") || sender);
+  const roomPartnerName = roomMeta?.get(event.getRoomId() as string)?.partnerName;
+  const senderName = isOwn ? "Me" : (event.sender?.name || roomPartnerName || sender.split(":")[0].replace("@", "") || sender);
 
   if (msgtype === "m.image") {
     // Store the raw mxc:// URL — the ChatImage component converts it to an
@@ -374,7 +375,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
 
       if (event.getType() !== "m.room.message") return;
       const myId = client.getUserId() as string;
-      const msg = matrixEventToChatMessage(event, myId, client);
+      const msg = matrixEventToChatMessage(event, myId, client, roomMetaRef.current);
       if (!msg) return;
 
       const roomId = room.roomId as string;
@@ -445,7 +446,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
       if (!room || event.status !== null) return; // still in-flight
       if (event.getType() !== "m.room.message") return;
       const myId = client.getUserId() as string;
-      const msg = matrixEventToChatMessage(event, myId, client);
+      const msg = matrixEventToChatMessage(event, myId, client, roomMetaRef.current);
       if (!msg) return;
 
       const roomId = room.roomId as string;
@@ -638,7 +639,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const events: any[] = sdkRoom.getLiveTimeline().getEvents();
       const messages: ChatMessage[] = events
-        .map((e) => matrixEventToChatMessage(e, myId, client))
+        .map((e) => matrixEventToChatMessage(e, myId, client, roomMetaRef.current))
         .filter((m): m is ChatMessage => m !== null);
 
       // Apply payment status updates from history
@@ -834,7 +835,7 @@ export function RealTimeProvider({ children }: { children: React.ReactNode }) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const events: any[] = sdkRoom.getLiveTimeline().getEvents();
         const messages = events
-          .map((e) => matrixEventToChatMessage(e, myId, client))
+          .map((e) => matrixEventToChatMessage(e, myId, client, roomMetaRef.current))
           .filter((m): m is ChatMessage => m !== null);
         setMessagesByRoom((prev) => {
           const newMap = new Map(prev);

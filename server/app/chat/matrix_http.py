@@ -218,3 +218,18 @@ async def join_room_as_user(matrix_room_id: str, access_token: str) -> None:
         body={},
         access_token=access_token,
     )
+
+
+async def set_matrix_display_name(
+    matrix_user_id: str, access_token: str, display_name: str
+) -> None:
+    """
+    Set the Matrix profile display name for a user.
+    Endpoint: PUT /_matrix/client/v3/profile/{userId}/displayname
+    """
+    await matrix_fetch(
+        f"/_matrix/client/v3/profile/{matrix_user_id}/displayname",
+        method="PUT",
+        body={"displayname": display_name},
+        access_token=access_token,
+    )
