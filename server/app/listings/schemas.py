@@ -210,7 +210,9 @@ class ListingUpdate(BaseModel):
     media_urls: Optional[List[str]] = Field(default=None)
     tags: Optional[List[str]] = Field(default=None)
 
-    zip_code: Optional[str] = Field(default=None, min_length=4, max_length=4, pattern=r"^\d{4}$")
+    zip_code: Optional[str] = Field(
+        default=None, min_length=4, max_length=4, pattern=r"^\d{4}$"
+    )
     d_class: Optional[DClass] = Field(default=None)
 
     available_until: Optional[datetime] = Field(default=None)

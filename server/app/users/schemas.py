@@ -50,7 +50,11 @@ class UserCreate(SQLModel):
         ..., description="Valid invite code required for registration."
     )
     zip_code: str = Field(
-        ..., min_length=4, max_length=4, pattern=r"^\d{4}$", description="Hungarian 4-digit ZIP code."
+        ...,
+        min_length=4,
+        max_length=4,
+        pattern=r"^\d{4}$",
+        description="Hungarian 4-digit ZIP code.",
     )
     city: str = Field(..., max_length=100, description="User's home city.")
 
@@ -96,7 +100,11 @@ class UserUpdate(SQLModel):
     )
 
     zip_code: Optional[str] = Field(
-        default=None, min_length=4, max_length=4, pattern=r"^\d{4}$", description="Hungarian 4-digit ZIP code."
+        default=None,
+        min_length=4,
+        max_length=4,
+        pattern=r"^\d{4}$",
+        description="Hungarian 4-digit ZIP code.",
     )
     city: Optional[str] = Field(default=None, max_length=100)
 

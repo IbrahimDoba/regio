@@ -133,8 +133,12 @@ async def update_user_details(
                     user_first_name=db_user.first_name,
                     user_email=db_user.email,
                     new_status=user_in.verification_status,
-                    app_url=email_settings.APP_URL if user_in.verification_status == "VERIFIED" else None,
-                    how_it_works_video_url=email_settings.HOW_IT_WORKS_VIDEO_URL if user_in.verification_status == "VERIFIED" else None,
+                    app_url=email_settings.APP_URL
+                    if user_in.verification_status == "VERIFIED"
+                    else None,
+                    how_it_works_video_url=email_settings.HOW_IT_WORKS_VIDEO_URL
+                    if user_in.verification_status == "VERIFIED"
+                    else None,
                 ),
             )
 
@@ -229,10 +233,14 @@ async def toggle_user_active(
 )
 async def get_tags(
     service: AdminServiceDep,
-    pending: bool = Query(False, description="If True, returns only tags waiting for approval."),
+    pending: bool = Query(
+        False, description="If True, returns only tags waiting for approval."
+    ),
     skip: int = Query(0, ge=0, description="Pagination offset."),
     limit: int = Query(50, le=200, description="Pagination limit."),
-    q: Optional[str] = Query(None, description="Search across name, name_de, name_en, name_hu."),
+    q: Optional[str] = Query(
+        None, description="Search across name, name_de, name_en, name_hu."
+    ),
 ) -> Any:
     """
     Get tags with usage counts, search, and pagination.
@@ -240,7 +248,9 @@ async def get_tags(
     - **pending**: Filter for user-suggested tags awaiting approval.
     - **q**: Full-text search across all language name fields.
     """
-    return await service.get_tags_with_usage(pending_only=pending, skip=skip, limit=limit, q=q)
+    return await service.get_tags_with_usage(
+        pending_only=pending, skip=skip, limit=limit, q=q
+    )
 
 
 @router.patch(

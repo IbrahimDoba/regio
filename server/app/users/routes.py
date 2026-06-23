@@ -34,7 +34,11 @@ from app.users.dependencies import (
     CurrentUserAnyStatus,
     UserServiceDep,
 )
-from app.users.exceptions import InvalidAvatarFile, UserAlreadyExists, UserNotFound
+from app.users.exceptions import (
+    InvalidAvatarFile,
+    UserAlreadyExists,
+    UserNotFound,
+)
 from app.users.schemas import UserCreate, UserPublic, UsersPublic, UserUpdate
 
 router = APIRouter()
@@ -368,9 +372,12 @@ async def request_email_change(
         )
 
     try:
-        first_name, old_email, new_email, confirm_url = (
-            await service.request_email_change(current_user.id, new_email)
-        )
+        (
+            first_name,
+            old_email,
+            new_email,
+            confirm_url,
+        ) = await service.request_email_change(current_user.id, new_email)
     except UserAlreadyExists:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -394,7 +401,9 @@ async def request_email_change(
         ),
     )
 
-    return {"message": "Confirmation emails sent. Please check your new inbox."}
+    return {
+        "message": "Confirmation emails sent. Please check your new inbox."
+    }
 
 
 @router.post(
@@ -424,7 +433,9 @@ async def confirm_email_change(
     except (ValueError, UserNotFound) as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e) if isinstance(e, ValueError) else "Invalid or expired confirmation token.",
+            detail=str(e)
+            if isinstance(e, ValueError)
+            else "Invalid or expired confirmation token.",
         )
 
     return {"message": "Email address updated successfully."}

@@ -294,7 +294,9 @@ class EmailService:
         self, data: EmailChangeNotifyData
     ) -> None:
         """Notify the OLD address that an email change has been requested."""
-        html = self._render_template("email_change_notify.html", data.model_dump())
+        html = self._render_template(
+            "email_change_notify.html", data.model_dump()
+        )
         message = EmailMessage(
             to=data.user_email,
             subject="Your Regio email address is being changed",
@@ -307,7 +309,9 @@ class EmailService:
         self, data: EmailChangeConfirmData
     ) -> None:
         """Send confirmation link to the NEW address."""
-        html = self._render_template("email_change_confirm.html", data.model_dump())
+        html = self._render_template(
+            "email_change_confirm.html", data.model_dump()
+        )
         message = EmailMessage(
             to=data.user_email,
             subject="Confirm your new Regio email address",
@@ -320,7 +324,9 @@ class EmailService:
         self, data: BookingReminderEmailData
     ) -> None:
         """Send a reminder to book the verification call (30 min after registration)."""
-        html = self._render_template("booking_reminder.html", data.model_dump())
+        html = self._render_template(
+            "booking_reminder.html", data.model_dump()
+        )
         message = EmailMessage(
             to=data.user_email,
             subject="Don't forget — Book your Regio verification call",

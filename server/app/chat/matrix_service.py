@@ -110,11 +110,16 @@ async def ensure_matrix_user(
     encrypted_token = encrypt_password(access_token)
 
     # Set display name so messages show the user's real name, not regio_<uuid>
-    display_name = f"{user.first_name} {user.last_name}".strip()
+    # display_name = f"{user.first_name} {user.last_name}".strip()
+    display_name = user.full_name.strip()
     try:
-        await set_matrix_display_name(matrix_user_id, access_token, display_name)
+        await set_matrix_display_name(
+            matrix_user_id, access_token, display_name
+        )
     except Exception as exc:
-        logger.warning("Could not set Matrix display name for %s: %s", matrix_user_id, exc)
+        logger.warning(
+            "Could not set Matrix display name for %s: %s", matrix_user_id, exc
+        )
 
     # Persist to DB
     user.matrix_user_id = matrix_user_id

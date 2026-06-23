@@ -32,7 +32,9 @@ async def send_welcome_email_task(data: VerificationEmailData) -> None:
 BOOKING_REMINDER_DELAY_SECONDS = 30 * 60  # 30 minutes
 
 
-async def send_booking_reminder_email_task(data: BookingReminderEmailData) -> None:
+async def send_booking_reminder_email_task(
+    data: BookingReminderEmailData,
+) -> None:
     """Background task: send booking reminder 30 minutes after registration.
 
     Waits silently if the user books before the delay elapses — the email

@@ -42,7 +42,9 @@ async def seed(json_path: Path) -> None:
 
     async with session_factory() as session:
         for entry in entries:
-            name = entry["en"]  # canonical key — English is the neutral primary
+            name = entry[
+                "en"
+            ]  # canonical key — English is the neutral primary
             result = await session.execute(
                 text(
                     """

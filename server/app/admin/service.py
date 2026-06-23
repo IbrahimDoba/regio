@@ -218,10 +218,14 @@ class AdminService:
         ).scalar_one()
 
         tags = (
-            await self.session.execute(
-                base_stmt.order_by(Tag.name).offset(skip).limit(limit)
+            (
+                await self.session.execute(
+                    base_stmt.order_by(Tag.name).offset(skip).limit(limit)
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
         if not tags:
             return TagsAdminListResponse(data=[], count=total)
@@ -234,7 +238,10 @@ class AdminService:
             .where(Listing.status == ListingStatus.ACTIVE)
             .group_by(func.jsonb_array_elements_text(Listing.tags))
         )
-        usage_map = {row[0]: row[1] for row in (await self.session.execute(stats_stmt)).all()}
+        usage_map = {
+            row[0]: row[1]
+            for row in (await self.session.execute(stats_stmt)).all()
+        }
 
         results = [
             TagAdminView(
