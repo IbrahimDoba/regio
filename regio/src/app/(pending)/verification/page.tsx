@@ -7,12 +7,21 @@ import { useAuth } from "@/context/AuthContext";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useRouter } from "next/navigation";
 
+const VERIFICATION_BASE_URL =
+  process.env.NEXT_PUBLIC_VERIFICATION_URL || 'https://verify.regio.is/schedule';
+
 export default function VerificationPage() {
   const { language, setLanguage, t } = useLanguage();
   const { logout, user } = useAuth();
   const router = useRouter();
 
   const isVerified = user?.verification_status === 'VERIFIED';
+
+  const openSchedulingPage = () => {
+    if (!user) return;
+    const url = `${VERIFICATION_BASE_URL}?id=${user.id}&lang=${language.toLowerCase()}`;
+    window.open(url, '_blank');
+  };
 
   const flags: { [key: string]: string } = { 'EN': '🇬🇧', 'HU': '🇭🇺', 'DE': '🇩🇪' };
 
@@ -108,7 +117,7 @@ export default function VerificationPage() {
               <div className="text-[12px] text-[#555] mb-[15px]">{t.verification.call_notice}</div>
               <button
                 className="w-full p-[12px] bg-[var(--color-green-offer)] text-white border-none rounded-[6px] text-[14px] font-[700] cursor-pointer flex justify-center items-center gap-[8px] hover:scale-[1.02] transition-transform"
-                onClick={() => window.open('https://cal.regio.is', '_blank')}
+                onClick={openSchedulingPage}
               >
                 <FaVideo /> <span>{t.verification.book_button}</span>
               </button>

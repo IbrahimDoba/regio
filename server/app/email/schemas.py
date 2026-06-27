@@ -19,7 +19,7 @@ class VerificationEmailData(BaseModel):
 
     user_first_name: str
     user_email: EmailStr
-    calendly_url: str
+    verification_url: str
 
 
 class VerificationStatusEmailData(BaseModel):
@@ -38,7 +38,7 @@ class BookingReminderEmailData(BaseModel):
 
     user_first_name: str
     user_email: EmailStr
-    calendly_url: str
+    verification_url: str
 
 
 class BroadcastDigestEmailData(BaseModel):

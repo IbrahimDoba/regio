@@ -2,6 +2,9 @@ import asyncio
 import logging
 from typing import List
 
+from sqlmodel import select
+
+from app.core.database import AsyncSessionLocal
 from app.email.config import email_settings
 from app.email.schemas import (
     BookingReminderEmailData,
@@ -15,6 +18,8 @@ from app.email.schemas import (
     VerificationStatusEmailData,
 )
 from app.email.service import email_service
+from app.users.enums import VerificationStatus
+from app.users.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +42,27 @@ async def send_booking_reminder_email_task(
 ) -> None:
     """Background task: send booking reminder 30 minutes after registration.
 
-    Waits silently if the user books before the delay elapses — the email
-    will still send, which is acceptable (it acts as a confirmation then).
+    When the delay elapses we re-check the user's verification status and
+    skip the reminder unless they are still PENDING — so users who already
+    completed (or were otherwise progressed past) the call aren't nudged.
     A proper task-queue solution (Celery + Redis) would allow cancellation,
-    but asyncio.sleep is sufficient for the current architecture.
+    but re-checking status on wake is sufficient for the current architecture.
     """
     await asyncio.sleep(BOOKING_REMINDER_DELAY_SECONDS)
     try:
+        async with AsyncSessionLocal() as session:
+            status = await session.scalar(
+                select(User.verification_status).where(
+                    User.email == data.user_email
+                )
+            )
+        if status != VerificationStatus.PENDING:
+            logger.info(
+                "Skipping booking reminder for %s (status=%s)",
+                data.user_email,
+                status,
+            )
+            return
         await email_service.send_booking_reminder_email(data)
     except Exception as e:
         logger.error(

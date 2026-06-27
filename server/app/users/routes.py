@@ -132,10 +132,14 @@ async def register_user(
 
     # Only send emails on successful registrations
     if db_user:
+        verification_url = (
+            f"{email_settings.VERIFICATION_URL}"
+            f"?id={db_user.id}&lang={db_user.language.lower()}"
+        )
         email_data = VerificationEmailData(
             user_first_name=db_user.first_name,
             user_email=db_user.email,
-            calendly_url=email_settings.CALENDLY_URL,
+            verification_url=verification_url,
         )
         background_tasks.add_task(send_welcome_email_task, email_data)
         # Schedule a reminder if the user hasn't booked after 30 minutes
@@ -144,7 +148,7 @@ async def register_user(
             BookingReminderEmailData(
                 user_first_name=db_user.first_name,
                 user_email=db_user.email,
-                calendly_url=email_settings.CALENDLY_URL,
+                verification_url=verification_url,
             ),
         )
 

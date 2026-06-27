@@ -62,6 +62,7 @@ export type Language = 'EN' | 'DE' | 'HU';
 export type UserRole = 'User' | 'Admin';
 
 export interface UserPublic {
+  id: string;
   user_code: string;
   email: string;
   first_name: string;

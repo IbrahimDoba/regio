@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from typing import Any, Optional
 
@@ -172,6 +173,9 @@ class UserAdminUpdate(UserUpdate):
 
 # Properties to return via API
 class UserPublic(SQLModel):
+    id: uuid.UUID = Field(
+        ..., description="Internal unique user ID (UUID)."
+    )
     user_code: str = Field(
         ..., description="Public 5-digit unique ID (e.g. B4444)."
     )
@@ -233,6 +237,7 @@ class UserPublic(SQLModel):
         from_attributes=True,
         json_schema_extra={
             "example": {
+                "id": "9f1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
                 "user_code": "B4444",
                 "email": "jane@example.com",
                 "first_name": "Jane",

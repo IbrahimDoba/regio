@@ -34,9 +34,12 @@ class EmailConfig(RegioBaseSettings):
         description="Whether to use TLS/STARTTLS. Set to false for plain SMTP (e.g. local smartrelay on port 25).",
     )
 
-    CALENDLY_URL: str = Field(
-        default="https://cal.regio.is",
-        description="Video call booking URL for user verification calls.",
+    VERIFICATION_URL: str = Field(
+        default="https://verify.regio.is/schedule",
+        description=(
+            "Base URL of the verification scheduling app. Per-user query "
+            "params (id, lang) are appended when building booking links."
+        ),
     )
 
     APP_URL: str = Field(
