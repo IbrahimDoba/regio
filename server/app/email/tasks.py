@@ -29,7 +29,7 @@ async def send_welcome_email_task(data: VerificationEmailData) -> None:
     try:
         await email_service.send_welcome_email(data)
     except Exception as e:
-        logger.error(
+        logger.exception(
             f"Background welcome email failed for {data.user_email}: {e}"
         )
 
@@ -65,7 +65,7 @@ async def send_booking_reminder_email_task(
             return
         await email_service.send_booking_reminder_email(data)
     except Exception as e:
-        logger.error(
+        logger.exception(
             f"Background booking reminder failed for {data.user_email}: {e}"
         )
 
@@ -77,7 +77,7 @@ async def send_verification_status_email_task(
     try:
         await email_service.send_verification_status_email(data)
     except Exception as e:
-        logger.error(
+        logger.exception(
             f"Background verification email failed for {data.user_email}: {e}"
         )
 
@@ -89,7 +89,7 @@ async def send_payment_request_rejected_email_task(
     try:
         await email_service.send_payment_request_rejected_email(data)
     except Exception as e:
-        logger.error(
+        logger.exception(
             f"Background rejection email failed for {data.user_email}: {e}"
         )
 
@@ -101,7 +101,7 @@ async def send_dispute_resolved_email_task(
     try:
         await email_service.send_dispute_resolved_email(data)
     except Exception as e:
-        logger.error(
+        logger.exception(
             f"Background dispute resolved email failed for {data.user_email}: {e}"
         )
 
@@ -111,7 +111,7 @@ async def send_password_reset_email_task(data: PasswordResetEmailData) -> None:
     try:
         await email_service.send_password_reset_email(data)
     except Exception as e:
-        logger.error(
+        logger.exception(
             f"Background password reset email failed for {data.user_email}: {e}"
         )
 
@@ -139,7 +139,7 @@ async def send_broadcast_digest_emails_task(
             try:
                 await email_service.send_broadcast_digest_email(data)
             except Exception as e:
-                logger.error(
+                logger.exception(
                     f"Background broadcast digest failed for "
                     f"{data.user_email}: {e}"
                 )
@@ -171,7 +171,7 @@ async def send_email_change_notify_task(data: EmailChangeNotifyData) -> None:
     try:
         await email_service.send_email_change_notify_email(data)
     except Exception as e:
-        logger.error(
+        logger.exception(
             f"Background email-change notify failed for {data.user_email}: {e}"
         )
 
@@ -181,6 +181,6 @@ async def send_email_change_confirm_task(data: EmailChangeConfirmData) -> None:
     try:
         await email_service.send_email_change_confirm_email(data)
     except Exception as e:
-        logger.error(
+        logger.exception(
             f"Background email-change confirm failed for {data.user_email}: {e}"
         )

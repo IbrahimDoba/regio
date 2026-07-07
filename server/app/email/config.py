@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from app.base_config import RegioBaseSettings
 
@@ -31,7 +31,11 @@ class EmailConfig(RegioBaseSettings):
     )
     SMTP_SECURE: bool = Field(
         default=True,
-        description="Whether to use TLS/STARTTLS. Set to false for plain SMTP (e.g. local smartrelay on port 25).",
+        description="Whether to use implicit TLS on connect (SMTPS, typically port 465). Set to false for plain SMTP (e.g. local smartrelay on port 25) or STARTTLS.",
+    )
+    SMTP_STARTTLS: bool = Field(
+        default=False,
+        description="Upgrade the connection via STARTTLS (typically port 587). Mutually exclusive with SMTP_SECURE (implicit TLS). Leave false for a plain local relay or implicit-TLS.",
     )
 
     VERIFICATION_URL: str = Field(
@@ -64,6 +68,15 @@ class EmailConfig(RegioBaseSettings):
         default=3,
         description="Concurrent SMTP sends within a single broadcast chunk.",
     )
+
+    @model_validator(mode="after")
+    def _tls_modes_exclusive(self) -> "EmailConfig":
+        if self.SMTP_SECURE and self.SMTP_STARTTLS:
+            raise ValueError(
+                "SMTP_SECURE (implicit TLS) and SMTP_STARTTLS are mutually "
+                "exclusive; enable at most one."
+            )
+        return self
 
 
 email_settings = EmailConfig()

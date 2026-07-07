@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.banking.enums import PaymentStatus
 from app.users.enums import TrustLevel, VerificationStatus
@@ -199,6 +199,13 @@ class DisputePublic(BaseModel):
     dispute_raised_at: Optional[datetime]
     dispute_admin_note: Optional[str]
     created_at: datetime
+
+
+# EMAIL DIAGNOSTICS
+class TestEmailRequest(BaseModel):
+    email: EmailStr = Field(
+        ..., description="Recipient address for the SMTP connectivity test."
+    )
 
 
 # BROADCAST

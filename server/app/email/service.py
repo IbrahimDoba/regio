@@ -151,17 +151,21 @@ class EmailService:
                 username=self.config.SMTP_USERNAME or None,
                 password=self.config.SMTP_PASSWORD or None,
                 use_tls=self.config.SMTP_SECURE,
-                # When not using implicit TLS, disable the opportunistic
-                # STARTTLS upgrade (aiosmtplib's default is to upgrade if the
-                # server advertises support). This keeps a plain local relay
-                # (SMTP_SECURE=false) from being forced through a cert-validated
-                # TLS handshake it isn't set up for.
-                start_tls=None if self.config.SMTP_SECURE else False,
+                # STARTTLS only when explicitly enabled; otherwise force plain
+                # SMTP (aiosmtplib's default None would opportunistically upgrade
+                # if the server advertises support, which breaks a plain local
+                # relay with an untrusted cert). Never both — guarded in
+                # EmailConfig.
+                start_tls=(
+                    None
+                    if self.config.SMTP_SECURE
+                    else self.config.SMTP_STARTTLS
+                ),
             )
             logger.info(f"Email sent to {message.to}: {message.subject}")
         except Exception as e:
             logger.error(f"Failed to send email to {message.to}: {e}")
-            raise EmailSendFailed(f"SMTP error: {e}")
+            raise EmailSendFailed(f"SMTP error: {e}") from e
 
     # ------------------------------------------------------------------ #
     #  High-level email methods
@@ -338,6 +342,18 @@ class EmailService:
             subject="Don't forget — Book your Regio verification call",
             html_body=html,
             inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_test_email(self, to: str) -> None:
+        """Minimal SMTP connectivity check; failures propagate to the caller."""
+        message = EmailMessage(
+            to=to,
+            subject="Regio SMTP test",
+            html_body=(
+                "<p>Regio SMTP connectivity test — if you got this, "
+                "outbound email is working.</p>"
+            ),
         )
         await self._send(message)
 

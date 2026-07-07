@@ -17,15 +17,18 @@ from app.admin.schemas import (
     SystemStats,
     TagAdminUpdate,
     TagsAdminListResponse,
+    TestEmailRequest,
     UserListResponse,
 )
 from app.banking.dependencies import get_banking_service
 from app.banking.service import BankingService
+from app.core.schemas import Message
 from app.email.config import email_settings
 from app.email.schemas import (
     DisputeResolvedEmailData,
     VerificationStatusEmailData,
 )
+from app.email.service import email_service
 from app.email.tasks import (
     send_dispute_resolved_email_task,
     send_verification_status_email_task,
@@ -406,3 +409,28 @@ async def resolve_dispute(
     )
 
     return {"detail": f"Dispute {outcome.lower()}. Both parties notified."}
+
+
+"""EMAIL DIAGNOSTICS"""
+
+
+@router.post(
+    "/email/test",
+    response_model=Message,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_502_BAD_GATEWAY: {
+            "description": "SMTP send failed; body carries the underlying error."
+        },
+    },
+)
+async def send_test_email(body: TestEmailRequest) -> Message:
+    """
+    Send a diagnostic email synchronously to verify SMTP configuration.
+
+    Unlike the transactional flows, this awaits the send inline (no background
+    task), so a misconfigured relay surfaces as a 502 with the real SMTP error
+    instead of failing silently.
+    """
+    await email_service.send_test_email(body.email)
+    return Message(message=f"Test email sent to {body.email}.")
