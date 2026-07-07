@@ -151,6 +151,12 @@ class EmailService:
                 username=self.config.SMTP_USERNAME or None,
                 password=self.config.SMTP_PASSWORD or None,
                 use_tls=self.config.SMTP_SECURE,
+                # When not using implicit TLS, disable the opportunistic
+                # STARTTLS upgrade (aiosmtplib's default is to upgrade if the
+                # server advertises support). This keeps a plain local relay
+                # (SMTP_SECURE=false) from being forced through a cert-validated
+                # TLS handshake it isn't set up for.
+                start_tls=None if self.config.SMTP_SECURE else False,
             )
             logger.info(f"Email sent to {message.to}: {message.subject}")
         except Exception as e:
