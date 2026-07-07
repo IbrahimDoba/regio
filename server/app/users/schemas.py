@@ -173,9 +173,7 @@ class UserAdminUpdate(UserUpdate):
 
 # Properties to return via API
 class UserPublic(SQLModel):
-    id: uuid.UUID = Field(
-        ..., description="Internal unique user ID (UUID)."
-    )
+    id: uuid.UUID = Field(..., description="Internal unique user ID (UUID).")
     user_code: str = Field(
         ..., description="Public 5-digit unique ID (e.g. B4444)."
     )
