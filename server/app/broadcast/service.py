@@ -81,12 +81,12 @@ class BroadcastService:
 
     async def get_email_digest_recipients(
         self, target_trust_levels: list[str] | None = None
-    ) -> list[tuple[str, str]]:
+    ) -> list[tuple[str, str, str]]:
         """
-        Return (first_name, email) pairs for users who have email digest
-        notifications enabled, optionally filtered by trust level.
+        Return (first_name, email, language) tuples for users who have email
+        digest notifications enabled, optionally filtered by trust level.
         """
-        stmt = select(User.first_name, User.email).where(
+        stmt = select(User.first_name, User.email, User.language).where(
             User.notif_email_digest.is_(True)
         )
         if target_trust_levels and len(target_trust_levels) > 0:

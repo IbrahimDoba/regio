@@ -1,50 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #1a1a1a; }
-    .container { max-width: 580px; margin: 20px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-    .header { padding: 40px 20px; text-align: center; background-color: #ffffff; }
-    .logo { max-width: 200px; height: auto; }
-    .body { padding: 0 40px 40px; line-height: 1.6; font-size: 18px; }
-    h2 { font-size: 20px; margin-bottom: 15px; color: #1a1a1a; font-weight: 600; }
-    .cta { display: inline-block; padding: 16px 32px; background-color: #3D633D; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; font-size: 18px; }
-    .details { background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; font-size: 16px; }
-    .details table { width: 100%; border-collapse: collapse; }
-    .details td { padding: 6px 0; vertical-align: top; }
-    .details td.label { color: #3D633D; font-weight: 600; width: 130px; }
-    .footer { padding: 40px; text-align: center; font-size: 13px; color: #ffffff; background-color: #1a1a1a; line-height: 1.5; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="cid:logo" alt="REGIO" class="logo">
-    </div>
-    <div class="body">
-      <h2>New registration pending verification</h2>
-      <p>A new user has just registered on Regio and is awaiting their verification call.</p>
+{% extends "base.html" %}
+{% block extra_styles %}
+<style>
+  .details { background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; font-size: 16px; }
+  .details table { width: 100%; border-collapse: collapse; }
+  .details td { padding: 6px 0; vertical-align: top; }
+  .details td.label { color: #3D633D; font-weight: 600; width: 130px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="body">
+  <h2>{{ t.heading | safe }}</h2>
+  <p>{{ t.intro | safe }}</p>
 
-      <div class="details">
-        <table>
-          <tr><td class="label">Name</td><td>{{ new_user_name }}</td></tr>
-          <tr><td class="label">User code</td><td>{{ new_user_code }}</td></tr>
-          <tr><td class="label">Email</td><td>{{ new_user_email }}</td></tr>
-          <tr><td class="label">City</td><td>{{ new_user_city }}</td></tr>
-          <tr><td class="label">Zip</td><td>{{ new_user_zip }}</td></tr>
-        </table>
-      </div>
-
-      <p>They will remain <strong>pending</strong> until their identity check is completed.</p>
-    </div>
-    <div class="footer">
-      <strong>REGIO</strong> is a non-profit project by <strong>151 CONCEPTS</strong><br>
-      Báta, 7149, Hungary | Tax ID: HU48374642
-      <br><br>
-      You’re receiving this email as the Regio system administrator.
-    </div>
+  <div class="details">
+    <table>
+      <tr><td class="label">{{ t.label_name | safe }}</td><td>{{ new_user_name }}</td></tr>
+      <tr><td class="label">{{ t.label_code | safe }}</td><td>{{ new_user_code }}</td></tr>
+      <tr><td class="label">{{ t.label_email | safe }}</td><td>{{ new_user_email }}</td></tr>
+      <tr><td class="label">{{ t.label_city | safe }}</td><td>{{ new_user_city }}</td></tr>
+      <tr><td class="label">{{ t.label_zip | safe }}</td><td>{{ new_user_zip }}</td></tr>
+    </table>
   </div>
-</body>
-</html>
+
+  <p>{{ t.outro | safe }}</p>
+</div>
+{% endblock %}

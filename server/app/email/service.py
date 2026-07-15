@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import uuid
@@ -33,8 +34,14 @@ from app.email.schemas import (
 logger = logging.getLogger(__name__)
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
+LOCALES_DIR = Path(__file__).parent / "locales"
 
 FROM_DISPLAY_NAME = "REGIO"
+
+# Languages with a translation catalog on disk; EN is the fallback for any
+# missing language or key.
+SUPPORTED_LANGUAGES = ("EN", "DE", "HU")
+DEFAULT_LANGUAGE = "EN"
 
 # Strips tags/scripts/styles and collapses whitespace. Good enough for
 # transactional emails whose templates are simple — we don't need a full
@@ -90,6 +97,28 @@ class EmailService:
         )
         self._logo_m = (TEMPLATE_DIR / "logo-M.png").read_bytes()
         self._logo_s = (TEMPLATE_DIR / "logo-S.png").read_bytes()
+        # Per-language string catalogs, loaded once (keyed by upper-case code).
+        self._locales = {
+            lang: json.loads(
+                (LOCALES_DIR / f"{lang.lower()}.json").read_text("utf-8")
+            )
+            for lang in SUPPORTED_LANGUAGES
+        }
+
+    def _t(self, email_key: str, language: str) -> dict:
+        """Localized strings for one email, EN-fallback applied per key.
+
+        Merges the target language's ``common`` + per-email sections over the
+        English ones, so any string missing in DE/HU silently falls back to EN.
+        """
+        lang = (str(language) or DEFAULT_LANGUAGE).upper()
+        english = self._locales[DEFAULT_LANGUAGE]
+        localized = self._locales.get(lang, english)
+        merged: dict = {}
+        for source in (english, localized):
+            merged.update(source.get("common", {}))
+            merged.update(source.get(email_key, {}))
+        return merged
 
     def _render_template(self, template_name: str, context: dict) -> str:
         """Render a Jinja2 template to an HTML string with all CSS inlined."""
@@ -174,10 +203,13 @@ class EmailService:
 
     async def send_welcome_email(self, data: VerificationEmailData) -> None:
         """Send registration welcome email with booking link."""
-        html = self._render_template("welcome.html", data.model_dump())
+        t = self._t("welcome", data.language)
+        html = self._render_template(
+            "welcome.html", {**data.model_dump(), "t": t}
+        )
         message = EmailMessage(
             to=data.user_email,
-            subject="Welcome to Regio — Book Your Verification Call",
+            subject=t["subject"],
             html_body=html,
             inline_images={"logo": self._logo_m},
         )
@@ -187,12 +219,14 @@ class EmailService:
         self, data: AdminNewUserEmailData
     ) -> None:
         """Notify the system admin that a new user registered (pending verification)."""
-        html = self._render_template("admin_new_user.html", data.model_dump())
+        t = self._t("admin_new_user", data.language)
+        html = self._render_template(
+            "admin_new_user.html", {**data.model_dump(), "t": t}
+        )
         message = EmailMessage(
             to=data.admin_email,
-            subject=(
-                f"New Regio registration — "
-                f"{data.new_user_name} ({data.new_user_code})"
+            subject=t["subject"].format(
+                name=data.new_user_name, code=data.new_user_code
             ),
             html_body=html,
             inline_images={"logo": self._logo_m},
@@ -203,17 +237,14 @@ class EmailService:
         self, data: VerificationStatusEmailData
     ) -> None:
         """Send email when a user's verification status changes."""
-        subject_map = {
-            "VERIFIED": "Your Regio Account Has Been Verified",
-            "REJECTED": "Regio Account Verification Update",
-            "ACTION_REQUIRED": "Action Required for Your Regio Account",
-        }
+        t = self._t("verification_status", data.language)
+        subjects = t["subject"]
         html = self._render_template(
-            "verification_status.html", data.model_dump()
+            "verification_status.html", {**data.model_dump(), "t": t}
         )
         message = EmailMessage(
             to=data.user_email,
-            subject=subject_map.get(data.new_status, "Regio Account Update"),
+            subject=subjects.get(data.new_status, subjects["DEFAULT"]),
             html_body=html,
             inline_images={"logo": self._logo_m},
         )
@@ -223,12 +254,13 @@ class EmailService:
         self, data: PaymentReminderEmailData
     ) -> None:
         """Remind a debtor that their payment request is overdue."""
+        t = self._t("payment_reminder", data.language)
         html = self._render_template(
-            "payment_reminder.html", data.model_dump()
+            "payment_reminder.html", {**data.model_dump(), "t": t}
         )
         message = EmailMessage(
             to=data.user_email,
-            subject="Payment Reminder — Action Required on Regio",
+            subject=t["subject"],
             html_body=html,
             inline_images={"logo": self._logo_m},
         )
@@ -238,13 +270,10 @@ class EmailService:
         self, data: PaymentEnforcedEmailData
     ) -> None:
         """Notify a user their payment was automatically executed by the system."""
-        subject = (
-            "Your Payment Request Was Automatically Processed — Regio"
-            if data.is_creditor
-            else "Automatic Payment Processed From Your Account — Regio"
-        )
+        t = self._t("payment_enforced", data.language)
+        subject = t["subject"]["creditor" if data.is_creditor else "debtor"]
         html = self._render_template(
-            "payment_enforced.html", data.model_dump()
+            "payment_enforced.html", {**data.model_dump(), "t": t}
         )
         message = EmailMessage(
             to=data.user_email,
@@ -258,12 +287,13 @@ class EmailService:
         self, data: PaymentRequestRejectedEmailData
     ) -> None:
         """Notify the creditor that their payment request was declined by the debtor."""
+        t = self._t("request_rejected", data.language)
         html = self._render_template(
-            "request_rejected.html", data.model_dump()
+            "request_rejected.html", {**data.model_dump(), "t": t}
         )
         message = EmailMessage(
             to=data.user_email,
-            subject="Your Payment Request Was Declined — Regio",
+            subject=t["subject"],
             html_body=html,
             inline_images={"logo": self._logo_m},
         )
@@ -273,13 +303,10 @@ class EmailService:
         self, data: DisputeResolvedEmailData
     ) -> None:
         """Notify a user (creditor or debtor) that their dispute has been resolved."""
-        subject = (
-            "Your Dispute Has Been Resolved — Regio"
-            if data.is_creditor
-            else "Payment Dispute Update — Regio"
-        )
+        t = self._t("dispute_resolved", data.language)
+        subject = t["subject"]["creditor" if data.is_creditor else "debtor"]
         html = self._render_template(
-            "dispute_resolved.html", data.model_dump()
+            "dispute_resolved.html", {**data.model_dump(), "t": t}
         )
         message = EmailMessage(
             to=data.user_email,
@@ -293,12 +320,13 @@ class EmailService:
         self, data: BroadcastDigestEmailData
     ) -> None:
         """Send broadcast content as an email digest to a single user."""
+        t = self._t("broadcast_digest", data.language)
         html = self._render_template(
-            "broadcast_digest.html", data.model_dump()
+            "broadcast_digest.html", {**data.model_dump(), "t": t}
         )
         message = EmailMessage(
             to=data.user_email,
-            subject=f"Regio Update: {data.broadcast_title}",
+            subject=t["subject"].format(title=data.broadcast_title),
             html_body=html,
             inline_images={"logo": self._logo_s},
         )
@@ -308,10 +336,13 @@ class EmailService:
         self, data: PasswordResetEmailData
     ) -> None:
         """Send a password reset link to the user."""
-        html = self._render_template("password_reset.html", data.model_dump())
+        t = self._t("password_reset", data.language)
+        html = self._render_template(
+            "password_reset.html", {**data.model_dump(), "t": t}
+        )
         message = EmailMessage(
             to=data.user_email,
-            subject="Reset Your Regio Password",
+            subject=t["subject"],
             html_body=html,
             inline_images={"logo": self._logo_m},
         )
@@ -321,12 +352,13 @@ class EmailService:
         self, data: EmailChangeNotifyData
     ) -> None:
         """Notify the OLD address that an email change has been requested."""
+        t = self._t("email_change_notify", data.language)
         html = self._render_template(
-            "email_change_notify.html", data.model_dump()
+            "email_change_notify.html", {**data.model_dump(), "t": t}
         )
         message = EmailMessage(
             to=data.user_email,
-            subject="Your Regio email address is being changed",
+            subject=t["subject"],
             html_body=html,
             inline_images={"logo": self._logo_m},
         )
@@ -336,12 +368,13 @@ class EmailService:
         self, data: EmailChangeConfirmData
     ) -> None:
         """Send confirmation link to the NEW address."""
+        t = self._t("email_change_confirm", data.language)
         html = self._render_template(
-            "email_change_confirm.html", data.model_dump()
+            "email_change_confirm.html", {**data.model_dump(), "t": t}
         )
         message = EmailMessage(
             to=data.user_email,
-            subject="Confirm your new Regio email address",
+            subject=t["subject"],
             html_body=html,
             inline_images={"logo": self._logo_m},
         )
@@ -351,12 +384,13 @@ class EmailService:
         self, data: BookingReminderEmailData
     ) -> None:
         """Send a reminder to book the verification call (30 min after registration)."""
+        t = self._t("booking_reminder", data.language)
         html = self._render_template(
-            "booking_reminder.html", data.model_dump()
+            "booking_reminder.html", {**data.model_dump(), "t": t}
         )
         message = EmailMessage(
             to=data.user_email,
-            subject="Don't forget — Book your Regio verification call",
+            subject=t["subject"],
             html_body=html,
             inline_images={"logo": self._logo_m},
         )

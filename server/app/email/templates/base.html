@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #1a1a1a; }
+    .container { max-width: 580px; margin: 20px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .header { padding: 28px 40px 20px; text-align: left; background-color: #ffffff; border-bottom: 2px solid #3D633D; }
+    .logo { max-width: 130px; height: auto; }
+    .body { padding: 24px 40px 40px; line-height: 1.6; font-size: 18px; }
+    h2 { font-size: 20px; margin-top: 0; margin-bottom: 15px; color: #1a1a1a; font-weight: 600; }
+    .footer { padding: 40px; text-align: center; font-size: 13px; color: #ffffff; background-color: #1a1a1a; line-height: 1.5; }
+  </style>
+  {% block extra_styles %}{% endblock %}
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="cid:logo" alt="REGIO" class="logo">
+    </div>
+    {% block content %}{% endblock %}
+    <div class="footer">
+      <strong>REGIO</strong> is a non-profit project by <strong>151 CONCEPTS</strong><br>
+      Báta, 7149, Hungary | Tax ID: HU48374642
+      <br><br>
+      {{ t.footer_note }}
+    </div>
+  </div>
+</body>
+</html>

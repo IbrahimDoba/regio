@@ -1,0 +1,148 @@
+{
+  "common": {
+    "min_unit": "Min.",
+    "regio_unit": "Regio"
+  },
+  "welcome": {
+    "subject": "Willkommen bei Regio — Buche deinen Verifizierungsanruf",
+    "heading": "Hey {name}!",
+    "intro1": "Danke, dass du zu Regio gekommen bist! Wir freuen uns riesig, dich an Bord zu haben.",
+    "intro2": "Damit unsere Community sicher und großartig bleibt, brauchen wir nur eine kurze <strong>Identitätsprüfung</strong> per kurzem Videoanruf, bevor du mit dem Handeln starten kannst.",
+    "cta": "Verifizierungsanruf buchen",
+    "checklist_title": "Kurze Checkliste:",
+    "step1": "Wähle oben einen Termin, der dir passt.",
+    "step2": "Nimm zur vereinbarten Zeit am Videoanruf teil.",
+    "step3": "Sobald du verifiziert bist, kann es losgehen!",
+    "outro": "Bis bald!",
+    "footer_note": "Du erhältst diese E-Mail, weil du ein Konto bei Regio registriert hast."
+  },
+  "booking_reminder": {
+    "subject": "Nicht vergessen — Buche deinen Regio-Verifizierungsanruf",
+    "heading": "Noch dabei, {name}?",
+    "intro": "Uns ist aufgefallen, dass du deine <strong>Identitätsprüfung</strong> noch nicht gebucht hast. Es ist ein kurzer Videoanruf und der letzte Schritt, bevor du auf Regio handeln kannst.",
+    "cta": "Verifizierungsanruf buchen",
+    "next_title": "So geht es weiter:",
+    "step1": "Wähle oben einen Termin, der dir passt.",
+    "step2": "Nimm zur vereinbarten Zeit am Videoanruf teil.",
+    "step3": "Sobald du verifiziert bist, kann es losgehen!",
+    "outro": "Es dauert nur ein paar Minuten. Wir freuen uns darauf, dich kennenzulernen!",
+    "footer_note": "Du erhältst diese E-Mail, weil du ein Konto bei Regio registriert hast."
+  },
+  "verification_status": {
+    "subject": {
+      "VERIFIED": "Dein Regio-Konto wurde verifiziert",
+      "REJECTED": "Aktualisierung zur Verifizierung deines Regio-Kontos",
+      "ACTION_REQUIRED": "Aktion für dein Regio-Konto erforderlich",
+      "DEFAULT": "Aktualisierung deines Regio-Kontos"
+    },
+    "verified_heading": "Sehr gut, {name}! 🎉",
+    "verified_intro": "Dein Konto ist jetzt <strong>vollständig verifiziert</strong> und aktiv. Willkommen in der Regio-Community!",
+    "verified_can_title": "Was du auf Regio tun kannst:",
+    "verified_step1": "Lokale Angebote und Gesuche durchstöbern und einstellen (Waren, Dienstleistungen, Zeit)",
+    "verified_step2": "Dich mit Nachbarn vernetzen und mit Regio-Guthaben handeln",
+    "verified_step3": "Vertrauen in deiner lokalen Gemeinschaft aufbauen — ganz ohne Geld",
+    "verified_video_intro": "Neu bei Regio? Schau dir unsere kurze Einführung an, um loszulegen:",
+    "verified_video_cta": "▶ So funktioniert Regio",
+    "verified_app_cta": "App öffnen →",
+    "verified_signoff": "Bei Fragen antworte einfach auf diese E-Mail.<br><strong>Dein Regio-Team</strong>",
+    "rejected_heading": "Hey {name}",
+    "rejected_intro": "Kurzes Update: Deine Kontoverifizierung hat dieses Mal nicht geklappt.",
+    "reason_label": "Grund:",
+    "rejected_outro": "Wenn du denkst, dass das ein Fehler ist, melde dich einfach bei uns!",
+    "action_heading": "Hey {name}, wir brauchen kurz deine Aufmerksamkeit",
+    "action_intro": "Deine Verifizierung ist fast geschafft, aber wir brauchen, dass du dir das hier ansiehst:",
+    "details_label": "Details:",
+    "action_outro": "Schreib uns, sobald du es geprüft hast!",
+    "footer_note": "Du erhältst diese E-Mail, weil sich dein Kontostatus geändert hat."
+  },
+  "payment_reminder": {
+    "subject": "Zahlungserinnerung — Aktion auf Regio erforderlich",
+    "heading": "Hey {name},",
+    "intro": "Dies ist eine Erinnerung, dass du eine Zahlungsanfrage von <strong>{creditor}</strong> hast, die seit <strong>{days} Tagen</strong> aussteht.",
+    "for_label": "Für:",
+    "amount_label": "Betrag:",
+    "outro_pre": "Bitte bestätige oder widersprich dieser Anfrage so bald wie möglich. ",
+    "deadline": "Wenn innerhalb von 7 Tagen nach der ursprünglichen Anfrage nichts unternommen wird, wird die Zahlung automatisch ausgeführt.",
+    "footer_note": "Du erhältst diese E-Mail, weil du eine ausstehende Zahlungsanfrage in Regio hast."
+  },
+  "payment_enforced": {
+    "subject": {
+      "creditor": "Deine Zahlungsanfrage wurde automatisch verarbeitet — Regio",
+      "debtor": "Automatische Zahlung von deinem Konto verarbeitet — Regio"
+    },
+    "heading": "Hey {name},",
+    "creditor_line": "Deine Zahlungsanfrage an <strong>{party}</strong> wurde nach 7 Tagen ohne Reaktion <strong>automatisch verarbeitet</strong>.",
+    "debtor_line": "Eine Zahlungsanfrage von <strong>{party}</strong> wurde nach 7 Tagen ohne Reaktion <strong>automatisch von deinem Konto verarbeitet</strong>.",
+    "for_label": "Für:",
+    "amount_label": "Betrag:",
+    "outro": "Diese Zahlung wurde vom Regio-System gemäß der 7-Tage-Regel automatisch ausgeführt. Du kannst sie in deinem Transaktionsverlauf einsehen.",
+    "footer_note": "Du erhältst diese E-Mail, weil eine Zahlung im Zusammenhang mit deinem Konto automatisch verarbeitet wurde."
+  },
+  "request_rejected": {
+    "subject": "Deine Zahlungsanfrage wurde abgelehnt — Regio",
+    "heading": "Hey {name},",
+    "intro": "<strong>{debtor}</strong> hat deine Zahlungsanfrage abgelehnt.",
+    "request_label": "Anfrage:",
+    "amount_label": "Betrag:",
+    "outro": "Wenn du glaubst, dass dies ein Fehler ist, kannst du einen Streitfall eröffnen und ein Admin prüft ihn.",
+    "footer_note": "Du erhältst diese E-Mail, weil eine von dir gesendete Zahlungsanfrage abgelehnt wurde."
+  },
+  "dispute_resolved": {
+    "subject": {
+      "creditor": "Dein Streitfall wurde geklärt — Regio",
+      "debtor": "Update zum Zahlungsstreit — Regio"
+    },
+    "heading": "Hey {name},",
+    "creditor_approved": "Dein Streitfall wurde <strong>genehmigt</strong>. Die Zahlung wurde verarbeitet und das Guthaben ist unterwegs.",
+    "creditor_cancelled": "Dein Streitfall wurde <strong>geprüft</strong>. Nach Abwägung hat der Admin der anderen Partei recht gegeben und die Zahlungsanfrage wurde storniert.",
+    "debtor_approved": "Ein Zahlungsstreit bezüglich deines Kontos wurde <strong>geklärt</strong>. Der Admin hat den Anspruch des Gläubigers genehmigt und die Zahlung wurde von deinem Konto verarbeitet.",
+    "debtor_cancelled": "Ein Zahlungsstreit bezüglich deines Kontos wurde zu deinen Gunsten <strong>geklärt</strong>. Die Zahlungsanfrage wurde storniert.",
+    "original_label": "Ursprüngliche Anfrage:",
+    "admin_note_label": "Admin-Hinweis:",
+    "outro": "Bei Fragen wende dich bitte an das Regio-Team.",
+    "footer_note": "Du erhältst diese E-Mail, weil ein Zahlungsstreit im Zusammenhang mit deinem Konto geklärt wurde."
+  },
+  "broadcast_digest": {
+    "subject": "Regio-Update: {title}",
+    "intro1": "Hey {name},",
+    "intro2": "Hier ist ein neues Update vom Regio-Team, das dich interessieren könnte:",
+    "cta": "Jetzt ansehen",
+    "footer_note": "Du erhältst diese E-Mail, weil du E-Mail-Zusammenfassungen in deinem Regio-Profil aktiviert hast."
+  },
+  "password_reset": {
+    "subject": "Setze dein Regio-Passwort zurück",
+    "heading": "Hey {name},",
+    "intro": "Wir haben eine Anfrage erhalten, dein Regio-Passwort zurückzusetzen. Klicke auf den Button unten, um ein neues festzulegen.",
+    "cta": "Passwort zurücksetzen",
+    "notice": "Dieser Link läuft in <strong>30 Minuten</strong> ab. Wenn du kein Zurücksetzen angefordert hast, kannst du diese E-Mail ignorieren — dein Passwort bleibt unverändert.",
+    "footer_note": "Du erhältst diese E-Mail, weil für dein Regio-Konto ein Zurücksetzen des Passworts angefordert wurde."
+  },
+  "email_change_confirm": {
+    "subject": "Bestätige deine neue Regio-E-Mail-Adresse",
+    "heading": "Hey {name},",
+    "intro": "Bitte bestätige, dass du diese Adresse als deine neue Regio-E-Mail verwenden möchtest. Klicke auf den Button unten, um die Änderung abzuschließen.",
+    "cta": "Neue E-Mail-Adresse bestätigen",
+    "notice": "Dieser Link läuft in <strong>24 Stunden</strong> ab. Wenn du diese Änderung nicht angefordert hast, kannst du diese E-Mail ignorieren.",
+    "footer_note": "Du erhältst diese E-Mail, weil für dein Regio-Konto eine E-Mail-Änderung angefordert wurde."
+  },
+  "email_change_notify": {
+    "subject": "Deine Regio-E-Mail-Adresse wird geändert",
+    "heading": "Hey {name},",
+    "intro": "Es wurde beantragt, die E-Mail-Adresse deines Regio-Kontos zu ändern in:",
+    "confirm_hint": "An die neue Adresse wurde ein Bestätigungslink gesendet. Die Änderung wird erst nach Bestätigung wirksam.",
+    "notice": "Wenn du diese Änderung nicht angefordert hast, kontaktiere uns bitte umgehend — dein Konto könnte gefährdet sein.",
+    "footer_note": "Du erhältst diese E-Mail, weil für dein Regio-Konto eine E-Mail-Änderung angefordert wurde."
+  },
+  "admin_new_user": {
+    "subject": "Neue Regio-Registrierung — {name} ({code})",
+    "heading": "Neue Registrierung – Verifizierung ausstehend",
+    "intro": "Ein neuer Nutzer hat sich gerade bei Regio registriert und wartet auf seinen Verifizierungsanruf.",
+    "label_name": "Name",
+    "label_code": "Nutzercode",
+    "label_email": "E-Mail",
+    "label_city": "Stadt",
+    "label_zip": "PLZ",
+    "outro": "Der Nutzer bleibt <strong>ausstehend</strong>, bis die Identitätsprüfung abgeschlossen ist.",
+    "footer_note": "Du erhältst diese E-Mail als Regio-Systemadministrator."
+  }
+}

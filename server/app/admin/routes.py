@@ -142,6 +142,7 @@ async def update_user_details(
                     how_it_works_video_url=email_settings.HOW_IT_WORKS_VIDEO_URL
                     if user_in.verification_status == "VERIFIED"
                     else None,
+                    language=db_user.language,
                 ),
             )
 
@@ -181,6 +182,7 @@ async def verify_user(
             new_status="VERIFIED",
             app_url=email_settings.APP_URL,
             how_it_works_video_url=email_settings.HOW_IT_WORKS_VIDEO_URL,
+            language=db_user.language,
         ),
     )
 
@@ -392,6 +394,7 @@ async def resolve_dispute(
             amount_time=dispute.amount_time,
             amount_regio=float(dispute.amount_regio),
             description=dispute.description,
+            language=creditor.language,
         ),
     )
     background_tasks.add_task(
@@ -405,6 +408,7 @@ async def resolve_dispute(
             amount_time=dispute.amount_time,
             amount_regio=float(dispute.amount_regio),
             description=dispute.description,
+            language=debtor.language,
         ),
     )
 

@@ -143,6 +143,7 @@ async def register_user(
             user_first_name=db_user.first_name,
             user_email=db_user.email,
             verification_url=verification_url,
+            language=db_user.language,
         )
         background_tasks.add_task(send_welcome_email_task, email_data)
         # Schedule a reminder if the user hasn't booked after 30 minutes
@@ -152,6 +153,7 @@ async def register_user(
                 user_first_name=db_user.first_name,
                 user_email=db_user.email,
                 verification_url=verification_url,
+                language=db_user.language,
             ),
         )
         # Notify the system admin that a new user is pending verification
@@ -409,6 +411,7 @@ async def request_email_change(
             user_first_name=first_name,
             user_email=old_email,
             new_email=new_email,
+            language=current_user.language,
         ),
     )
     background_tasks.add_task(
@@ -417,6 +420,7 @@ async def request_email_change(
             user_first_name=first_name,
             user_email=new_email,
             confirm_url=confirm_url,
+            language=current_user.language,
         ),
     )
 

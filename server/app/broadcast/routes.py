@@ -54,8 +54,9 @@ async def send_broadcast(
                 broadcast_title=data.title,
                 broadcast_body=data.body,
                 broadcast_link=data.link,
+                language=language,
             )
-            for first_name, email in recipients
+            for first_name, email, language in recipients
         ]
         background_tasks.add_task(
             send_broadcast_digest_emails_task, digest_data

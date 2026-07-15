@@ -11,7 +11,7 @@ from pydantic import (
 )
 from sqlmodel import SQLModel
 
-from app.users.enums import TrustLevel, VerificationStatus
+from app.users.enums import Language, TrustLevel, VerificationStatus
 
 """Base model with shared properties."""
 
@@ -58,6 +58,10 @@ class UserCreate(SQLModel):
         description="Hungarian 4-digit ZIP code.",
     )
     city: str = Field(..., max_length=100, description="User's home city.")
+    language: Language = Field(
+        default=Language.EN,
+        description="Preferred language, taken from the frontend locale at signup.",
+    )
 
     @field_validator("zip_code")
     @classmethod
@@ -77,6 +81,7 @@ class UserCreate(SQLModel):
                 "invite_code": "REGIO-XX-XXXXXXXX",
                 "zip_code": "1011",
                 "city": "Budapest - I.Kerület",
+                "language": "EN",
             }
         }
     )

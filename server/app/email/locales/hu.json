@@ -1,0 +1,148 @@
+{
+  "common": {
+    "min_unit": "perc",
+    "regio_unit": "Regio"
+  },
+  "welcome": {
+    "subject": "Üdvözlünk a Regióban — Foglald le az azonosító hívásod",
+    "heading": "Szia {name}!",
+    "intro1": "Köszönjük, hogy csatlakoztál a Regióhoz! Nagyon örülünk, hogy itt vagy.",
+    "intro2": "Hogy közösségünk biztonságos és szuper maradjon, mielőtt kereskedni kezdhetnél, csak egy gyors <strong>személyazonosság-ellenőrzésre</strong> van szükség egy rövid videohívás keretében.",
+    "cta": "Azonosító hívás foglalása",
+    "checklist_title": "Rövid ellenőrzőlista:",
+    "step1": "Válassz fentebb egy neked megfelelő időpontot.",
+    "step2": "Csatlakozz a videohíváshoz a megbeszélt időpontban.",
+    "step3": "Amint azonosítottunk, már indulhat is minden!",
+    "outro": "Hamarosan találkozunk!",
+    "footer_note": "Ezt az e-mailt azért kapod, mert regisztráltál egy fiókot a Regióban."
+  },
+  "booking_reminder": {
+    "subject": "Ne feledd — Foglald le a Regio azonosító hívásod",
+    "heading": "Ott vagy még, {name}?",
+    "intro": "Észrevettük, hogy még nem foglaltad le a <strong>személyazonosság-ellenőrzésed</strong>. Ez egy rövid videohívás, és az utolsó lépés, mielőtt kereskedni kezdhetnél a Regióban.",
+    "cta": "Azonosító hívás foglalása",
+    "next_title": "Így folytatódik:",
+    "step1": "Válassz fentebb egy neked megfelelő időpontot.",
+    "step2": "Csatlakozz a videohíváshoz a megbeszélt időpontban.",
+    "step3": "Amint azonosítottunk, már indulhat is minden!",
+    "outro": "Csak néhány percet vesz igénybe. Alig várjuk, hogy megismerhessünk!",
+    "footer_note": "Ezt az e-mailt azért kapod, mert regisztráltál egy fiókot a Regióban."
+  },
+  "verification_status": {
+    "subject": {
+      "VERIFIED": "A Regio-fiókodat megerősítettük",
+      "REJECTED": "Frissítés a Regio-fiókod ellenőrzéséről",
+      "ACTION_REQUIRED": "Intézkedés szükséges a Regio-fiókodhoz",
+      "DEFAULT": "Frissítés a Regio-fiókodról"
+    },
+    "verified_heading": "Szuper, {name}! 🎉",
+    "verified_intro": "A fiókod mostantól <strong>teljesen ellenőrzött</strong> és aktív. Üdvözlünk a Regio közösségében!",
+    "verified_can_title": "Mit tehetsz a Regióban:",
+    "verified_step1": "Helyi ajánlatok és kérések böngészése és feladása (áruk, szolgáltatások, idő)",
+    "verified_step2": "Kapcsolódj a szomszédaidhoz, és kereskedj Regio-kreditekkel",
+    "verified_step3": "Építs bizalmat a helyi közösségedben — pénz nélkül",
+    "verified_video_intro": "Új vagy a Regióban? Nézd meg rövid bemutatónkat az induláshoz:",
+    "verified_video_cta": "▶ Hogyan működik a Regio",
+    "verified_app_cta": "Alkalmazás megnyitása →",
+    "verified_signoff": "Ha bármi kérdésed van, csak válaszolj erre az e-mailre.<br><strong>A Regio csapata</strong>",
+    "rejected_heading": "Szia {name}",
+    "rejected_intro": "Rövid tájékoztatás: a fiókod ellenőrzése ezúttal nem sikerült.",
+    "reason_label": "Ok:",
+    "rejected_outro": "Ha úgy gondolod, hogy ez tévedés, keress minket nyugodtan!",
+    "action_heading": "Szia {name}, egy pillanatra szükségünk van rád",
+    "action_intro": "Az ellenőrzésed majdnem kész, de kérünk, nézd meg ezt:",
+    "details_label": "Részletek:",
+    "action_outro": "Írj nekünk, amint megnézted!",
+    "footer_note": "Ezt azért kapod, mert a fiókod állapota megváltozott."
+  },
+  "payment_reminder": {
+    "subject": "Fizetési emlékeztető — Intézkedés szükséges a Regióban",
+    "heading": "Szia {name},",
+    "intro": "Emlékeztetünk, hogy fizetési kérésed van <strong>{creditor}</strong> részéről, amely már <strong>{days} napja</strong> függőben van.",
+    "for_label": "Miért:",
+    "amount_label": "Összeg:",
+    "outro_pre": "Kérjük, a lehető leghamarabb erősítsd meg vagy vitasd ezt a kérést. ",
+    "deadline": "Ha az eredeti kéréstől számított 7 napon belül nem történik intézkedés, a fizetés automatikusan feldolgozásra kerül.",
+    "footer_note": "Ezt azért kapod, mert függőben lévő fizetési kérésed van a Regióban."
+  },
+  "payment_enforced": {
+    "subject": {
+      "creditor": "A fizetési kérésed automatikusan feldolgozásra került — Regio",
+      "debtor": "Automatikus fizetés feldolgozva a fiókodból — Regio"
+    },
+    "heading": "Szia {name},",
+    "creditor_line": "A(z) <strong>{party}</strong> részére küldött fizetési kérésed 7 nap válasz nélküli eltelte után <strong>automatikusan feldolgozásra került</strong>.",
+    "debtor_line": "A(z) <strong>{party}</strong> részéről érkezett fizetési kérés 7 nap tétlenség után <strong>automatikusan feldolgozásra került</strong> a fiókodból.",
+    "for_label": "Miért:",
+    "amount_label": "Összeg:",
+    "outro": "Ezt a fizetést a Regio rendszer automatikusan hajtotta végre a 7 napos fizetési szabály szerint. A tranzakciós előzményeidben megtekintheted.",
+    "footer_note": "Ezt azért kapod, mert a fiókodat érintő fizetés automatikusan feldolgozásra került."
+  },
+  "request_rejected": {
+    "subject": "A fizetési kérésedet elutasították — Regio",
+    "heading": "Szia {name},",
+    "intro": "<strong>{debtor}</strong> elutasította a fizetési kérésedet.",
+    "request_label": "Kérés:",
+    "amount_label": "Összeg:",
+    "outro": "Ha úgy véled, hogy ez tévedés, vitát indíthatsz, és egy adminisztrátor felülvizsgálja.",
+    "footer_note": "Ezt azért kapod, mert egy általad küldött fizetési kérést elutasítottak."
+  },
+  "dispute_resolved": {
+    "subject": {
+      "creditor": "A vitádat rendeztük — Regio",
+      "debtor": "Frissítés a fizetési vitáról — Regio"
+    },
+    "heading": "Szia {name},",
+    "creditor_approved": "A vitádat <strong>jóváhagytuk</strong>. A fizetés feldolgozásra került, és az összeg úton van.",
+    "creditor_cancelled": "A vitádat <strong>felülvizsgáltuk</strong>. Mérlegelés után az adminisztrátor a másik félnek adott igazat, és a fizetési kérést töröltük.",
+    "debtor_approved": "A fiókodat érintő fizetési vitát <strong>rendeztük</strong>. Az adminisztrátor jóváhagyta a hitelező igényét, és a fizetés feldolgozásra került a fiókodból.",
+    "debtor_cancelled": "A fiókodat érintő fizetési vitát a <strong>javadra rendeztük</strong>. A fizetési kérést töröltük.",
+    "original_label": "Eredeti kérés:",
+    "admin_note_label": "Adminisztrátori megjegyzés:",
+    "outro": "Ha bármi kérdésed van, fordulj a Regio csapatához.",
+    "footer_note": "Ezt azért kapod, mert a fiókodat érintő fizetési vitát rendeztünk."
+  },
+  "broadcast_digest": {
+    "subject": "Regio hírek: {title}",
+    "intro1": "Szia {name},",
+    "intro2": "Íme egy új frissítés a Regio csapatától, amely érdekelhet:",
+    "cta": "Nézd meg",
+    "footer_note": "Ezt azért kapod, mert bekapcsoltad az e-mail összefoglalókat a Regio-profilodban."
+  },
+  "password_reset": {
+    "subject": "Állítsd vissza a Regio-jelszavad",
+    "heading": "Szia {name},",
+    "intro": "Kérést kaptunk a Regio-jelszavad visszaállítására. Kattints az alábbi gombra egy új beállításához.",
+    "cta": "Jelszó visszaállítása",
+    "notice": "Ez a link <strong>30 perc</strong> múlva lejár. Ha nem kértél jelszó-visszaállítást, nyugodtan hagyd figyelmen kívül ezt az e-mailt — a jelszavad nem változik.",
+    "footer_note": "Ezt az e-mailt azért kapod, mert jelszó-visszaállítást kértek a Regio-fiókodhoz."
+  },
+  "email_change_confirm": {
+    "subject": "Erősítsd meg az új Regio e-mail-címed",
+    "heading": "Szia {name},",
+    "intro": "Kérjük, erősítsd meg, hogy ezt a címet szeretnéd használni új Regio e-mail-címként. Kattints az alábbi gombra a módosítás befejezéséhez.",
+    "cta": "Új e-mail-cím megerősítése",
+    "notice": "Ez a link <strong>24 óra</strong> múlva lejár. Ha nem te kérted ezt a módosítást, nyugodtan hagyd figyelmen kívül ezt az e-mailt.",
+    "footer_note": "Ezt azért kapod, mert e-mail-cím módosítást kértek a Regio-fiókodhoz."
+  },
+  "email_change_notify": {
+    "subject": "A Regio e-mail-címed módosítás alatt áll",
+    "heading": "Szia {name},",
+    "intro": "Kérés érkezett a Regio-fiókod e-mail-címének módosítására erre:",
+    "confirm_hint": "Egy megerősítő linket küldtünk az új címre. A módosítás csak megerősítés után lép életbe.",
+    "notice": "Ha nem te kérted ezt a módosítást, kérjük, azonnal lépj kapcsolatba velünk — a fiókod veszélyben lehet.",
+    "footer_note": "Ezt azért kapod, mert e-mail-cím módosítást kértek a Regio-fiókodhoz."
+  },
+  "admin_new_user": {
+    "subject": "Új Regio-regisztráció — {name} ({code})",
+    "heading": "Új regisztráció, ellenőrzésre vár",
+    "intro": "Egy új felhasználó éppen most regisztrált a Regióban, és az azonosító hívására vár.",
+    "label_name": "Név",
+    "label_code": "Felhasználói kód",
+    "label_email": "E-mail",
+    "label_city": "Város",
+    "label_zip": "Irányítószám",
+    "outro": "A felhasználó <strong>függőben</strong> marad, amíg a személyazonosság-ellenőrzése le nem zárul.",
+    "footer_note": "Ezt az e-mailt Regio rendszeradminisztrátorként kapod."
+  }
+}

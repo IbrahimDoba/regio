@@ -1,0 +1,148 @@
+{
+  "common": {
+    "min_unit": "min",
+    "regio_unit": "Regio"
+  },
+  "welcome": {
+    "subject": "Welcome to Regio — Book Your Verification Call",
+    "heading": "Hey {name}!",
+    "intro1": "Thanks for joining Regio! We're stoked to have you on board.",
+    "intro2": "To keep our community safe and awesome, we just need to do a quick <strong>identity check</strong> via a short video call before you can start trading.",
+    "cta": "Book my verification call",
+    "checklist_title": "Quick checklist:",
+    "step1": "Pick a slot that works for you above.",
+    "step2": "Join the video call at the scheduled time.",
+    "step3": "Once verified, you're all set to go!",
+    "outro": "See you soon!",
+    "footer_note": "You're receiving this email because you registered an account with Regio."
+  },
+  "booking_reminder": {
+    "subject": "Don't forget — Book your Regio verification call",
+    "heading": "Still there, {name}?",
+    "intro": "We noticed you haven't booked your <strong>identity check</strong> yet. It's a short video call, and it's the last step before you can start trading on Regio.",
+    "cta": "Book my verification call",
+    "next_title": "Here's what happens next:",
+    "step1": "Pick a slot that works for you above.",
+    "step2": "Join the video call at the scheduled time.",
+    "step3": "Once verified, you're all set to go!",
+    "outro": "It only takes a few minutes. We're looking forward to meeting you!",
+    "footer_note": "You're receiving this email because you registered an account with Regio."
+  },
+  "verification_status": {
+    "subject": {
+      "VERIFIED": "Your Regio Account Has Been Verified",
+      "REJECTED": "Regio Account Verification Update",
+      "ACTION_REQUIRED": "Action Required for Your Regio Account",
+      "DEFAULT": "Regio Account Update"
+    },
+    "verified_heading": "High five, {name}! 🎉",
+    "verified_intro": "Your account is now <strong>fully verified</strong> and active. Welcome to the Regio community!",
+    "verified_can_title": "What you can do on Regio:",
+    "verified_step1": "Browse and post local offers and requests (goods, services, time)",
+    "verified_step2": "Connect and trade with neighbors using Regio credits",
+    "verified_step3": "Build trust in your local community — no money needed",
+    "verified_video_intro": "New to Regio? Watch our short intro to get started:",
+    "verified_video_cta": "▶ How Regio works",
+    "verified_app_cta": "Open the App →",
+    "verified_signoff": "If you have any questions, just reply to this email.<br><strong>The Regio Team</strong>",
+    "rejected_heading": "Hey {name}",
+    "rejected_intro": "Quick update: your account verification didn't go through this time.",
+    "reason_label": "Reason:",
+    "rejected_outro": "If you think this is a mistake, just reach out to us!",
+    "action_heading": "Hey {name}, we need a moment",
+    "action_intro": "Your verification is almost there, but we need you to take a look at this:",
+    "details_label": "Details:",
+    "action_outro": "Drop us a message once you've checked it!",
+    "footer_note": "You're receiving this because your account status was updated."
+  },
+  "payment_reminder": {
+    "subject": "Payment Reminder — Action Required on Regio",
+    "heading": "Hey {name},",
+    "intro": "This is a reminder that you have a payment request from <strong>{creditor}</strong> that has been pending for <strong>{days} days</strong>.",
+    "for_label": "For:",
+    "amount_label": "Amount:",
+    "outro_pre": "Please confirm or dispute this request as soon as possible. ",
+    "deadline": "If no action is taken within 7 days of the original request, the payment will be processed automatically.",
+    "footer_note": "You're receiving this because you have a pending payment request in Regio."
+  },
+  "payment_enforced": {
+    "subject": {
+      "creditor": "Your Payment Request Was Automatically Processed — Regio",
+      "debtor": "Automatic Payment Processed From Your Account — Regio"
+    },
+    "heading": "Hey {name},",
+    "creditor_line": "Your payment request to <strong>{party}</strong> has been <strong>automatically processed</strong> after 7 days with no response.",
+    "debtor_line": "A payment request from <strong>{party}</strong> has been <strong>automatically processed</strong> from your account after 7 days with no action taken.",
+    "for_label": "For:",
+    "amount_label": "Amount:",
+    "outro": "This payment was automatically executed by the Regio system in accordance with the 7-day payment rule. You can view it in your transaction history.",
+    "footer_note": "You're receiving this because a payment involving your account was automatically processed."
+  },
+  "request_rejected": {
+    "subject": "Your Payment Request Was Declined — Regio",
+    "heading": "Hey {name},",
+    "intro": "<strong>{debtor}</strong> has declined your payment request.",
+    "request_label": "Request:",
+    "amount_label": "Amount:",
+    "outro": "If you believe this is a mistake, you can raise a dispute and an admin will review it.",
+    "footer_note": "You're receiving this because a payment request you sent was declined."
+  },
+  "dispute_resolved": {
+    "subject": {
+      "creditor": "Your Dispute Has Been Resolved — Regio",
+      "debtor": "Payment Dispute Update — Regio"
+    },
+    "heading": "Hey {name},",
+    "creditor_approved": "Your dispute has been <strong>approved</strong>. The payment has been processed and the funds are on their way.",
+    "creditor_cancelled": "Your dispute has been <strong>reviewed</strong>. After consideration, the admin has sided with the other party and the payment request has been cancelled.",
+    "debtor_approved": "A payment dispute concerning your account has been <strong>resolved</strong>. The admin has approved the creditor's claim and the payment has been processed from your account.",
+    "debtor_cancelled": "A payment dispute concerning your account has been <strong>resolved</strong> in your favour. The payment request has been cancelled.",
+    "original_label": "Original request:",
+    "admin_note_label": "Admin note:",
+    "outro": "If you have any questions, please reach out to the Regio team.",
+    "footer_note": "You're receiving this because a payment dispute involving your account was resolved."
+  },
+  "broadcast_digest": {
+    "subject": "Regio Update: {title}",
+    "intro1": "Hey {name},",
+    "intro2": "Here's a new update from the Regio team you might find interesting:",
+    "cta": "Check it out",
+    "footer_note": "You're receiving this because you have email digests enabled in your Regio profile."
+  },
+  "password_reset": {
+    "subject": "Reset Your Regio Password",
+    "heading": "Hey {name},",
+    "intro": "We received a request to reset your Regio password. Click the button below to set a new one.",
+    "cta": "Reset my password",
+    "notice": "This link expires in <strong>30 minutes</strong>. If you didn't request a password reset, you can safely ignore this email — your password won't change.",
+    "footer_note": "You're receiving this email because a password reset was requested for your Regio account."
+  },
+  "email_change_confirm": {
+    "subject": "Confirm your new Regio email address",
+    "heading": "Hey {name},",
+    "intro": "Please confirm that you want to use this address as your new Regio email. Click the button below to complete the change.",
+    "cta": "Confirm new email address",
+    "notice": "This link expires in <strong>24 hours</strong>. If you did not request this change, you can safely ignore this email.",
+    "footer_note": "You're receiving this because an email change was requested for your Regio account."
+  },
+  "email_change_notify": {
+    "subject": "Your Regio email address is being changed",
+    "heading": "Hey {name},",
+    "intro": "A request has been made to change the email address on your Regio account to:",
+    "confirm_hint": "A confirmation link has been sent to the new address. The change will only take effect once confirmed.",
+    "notice": "If you did not request this change, please contact us immediately — your account may be at risk.",
+    "footer_note": "You're receiving this because an email change was requested for your Regio account."
+  },
+  "admin_new_user": {
+    "subject": "New Regio registration — {name} ({code})",
+    "heading": "New registration pending verification",
+    "intro": "A new user has just registered on Regio and is awaiting their verification call.",
+    "label_name": "Name",
+    "label_code": "User code",
+    "label_email": "Email",
+    "label_city": "City",
+    "label_zip": "Zip",
+    "outro": "They will remain <strong>pending</strong> until their identity check is completed.",
+    "footer_note": "You're receiving this email as the Regio system administrator."
+  }
+}

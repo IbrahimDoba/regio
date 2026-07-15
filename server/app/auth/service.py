@@ -303,6 +303,7 @@ class AuthService:
             user_first_name=user.first_name,
             user_email=user.email,
             reset_url=reset_url,
+            language=user.language,
         )
 
     async def reset_password(self, token: str, new_password: str) -> None:

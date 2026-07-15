@@ -1,95 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { margin: 0; padding: 0; background-color: #f4f4f4; font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; }
-    .container { max-width: 580px; margin: 20px auto; background: #ffffff; border-radius: 8px; overflow: hidden; }
-    .header { padding: 40px 20px; text-align: center; background-color: #ffffff; border-bottom: 2px solid #f4f4f4; }
-    .logo { max-width: 180px; }
-    .status-bar { height: 6px; width: 100%; }
-    .verified-color { background-color: #3D633D; }
-    .rejected-color { background-color: #C1272D; }
-    .action-color { background-color: #1a1a1a; }
-    .body { padding: 40px; line-height: 1.6; font-size: 18px; }
-    h2 { font-size: 20px; margin-top: 0; margin-bottom: 15px; font-weight: 600; }
-    .info-box { background-color: #f9f9f9; border-left: 4px solid #1a1a1a; padding: 20px; margin: 20px 0; border-radius: 4px; font-size: 17px; }
-    .steps { background-color: #f9f9f9; padding: 20px; border-radius: 8px; list-style: none; margin: 20px 0; font-size: 17px; }
-    .steps li { margin-bottom: 10px; padding-left: 25px; position: relative; }
-    .steps li::before { content: '→'; position: absolute; left: 0; color: #3D633D; font-weight: bold; }
-    .cta { display: inline-block; padding: 14px 28px; background-color: #3D633D; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 10px 0; font-size: 17px; }
-    .footer { padding: 40px; text-align: center; font-size: 13px; color: #ffffff; background-color: #1a1a1a; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="cid:logo" alt="REGIO" class="logo">
-    </div>
+{% extends "base.html" %}
+{% block extra_styles %}
+<style>
+  .info-box { background-color: #f9f9f9; border-left: 4px solid #1a1a1a; padding: 20px; margin: 20px 0; border-radius: 4px; font-size: 17px; }
+  .steps { background-color: #f9f9f9; padding: 20px; border-radius: 8px; list-style: none; margin: 20px 0; font-size: 17px; }
+  .steps li { margin-bottom: 10px; padding-left: 25px; position: relative; }
+  .steps li::before { content: '→'; position: absolute; left: 0; color: #3D633D; font-weight: bold; }
+  .cta { display: inline-block; padding: 14px 28px; background-color: #3D633D; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 10px 0; font-size: 17px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="body">
+  {% if new_status == "VERIFIED" %}
+    <h2>{{ (t.verified_heading | safe).format(name=user_first_name) }}</h2>
+    <p>{{ t.verified_intro | safe }}</p>
 
-    {% if new_status == "VERIFIED" %}
-    <div class="status-bar verified-color"></div>
-    <div class="body">
-      <h2>High five, {{ user_first_name }}! 🎉</h2>
-      <p>Your account is now <strong>fully verified</strong> and active. Welcome to the Regio community!</p>
+    <p><strong>{{ t.verified_can_title | safe }}</strong></p>
+    <ul class="steps">
+      <li>{{ t.verified_step1 | safe }}</li>
+      <li>{{ t.verified_step2 | safe }}</li>
+      <li>{{ t.verified_step3 | safe }}</li>
+    </ul>
 
-      <p><strong>What you can do on Regio:</strong></p>
-      <ul class="steps">
-        <li>Browse and post local offers &amp; requests (goods, services, time)</li>
-        <li>Connect and trade with neighbors using Regio credits</li>
-        <li>Build trust in your local community — no money needed</li>
-      </ul>
-
-      {% if how_it_works_video_url %}
-      <p>New to Regio? Watch our short intro to get started:</p>
-      <div style="text-align: center;">
-        <a class="cta" href="{{ how_it_works_video_url }}" style="background-color:#f57c00;">▶ How Regio works</a>
-      </div>
-      {% endif %}
-
-      {% if app_url %}
-      <div style="text-align: center; margin-top: 20px;">
-        <a class="cta" href="{{ app_url }}">Open the App →</a>
-      </div>
-      {% endif %}
-
-      <p style="margin-top: 30px;">If you have any questions, just reply to this email.<br><strong>The Regio Team</strong></p>
-    </div>
-
-    {% elif new_status == "REJECTED" %}
-    <div class="status-bar rejected-color"></div>
-    <div class="body">
-      <h2>Hey {{ user_first_name }}</h2>
-      <p>Quick update: your account verification didn't go through this time.</p>
-      {% if reason %}
-      <div class="info-box" style="border-color: #C1272D;">
-        <strong>Reason:</strong> {{ reason }}
-      </div>
-      {% endif %}
-      <p>If you think this is a mistake, just reach out to us!</p>
-    </div>
-
-    {% elif new_status == "ACTION_REQUIRED" %}
-    <div class="status-bar action-color"></div>
-    <div class="body">
-      <h2>Hey {{ user_first_name }}, we need a moment</h2>
-      <p>Your verification is almost there, but we need you to take a look at this:</p>
-      {% if reason %}
-      <div class="info-box">
-        <strong>Details:</strong> {{ reason }}
-      </div>
-      {% endif %}
-      <p>Drop us a message once you've checked it!</p>
+    {% if how_it_works_video_url %}
+    <p>{{ t.verified_video_intro | safe }}</p>
+    <div style="text-align: center;">
+      <a class="cta" href="{{ how_it_works_video_url }}" style="background-color:#f57c00;">{{ t.verified_video_cta | safe }}</a>
     </div>
     {% endif %}
 
-    <div class="footer">
-      <strong>REGIO</strong> is a non-profit project by <strong>151 CONCEPTS</strong><br>
-      Báta, 7149, Hungary | Tax ID: HU48374642
-      <br><br>
-      You’re receiving this because your account status was updated.
+    {% if app_url %}
+    <div style="text-align: center; margin-top: 20px;">
+      <a class="cta" href="{{ app_url }}">{{ t.verified_app_cta | safe }}</a>
     </div>
-  </div>
-</body>
-</html>
+    {% endif %}
+
+    <p style="margin-top: 30px;">{{ t.verified_signoff | safe }}</p>
+
+  {% elif new_status == "REJECTED" %}
+    <h2>{{ (t.rejected_heading | safe).format(name=user_first_name) }}</h2>
+    <p>{{ t.rejected_intro | safe }}</p>
+    {% if reason %}
+    <div class="info-box" style="border-color: #C1272D;">
+      <strong>{{ t.reason_label | safe }}</strong> {{ reason }}
+    </div>
+    {% endif %}
+    <p>{{ t.rejected_outro | safe }}</p>
+
+  {% elif new_status == "ACTION_REQUIRED" %}
+    <h2>{{ (t.action_heading | safe).format(name=user_first_name) }}</h2>
+    <p>{{ t.action_intro | safe }}</p>
+    {% if reason %}
+    <div class="info-box">
+      <strong>{{ t.details_label | safe }}</strong> {{ reason }}
+    </div>
+    {% endif %}
+    <p>{{ t.action_outro | safe }}</p>
+  {% endif %}
+</div>
+{% endblock %}

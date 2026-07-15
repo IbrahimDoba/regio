@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
+from app.users.enums import Language
+
 
 class EmailMessage(BaseModel):
     """Internal schema representing a composed email ready to send."""
@@ -14,7 +16,18 @@ class EmailMessage(BaseModel):
     inline_images: dict[str, bytes] = Field(default_factory=dict)
 
 
-class VerificationEmailData(BaseModel):
+class _LocalizedEmailData(BaseModel):
+    """Base for email payloads: carries the recipient's preferred language.
+
+    Drives which locale catalog + subject the EmailService renders. Defaults
+    to English so senders that have no user context (e.g. the system admin
+    notification) render in EN.
+    """
+
+    language: Language = Language.EN
+
+
+class VerificationEmailData(_LocalizedEmailData):
     """Data for rendering the registration welcome email."""
 
     user_first_name: str
@@ -22,7 +35,7 @@ class VerificationEmailData(BaseModel):
     verification_url: str
 
 
-class AdminNewUserEmailData(BaseModel):
+class AdminNewUserEmailData(_LocalizedEmailData):
     """Notify the system admin that a new user registered and is pending verification."""
 
     admin_email: EmailStr  # recipient — the system admin (SYSTEM_SINK_EMAIL)
@@ -33,7 +46,7 @@ class AdminNewUserEmailData(BaseModel):
     new_user_zip: str
 
 
-class VerificationStatusEmailData(BaseModel):
+class VerificationStatusEmailData(_LocalizedEmailData):
     """Data for rendering verification status change emails."""
 
     user_first_name: str
@@ -44,7 +57,7 @@ class VerificationStatusEmailData(BaseModel):
     how_it_works_video_url: Optional[str] = None
 
 
-class BookingReminderEmailData(BaseModel):
+class BookingReminderEmailData(_LocalizedEmailData):
     """Data for the 30-minute booking reminder email."""
 
     user_first_name: str
@@ -52,7 +65,7 @@ class BookingReminderEmailData(BaseModel):
     verification_url: str
 
 
-class BroadcastDigestEmailData(BaseModel):
+class BroadcastDigestEmailData(_LocalizedEmailData):
     """Data for rendering the broadcast digest email."""
 
     user_first_name: str
@@ -62,7 +75,7 @@ class BroadcastDigestEmailData(BaseModel):
     broadcast_link: Optional[str] = None
 
 
-class PaymentReminderEmailData(BaseModel):
+class PaymentReminderEmailData(_LocalizedEmailData):
     """Remind the debtor that a payment request is overdue."""
 
     user_first_name: str
@@ -74,7 +87,7 @@ class PaymentReminderEmailData(BaseModel):
     days_pending: int
 
 
-class PaymentEnforcedEmailData(BaseModel):
+class PaymentEnforcedEmailData(_LocalizedEmailData):
     """Notify both parties that a payment was automatically executed by the system."""
 
     user_first_name: str
@@ -86,7 +99,7 @@ class PaymentEnforcedEmailData(BaseModel):
     description: Optional[str] = None
 
 
-class PaymentRequestRejectedEmailData(BaseModel):
+class PaymentRequestRejectedEmailData(_LocalizedEmailData):
     """Notify the creditor that the debtor has rejected their payment request."""
 
     user_first_name: str
@@ -97,7 +110,7 @@ class PaymentRequestRejectedEmailData(BaseModel):
     description: Optional[str] = None
 
 
-class DisputeResolvedEmailData(BaseModel):
+class DisputeResolvedEmailData(_LocalizedEmailData):
     """Data for rendering the dispute resolution notification email."""
 
     user_first_name: str
@@ -110,7 +123,7 @@ class DisputeResolvedEmailData(BaseModel):
     description: Optional[str] = None
 
 
-class PasswordResetEmailData(BaseModel):
+class PasswordResetEmailData(_LocalizedEmailData):
     """Data for rendering the password reset email."""
 
     user_first_name: str
@@ -118,7 +131,7 @@ class PasswordResetEmailData(BaseModel):
     reset_url: str
 
 
-class EmailChangeNotifyData(BaseModel):
+class EmailChangeNotifyData(_LocalizedEmailData):
     """Notification sent to the OLD email address when a change is requested."""
 
     user_first_name: str
@@ -126,7 +139,7 @@ class EmailChangeNotifyData(BaseModel):
     new_email: str
 
 
-class EmailChangeConfirmData(BaseModel):
+class EmailChangeConfirmData(_LocalizedEmailData):
     """Confirmation link sent to the NEW email address."""
 
     user_first_name: str

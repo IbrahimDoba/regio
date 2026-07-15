@@ -72,6 +72,7 @@ async def run_payment_enforcer() -> None:
                         amount_regio=float(req.amount_regio),
                         description=req.description,
                         days_pending=days_pending,
+                        language=req.debtor.language,
                     )
                 )
                 req.reminder_sent_at = now
@@ -112,9 +113,11 @@ async def run_payment_enforcer() -> None:
             creditor_name = req.creditor.full_name
             creditor_email = req.creditor.email
             creditor_first_name = req.creditor.first_name
+            creditor_language = req.creditor.language
             debtor_name = req.debtor.full_name
             debtor_email = req.debtor.email
             debtor_first_name = req.debtor.first_name
+            debtor_language = req.debtor.language
             amount_time = req.amount_time
             amount_regio = float(req.amount_regio)
             description = req.description
@@ -125,9 +128,21 @@ async def run_payment_enforcer() -> None:
                 logger.info(f"Enforcer: force-executed request {req.id}")
 
                 # Notify both parties
-                for is_creditor, first_name, email, other_name in [
-                    (True, creditor_first_name, creditor_email, debtor_name),
-                    (False, debtor_first_name, debtor_email, creditor_name),
+                for is_creditor, first_name, email, other_name, language in [
+                    (
+                        True,
+                        creditor_first_name,
+                        creditor_email,
+                        debtor_name,
+                        creditor_language,
+                    ),
+                    (
+                        False,
+                        debtor_first_name,
+                        debtor_email,
+                        creditor_name,
+                        debtor_language,
+                    ),
                 ]:
                     try:
                         await email_service.send_payment_enforced_email(
@@ -139,6 +154,7 @@ async def run_payment_enforcer() -> None:
                                 amount_time=amount_time,
                                 amount_regio=amount_regio,
                                 description=description,
+                                language=language,
                             )
                         )
                     except Exception as e:
