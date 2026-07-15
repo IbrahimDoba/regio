@@ -50,14 +50,16 @@ class AdminService:
             )
         )
 
+        # Zero-sum ledger: net balance across all accounts (incl. negatives)
+        # should settle to ~0. Summing every account surfaces that invariant.
         total_time = await self.session.execute(
             select(func.sum(Account.balance_time)).where(
-                Account.type == Currency.TIME, Account.balance_time > 0
+                Account.type == Currency.TIME
             )
         )
         total_regio = await self.session.execute(
             select(func.sum(Account.balance_regio)).where(
-                Account.type == Currency.REGIO, Account.balance_regio > 0
+                Account.type == Currency.REGIO
             )
         )
 

@@ -21,10 +21,12 @@ class SystemStats(BaseModel):
         ..., description="Users awaiting identity verification."
     )
     total_time_volume: int = Field(
-        ..., description="Total volume of Time currency in circulation."
+        ...,
+        description="Net Time balance across all accounts (minutes); ~0 in a balanced ledger.",
     )
     total_regio_volume: Decimal = Field(
-        ..., description="Total volume of Regio currency in circulation."
+        ...,
+        description="Net Regio balance across all accounts; ~0 in a balanced ledger.",
     )
     pending_disputes: int = Field(
         ..., description="Count of unresolved disputes."

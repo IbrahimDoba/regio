@@ -608,7 +608,7 @@
       "total_users": "Total Users",
       "active_pending": "Active Pending",
       "time_volume": "Total Time Volume",
-      "time_unit": "hrs",
+      "time_unit": "min",
       "garas_volume": "Total Garas Vol.",
       "action_required": "Action Required",
       "disputes": "Disputes"

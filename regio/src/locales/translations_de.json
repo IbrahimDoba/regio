@@ -608,7 +608,7 @@
       "total_users": "Nutzer gesamt",
       "active_pending": "Aktiv / Ausstehend",
       "time_volume": "Zeitvolumen gesamt",
-      "time_unit": "Std",
+      "time_unit": "Min",
       "garas_volume": "Garasvolumen gesamt",
       "action_required": "Handlungsbedarf",
       "disputes": "Konflikte"

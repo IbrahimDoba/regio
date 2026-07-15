@@ -608,7 +608,7 @@
       "total_users": "Összes felhasználó",
       "active_pending": "Aktív / függőben",
       "time_volume": "Összes időforgalom",
-      "time_unit": "óra",
+      "time_unit": "perc",
       "garas_volume": "Összes Garas-forgalom",
       "action_required": "Teendő szükséges",
       "disputes": "Konfliktusok"
