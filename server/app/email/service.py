@@ -15,6 +15,7 @@ from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 from app.email.config import email_settings
 from app.email.exceptions import EmailSendFailed, EmailTemplateNotFound
 from app.email.schemas import (
+    AdminNewUserEmailData,
     BookingReminderEmailData,
     BroadcastDigestEmailData,
     DisputeResolvedEmailData,
@@ -177,6 +178,22 @@ class EmailService:
         message = EmailMessage(
             to=data.user_email,
             subject="Welcome to Regio — Book Your Verification Call",
+            html_body=html,
+            inline_images={"logo": self._logo_m},
+        )
+        await self._send(message)
+
+    async def send_admin_new_user_email(
+        self, data: AdminNewUserEmailData
+    ) -> None:
+        """Notify the system admin that a new user registered (pending verification)."""
+        html = self._render_template("admin_new_user.html", data.model_dump())
+        message = EmailMessage(
+            to=data.admin_email,
+            subject=(
+                f"New Regio registration — "
+                f"{data.new_user_name} ({data.new_user_code})"
+            ),
             html_body=html,
             inline_images={"logo": self._logo_m},
         )

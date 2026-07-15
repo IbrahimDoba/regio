@@ -22,6 +22,17 @@ class VerificationEmailData(BaseModel):
     verification_url: str
 
 
+class AdminNewUserEmailData(BaseModel):
+    """Notify the system admin that a new user registered and is pending verification."""
+
+    admin_email: EmailStr  # recipient — the system admin (SYSTEM_SINK_EMAIL)
+    new_user_name: str  # full name of the registrant
+    new_user_email: EmailStr
+    new_user_code: str
+    new_user_city: str
+    new_user_zip: str
+
+
 class VerificationStatusEmailData(BaseModel):
     """Data for rendering verification status change emails."""
 

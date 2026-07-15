@@ -7,6 +7,7 @@ from sqlmodel import select
 from app.core.database import AsyncSessionLocal
 from app.email.config import email_settings
 from app.email.schemas import (
+    AdminNewUserEmailData,
     BookingReminderEmailData,
     BroadcastDigestEmailData,
     DisputeResolvedEmailData,
@@ -31,6 +32,16 @@ async def send_welcome_email_task(data: VerificationEmailData) -> None:
     except Exception as e:
         logger.exception(
             f"Background welcome email failed for {data.user_email}: {e}"
+        )
+
+
+async def send_admin_new_user_email_task(data: AdminNewUserEmailData) -> None:
+    """Background task: notify the system admin of a new registration."""
+    try:
+        await email_service.send_admin_new_user_email(data)
+    except Exception as e:
+        logger.exception(
+            f"Background admin new-user email failed for {data.new_user_email}: {e}"
         )
 
 

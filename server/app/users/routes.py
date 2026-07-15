@@ -13,15 +13,18 @@ from fastapi.responses import StreamingResponse
 
 from app.auth.dependencies import AuthServiceDep
 from app.auth.schemas import InvitePublic
+from app.core.config import settings
 from app.core.file_storage import StorageServiceDep
 from app.email.config import email_settings
 from app.email.schemas import (
+    AdminNewUserEmailData,
     BookingReminderEmailData,
     EmailChangeConfirmData,
     EmailChangeNotifyData,
     VerificationEmailData,
 )
 from app.email.tasks import (
+    send_admin_new_user_email_task,
     send_booking_reminder_email_task,
     send_email_change_confirm_task,
     send_email_change_notify_task,
@@ -149,6 +152,18 @@ async def register_user(
                 user_first_name=db_user.first_name,
                 user_email=db_user.email,
                 verification_url=verification_url,
+            ),
+        )
+        # Notify the system admin that a new user is pending verification
+        background_tasks.add_task(
+            send_admin_new_user_email_task,
+            AdminNewUserEmailData(
+                admin_email=settings.SYSTEM_SINK_EMAIL,
+                new_user_name=db_user.full_name,
+                new_user_email=db_user.email,
+                new_user_code=db_user.user_code,
+                new_user_city=db_user.city,
+                new_user_zip=db_user.zip_code,
             ),
         )
 
