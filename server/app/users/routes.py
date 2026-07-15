@@ -146,17 +146,10 @@ async def register_user(
             language=db_user.language,
         )
         background_tasks.add_task(send_welcome_email_task, email_data)
-        # Schedule a reminder if the user hasn't booked after 30 minutes
-        background_tasks.add_task(
-            send_booking_reminder_email_task,
-            BookingReminderEmailData(
-                user_first_name=db_user.first_name,
-                user_email=db_user.email,
-                verification_url=verification_url,
-                language=db_user.language,
-            ),
-        )
-        # Notify the system admin that a new user is pending verification
+        # Notify the system admin that a new user is pending verification.
+        # Queued before the booking reminder because Starlette runs background
+        # tasks sequentially and the reminder sleeps 30 minutes before sending —
+        # anything queued after it would be blocked for that whole window.
         background_tasks.add_task(
             send_admin_new_user_email_task,
             AdminNewUserEmailData(
@@ -166,6 +159,17 @@ async def register_user(
                 new_user_code=db_user.user_code,
                 new_user_city=db_user.city,
                 new_user_zip=db_user.zip_code,
+            ),
+        )
+        # Schedule a reminder if the user hasn't booked after 30 minutes (runs
+        # last: it sleeps 30 minutes before sending).
+        background_tasks.add_task(
+            send_booking_reminder_email_task,
+            BookingReminderEmailData(
+                user_first_name=db_user.first_name,
+                user_email=db_user.email,
+                verification_url=verification_url,
+                language=db_user.language,
             ),
         )
 
