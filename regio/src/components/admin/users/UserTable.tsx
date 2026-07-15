@@ -117,8 +117,11 @@ export default function UserTable({ users, onEditUser, onVerifyUser, onRejectUse
                   />
                   <div>
                     <strong className="block">{user.full_name}</strong>
-                    <span className="text-[10px] text-[#888]">
+                    <span className="block text-[10px] text-[#888]">
                       ID: {user.user_code}
+                    </span>
+                    <span className="block text-[10px] text-[#888]">
+                      {user.email}
                     </span>
                   </div>
                 </div>
