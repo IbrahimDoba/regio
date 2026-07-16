@@ -125,6 +125,7 @@ function AuthForm() {
         invite_code: inviteCode,
         zip_code: registerZip,
         city: registerCity,
+        language,
       });
       await login({ username: registerEmail, password: registerPassword });
     } catch (error: unknown) {

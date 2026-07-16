@@ -101,6 +101,8 @@ export interface UserCreate {
   invite_code: string;
   zip_code: string;
   city: string;
+  // Active frontend locale at signup; becomes the user's preferred language.
+  language?: Language;
 }
 
 export interface UserUpdate {
