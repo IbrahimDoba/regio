@@ -200,6 +200,7 @@ async def reject_payment_request(
             amount_time=req.amount_time,
             amount_regio=float(req.amount_regio),
             description=req.description,
+            language=req.creditor.language,
         ),
     )
     return Message(message="Request rejected")
