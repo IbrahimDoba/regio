@@ -96,7 +96,6 @@ class EmailService:
             autoescape=True,
         )
         self._logo_m = (TEMPLATE_DIR / "logo-M.png").read_bytes()
-        self._logo_s = (TEMPLATE_DIR / "logo-S.png").read_bytes()
         # Per-language string catalogs, loaded once (keyed by upper-case code).
         self._locales = {
             lang: json.loads(
@@ -328,7 +327,7 @@ class EmailService:
             to=data.user_email,
             subject=t["subject"].format(title=data.broadcast_title),
             html_body=html,
-            inline_images={"logo": self._logo_s},
+            inline_images={"logo": self._logo_m},
         )
         await self._send(message)
 
