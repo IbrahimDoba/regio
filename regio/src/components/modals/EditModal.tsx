@@ -214,14 +214,20 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
   const [existingUrls, setExistingUrls] = useState<string[]>(listing.media_urls ?? []);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreviewUrls, setNewPreviewUrls] = useState<string[]>([]);
+  // Mirror the new-file preview URLs in a ref so the unmount cleanup revokes the latest set.
+  // Only these are object URLs — existingUrls are server URLs and must never be revoked.
+  const newPreviewUrlsRef = useRef<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const remaining = 5 - existingUrls.length - newFiles.length;
-    const incoming = Array.from(e.target.files || []).filter(f => f.size <= 1 * 1024 * 1024);
+    const incoming = Array.from(e.target.files || []);
     const combined = [...newFiles, ...incoming].slice(0, newFiles.length + remaining);
     setNewFiles(combined);
-    setNewPreviewUrls(combined.map(f => URL.createObjectURL(f)));
+    setNewPreviewUrls(prev => {
+      prev.forEach(URL.revokeObjectURL);
+      return combined.map(f => URL.createObjectURL(f));
+    });
     e.target.value = "";
   };
 
@@ -232,7 +238,10 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
   const removeNewFile = (index: number) => {
     const next = newFiles.filter((_, i) => i !== index);
     setNewFiles(next);
-    setNewPreviewUrls(next.map(f => URL.createObjectURL(f)));
+    setNewPreviewUrls(prev => {
+      prev.forEach(URL.revokeObjectURL);
+      return next.map(f => URL.createObjectURL(f));
+    });
   };
 
   useEffect(() => {
@@ -249,6 +258,9 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => { newPreviewUrlsRef.current = newPreviewUrls; }, [newPreviewUrls]);
+  useEffect(() => () => { newPreviewUrlsRef.current.forEach(URL.revokeObjectURL); }, []);
 
   const markUnofficial = (name: string) =>
     setUnofficialTags((prev) => (prev.includes(name) ? prev : [...prev, name]));

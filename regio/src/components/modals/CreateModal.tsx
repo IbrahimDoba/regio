@@ -129,6 +129,8 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  // Mirror preview URLs in a ref so the unmount cleanup revokes the latest set, not a stale closure.
+  const previewUrlsRef = useRef<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [debouncedTagInput, setDebouncedTagInput] = useState("");
   const [showTagDropdown, setShowTagDropdown] = useState(false);
@@ -154,6 +156,9 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => { previewUrlsRef.current = previewUrls; }, [previewUrls]);
+  useEffect(() => () => { previewUrlsRef.current.forEach(URL.revokeObjectURL); }, []);
 
   if (!isOpen) return null;
 
@@ -280,21 +285,28 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const incoming = Array.from(e.target.files || []).filter(f => f.size <= 1 * 1024 * 1024);
+    const incoming = Array.from(e.target.files || []);
     const combined = [...selectedFiles, ...incoming].slice(0, 5);
     setSelectedFiles(combined);
-    setPreviewUrls(combined.map(f => URL.createObjectURL(f)));
+    setPreviewUrls(prev => {
+      prev.forEach(URL.revokeObjectURL);
+      return combined.map(f => URL.createObjectURL(f));
+    });
     e.target.value = "";
   };
 
   const removeFile = (index: number) => {
     const next = selectedFiles.filter((_, i) => i !== index);
     setSelectedFiles(next);
-    setPreviewUrls(next.map(f => URL.createObjectURL(f)));
+    setPreviewUrls(prev => {
+      prev.forEach(URL.revokeObjectURL);
+      return next.map(f => URL.createObjectURL(f));
+    });
   };
 
   const resetForm = () => {
     setTitle(""); setDescription(""); setTags([]); setPriceNotes("");
+    previewUrls.forEach(URL.revokeObjectURL);
     setSelectedFiles([]); setPreviewUrls([]);
     setAvailableUntil("");
     setTagInput(""); setUnofficialTags([]); setTagDisplayLabels({});

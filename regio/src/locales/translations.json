@@ -202,7 +202,7 @@
     "address_not_found": "Address not found. Try a different ZIP code.",
     "address_set": "Location set",
     "images_label": "Photos",
-    "images_hint": "Up to 5 images, max. 1 MB each (JPEG, PNG, WebP)",
+    "images_hint": "Up to 5 images (JPEG, PNG, WebP, GIF)",
     "images_add": "Add Photos",
     "images_uploading": "Uploading photos...",
     "date_select": {

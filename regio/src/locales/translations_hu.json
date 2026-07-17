@@ -202,7 +202,7 @@
     "address_not_found": "A cím nem található. Próbálj másik irányítószámot.",
     "address_set": "Helyszín beállítva",
     "images_label": "Fotók",
-    "images_hint": "Legfeljebb 5 kép, egyenként max. 1 MB (JPEG, PNG, WebP)",
+    "images_hint": "Legfeljebb 5 kép (JPEG, PNG, WebP, GIF)",
     "images_add": "Fotók hozzáadása",
     "images_uploading": "Fotók feltöltése...",
     "date_select": {

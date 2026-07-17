@@ -202,7 +202,7 @@
     "address_not_found": "Adresse nicht gefunden. Andere PLZ versuchen.",
     "address_set": "Standort gesetzt",
     "images_label": "Fotos",
-    "images_hint": "Bis zu 5 Bilder, max. 1 MB je Datei (JPEG, PNG, WebP)",
+    "images_hint": "Bis zu 5 Bilder (JPEG, PNG, WebP, GIF)",
     "images_add": "Fotos hinzufügen",
     "images_uploading": "Fotos werden hochgeladen...",
     "date_select": {
