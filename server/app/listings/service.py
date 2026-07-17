@@ -1,5 +1,6 @@
 import uuid
-from typing import List, Optional
+from datetime import datetime, timezone
+from typing import Any, List, Optional
 
 import sqlalchemy as sa
 from fastapi import UploadFile
@@ -22,6 +23,7 @@ from app.listings.exceptions import (
 )
 from app.listings.models import (
     Listing,
+    ListingEditLog,
     ListingTagLink,
     PostVisibility,
     Tag,
@@ -30,6 +32,7 @@ from app.listings.models import (
 from app.listings.schemas import (
     FeedResponse,
     ListingCreate,
+    ListingEditLogEntry,
     ListingPublic,
     ListingUpdate,
     TagPublic,
@@ -78,6 +81,25 @@ def _localize(listing: Listing, lang: str) -> tuple[str, str]:
 def _tag_label(tag: Tag, lang: str) -> str:
     """Localized display label for a tag, falling back to its canonical name."""
     return getattr(tag, f"name_{lang.lower()}", None) or tag.name
+
+
+def _edit_log_value(value: Any) -> Optional[str]:
+    """Normalize a field value to the string form stored in the edit log."""
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return str(value)
+
+
+# Top-level scalar listing fields to audit: (update-payload key, model attribute).
+_EDIT_LOG_SCALAR_FIELDS = (
+    ("title", "title_original"),
+    ("description", "description_original"),
+    ("payment_notes", "payment_notes"),
+    ("zip_code", "zip_code"),
+    ("available_until", "available_until"),
+)
 
 
 class ListingService:
@@ -285,6 +307,10 @@ class ListingService:
 
         data = update_data.model_dump(exclude_unset=True)
 
+        # Capture field-level changes before `data` is transformed below. All rows
+        # share one timestamp so the UI can group them into a single edit event.
+        edit_logs = self._build_edit_logs(listing, data, user)
+
         # Track if visibility needs to be rebuilt
         visibility_changed = "zip_code" in data or "d_class" in data
 
@@ -307,6 +333,8 @@ class ListingService:
 
         listing.sqlmodel_update(data)
         self.session.add(listing)
+        if edit_logs:
+            self.session.add_all(edit_logs)
         await self.session.commit()
         await self.session.refresh(listing)
 
@@ -317,6 +345,89 @@ class ListingService:
             )
 
         return listing
+
+    def _build_edit_logs(
+        self, listing: Listing, data: dict, user: User
+    ) -> List[ListingEditLog]:
+        """Diff an incoming update against the current listing into edit-log rows.
+
+        Must be called before ``data`` is transformed (tags resolved to Tag rows,
+        title/description keys renamed). Only changed fields produce a row, and all
+        rows share one ``created_at`` so they group as a single edit event.
+        """
+        ts = datetime.now(timezone.utc)
+        logs: List[ListingEditLog] = []
+
+        def record(field: str, old: Any, new: Any) -> None:
+            old_str = _edit_log_value(old)
+            new_str = _edit_log_value(new)
+            if old_str == new_str:
+                return
+            logs.append(
+                ListingEditLog(
+                    listing_id=listing.id,
+                    edited_by_id=user.id,
+                    field=field,
+                    value_from=old_str,
+                    value_to=new_str,
+                    created_at=ts,
+                )
+            )
+
+        for key, attr in _EDIT_LOG_SCALAR_FIELDS:
+            if key in data:
+                record(key, getattr(listing, attr), data[key])
+
+        if "d_class" in data:
+            new_d_class = (
+                DClass(data["d_class"]).value
+                if data["d_class"] is not None
+                else None
+            )
+            record("d_class", listing.d_class, new_d_class)
+
+        if "tags" in data:
+            old_tags = ", ".join(t.name for t in (listing.tags or []))
+            new_tags = ", ".join(data["tags"])
+            record("tags", old_tags, new_tags)
+
+        if "attributes" in data and data["attributes"] is not None:
+            old_attrs = listing.attributes or {}
+            new_attrs = data["attributes"] or {}
+            for key in sorted(set(old_attrs) | set(new_attrs)):
+                record(
+                    f"attributes.{key}",
+                    old_attrs.get(key),
+                    new_attrs.get(key),
+                )
+
+        return logs
+
+    async def get_edit_log(
+        self, listing_id: uuid.UUID
+    ) -> List[ListingEditLogEntry]:
+        """Full change history for a listing, newest edit event first (admin-only)."""
+        stmt = (
+            select(ListingEditLog, User.full_name)
+            .join(
+                User,
+                col(User.id) == ListingEditLog.edited_by_id,
+                isouter=True,
+            )
+            .where(ListingEditLog.listing_id == listing_id)
+            .order_by(desc(ListingEditLog.created_at), desc(ListingEditLog.id))
+        )
+        rows = (await self.session.execute(stmt)).all()
+        return [
+            ListingEditLogEntry(
+                field=log.field,
+                value_from=log.value_from,
+                value_to=log.value_to,
+                created_at=log.created_at,
+                edited_by=editor_name,
+            )
+            for log, editor_name in rows
+        ]
 
     async def upload_media(
         self,

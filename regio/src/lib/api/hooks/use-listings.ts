@@ -13,6 +13,7 @@ import {
   FeedParams,
   FeedResponse,
   ListingPublic,
+  ListingEditLogEntry,
 } from "../types";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -92,6 +93,18 @@ export function useListing(listingId: string) {
     queryKey: [...queryKeys.listings.detail(listingId), lang],
     queryFn: () => listingsApi.getListing(listingId, lang),
     enabled: !!listingId,
+  });
+}
+
+/**
+ * Hook to fetch a listing's edit history. The endpoint is admin-only, so callers
+ * must pass `enabled` (typically `user?.is_system_admin`) to avoid a guaranteed 403.
+ */
+export function useListingEditLog(listingId: string, enabled: boolean) {
+  return useQuery<ListingEditLogEntry[]>({
+    queryKey: queryKeys.listings.editLog(listingId),
+    queryFn: () => listingsApi.getListingEditLog(listingId),
+    enabled: enabled && !!listingId,
   });
 }
 

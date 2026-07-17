@@ -122,6 +122,18 @@
     "show_map": "Karte anzeigen",
     "hide_map": "Karte ausblenden",
     "edit_log_title": "Änderungsprotokoll",
+    "edit_log_by": "von {name}",
+    "edit_log_empty": "Noch keine Änderungen erfasst.",
+    "edit_log_fields": {
+      "title": "Titel",
+      "description": "Beschreibung",
+      "tags": "Tags",
+      "zip_code": "PLZ",
+      "d_class": "Sichtbarkeit",
+      "available_until": "Verfügbar bis",
+      "payment_notes": "Zahlungshinweise"
+    },
+    "delete_button": "Beitrag löschen",
     "toast_deleted": "Beitrag gelöscht.",
     "toast_delete_error": "Beitrag konnte nicht gelöscht werden.",
     "attributes": {

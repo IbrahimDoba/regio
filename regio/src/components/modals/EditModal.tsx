@@ -9,7 +9,6 @@ import { getCategoryDetails } from "@/lib/feed-helpers";
 import { ListingAttributes } from "@/lib/feed-helpers";
 import { useUpdateListing, useDeleteListing, useSearchTags } from "@/lib/api/hooks/use-listings";
 import { useLanguage } from "@/context/LanguageContext";
-import { appendEditLog, EditLogEntry } from "@/lib/listingEditLog";
 import { useModalKeyboard } from "@/hooks/useModalKeyboard";
 import { useDialog } from "@/context/DialogContext";
 import { useToast } from "@/context/ToastContext";
@@ -358,44 +357,6 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     }
   };
 
-  const computeDiff = (newAttrs: Record<string, unknown>): EditLogEntry[] => {
-    const entries: EditLogEntry[] = [];
-    const ts = new Date().toISOString();
-    const oldAttrs = (listing.attributes ?? {}) as Record<string, unknown>;
-
-    if (title !== listing.title)
-      entries.push({ ts, field: "title", from: listing.title, to: title });
-    if (description !== listing.description)
-      entries.push({
-        ts,
-        field: "description",
-        from: listing.description,
-        to: description,
-      });
-    if (JSON.stringify(tags) !== JSON.stringify(listing.tags ?? []))
-      entries.push({
-        ts,
-        field: "tags",
-        from: (listing.tags ?? []).join(", "),
-        to: tags.join(", "),
-      });
-
-    for (const key of Object.keys(newAttrs)) {
-      const oldVal = oldAttrs[key] ?? null;
-      const newVal = newAttrs[key] ?? null;
-      if (String(oldVal) !== String(newVal)) {
-        entries.push({
-          ts,
-          field: `attributes.${key}`,
-          from: oldVal as string | number | boolean | null,
-          to: newVal as string | number | boolean | null,
-        });
-      }
-    }
-
-    return entries;
-  };
-
   const isValid = () => {
     if (title.length < 5 || description.length < 20) return false;
     if (listing.category === "SELL_PRODUCT") {
@@ -451,7 +412,6 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     if (!(await confirmUnofficialTags())) return;
 
     const newAttrs = buildAttributes();
-    const diff = computeDiff(newAttrs);
 
     const payload: ListingUpdate = {
       title,
@@ -468,7 +428,6 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
       { listingId: listing.id, data: payload },
       {
         onSuccess: async () => {
-          appendEditLog(listing.id, diff);
           if (newFiles.length > 0) {
             setIsUploading(true);
             try {
@@ -1106,7 +1065,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
               disabled={deleteMutation.isPending || updateMutation.isPending}
             >
               {deleteMutation.isPending ? <FaSpinner className="animate-spin" /> : <FaTrash size={14} />}
-              Delete Post
+              {t.preview_modal.delete_button}
             </button>
           </div>
           <div className="flex gap-[10px]">

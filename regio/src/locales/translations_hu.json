@@ -122,6 +122,18 @@
     "show_map": "Térkép megjelenítése",
     "hide_map": "Térkép elrejtése",
     "edit_log_title": "Módosítási előzmények",
+    "edit_log_by": "{name} által",
+    "edit_log_empty": "Még nincs rögzített változás.",
+    "edit_log_fields": {
+      "title": "Cím",
+      "description": "Leírás",
+      "tags": "Címkék",
+      "zip_code": "Irányítószám",
+      "d_class": "Láthatóság",
+      "available_until": "Elérhető eddig",
+      "payment_notes": "Fizetési megjegyzések"
+    },
+    "delete_button": "Bejegyzés törlése",
     "toast_deleted": "Bejegyzés törölve.",
     "toast_delete_error": "Nem sikerült törölni a bejegyzést.",
     "attributes": {

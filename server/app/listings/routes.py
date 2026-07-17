@@ -10,11 +10,12 @@ from app.listings.enums import ListingCategory
 from app.listings.schemas import (
     FeedResponse,
     ListingCreate,
+    ListingEditLogEntry,
     ListingPublic,
     ListingUpdate,
     TagPublic,
 )
-from app.users.dependencies import CurrentUser
+from app.users.dependencies import CurrentAdmin, CurrentUser
 
 router = APIRouter()
 
@@ -169,6 +170,30 @@ async def get_listing_by_id(
     """
     listing = await service.get_listing(listing_id)
     return await service.format_listing(listing, lang)
+
+
+@router.get(
+    "/{listing_id}/edit-log",
+    response_model=List[ListingEditLogEntry],
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "User is not authenticated."
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "description": "User is not a system admin."
+        },
+    },
+)
+async def get_listing_edit_log(
+    listing_id: uuid.UUID,
+    service: ListingServiceDep,
+    _admin: CurrentAdmin,
+) -> Any:
+    """
+    Full field-level edit history for a listing. Restricted to system admins.
+    """
+    return await service.get_edit_log(listing_id)
 
 
 @router.post(

@@ -2,14 +2,14 @@
 
 import React from "react";
 import { FaEnvelope, FaPencil, FaCircleUser } from "react-icons/fa6";
-import { ListingPublic } from "@/lib/api/types";
+import { ListingPublic, ListingEditLogEntry } from "@/lib/api/types";
 import { getCategoryDetails, ListingAttributes } from "@/lib/feed-helpers";
 
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { API_CONFIG } from "@/lib/api/config";
 import type { Translations } from "@/context/LanguageContext";
-import { getEditLog } from "@/lib/listingEditLog";
+import { useListingEditLog } from "@/lib/api/hooks/use-listings";
 import { useModalKeyboard } from "@/hooks/useModalKeyboard";
 
 interface PreviewModalProps {
@@ -124,6 +124,48 @@ function AttributeDetails({
   );
 }
 
+interface EditGroup {
+  ts: string;
+  editor: string | null;
+  entries: ListingEditLogEntry[];
+}
+
+/** Group flat log rows (already newest-first from the API) into edit events by timestamp. */
+function groupEditLog(entries: ListingEditLogEntry[]): EditGroup[] {
+  const groups: EditGroup[] = [];
+  const byTs = new Map<string, EditGroup>();
+  for (const entry of entries) {
+    let group = byTs.get(entry.created_at);
+    if (!group) {
+      group = { ts: entry.created_at, editor: entry.edited_by, entries: [] };
+      byTs.set(entry.created_at, group);
+      groups.push(group);
+    }
+    group.entries.push(entry);
+  }
+  return groups;
+}
+
+function prettifyKey(key: string): string {
+  return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** Localized label for a changed field; attribute keys reuse the preview attribute map. */
+function fieldLabel(field: string, t: Translations): string {
+  if (field.startsWith("attributes.")) {
+    const key = field.slice("attributes.".length);
+    const attrMap = t.preview_modal.attributes as Record<string, string>;
+    return attrMap[key] ?? prettifyKey(key);
+  }
+  const fieldMap = t.preview_modal.edit_log_fields as Record<string, string>;
+  return fieldMap[field] ?? prettifyKey(field);
+}
+
+/** Empty/missing values render as an em dash so a blank side stays visible. */
+function editValue(value: string | null): string {
+  return value === null || value === "" ? "—" : value;
+}
+
 export default function PreviewModal({
   listing,
   onClose,
@@ -135,15 +177,23 @@ export default function PreviewModal({
   const { user } = useAuth();
   const [lightboxUrl, setLightboxUrl] = React.useState<string | null>(null);
   useModalKeyboard(onClose, undefined, !!listing);
+
+  // Edit history is an admin-only surface; the endpoint 403s for everyone else.
+  const isAdmin = !!user?.is_system_admin;
+  const { data: editLog = [] } = useListingEditLog(listing?.id ?? "", isAdmin);
+
   if (!listing) return null;
 
   const isOwn = !!user && listing.owner_code === user.user_code;
   const timeUnit = language === "HU" ? "perc" : "min";
+  const dateLocale =
+    language === "HU" ? "hu-HU" : language === "DE" ? "de-DE" : "en-GB";
 
   const { icon, colorVar, lightBg } = getCategoryDetails(listing.category);
   const attrs = listing.attributes as ListingAttributes;
 
-  const editLog = isOwn ? getEditLog(listing.id) : [];
+  // Group the flat change list into edit events (rows sharing a timestamp).
+  const editGroups = groupEditLog(editLog);
 
   // Build footer pricing label + icon node
   let pricingLabel: string | null = null;
@@ -309,23 +359,55 @@ export default function PreviewModal({
             </div>
           )}
 
-          {/* Edit log (own posts only) */}
-          {isOwn && editLog.length > 0 && (
+          {/* Edit history — system admins only */}
+          {isAdmin && (
             <div className="mt-[10px] mb-[20px]">
               <div className="text-[12px] font-[700] text-[#888] mb-[6px] uppercase tracking-wide">
                 {t.preview_modal.edit_log_title}
               </div>
-              <div className="bg-[#f8f8f8] rounded-[6px] border border-[#eee] p-[10px] text-[11px] font-mono text-[#555] space-y-[4px] max-h-[140px] overflow-y-auto">
-                {editLog.map((entry, i) => (
-                  <div key={i}>
-                    <span className="text-[#aaa]">{new Date(entry.ts).toLocaleString()}</span>{" "}
-                    <span className="text-[#555] font-bold">{entry.field}:</span>{" "}
-                    <span className="text-[#c00]">{String(entry.from)}</span>
-                    {" → "}
-                    <span className="text-[#080]">{String(entry.to)}</span>
-                  </div>
-                ))}
-              </div>
+              {editGroups.length === 0 ? (
+                <div className="bg-[#f8f8f8] rounded-[8px] border border-[#eee] p-[12px] text-[12px] text-[#999]">
+                  {t.preview_modal.edit_log_empty}
+                </div>
+              ) : (
+                <div className="space-y-[8px] max-h-[360px] overflow-y-auto pr-[2px]">
+                  {editGroups.map((group) => (
+                    <div
+                      key={group.ts}
+                      className="bg-[#f8f8f8] rounded-[8px] border border-[#eee] p-[10px]"
+                    >
+                      <div className="flex items-baseline justify-between gap-[8px] mb-[6px]">
+                        <span className="text-[11px] font-[700] text-[#666]">
+                          {new Date(group.ts).toLocaleString(dateLocale)}
+                        </span>
+                        {group.editor && (
+                          <span className="text-[11px] text-[#999] shrink-0">
+                            {t.preview_modal.edit_log_by.replace("{name}", group.editor)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-[5px]">
+                        {group.entries.map((entry, i) => (
+                          <div key={i} className="text-[12px] leading-[1.5]">
+                            <span className="font-[700] text-[#555]">
+                              {fieldLabel(entry.field, t)}
+                            </span>
+                            <div className="flex items-center gap-[6px] flex-wrap mt-[1px]">
+                              <span className="text-[#c0392b] line-through break-all">
+                                {editValue(entry.value_from)}
+                              </span>
+                              <span className="text-[#aaa]">→</span>
+                              <span className="text-[#1e7e34] break-all">
+                                {editValue(entry.value_to)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

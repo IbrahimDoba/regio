@@ -122,6 +122,18 @@
     "show_map": "Show map",
     "hide_map": "Hide map",
     "edit_log_title": "Edit History",
+    "edit_log_by": "by {name}",
+    "edit_log_empty": "No changes recorded yet.",
+    "edit_log_fields": {
+      "title": "Title",
+      "description": "Description",
+      "tags": "Tags",
+      "zip_code": "ZIP code",
+      "d_class": "Visibility",
+      "available_until": "Available until",
+      "payment_notes": "Payment notes"
+    },
+    "delete_button": "Delete Post",
     "toast_deleted": "Post deleted.",
     "toast_delete_error": "Failed to delete post.",
     "attributes": {

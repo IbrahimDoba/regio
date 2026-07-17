@@ -77,6 +77,7 @@ export const queryKeys = {
     feed: (params?: FeedParams) => [...queryKeys.listings.all(), 'feed', params] as const,
     details: () => [...queryKeys.listings.all(), 'detail'] as const,
     detail: (id: string) => [...queryKeys.listings.details(), id] as const,
+    editLog: (id: string) => [...queryKeys.listings.all(), 'edit-log', id] as const,
     myListings: () => [...queryKeys.listings.all(), 'my-listings'] as const,
     tags: {
       all: () => [...queryKeys.listings.all(), 'tags'] as const,

@@ -69,6 +69,7 @@ export const API_ENDPOINTS = {
     TAGS: '/listings/tags',
     BY_ID: (listingId: string) => `/listings/${listingId}`,
     MEDIA: (listingId: string) => `/listings/${listingId}/media`,
+    EDIT_LOG: (listingId: string) => `/listings/${listingId}/edit-log`,
   },
 
   // ============================================================================

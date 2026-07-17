@@ -116,6 +116,39 @@ class ListingTagLink(SQLModel, table=True):
     )
 
 
+class ListingEditLog(SQLModel, table=True):
+    """Append-only record of field-level changes to a listing.
+
+    One update writes several rows sharing a single ``created_at`` so the UI can
+    group them into one edit event. Rows are cleared with their listing through the
+    FK cascade. Admin-only surface — never exposed to regular users.
+    """
+
+    __tablename__ = "listing_edit_logs"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    listing_id: uuid.UUID = Field(
+        sa_column=Column(
+            sa.Uuid,
+            sa.ForeignKey("listings.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True,
+        )
+    )
+    # Who made the edit (owner or admin).
+    edited_by_id: Optional[uuid.UUID] = Field(
+        default=None, foreign_key="users.id", nullable=True
+    )
+    field: str = Field(nullable=False)
+    value_from: Optional[str] = Field(default=None, sa_type=String)
+    value_to: Optional[str] = Field(default=None, sa_type=String)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_type=DateTime(timezone=True),
+        index=True,
+    )
+
+
 class Listing(SQLModel, table=True):
     __tablename__ = "listings"
 
@@ -146,7 +179,7 @@ class Listing(SQLModel, table=True):
     zip_code: Optional[str] = Field(
         default=None,
         sa_column=Column(String(4), nullable=True),
-        description="Hungarian ZIP code of the listing's origin.",
+        description="Hungarian 4-digit ZIP code of the listing's origin.",
     )
     d_class: Optional[str] = Field(
         default=None,

@@ -272,3 +272,13 @@ class ListingPublic(BaseModel):
 class FeedResponse(BaseModel):
     data: List[ListingPublic]
     next_cursor: Optional[int] = None
+
+
+class ListingEditLogEntry(BaseModel):
+    """A single field-level change in a listing's history (admin-only surface)."""
+
+    field: str
+    value_from: Optional[str] = None
+    value_to: Optional[str] = None
+    created_at: datetime
+    edited_by: Optional[str] = None  # editor's full name, if still resolvable

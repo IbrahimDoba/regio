@@ -262,6 +262,15 @@ export interface ListingPublic {
   created_at: string;
 }
 
+/** One field-level change in a listing's history. Admin-only. */
+export interface ListingEditLogEntry {
+  field: string;
+  value_from: string | null;
+  value_to: string | null;
+  created_at: string;
+  edited_by: string | null;
+}
+
 export interface ListingCreate {
   category: ListingCategory;
   title: string;

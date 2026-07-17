@@ -8,6 +8,7 @@ import {
   ListingPublic,
   ListingCreate,
   ListingUpdate,
+  ListingEditLogEntry,
   FeedResponse,
   FeedParams,
   TagAutocomplete,
@@ -41,6 +42,18 @@ export const getListing = async (
   const response = await apiClient.get<ListingPublic>(
     API_ENDPOINTS.LISTINGS.BY_ID(listingId),
     { params: lang ? { lang } : undefined },
+  );
+  return response.data;
+};
+
+/**
+ * Get a listing's full edit history (admin-only endpoint; 403 for everyone else).
+ */
+export const getListingEditLog = async (
+  listingId: string,
+): Promise<ListingEditLogEntry[]> => {
+  const response = await apiClient.get<ListingEditLogEntry[]>(
+    API_ENDPOINTS.LISTINGS.EDIT_LOG(listingId),
   );
   return response.data;
 };
