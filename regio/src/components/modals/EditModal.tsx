@@ -911,8 +911,8 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
                 className={isSearchCategory || isSellProduct ? reqInputClass : inputClass}
                 placeholder={t.create_modal.zip_placeholder}
                 value={zipCode}
-                onChange={(e) => setZipCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                maxLength={10}
+                onChange={(e) => setZipCode(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                maxLength={4}
               />
             </div>
             <div className="flex-1">

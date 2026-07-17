@@ -99,7 +99,7 @@ export default function FilterPanel({
   };
 
   const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+    const val = e.target.value.replace(/\D/g, "").slice(0, 4);
     setViewerZip(val);
     if (!val) setMaxDistanceKm(undefined);
     if (val.length >= 4) setStoredHomebaseZip(val);
@@ -197,7 +197,7 @@ export default function FilterPanel({
               placeholder={t.filter_panel.homebase_placeholder}
               value={viewerZip}
               onChange={handleZipChange}
-              maxLength={10}
+              maxLength={4}
             />
           </div>
           <select
