@@ -176,7 +176,7 @@
     "price_notes_label": "Fizetés / ár részletei (opcionális)",
     "price_notes_placeholder": "pl. Az anyagköltség a márkától függ. Napi díj.",
     "tags_label": "Címkék",
-    "tags_placeholder": "Címke hozzáadása, majd Enter...",
+    "tags_placeholder": "Keress címkét gépeléssel",
     "unofficial_tags_title": "{count} címke még nem hivatalos",
     "unofficial_tags_body": "Ezek a címkék nem szerepelnek a hivatalos listán: {tags}. Jóváhagyásra beküldjük őket, és egy adminisztrátor később eltávolíthatja azokat. Ha van megfelelő javasolt címke, inkább azt válaszd.",
     "cancel_button": "Mégsem",

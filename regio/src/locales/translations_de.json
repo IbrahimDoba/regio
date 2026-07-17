@@ -176,7 +176,7 @@
     "price_notes_label": "Zahlung / Preis-Details (optional)",
     "price_notes_placeholder": "z. B. Materialkosten hängen von der Marke ab. Preis pro Tag.",
     "tags_label": "Tags",
-    "tags_placeholder": "Tag hinzufügen, Enter drücken...",
+    "tags_placeholder": "Suche einen Tag durch tippen",
     "unofficial_tags_title": "{count} Tag(s) sind noch nicht offiziell",
     "unofficial_tags_body": "Diese Tags stehen nicht auf der offiziellen Liste: {tags}. Sie werden zur Prüfung eingereicht und können später von der Administration entfernt werden. Wähle nach Möglichkeit einen vorgeschlagenen Tag.",
     "cancel_button": "Abbrechen",

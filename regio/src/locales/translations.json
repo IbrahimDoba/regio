@@ -176,7 +176,7 @@
     "price_notes_label": "Payment / Price Notes (optional)",
     "price_notes_placeholder": "e.g. Material costs depend on brand. Price per day.",
     "tags_label": "Tags",
-    "tags_placeholder": "Add tag, press Enter...",
+    "tags_placeholder": "Search for a tag by typing",
     "unofficial_tags_title": "{count} tag(s) are not official yet",
     "unofficial_tags_body": "These tags are not on the official list: {tags}. They will be submitted for review, and an administrator may remove them later. If a suggested tag fits, pick that instead.",
     "cancel_button": "Cancel",
