@@ -150,7 +150,10 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
   const [tagInput, setTagInput] = useState("");
   const [debouncedTagInput, setDebouncedTagInput] = useState("");
   const [showTagDropdown, setShowTagDropdown] = useState(false);
-  const [highlightedTagIndex, setHighlightedTagIndex] = useState(0);
+  // Tags added in this session that aren't official yet — warned about before save.
+  // Tags the listing already had are not re-flagged.
+  const [unofficialTags, setUnofficialTags] = useState<string[]>([]);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [tagDisplayLabels, setTagDisplayLabels] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       (listing.tags_canonical ?? []).map((name, i) => [name, listing.tags?.[i] ?? name]),
@@ -238,11 +241,6 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     return () => clearTimeout(timer);
   }, [tagInput]);
 
-  // Keep the highlight on the first entry of each freshly-fetched suggestion list
-  useEffect(() => {
-    setHighlightedTagIndex(0);
-  }, [debouncedTagInput]);
-
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (tagContainerRef.current && !tagContainerRef.current.contains(e.target as Node)) {
@@ -253,22 +251,33 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Tags may only come from API suggestions — typed text never becomes a pill.
+  const markUnofficial = (name: string) =>
+    setUnofficialTags((prev) => (prev.includes(name) ? prev : [...prev, name]));
+
   const handleTagKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      if (!showTagDropdown || tagSuggestionsList.length === 0) return;
+    if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
-      const delta = e.key === "ArrowDown" ? 1 : -1;
-      setHighlightedTagIndex((prev) =>
-        Math.min(Math.max(prev + delta, 0), tagSuggestionsList.length - 1)
+      const val = tagInput.trim().replace(",", "");
+      if (!val) return;
+
+      // Typed text that matches a known tag resolves to it, so a user typing a
+      // tag's own localized label doesn't create a duplicate of it.
+      const match = tagSuggestionsList.find(
+        (s) =>
+          s.label.toLowerCase() === val.toLowerCase() ||
+          s.name.toLowerCase() === val.toLowerCase()
       );
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      // Suggestions lag typing by the 300ms debounce; ignore Enter until they catch up
-      // so a fast typist can't add a tag they never saw.
-      if (!showTagDropdown || debouncedTagInput !== tagInput.trim()) return;
-      const highlighted = tagSuggestionsList[highlightedTagIndex];
-      if (highlighted) handleSelectTagSuggestion(highlighted);
+      if (match) {
+        handleSelectTagSuggestion(match);
+        return;
+      }
+
+      if (!tags.includes(val)) {
+        setTags([...tags, val]);
+        markUnofficial(val);
+      }
+      setTagInput("");
+      setShowTagDropdown(false);
     } else if (e.key === "Escape") {
       setShowTagDropdown(false);
     }
@@ -278,6 +287,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     if (!tags.includes(tag.name)) {
       setTags([...tags, tag.name]);
       setTagDisplayLabels((prev) => ({ ...prev, [tag.name]: tag.label }));
+      if (!tag.is_official) markUnofficial(tag.name);
     }
     setTagInput("");
     setDebouncedTagInput("");
@@ -285,7 +295,9 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
   };
 
   const removeTag = (index: number) => {
+    const name = tags[index];
     setTags(tags.filter((_, i) => i !== index));
+    setUnofficialTags((prev) => prev.filter((t) => t !== name));
   };
 
   const buildAttributes = (): Record<string, unknown> => {
@@ -410,8 +422,31 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     });
   };
 
-  const handleSubmit = () => {
-    if (!isValid()) return;
+  /** Tags added here that aren't official yet — they go to the admin for review. */
+  const pendingUnofficialTags = unofficialTags.filter((name) => tags.includes(name));
+
+  const confirmUnofficialTags = async (): Promise<boolean> => {
+    if (pendingUnofficialTags.length === 0) return true;
+    setIsConfirming(true);
+    try {
+      return await dialog.confirm(
+        t.create_modal.unofficial_tags_title,
+        t.create_modal.unofficial_tags_body
+          .replace("{count}", String(pendingUnofficialTags.length))
+          .replace(
+            "{tags}",
+            pendingUnofficialTags.map((n) => tagDisplayLabels[n] ?? n).join(", ")
+          )
+      );
+    } finally {
+      setIsConfirming(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!isValid() || isConfirming) return;
+    if (!(await confirmUnofficialTags())) return;
+
     const newAttrs = buildAttributes();
     const diff = computeDiff(newAttrs);
 
@@ -994,14 +1029,10 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
               </div>
               {showTagDropdown && tagSuggestionsList.length > 0 && (
                 <div className="bg-white border border-[#ccc] border-t-0 rounded-b-[4px] shadow-md max-h-[160px] overflow-y-auto">
-                  {tagSuggestionsList.map((s, i) => (
+                  {tagSuggestionsList.map((s) => (
                     <div
                       key={s.id}
-                      className={cn(
-                        "px-[12px] py-[8px] text-[14px] cursor-pointer flex items-center gap-[6px]",
-                        i === highlightedTagIndex && "bg-[#f5f5f5]",
-                      )}
-                      onMouseEnter={() => setHighlightedTagIndex(i)}
+                      className="px-[12px] py-[8px] text-[14px] cursor-pointer hover:bg-[#f5f5f5] flex items-center gap-[6px]"
                       onMouseDown={(e) => { e.preventDefault(); handleSelectTagSuggestion(s); }}
                     >
                       <span>{s.label}</span>
@@ -1087,7 +1118,7 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
               className="flex-1 p-[12px] border-none rounded-[4px] font-bold cursor-pointer text-white flex justify-center items-center gap-2 disabled:opacity-50"
               style={{ backgroundColor: catColorVar }}
               onClick={handleSubmit}
-              disabled={updateMutation.isPending || isUploading || !isValid()}
+              disabled={updateMutation.isPending || isUploading || isConfirming || !isValid()}
             >
               {(updateMutation.isPending || isUploading) && (
                 <FaSpinner className="animate-spin" />

@@ -114,6 +114,8 @@ export function useUpdateTag() {
       // Invalidate tag queries
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.tags.all() });
       queryClient.invalidateQueries({ queryKey: queryKeys.listings.tags.all() });
+      // Renaming or translating a tag changes the labels listings render
+      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all() });
     },
   });
 }
@@ -142,6 +144,8 @@ export function useDeleteTag() {
       );
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.tags.all() });
       queryClient.invalidateQueries({ queryKey: queryKeys.listings.tags.all() });
+      // Deleting a tag cascades to listing_tags, so cached listings still show it
+      queryClient.invalidateQueries({ queryKey: queryKeys.listings.all() });
     },
   });
 }
