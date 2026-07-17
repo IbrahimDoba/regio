@@ -408,7 +408,7 @@ class ListingService:
     ) -> List[ListingEditLogEntry]:
         """Full change history for a listing, newest edit event first (admin-only)."""
         stmt = (
-            select(ListingEditLog, User.full_name)
+            select(ListingEditLog, User)
             .join(
                 User,
                 col(User.id) == ListingEditLog.edited_by_id,
@@ -424,9 +424,9 @@ class ListingService:
                 value_from=log.value_from,
                 value_to=log.value_to,
                 created_at=log.created_at,
-                edited_by=editor_name,
+                edited_by=editor.full_name if editor else None,
             )
-            for log, editor_name in rows
+            for log, editor in rows
         ]
 
     async def upload_media(
