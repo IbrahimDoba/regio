@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FaUserClock, FaCheck, FaVideo, FaLock, FaCircleCheck } from "react-icons/fa6";
+import { FaUserClock, FaCheck, FaCalendarDays, FaLock, FaCircleCheck } from "react-icons/fa6";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import MobileContainer from "@/components/layout/MobileContainer";
@@ -119,7 +119,7 @@ export default function VerificationPage() {
                 className="w-full p-[12px] bg-[var(--color-green-offer)] text-white border-none rounded-[6px] text-[14px] font-[700] cursor-pointer flex justify-center items-center gap-[8px] hover:scale-[1.02] transition-transform"
                 onClick={openSchedulingPage}
               >
-                <FaVideo /> <span>{t.verification.book_button}</span>
+                <FaCalendarDays /> <span>{t.verification.book_button}</span>
               </button>
             </div>
             <div className="text-[11px] text-[#999] text-center mb-[20px] leading-[1.5]">
