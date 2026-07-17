@@ -95,6 +95,27 @@ class Tag(SQLModel, table=True):
     )
 
 
+class ListingTagLink(SQLModel, table=True):
+    """Join table between listings and tags.
+
+    Tags are referenced by id, never by name, so a listing cannot hold a
+    language-specific label. Deleting a tag clears it from every listing
+    through the FK cascade.
+    """
+
+    __tablename__ = "listing_tags"
+
+    listing_id: uuid.UUID = Field(
+        foreign_key="listings.id", primary_key=True, ondelete="CASCADE"
+    )
+    tag_id: int = Field(
+        foreign_key="tags.id",
+        primary_key=True,
+        index=True,
+        ondelete="CASCADE",
+    )
+
+
 class Listing(SQLModel, table=True):
     __tablename__ = "listings"
 
@@ -119,12 +140,7 @@ class Listing(SQLModel, table=True):
     description_hu: Optional[str] = None
 
     # META
-    tags: List[str] = Field(default=[], sa_column=Column(JSONB))
     media_urls: List[str] = Field(default=[], sa_column=Column(JSON))
-
-    __table_args__ = (
-        sa.Index("ix_listings_tags_gin", "tags", postgresql_using="gin"),
-    )
 
     # LOCATION & VISIBILITY (ZIP-code based system)
     zip_code: Optional[str] = Field(
@@ -163,3 +179,4 @@ class Listing(SQLModel, table=True):
 
     # Relationships
     owner: "User" = Relationship(back_populates="listings")
+    tags: List[Tag] = Relationship(link_model=ListingTagLink)

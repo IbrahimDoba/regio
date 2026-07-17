@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlmodel import col, desc, func, or_, select
+from sqlmodel import col, desc, or_, select
 
 from app.core.config import settings
 from app.core.file_storage import LocalStorageService
@@ -20,7 +20,13 @@ from app.listings.exceptions import (
     ListingNotOwned,
     MediaLimitExceeded,
 )
-from app.listings.models import Listing, PostVisibility, Tag, ZipDistance
+from app.listings.models import (
+    Listing,
+    ListingTagLink,
+    PostVisibility,
+    Tag,
+    ZipDistance,
+)
 from app.listings.schemas import (
     FeedResponse,
     ListingCreate,
@@ -69,6 +75,11 @@ def _localize(listing: Listing, lang: str) -> tuple[str, str]:
     return title, description
 
 
+def _tag_label(tag: Tag, lang: str) -> str:
+    """Localized display label for a tag, falling back to its canonical name."""
+    return getattr(tag, f"name_{lang.lower()}", None) or tag.name
+
+
 class ListingService:
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -105,43 +116,37 @@ class ListingService:
             TagPublic(
                 id=tag.id,
                 name=tag.name,  # canonical English — client submits this when creating listings
-                label=getattr(tag, f"name_{lang}", None) or tag.name,
+                label=_tag_label(tag, lang),
                 is_official=tag.is_official,
             )
             for tag in tags
         ]
 
-    async def _localize_tags(
-        self, canonical_names: List[str], lang: str
-    ) -> List[str]:
-        """Translate a list of canonical tag names to the given language."""
-        if not canonical_names:
-            return []
-        lang = lang.lower()
-        stmt = select(Tag).where(col(Tag.name).in_(canonical_names))
-        res = await self.session.execute(stmt)
-        tag_map: dict[str, str] = {
-            tag.name: getattr(tag, f"name_{lang}", None) or tag.name
-            for tag in res.scalars().all()
-        }
-        # Preserve order; fall back to canonical for user-suggested tags
-        return [tag_map.get(name, name) for name in canonical_names]
+    async def _process_tags(self, raw_tags: List[str]) -> List[Tag]:
+        """Resolve canonical tag names to Tag rows, creating unknown ones as suggestions.
 
-    async def _process_tags(self, raw_tags: List[str]) -> List[str]:
-        """Validates tags. Reuses existing or creates them as suggestions."""
-        cleaned_tags = [t.strip() for t in raw_tags if t.strip()]
-        if not cleaned_tags:
+        Input is always canonical names; localized labels are a display concern
+        and never reach the database.
+        """
+        # Preserve caller order while dropping blanks and duplicates
+        ordered = list(dict.fromkeys(t.strip() for t in raw_tags if t.strip()))
+        if not ordered:
             return []
 
-        stmt = select(Tag).where(col(Tag.name).in_(cleaned_tags))
+        stmt = select(Tag).where(col(Tag.name).in_(ordered))
         res = await self.session.execute(stmt)
-        existing = {tag.name for tag in res.scalars().all()}
+        by_name = {tag.name: tag for tag in res.scalars().all()}
 
-        for tag_name in cleaned_tags:
-            if tag_name not in existing:
-                self.session.add(Tag(name=tag_name, is_official=False))
+        for tag_name in ordered:
+            if tag_name not in by_name:
+                tag = Tag(name=tag_name, is_official=False)
+                self.session.add(tag)
+                by_name[tag_name] = tag
 
-        return cleaned_tags
+        # Assign ids to the new tags so the link rows can reference them
+        await self.session.flush()
+
+        return [by_name[tag_name] for tag_name in ordered]
 
     # --------------------------------------------------------
     # POST VISIBILITY (ZIP-code pre-computation)
@@ -204,7 +209,6 @@ class ListingService:
             description_original=data.description,
             payment_notes=data.payment_notes,
             media_urls=data.media_urls,
-            tags=final_tags,
             zip_code=data.zip_code,
             d_class=data.d_class.value if data.d_class else DClass.D5.value,
             available_until=data.available_until,
@@ -212,10 +216,12 @@ class ListingService:
                 mode="json", exclude_none=True
             ),
         )
+        # Relationship, so it is assigned rather than passed to the constructor
+        listing.tags = final_tags
 
         self.session.add(listing)
         await self.session.commit()
-        await self.session.refresh(listing)
+        await self.session.refresh(listing, attribute_names=["tags"])
 
         # Populate visibility table for local listings (D1–D4)
         if listing.zip_code and listing.d_class:
@@ -228,9 +234,9 @@ class ListingService:
     async def format_listing(
         self, listing: Listing, user_lang: str = "en"
     ) -> ListingPublic:
-        """Format a DB Listing (with eager-loaded owner) into ListingPublic."""
+        """Format a DB Listing (with eager-loaded owner and tags) into ListingPublic."""
         title, description = _localize(listing, user_lang)
-        tags = await self._localize_tags(listing.tags or [], user_lang)
+        listing_tags = listing.tags or []
 
         return ListingPublic(
             id=listing.id,
@@ -243,8 +249,8 @@ class ListingService:
             description=description,
             payment_notes=listing.payment_notes,
             media_urls=[_ensure_url(k) for k in (listing.media_urls or [])],
-            tags=tags,
-            tags_canonical=listing.tags or [],
+            tags=[_tag_label(t, user_lang) for t in listing_tags],
+            tags_canonical=[t.name for t in listing_tags],
             zip_code=listing.zip_code,
             d_class=listing.d_class,
             owner_zip_code=listing.owner.zip_code,
@@ -258,7 +264,7 @@ class ListingService:
         query = (
             select(Listing)
             .where(Listing.id == listing_id)
-            .options(selectinload(Listing.owner))
+            .options(selectinload(Listing.owner), selectinload(Listing.tags))
         )
         results = await self.session.execute(query)
         listing = results.scalar_one_or_none()
@@ -471,10 +477,27 @@ class ListingService:
         if categories:
             query = query.where(col(Listing.category).in_(categories))
 
-        # Tag filter (JSONB containment)
+        # Tag filter — a listing must carry every requested tag (AND semantics)
         if tags:
+            id_stmt = select(Tag.name, Tag.id).where(col(Tag.name).in_(tags))
+            tag_ids = {
+                name: tag_id
+                for name, tag_id in (await self.session.execute(id_stmt)).all()
+            }
             for tag in tags:
-                query = query.where(func.jsonb_exists(Listing.tags, tag))
+                tag_id = tag_ids.get(tag)
+                if tag_id is None:
+                    # Unknown tag matches nothing, as with the old containment check
+                    query = query.where(sa.false())
+                    break
+                query = query.where(
+                    sa.exists().where(
+                        sa.and_(
+                            ListingTagLink.listing_id == Listing.id,
+                            ListingTagLink.tag_id == tag_id,
+                        )
+                    )
+                )
 
         # Full-text search (ILIKE across original + all translations)
         if search_query:
@@ -496,24 +519,11 @@ class ListingService:
             query.order_by(desc(Listing.created_at), Listing.id)
             .offset(offset)
             .limit(limit)
-            .options(selectinload(Listing.owner))
+            .options(selectinload(Listing.owner), selectinload(Listing.tags))
         )
 
         results = await self.session.execute(query)
         rows = results.all() if viewer_zip else results.scalars().all()
-
-        # Batch-fetch tag translations for all listings in one query
-        all_listings = [row[0] if viewer_zip else row for row in rows]
-        all_tag_names = list(
-            {t for listing in all_listings for t in (listing.tags or [])}
-        )
-        tag_label_map: dict[str, str] = {}
-        if all_tag_names:
-            tag_stmt = select(Tag).where(col(Tag.name).in_(all_tag_names))
-            tag_res = await self.session.execute(tag_stmt)
-            for tag in tag_res.scalars().all():
-                localized = getattr(tag, f"name_{user_lang}", None)
-                tag_label_map[tag.name] = localized if localized else tag.name
 
         feed_items = []
         for row in rows:
@@ -522,7 +532,7 @@ class ListingService:
             else:
                 listing, dist_km = row, None
             title, description = _localize(listing, user_lang)
-            tags = [tag_label_map.get(t, t) for t in (listing.tags or [])]
+            listing_tags = listing.tags or []
             feed_items.append(
                 ListingPublic(
                     id=listing.id,
@@ -537,8 +547,8 @@ class ListingService:
                     media_urls=[
                         _ensure_url(k) for k in (listing.media_urls or [])
                     ],
-                    tags=tags,
-                    tags_canonical=listing.tags or [],
+                    tags=[_tag_label(t, user_lang) for t in listing_tags],
+                    tags_canonical=[t.name for t in listing_tags],
                     zip_code=listing.zip_code,
                     d_class=listing.d_class,
                     owner_zip_code=listing.owner.zip_code,

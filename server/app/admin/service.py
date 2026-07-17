@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlmodel import desc, func, or_, select
+from sqlmodel import col, desc, func, or_, select
 
 from app.admin.schemas import (
     BroadcastCreate,
@@ -22,7 +22,7 @@ from app.banking.exceptions import PaymentRequestNotFound
 from app.banking.models import Account, PaymentRequest
 from app.listings.enums import ListingStatus
 from app.listings.exceptions import TagNotFound
-from app.listings.models import Listing, Tag
+from app.listings.models import Listing, ListingTagLink, Tag
 from app.users.enums import VerificationStatus
 from app.users.exceptions import UserNotFound
 from app.users.models import User
@@ -232,13 +232,15 @@ class AdminService:
         if not tags:
             return TagsAdminListResponse(data=[], count=total)
 
+        # Count active listings per tag, scoped to the tags on this page
         stats_stmt = (
-            select(
-                func.jsonb_array_elements_text(Listing.tags).label("tag_str"),
-                func.count(Listing.id),
+            select(ListingTagLink.tag_id, func.count(Listing.id))
+            .join(Listing, col(Listing.id) == ListingTagLink.listing_id)
+            .where(
+                Listing.status == ListingStatus.ACTIVE,
+                col(ListingTagLink.tag_id).in_([t.id for t in tags]),
             )
-            .where(Listing.status == ListingStatus.ACTIVE)
-            .group_by(func.jsonb_array_elements_text(Listing.tags))
+            .group_by(col(ListingTagLink.tag_id))
         )
         usage_map = {
             row[0]: row[1]
@@ -253,7 +255,7 @@ class AdminService:
                 name_en=t.name_en,
                 name_hu=t.name_hu,
                 is_official=t.is_official,
-                usage_count=usage_map.get(t.name, 0),
+                usage_count=usage_map.get(t.id, 0),
             )
             for t in tags
         ]
@@ -274,6 +276,7 @@ class AdminService:
         return tag
 
     async def delete_tag(self, tag_id: int):
+        """Delete a tag; the listing_tags FK cascade clears it from every listing."""
         tag = await self.session.get(Tag, tag_id)
         if not tag:
             raise TagNotFound()
