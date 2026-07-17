@@ -117,7 +117,7 @@
     "price_label": "Wert / Preis",
     "contact_button": "Kontakt",
     "contact_loading": "Chat wird gestartet...",
-    "modify_button": "Eintrag bearbeiten",
+    "modify_button": "Speichern",
     "modify_loading": "Wird gespeichert...",
     "show_map": "Karte anzeigen",
     "hide_map": "Karte ausblenden",
@@ -133,7 +133,7 @@
       "available_until": "Verfügbar bis",
       "payment_notes": "Zahlungshinweise"
     },
-    "delete_button": "Beitrag löschen",
+    "delete_button": "Annonce löschen",
     "toast_deleted": "Beitrag gelöscht.",
     "toast_delete_error": "Beitrag konnte nicht gelöscht werden.",
     "attributes": {

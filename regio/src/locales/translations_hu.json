@@ -117,7 +117,7 @@
     "price_label": "Érték / ár",
     "contact_button": "Kapcsolat",
     "contact_loading": "Chat indítása...",
-    "modify_button": "Bejegyzés szerkesztése",
+    "modify_button": "Mentés",
     "modify_loading": "Mentés...",
     "show_map": "Térkép megjelenítése",
     "hide_map": "Térkép elrejtése",
@@ -133,7 +133,7 @@
       "available_until": "Elérhető eddig",
       "payment_notes": "Fizetési megjegyzések"
     },
-    "delete_button": "Bejegyzés törlése",
+    "delete_button": "Hirdetés törlése",
     "toast_deleted": "Bejegyzés törölve.",
     "toast_delete_error": "Nem sikerült törölni a bejegyzést.",
     "attributes": {
