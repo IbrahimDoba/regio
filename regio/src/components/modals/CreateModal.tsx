@@ -309,7 +309,10 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     setIsConfirming(true);
     try {
       return await dialog.confirm(
-        t.create_modal.unofficial_tags_title,
+        t.create_modal.unofficial_tags_title.replace(
+          "{count}",
+          String(pendingUnofficialTags.length)
+        ),
         t.create_modal.unofficial_tags_body
           .replace("{count}", String(pendingUnofficialTags.length))
           .replace(
