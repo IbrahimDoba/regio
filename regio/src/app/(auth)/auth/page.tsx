@@ -300,7 +300,7 @@ function AuthForm() {
               </span>
             </div>
 
-            <div className="text-center mt-[15px] text-[13px] text-[#777] pb-[20px]">
+            <div className="text-center mt-[15px] text-[15px] text-[#777] pb-[20px]">
               <span
                 className="text-[var(--color-nav-bg)] font-bold cursor-pointer"
                 onClick={() => setView('register')}

@@ -181,7 +181,6 @@ async def verify_user(
             user_email=db_user.email,
             new_status="VERIFIED",
             app_url=email_settings.APP_URL,
-            how_it_works_video_url=email_settings.HOW_IT_WORKS_VIDEO_URL,
             language=db_user.language,
         ),
     )
