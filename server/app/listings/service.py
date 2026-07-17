@@ -244,6 +244,7 @@ class ListingService:
             payment_notes=listing.payment_notes,
             media_urls=[_ensure_url(k) for k in (listing.media_urls or [])],
             tags=tags,
+            tags_canonical=listing.tags or [],
             zip_code=listing.zip_code,
             d_class=listing.d_class,
             owner_zip_code=listing.owner.zip_code,
@@ -537,6 +538,7 @@ class ListingService:
                         _ensure_url(k) for k in (listing.media_urls or [])
                     ],
                     tags=tags,
+                    tags_canonical=listing.tags or [],
                     zip_code=listing.zip_code,
                     d_class=listing.d_class,
                     owner_zip_code=listing.owner.zip_code,

@@ -176,7 +176,7 @@
     "price_notes_label": "Payment / Price Notes (optional)",
     "price_notes_placeholder": "e.g. Material costs depend on brand. Price per day.",
     "tags_label": "Tags",
-    "tags_placeholder": "Add tag, press Enter...",
+    "tags_placeholder": "Search for a tag...",
     "cancel_button": "Cancel",
     "submit_button": "Create Listing",
     "submit_loading": "Creating...",

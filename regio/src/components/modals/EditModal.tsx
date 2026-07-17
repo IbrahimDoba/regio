@@ -145,11 +145,17 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
 
   const [title, setTitle] = useState(listing.title);
   const [description, setDescription] = useState(listing.description);
-  const [tags, setTags] = useState<string[]>(listing.tags ?? []);
+  // `listing.tags` are localized labels; the API expects canonical names back on update.
+  const [tags, setTags] = useState<string[]>(listing.tags_canonical ?? listing.tags ?? []);
   const [tagInput, setTagInput] = useState("");
   const [debouncedTagInput, setDebouncedTagInput] = useState("");
   const [showTagDropdown, setShowTagDropdown] = useState(false);
-  const [tagDisplayLabels, setTagDisplayLabels] = useState<Record<string, string>>({});
+  const [highlightedTagIndex, setHighlightedTagIndex] = useState(0);
+  const [tagDisplayLabels, setTagDisplayLabels] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      (listing.tags_canonical ?? []).map((name, i) => [name, listing.tags?.[i] ?? name]),
+    ),
+  );
   const tagContainerRef = useRef<HTMLDivElement>(null);
   const { data: tagSuggestionData } = useSearchTags(debouncedTagInput);
   const tagSuggestionsList = (tagSuggestionData ?? []).filter((s) => !tags.includes(s.name));
@@ -232,6 +238,11 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     return () => clearTimeout(timer);
   }, [tagInput]);
 
+  // Keep the highlight on the first entry of each freshly-fetched suggestion list
+  useEffect(() => {
+    setHighlightedTagIndex(0);
+  }, [debouncedTagInput]);
+
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (tagContainerRef.current && !tagContainerRef.current.contains(e.target as Node)) {
@@ -242,15 +253,22 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Tags may only come from API suggestions — typed text never becomes a pill.
   const handleTagKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === ",") {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      if (!showTagDropdown || tagSuggestionsList.length === 0) return;
       e.preventDefault();
-      const val = tagInput.trim().replace(",", "");
-      if (val && !tags.includes(val)) {
-        setTags([...tags, val]);
-        setTagInput("");
-        setShowTagDropdown(false);
-      }
+      const delta = e.key === "ArrowDown" ? 1 : -1;
+      setHighlightedTagIndex((prev) =>
+        Math.min(Math.max(prev + delta, 0), tagSuggestionsList.length - 1)
+      );
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      // Suggestions lag typing by the 300ms debounce; ignore Enter until they catch up
+      // so a fast typist can't add a tag they never saw.
+      if (!showTagDropdown || debouncedTagInput !== tagInput.trim()) return;
+      const highlighted = tagSuggestionsList[highlightedTagIndex];
+      if (highlighted) handleSelectTagSuggestion(highlighted);
     } else if (e.key === "Escape") {
       setShowTagDropdown(false);
     }
@@ -976,10 +994,14 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
               </div>
               {showTagDropdown && tagSuggestionsList.length > 0 && (
                 <div className="bg-white border border-[#ccc] border-t-0 rounded-b-[4px] shadow-md max-h-[160px] overflow-y-auto">
-                  {tagSuggestionsList.map((s) => (
+                  {tagSuggestionsList.map((s, i) => (
                     <div
                       key={s.id}
-                      className="px-[12px] py-[8px] text-[14px] cursor-pointer hover:bg-[#f5f5f5] flex items-center gap-[6px]"
+                      className={cn(
+                        "px-[12px] py-[8px] text-[14px] cursor-pointer flex items-center gap-[6px]",
+                        i === highlightedTagIndex && "bg-[#f5f5f5]",
+                      )}
+                      onMouseEnter={() => setHighlightedTagIndex(i)}
                       onMouseDown={(e) => { e.preventDefault(); handleSelectTagSuggestion(s); }}
                     >
                       <span>{s.label}</span>

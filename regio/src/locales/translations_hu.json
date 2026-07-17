@@ -176,7 +176,7 @@
     "price_notes_label": "Fizetés / ár részletei (opcionális)",
     "price_notes_placeholder": "pl. Az anyagköltség a márkától függ. Napi díj.",
     "tags_label": "Címkék",
-    "tags_placeholder": "Címke hozzáadása, majd Enter...",
+    "tags_placeholder": "Címke keresése...",
     "cancel_button": "Mégsem",
     "submit_button": "Hirdetés közzététele",
     "submit_loading": "Létrehozás...",

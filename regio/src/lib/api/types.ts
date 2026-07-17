@@ -248,7 +248,10 @@ export interface ListingPublic {
   description: string;
   payment_notes?: string | null;
   media_urls: string[];
+  /** Localized display labels. */
   tags: string[];
+  /** Canonical names, parallel to `tags` — these are what update payloads must carry. */
+  tags_canonical?: string[];
   zip_code?: string | null;
   d_class?: DClass | null;
   owner_zip_code?: string | null;

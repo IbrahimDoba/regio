@@ -254,7 +254,9 @@ class ListingPublic(BaseModel):
     payment_notes: Optional[str] = None
 
     media_urls: List[str]
-    tags: List[str]
+    tags: List[str]  # localized display labels
+    # canonical names, parallel to `tags` — submit these back on update
+    tags_canonical: List[str] = []
 
     zip_code: Optional[str] = None
     d_class: Optional[str] = None
