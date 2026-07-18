@@ -77,7 +77,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
       <div className="p-[15px_12px_10px_12px]">
         {/* Header Grid */}
         <div
-          className="grid grid-cols-[50px_1fr] gap-[10px] mb-[5px] cursor-pointer border-b border-[var(--grey-line)] pb-[8px]"
+          className="grid grid-cols-[50px_1fr] gap-[10px] mb-[5px] cursor-pointer border-b border-[var(--grey-line)]"
           onClick={() => onOpenPreview(listing)}
         >
           <div className="flex justify-center items-start pt-[2px]">
@@ -114,7 +114,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
           {/* Category name badge — sits on top of the header divider line */}
           <div className="col-span-2 mt-[4px]">
             <span
-              className="block w-[40%] text-center text-white text-[11px] font-[700] py-[4px] rounded-[2px] tracking-wide"
+              className="block w-[40%] text-center text-white text-[11px] font-[700] py-[4px] tracking-wide"
               style={{ backgroundColor: colorVar }}
             >
               {t.category_labels[listing.category]}
