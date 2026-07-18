@@ -26,6 +26,7 @@ function AuthForm() {
     searchParams.get("view") === "register" ? "register" : "login"
   );
   const [isNoCodeOpen, setIsNoCodeOpen] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -52,8 +53,7 @@ function AuthForm() {
 
   const { data: zipCities = [], isFetching: citiesFetching } = useGetCitiesByZip(registerZip);
 
-  const flags: { [key: string]: string } = { 'EN': '🇬🇧', 'HU': '🇭🇺', 'DE': '🇩🇪' };
-  const langOrder: ('EN' | 'HU' | 'DE')[] = ['EN', 'HU', 'DE'];
+  const langIcons: { [key: string]: string } = { 'EN': '/EN-lang.png', 'HU': '/HU-lang.png', 'DE': '/DE-lang.png' };
 
   // When ZIP changes, validate against registry and derive the city.
   // Single match -> auto-fill (read-only). Multiple -> let the user pick.
@@ -69,11 +69,6 @@ function AuthForm() {
       setRegisterCity('');
     }
   }, [registerZip, zipCities, citiesFetching]);
-
-  const toggleLang = () => {
-    const idx = langOrder.indexOf(language);
-    setLanguage(langOrder[(idx + 1) % langOrder.length]);
-  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,11 +146,30 @@ function AuthForm() {
 
       {/* Top Bar */}
       <div className="p-[15px] flex justify-end">
-        <div
-          className="bg-[rgba(255,255,255,0.8)] p-[5px_10px] rounded-[20px] text-[14px] font-bold cursor-pointer flex items-center gap-[5px] shadow-sm backdrop-blur-sm"
-          onClick={toggleLang}
-        >
-          {flags[language]}
+        {/* Language Dropdown */}
+        <div className="relative">
+          <div
+            className="rounded-full w-[34px] h-[34px] flex items-center justify-center border border-[#ddd] cursor-pointer select-none overflow-hidden shadow-sm bg-white"
+            onClick={() => setIsLangOpen(!isLangOpen)}
+          >
+            <Image src={langIcons[language]} alt={language} width={34} height={34} className="object-cover" />
+          </div>
+          {isLangOpen && (
+            <div className="absolute top-[42px] right-0 bg-white border border-[#ddd] rounded-[4px] shadow-lg z-50 flex flex-col min-w-[56px]">
+              {Object.entries(langIcons).map(([lang, icon]) => (
+                <div
+                  key={lang}
+                  className="p-[6px_12px] cursor-pointer hover:bg-[#f5f5f5] flex justify-center"
+                  onClick={() => {
+                    setLanguage(lang as "EN" | "DE" | "HU");
+                    setIsLangOpen(false);
+                  }}
+                >
+                  <Image src={icon} alt={lang} width={30} height={30} className="object-cover rounded-full" />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
