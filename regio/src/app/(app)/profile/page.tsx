@@ -25,16 +25,34 @@ import {
   useGetCitiesByZip,
 } from "@/lib/api/hooks/use-users";
 import { useRequestPasswordReset } from "@/lib/api";
+import { useMyListings } from "@/lib/api/hooks/use-listings";
 import { API_CONFIG } from "@/lib/api/config";
+import { ListingPublic, ListingStatus } from "@/lib/api/types";
+import MyListingCard from "@/components/listings/MyListingCard";
+import EditModal from "@/components/modals/EditModal";
+
+type ListingsFilter = ListingStatus | "ALL";
 
 export default function ProfilePage() {
   const { language, setLanguage, t } = useLanguage();
   const dialog = useDialog();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<"personal" | "account" | "trust">(
-    "personal"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "personal" | "account" | "trust" | "listings"
+  >("personal");
   const router = useRouter(); // Use Next.js router for navigation
+
+  // My Listings tab state
+  const [listingsFilter, setListingsFilter] = useState<ListingsFilter>("ALL");
+  const [editListing, setEditListing] = useState<ListingPublic | null>(null);
+  const {
+    data: myListingsData,
+    isLoading: myListingsLoading,
+    fetchNextPage: fetchMoreListings,
+    hasNextPage: hasMoreListings,
+    isFetchingNextPage: fetchingMoreListings,
+  } = useMyListings(listingsFilter === "ALL" ? undefined : listingsFilter);
+  const myListings = myListingsData?.pages.flatMap((page) => page.data) ?? [];
 
   // Queries & Mutations
   const { data: user, isLoading } = useMe();
@@ -250,6 +268,15 @@ export default function ProfilePage() {
           onClick={() => setActiveTab("trust")}
         >
           {t.profile.tabs.trust_invites}
+        </div>
+        <div
+          className={`flex-1 text-center p-[15px] text-[13px] font-[600] text-[#666] cursor-pointer border-b-[3px] transition-all ${activeTab === "listings"
+              ? "text-[var(--color-green-offer)] border-[var(--color-green-offer)]"
+              : "border-transparent hover:bg-[#f9f9f9]"
+            }`}
+          onClick={() => setActiveTab("listings")}
+        >
+          {t.profile.tabs.listings}
         </div>
       </div>
 
@@ -568,7 +595,76 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+
+        {activeTab === "listings" && (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+            {/* Status filter */}
+            <div className="flex gap-[6px] overflow-x-auto pb-[12px] mb-[6px]">
+              {(
+                [
+                  ["ALL", t.profile.listings_tab.filter_all],
+                  ["ACTIVE", t.profile.listings_tab.filter_active],
+                  ["INACTIVE", t.profile.listings_tab.filter_expired],
+                  ["SOLD", t.profile.listings_tab.filter_sold],
+                  ["DELETED", t.profile.listings_tab.filter_deleted],
+                ] as [ListingsFilter, string][]
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  onClick={() => setListingsFilter(value)}
+                  className={`px-[14px] py-[7px] rounded-full text-[12px] font-bold whitespace-nowrap border transition-colors ${listingsFilter === value
+                      ? "bg-[var(--color-green-offer)] text-white border-[var(--color-green-offer)]"
+                      : "bg-white text-[#666] border-[#ddd] hover:border-[var(--color-green-offer)]"
+                    }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {myListingsLoading ? (
+              <div className="text-[13px] text-[#888] text-center py-[30px] flex justify-center items-center gap-[8px]">
+                <FaSpinner className="animate-spin" /> {t.profile.listings_tab.loading}
+              </div>
+            ) : myListings.length === 0 ? (
+              <div className="text-[13px] text-[#888] text-center py-[30px]">
+                {t.profile.listings_tab.empty}
+              </div>
+            ) : (
+              <>
+                {myListings.map((listing) => (
+                  <MyListingCard
+                    key={listing.id}
+                    listing={listing}
+                    onEdit={setEditListing}
+                  />
+                ))}
+                {hasMoreListings && (
+                  <button
+                    className="w-full p-[12px] bg-white border border-[#ccc] rounded-[6px] cursor-pointer text-[13px] font-bold flex justify-center items-center gap-[8px] disabled:opacity-50 mt-[4px]"
+                    onClick={() => fetchMoreListings()}
+                    disabled={fetchingMoreListings}
+                  >
+                    {fetchingMoreListings ? (
+                      <><FaSpinner className="animate-spin" /> {t.common.loading}</>
+                    ) : (
+                      t.profile.listings_tab.load_more
+                    )}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
+
+      {editListing && (
+        <EditModal
+          key={editListing.id}
+          listing={editListing}
+          onClose={() => setEditListing(null)}
+        />
+      )}
     </div>
   );
 }

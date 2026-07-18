@@ -307,6 +307,14 @@ export interface FeedParams {
   lang?: string; // ISO code sent to backend for localised content: 'en' | 'de' | 'hu'
 }
 
+/** Params for the owner-scoped "My Listings" endpoint. */
+export interface MyListingsParams {
+  /** Narrow to a single status; omit to return every status (incl. DELETED). */
+  status?: ListingStatus;
+  offset?: number;
+  lang?: string;
+}
+
 export interface FeedResponse {
   data: ListingPublic[];
   next_cursor: number;

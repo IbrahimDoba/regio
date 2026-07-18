@@ -11,6 +11,7 @@ import {
   ListingEditLogEntry,
   FeedResponse,
   FeedParams,
+  MyListingsParams,
   TagAutocomplete,
 } from "../types";
 
@@ -28,6 +29,19 @@ export const getFeed = async (params?: FeedParams): Promise<FeedResponse> => {
     {
       params,
     },
+  );
+  return response.data;
+};
+
+/**
+ * Get the current user's own listings across every status (management view).
+ */
+export const getMyListings = async (
+  params?: MyListingsParams,
+): Promise<FeedResponse> => {
+  const response = await apiClient.get<FeedResponse>(
+    API_ENDPOINTS.LISTINGS.MINE,
+    { params },
   );
   return response.data;
 };
@@ -131,6 +145,7 @@ export const searchTags = async (
 
 export const listingsApi = {
   getFeed,
+  getMyListings,
   getListing,
   createListing,
   updateListing,

@@ -467,7 +467,8 @@
     "tabs": {
       "personal": "Személyes",
       "account": "Fiók",
-      "trust_invites": "Meghívások"
+      "trust_invites": "Meghívások",
+      "listings": "Hirdetéseim"
     },
     "personal_tab": {
       "base_data_section": "Alapadatok (rögzített)",
@@ -532,7 +533,41 @@
       "toast_invites_generated": "Új meghívók létrehozva!"
     },
     "loading": "Profil betöltése...",
-    "error_loading": "Hiba a profil betöltésekor."
+    "error_loading": "Hiba a profil betöltésekor.",
+    "listings_tab": {
+      "filter_all": "Összes",
+      "filter_active": "Aktív",
+      "filter_expired": "Inaktív",
+      "filter_sold": "Eladva",
+      "filter_deleted": "Törölt",
+      "empty": "Még nincsenek itt hirdetések.",
+      "loading": "Hirdetések betöltése…",
+      "status_active": "Aktív",
+      "status_inactive": "Inaktív",
+      "status_sold": "Eladva",
+      "status_deleted": "Törölt",
+      "posted_on": "Feltöltve {date}",
+      "expires_on": "Lejár {date}",
+      "no_expiry": "Nincs lejárat",
+      "action_edit": "Szerkesztés",
+      "action_reactivate": "Újraaktiválás",
+      "action_restore": "Visszaállítás",
+      "action_mark_sold": "Eladottnak jelöl",
+      "action_deactivate": "Deaktiválás",
+      "action_delete": "Törlés",
+      "reactivate_date_label": "Új lejárati dátum",
+      "reactivate_confirm": "Újraaktiválás",
+      "confirm_mark_sold_title": "Eladottnak jelölöd?",
+      "confirm_mark_sold_body": "A hirdetés eltűnik a hírfolyamból és eladottként jelölődik. Később újraaktiválhatod.",
+      "confirm_deactivate_title": "Deaktiválod a hirdetést?",
+      "confirm_deactivate_body": "A hirdetés eltűnik a hírfolyamból. Bármikor újraaktiválhatod.",
+      "toast_reactivated": "Hirdetés újraaktiválva.",
+      "toast_restored": "Hirdetés visszaállítva.",
+      "toast_marked_sold": "Hirdetés eladottként megjelölve.",
+      "toast_deactivated": "Hirdetés deaktiválva.",
+      "toast_action_error": "Valami hiba történt. Kérjük, próbáld újra.",
+      "load_more": "Több betöltése"
+    }
   },
   "notifications": {
     "header": "Értesítések",

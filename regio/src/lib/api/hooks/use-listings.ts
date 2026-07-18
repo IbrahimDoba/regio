@@ -10,6 +10,7 @@ import { queryKeys, invalidationGroups } from "../query-keys";
 import {
   ListingCreate,
   ListingUpdate,
+  ListingStatus,
   FeedParams,
   FeedResponse,
   ListingPublic,
@@ -45,6 +46,28 @@ export function useFeed(params?: Omit<FeedParams, "lang">, showOriginal = false)
     queryKey: queryKeys.listings.feed(paramsWithLang),
     queryFn: ({ pageParam = 0 }) =>
       listingsApi.getFeed({ ...paramsWithLang, offset: pageParam as number }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage: FeedResponse) =>
+      lastPage.next_cursor ?? undefined,
+  });
+}
+
+/**
+ * Hook to fetch the current user's own listings (management view, infinite scroll).
+ * Returns every status by default; pass a `status` to power the My Listings tabs.
+ */
+export function useMyListings(status?: ListingStatus) {
+  const { language } = useLanguage();
+  const lang = toApiLang(language);
+
+  return useInfiniteQuery({
+    queryKey: queryKeys.listings.myListings(status),
+    queryFn: ({ pageParam = 0 }) =>
+      listingsApi.getMyListings({
+        status,
+        lang,
+        offset: pageParam as number,
+      }),
     initialPageParam: 0,
     getNextPageParam: (lastPage: FeedResponse) =>
       lastPage.next_cursor ?? undefined,

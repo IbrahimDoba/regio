@@ -66,6 +66,7 @@ export const API_ENDPOINTS = {
   LISTINGS: {
     BASE: '/listings/',
     FEED: '/listings/feed',
+    MINE: '/listings/mine',
     TAGS: '/listings/tags',
     BY_ID: (listingId: string) => `/listings/${listingId}`,
     MEDIA: (listingId: string) => `/listings/${listingId}/media`,

@@ -6,7 +6,7 @@ from fastapi import APIRouter, BackgroundTasks, Query, UploadFile, status
 from app.core.file_storage import StorageServiceDep
 from app.core.translate import TranslateService
 from app.listings.dependencies import ListingServiceDep
-from app.listings.enums import ListingCategory
+from app.listings.enums import ListingCategory, ListingStatus
 from app.listings.schemas import (
     FeedResponse,
     ListingCreate,
@@ -143,6 +143,48 @@ async def autocomplete_tags(
     the canonical name and the localized name for the given lang.
     """
     return await service.search_tags(q, lang=lang)
+
+
+@router.get(
+    "/mine",
+    response_model=FeedResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "description": "User is not authenticated."
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            "description": "Internal server error."
+        },
+    },
+)
+async def get_my_listings(
+    current_user: CurrentUser,
+    service: ListingServiceDep,
+    listing_status: Optional[ListingStatus] = Query(
+        None,
+        alias="status",
+        description="Filter to a single listing status (ACTIVE, INACTIVE, SOLD, DELETED).",
+    ),
+    offset: int = Query(
+        0, ge=0, description="Pagination offset (skip N items)."
+    ),
+    lang: str = Query(
+        "en", description="Language for localized content (en, de, hu)."
+    ),
+) -> Any:
+    """
+    The current user's own listings across every status, newest first.
+
+    Powers the profile "My Listings" management view. Not ZIP-filtered and not
+    limited to ACTIVE — pass ``status`` to narrow to one status for the UI tabs.
+    """
+    return await service.get_my_listings(
+        current_user,
+        status_filter=listing_status,
+        offset=offset,
+        user_lang=lang,
+    )
 
 
 @router.get(

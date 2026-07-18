@@ -97,6 +97,7 @@ _EDIT_LOG_SCALAR_FIELDS = (
     ("title", "title_original"),
     ("description", "description_original"),
     ("payment_notes", "payment_notes"),
+    ("status", "status"),
     ("zip_code", "zip_code"),
     ("available_until", "available_until"),
 )
@@ -281,6 +282,39 @@ class ListingService:
             attributes=listing.attributes,
             created_at=listing.created_at,
         )
+
+    async def get_my_listings(
+        self,
+        user: User,
+        status_filter: Optional[ListingStatus] = None,
+        limit: int = 20,
+        offset: int = 0,
+        user_lang: str = "en",
+    ) -> FeedResponse:
+        """Owner-scoped listings across every status (incl. DELETED).
+
+        Backs the user's "My Listings" management page. Unlike the public feed,
+        this is not ZIP-filtered and is not limited to ACTIVE — an optional
+        ``status_filter`` narrows it to a single status for the UI's tabs.
+        """
+        query = select(Listing).where(Listing.owner_id == user.id)
+        if status_filter is not None:
+            query = query.where(Listing.status == status_filter)
+
+        query = (
+            query.order_by(desc(Listing.created_at), Listing.id)
+            .offset(offset)
+            .limit(limit)
+            .options(selectinload(Listing.owner), selectinload(Listing.tags))
+        )
+
+        listings = (await self.session.execute(query)).scalars().all()
+        data = [
+            await self.format_listing(listing, user_lang)
+            for listing in listings
+        ]
+        next_cursor = offset + limit if len(listings) == limit else None
+        return FeedResponse(data=data, next_cursor=next_cursor)
 
     async def get_listing(self, listing_id: uuid.UUID) -> Listing:
         query = (
@@ -479,6 +513,12 @@ class ListingService:
     async def delete_listing(
         self, listing_id: uuid.UUID, current_user: User
     ) -> None:
+        """Soft-delete: flip status to DELETED and keep the row for retention.
+
+        Listings are never physically removed — the owner can restore them from
+        their management page, and the edit-log history is preserved. The status
+        change itself is recorded as an edit-log entry.
+        """
         listing = await self.session.get(Listing, listing_id)
         if not listing:
             raise ListingNotFound()
@@ -487,9 +527,19 @@ class ListingService:
         ):
             raise ListingNotOwned()
 
-        # post_visibilities rows are cascade-deleted via FK ondelete="CASCADE"
-        await self.session.delete(listing)
-        await self.session.commit()
+        if listing.status != ListingStatus.DELETED:
+            self.session.add(
+                ListingEditLog(
+                    listing_id=listing.id,
+                    edited_by_id=current_user.id,
+                    field="status",
+                    value_from=_edit_log_value(listing.status),
+                    value_to=_edit_log_value(ListingStatus.DELETED),
+                )
+            )
+            listing.status = ListingStatus.DELETED
+            self.session.add(listing)
+            await self.session.commit()
 
     # --------------------------------------------------------
     # FEED

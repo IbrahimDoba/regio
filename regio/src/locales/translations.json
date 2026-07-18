@@ -467,7 +467,8 @@
     "tabs": {
       "personal": "Personal",
       "account": "Account",
-      "trust_invites": "Invitations"
+      "trust_invites": "Invitations",
+      "listings": "My Listings"
     },
     "personal_tab": {
       "base_data_section": "Base Data (Fixed)",
@@ -532,7 +533,41 @@
       "toast_invites_generated": "New invites generated!"
     },
     "loading": "Loading profile...",
-    "error_loading": "Error loading profile."
+    "error_loading": "Error loading profile.",
+    "listings_tab": {
+      "filter_all": "All",
+      "filter_active": "Active",
+      "filter_expired": "Inactive",
+      "filter_sold": "Sold",
+      "filter_deleted": "Deleted",
+      "empty": "No listings here yet.",
+      "loading": "Loading your listings…",
+      "status_active": "Active",
+      "status_inactive": "Inactive",
+      "status_sold": "Sold",
+      "status_deleted": "Deleted",
+      "posted_on": "Posted {date}",
+      "expires_on": "Expires {date}",
+      "no_expiry": "No expiry",
+      "action_edit": "Edit",
+      "action_reactivate": "Reactivate",
+      "action_restore": "Restore",
+      "action_mark_sold": "Mark sold",
+      "action_deactivate": "Deactivate",
+      "action_delete": "Delete",
+      "reactivate_date_label": "New expiry date",
+      "reactivate_confirm": "Reactivate",
+      "confirm_mark_sold_title": "Mark as sold?",
+      "confirm_mark_sold_body": "This listing will be hidden from the feed and marked as sold. You can reactivate it later.",
+      "confirm_deactivate_title": "Deactivate listing?",
+      "confirm_deactivate_body": "This listing will be hidden from the feed. You can reactivate it anytime.",
+      "toast_reactivated": "Listing reactivated.",
+      "toast_restored": "Listing restored.",
+      "toast_marked_sold": "Listing marked as sold.",
+      "toast_deactivated": "Listing deactivated.",
+      "toast_action_error": "Something went wrong. Please try again.",
+      "load_more": "Load more"
+    }
   },
   "notifications": {
     "header": "Notifications",

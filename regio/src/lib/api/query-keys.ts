@@ -12,6 +12,7 @@
 
 import type {
   FeedParams,
+  ListingStatus,
   PaginationParams,
   PaymentStatus,
 } from './types';
@@ -78,7 +79,8 @@ export const queryKeys = {
     details: () => [...queryKeys.listings.all(), 'detail'] as const,
     detail: (id: string) => [...queryKeys.listings.details(), id] as const,
     editLog: (id: string) => [...queryKeys.listings.all(), 'edit-log', id] as const,
-    myListings: () => [...queryKeys.listings.all(), 'my-listings'] as const,
+    myListings: (status?: ListingStatus) =>
+      [...queryKeys.listings.all(), 'my-listings', status ?? 'all'] as const,
     tags: {
       all: () => [...queryKeys.listings.all(), 'tags'] as const,
       search: (query?: string) =>

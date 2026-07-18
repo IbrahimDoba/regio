@@ -467,7 +467,8 @@
     "tabs": {
       "personal": "Persönlich",
       "account": "Konto",
-      "trust_invites": "Einladungen"
+      "trust_invites": "Einladungen",
+      "listings": "Meine Anzeigen"
     },
     "personal_tab": {
       "base_data_section": "Basisdaten (fixiert)",
@@ -532,7 +533,41 @@
       "toast_invites_generated": "Neue Einladungen erstellt!"
     },
     "loading": "Profil wird geladen...",
-    "error_loading": "Fehler beim Laden des Profils."
+    "error_loading": "Fehler beim Laden des Profils.",
+    "listings_tab": {
+      "filter_all": "Alle",
+      "filter_active": "Aktiv",
+      "filter_expired": "Inaktiv",
+      "filter_sold": "Verkauft",
+      "filter_deleted": "Gelöscht",
+      "empty": "Noch keine Anzeigen hier.",
+      "loading": "Anzeigen werden geladen…",
+      "status_active": "Aktiv",
+      "status_inactive": "Inaktiv",
+      "status_sold": "Verkauft",
+      "status_deleted": "Gelöscht",
+      "posted_on": "Erstellt {date}",
+      "expires_on": "Läuft ab {date}",
+      "no_expiry": "Kein Ablaufdatum",
+      "action_edit": "Bearbeiten",
+      "action_reactivate": "Reaktivieren",
+      "action_restore": "Wiederherstellen",
+      "action_mark_sold": "Als verkauft markieren",
+      "action_deactivate": "Deaktivieren",
+      "action_delete": "Löschen",
+      "reactivate_date_label": "Neues Ablaufdatum",
+      "reactivate_confirm": "Reaktivieren",
+      "confirm_mark_sold_title": "Als verkauft markieren?",
+      "confirm_mark_sold_body": "Diese Anzeige wird aus dem Feed ausgeblendet und als verkauft markiert. Du kannst sie später reaktivieren.",
+      "confirm_deactivate_title": "Anzeige deaktivieren?",
+      "confirm_deactivate_body": "Diese Anzeige wird aus dem Feed ausgeblendet. Du kannst sie jederzeit reaktivieren.",
+      "toast_reactivated": "Anzeige reaktiviert.",
+      "toast_restored": "Anzeige wiederhergestellt.",
+      "toast_marked_sold": "Anzeige als verkauft markiert.",
+      "toast_deactivated": "Anzeige deaktiviert.",
+      "toast_action_error": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+      "load_more": "Mehr laden"
+    }
   },
   "notifications": {
     "header": "Benachrichtigungen",

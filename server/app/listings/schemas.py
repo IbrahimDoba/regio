@@ -115,8 +115,6 @@ class ListingCreateBase(BaseModel):
         if v is None:
             return v
         if isinstance(v, str):
-            from datetime import datetime
-
             v = datetime.fromisoformat(v.replace("Z", "+00:00"))
         now = datetime.now(timezone.utc)
         if v.tzinfo is None:
@@ -225,8 +223,6 @@ class ListingUpdate(BaseModel):
         if v is None:
             return v
         if isinstance(v, str):
-            from datetime import datetime
-
             v = datetime.fromisoformat(v.replace("Z", "+00:00"))
         now = datetime.now(timezone.utc)
         if v.tzinfo is None:
