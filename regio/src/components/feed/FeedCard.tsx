@@ -110,16 +110,16 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Category name badge */}
-        <div className="mt-[8px] mb-[2px]">
-          <span
-            className="inline-block text-white text-[11px] font-[700] px-[14px] py-[4px] rounded-[2px] tracking-wide"
-            style={{ backgroundColor: colorVar }}
-          >
-            {t.category_labels[listing.category]}
-          </span>
+          {/* Category name badge — sits on top of the header divider line */}
+          <div className="col-span-2 mt-[4px]">
+            <span
+              className="block w-[40%] text-center text-white text-[11px] font-[700] py-[4px] rounded-[2px] tracking-wide"
+              style={{ backgroundColor: colorVar }}
+            >
+              {t.category_labels[listing.category]}
+            </span>
+          </div>
         </div>
 
         {/* Meta Row */}
