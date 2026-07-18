@@ -112,6 +112,16 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
           </div>
         </div>
 
+        {/* Category name badge */}
+        <div className="mt-[8px] mb-[2px]">
+          <span
+            className="inline-block text-white text-[11px] font-[700] px-[14px] py-[4px] rounded-[2px] tracking-wide"
+            style={{ backgroundColor: colorVar }}
+          >
+            {t.category_labels[listing.category]}
+          </span>
+        </div>
+
         {/* Meta Row */}
         <div className="flex justify-between items-center h-[30px] mt-[5px] border-b border-[var(--grey-line)] cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
           <div className="flex items-center gap-[15px] h-full">
