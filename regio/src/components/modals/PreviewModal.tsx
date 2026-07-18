@@ -302,7 +302,7 @@ export default function PreviewModal({
 
           {/* Title */}
           <div
-            className="text-[22px] font-[800] mb-[10px] leading-snug"
+            className="font-condensed text-[22px] font-[800] mb-[10px] leading-snug"
             style={{ color: colorVar }}
           >
             {listing.title}

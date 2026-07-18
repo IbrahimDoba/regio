@@ -84,7 +84,7 @@ export default function FeedCard({ listing, onOpenPreview, onContact, onModify }
             <img src={icon} alt={label} className="w-[42px] h-[42px] object-contain" />
           </div>
           <div className="flex flex-col justify-between">
-            <h3 className="text-[17px] font-[500] leading-[1.3] m-[0_0_8px_0] text-[var(--color-text-main)]">
+            <h3 className="font-condensed text-[17px] font-[500] leading-[1.3] m-[0_0_8px_0] text-[var(--color-text-main)]">
               {listing.title.length > 70 ? listing.title.slice(0, 70) + '...' : listing.title}
             </h3>
             <div className="flex justify-end items-end gap-[8px]">
