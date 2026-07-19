@@ -15,6 +15,7 @@ from app.auth.service import AuthService
 from app.banking.service import BankingService
 from app.core.config import settings
 from app.core.file_storage import LocalStorageService
+from app.listings.models import ZipRegistry
 from app.users.enums import VerificationStatus
 from app.users.exceptions import (
     ActionNotPermitted,
@@ -25,7 +26,6 @@ from app.users.exceptions import (
     UserAlreadyExists,
     UserNotFound,
 )
-from app.listings.models import ZipRegistry
 from app.users.models import User
 from app.users.schemas import (
     UserAdminUpdate,
