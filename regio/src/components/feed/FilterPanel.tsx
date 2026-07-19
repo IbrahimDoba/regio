@@ -112,6 +112,10 @@ export default function FilterPanel({
     setShowSettings(!showSettings);
   };
 
+  const handleClear = () => {
+    setInputValue("");
+  };
+
   return (
     <div className="bg-white border-b border-[#ddd] p-[15px] shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] animate-in slide-in-from-top-2 duration-300">
 
@@ -134,15 +138,27 @@ export default function FilterPanel({
                 </button>
               </span>
             ))}
-            <input
-              type="text"
-              className="flex-1 min-w-[120px] border-none outline-none bg-transparent text-[14px]"
-              placeholder={tags.length === 0 ? t.filter_panel.search_placeholder : ""}
-              value={inputValue}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              onFocus={() => inputValue.length > 1 && setShowDropdown(true)}
-            />
+            <div className="relative flex-1 min-w-[120px]">
+              <input
+                type="text"
+                className="w-full border-none outline-none bg-transparent text-[14px] pr-[20px]"
+                placeholder={tags.length === 0 ? t.filter_panel.search_placeholder : ""}
+                value={inputValue}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                onFocus={() => inputValue.length > 1 && setShowDropdown(true)}
+              />
+              {inputValue && (
+                <button
+                  onClick={handleClear}
+                  type="button"
+                  className="absolute right-[8px] top-1/2 -translate-y-1/2 text-[#999] hover:text-[#555] flex items-center focus:outline-none"
+                  aria-label="Clear input"
+                >
+                  <FaXmark size={12} />
+                </button>
+              )}
+            </div>
           </div>
 
           {showDropdown && suggestions.length > 0 && (
