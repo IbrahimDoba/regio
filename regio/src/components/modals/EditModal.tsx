@@ -110,8 +110,6 @@ function buildInitialAttrs(listing: ListingPublic) {
     timeFactor: String(a.time_factor ?? 1.0),
     productTime: String(a.time_amount ?? ""),
     productGaras: String(a.regio_amount ?? ""),
-    productCondition: (a.condition as "NEW" | "USED") ?? "NEW",
-    productStock: String(a.stock ?? ""),
     rentalFeeTime: String(a.handling_fee_time ?? ""),
     rentalFeeGaras: String(a.usage_fee_regio ?? ""),
     rentalMaxDuration: a.max_rental_duration ?? "",
@@ -179,10 +177,6 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
   const [timeFactor, setTimeFactor] = useState(init.timeFactor);
   const [productTime, setProductTime] = useState(init.productTime);
   const [productGaras, setProductGaras] = useState(init.productGaras);
-  const [productCondition, setProductCondition] = useState<"NEW" | "USED">(
-    init.productCondition
-  );
-  const [productStock, setProductStock] = useState(init.productStock);
   const [rentalFeeTime, setRentalFeeTime] = useState(init.rentalFeeTime);
   const [rentalFeeGaras, setRentalFeeGaras] = useState(init.rentalFeeGaras);
   const [rentalMaxDuration, setRentalMaxDuration] = useState(
@@ -325,8 +319,6 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
         return {
           time_amount: productTime ? parseInt(productTime) : undefined,
           regio_amount: productGaras ? parseInt(productGaras) : undefined,
-          condition: productCondition,
-          stock: productStock ? parseInt(productStock) : undefined,
           price_notes: notes,
         };
       case "SEARCH_PRODUCT":
@@ -375,7 +367,6 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
       if (tags.length === 0) return false;
       if (!zipCode.trim()) return false;
       if (!productTime) return false;
-      if (!productStock) return false;
     }
     return true;
   };
@@ -618,39 +609,6 @@ export default function EditModal({ listing, onClose }: EditModalProps) {
                       className={cn(inputClass, "flex-1")}
                     />
                   </div>
-                </div>
-              </div>
-              <div className={cn(fieldClass, "flex gap-4")}>
-                <div className="flex-1">
-                  <label className={reqLabelClass}>
-                    {t.create_modal.sell_product.condition_label} *
-                  </label>
-                  <select
-                    className={reqInputClass}
-                    value={productCondition}
-                    onChange={(e) =>
-                      setProductCondition(e.target.value as "NEW" | "USED")
-                    }
-                  >
-                    <option value="NEW">
-                      {t.create_modal.sell_product.condition_new}
-                    </option>
-                    <option value="USED">
-                      {t.create_modal.sell_product.condition_used}
-                    </option>
-                  </select>
-                </div>
-                <div className="flex-1">
-                  <label className={reqLabelClass}>
-                    {t.create_modal.sell_product.stock_label} *
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={productStock}
-                    onChange={(e) => setProductStock(e.target.value)}
-                    className={reqInputClass}
-                  />
                 </div>
               </div>
             </>

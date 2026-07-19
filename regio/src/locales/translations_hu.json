@@ -225,12 +225,7 @@
       "price_time_placeholder": "",
       "price_time_required_hint": "Kötelező. A termékeknek tartalmazniuk kell az élőmunkát is.",
       "price_garas_label": "Garas",
-      "price_garas_placeholder": "",
-      "condition_label": "Állapot",
-      "condition_new": "Új",
-      "condition_used": "Használt",
-      "stock_label": "Készlet / mennyiség",
-      "stock_placeholder": "pl. 3"
+      "price_garas_placeholder": ""
     },
     "search_product": {
       "deadline_label": "Határidő / sürgősség (opcionális)"
@@ -274,7 +269,7 @@
     "zip_code_label": "Irányítószám",
     "d_class_label": "Láthatóság",
     "available_until_label": "Látható eddig",
-    "available_until_hint": "Nem kötelező. Legfeljebb 2 hónappal előre. A bejegyzés automatikusan lejár."
+    "available_until_hint": "Alapértelmezetten 2 hónappal előre (max.). A bejegyzés automatikusan lejár."
   },
   "chat": {
     "page": {

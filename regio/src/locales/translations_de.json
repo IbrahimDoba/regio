@@ -225,12 +225,7 @@
       "price_time_placeholder": "",
       "price_time_required_hint": "Erforderlich. Produkte müssen Arbeitszeit enthalten.",
       "price_garas_label": "Garas",
-      "price_garas_placeholder": "",
-      "condition_label": "Zustand",
-      "condition_new": "Neu",
-      "condition_used": "Gebraucht",
-      "stock_label": "Bestand / Menge",
-      "stock_placeholder": "z. B. 3"
+      "price_garas_placeholder": ""
     },
     "search_product": {
       "deadline_label": "Frist / Dringlichkeit (optional)"
@@ -274,7 +269,7 @@
     "zip_code_label": "PLZ",
     "d_class_label": "Sichtbarkeit",
     "available_until_label": "Sichtbar bis",
-    "available_until_hint": "Optional. Max. 2 Monate voraus. Eintrag läuft automatisch ab."
+    "available_until_hint": "Standardmäßig 2 Monate voraus (max.). Eintrag läuft automatisch ab."
   },
   "chat": {
     "page": {

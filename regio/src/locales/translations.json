@@ -225,12 +225,7 @@
       "price_time_placeholder": "",
       "price_time_required_hint": "Required. Products must include labor.",
       "price_garas_label": "Garas",
-      "price_garas_placeholder": "",
-      "condition_label": "Condition",
-      "condition_new": "New",
-      "condition_used": "Used",
-      "stock_label": "Stock Quantity",
-      "stock_placeholder": "e.g. 3"
+      "price_garas_placeholder": ""
     },
     "search_product": {
       "deadline_label": "Deadline / Urgency (optional)"
@@ -274,7 +269,7 @@
     "zip_code_label": "ZIP Code",
     "d_class_label": "Visibility",
     "available_until_label": "Visible Until",
-    "available_until_hint": "Optional. Max. 2 months ahead. Entry expires automatically."
+    "available_until_hint": "Defaults to 2 months ahead (max). The entry expires automatically."
   },
   "chat": {
     "page": {

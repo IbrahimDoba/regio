@@ -82,7 +82,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   // Location & Visibility (new system)
   const [zipCode, setZipCode] = useState(user?.zip_code ?? "");
   const [dClass, setDClass] = useState<DClass>("D3");
-  const [availableUntil, setAvailableUntil] = useState("");
+  const [availableUntil, setAvailableUntil] = useState(getMaxAvailableUntil());
   const availableUntilRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill ZIP from user profile
@@ -96,8 +96,6 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
   const [timeFactor, setTimeFactor] = useState(1.0);
 
   // SELL_PRODUCT
-  const [productCondition, setProductCondition] = useState<"NEW" | "USED">("NEW");
-  const [productStock, setProductStock] = useState("");
   const [productTime, setProductTime] = useState("");
   const [productGaras, setProductGaras] = useState("");
 
@@ -222,8 +220,6 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
         return {
           time_amount: productTime ? parseInt(productTime) : undefined,
           regio_amount: productGaras ? parseInt(productGaras) : undefined,
-          condition: productCondition,
-          stock: productStock ? parseInt(productStock) : undefined,
           price_notes: notes,
         };
       case "SEARCH_PRODUCT":
@@ -270,7 +266,6 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     }
     if (category === "SELL_PRODUCT") {
       if (!productTime) return false;
-      if (!productStock) return false;
     }
     switch (category) {
       case "OFFER_RENTAL":
@@ -308,7 +303,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
     setTitle(""); setDescription(""); setTags([]); setPriceNotes("");
     previewUrls.forEach(URL.revokeObjectURL);
     setSelectedFiles([]); setPreviewUrls([]);
-    setAvailableUntil("");
+    setAvailableUntil(getMaxAvailableUntil());
     setTagInput(""); setUnofficialTags([]); setTagDisplayLabels({});
     // Keep ZIP and D-class — user likely wants the same for next listing
   };
@@ -348,7 +343,7 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
       tags,
       zip_code: zipCode.trim() || null,
       d_class: dClass,
-      available_until: availableUntil ? new Date(availableUntil).toISOString() : null,
+      available_until: new Date(availableUntil).toISOString(),
       attributes: buildAttributes(),
     };
 
@@ -479,19 +474,6 @@ export default function CreateModal({ isOpen, onClose }: CreateModalProps) {
 
           {category === "SELL_PRODUCT" && (
             <>
-              <div className={cn(fieldClass, "flex gap-4")}>
-                <div className="flex-1">
-                  <label className={reqLabelClass}>{t.create_modal.sell_product.condition_label} *</label>
-                  <select className={reqInputClass} value={productCondition} onChange={(e) => setProductCondition(e.target.value as "NEW" | "USED")}>
-                    <option value="NEW">{t.create_modal.sell_product.condition_new}</option>
-                    <option value="USED">{t.create_modal.sell_product.condition_used}</option>
-                  </select>
-                </div>
-                <div className="flex-1">
-                  <label className={reqLabelClass}>{t.create_modal.sell_product.stock_label} *</label>
-                  <input type="number" min="1" value={productStock} onChange={(e) => setProductStock(e.target.value)} placeholder={t.create_modal.sell_product.stock_placeholder} className={reqInputClass} />
-                </div>
-              </div>
               <div className={cn(fieldClass, "flex gap-4")}>
                 <div className="flex-1">
                   <label className={reqLabelClass}>{t.create_modal.sell_product.price_time_label} *</label>

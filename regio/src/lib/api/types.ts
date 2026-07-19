@@ -280,7 +280,7 @@ export interface ListingCreate {
   media_urls?: string[];
   zip_code?: string | null;
   d_class?: DClass;
-  available_until?: string | null;
+  available_until: string;
   attributes?: Record<string, unknown>;
 }
 

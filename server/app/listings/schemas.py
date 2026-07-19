@@ -104,9 +104,12 @@ class ListingCreateBase(BaseModel):
     )
 
     # Expiry
-    available_until: Optional[datetime] = Field(
-        default=None,
-        description="Date when listing auto-expires (INACTIVE). Max 2 months ahead.",
+    available_until: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc) + _TWO_MONTHS,
+        description=(
+            "Date when listing auto-expires (INACTIVE). "
+            "Defaults to 2 months out. Max 2 months ahead."
+        ),
     )
 
     @field_validator("available_until", mode="before")
