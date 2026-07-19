@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useRef } from "react";
 import { FaCalendarDays, FaSpinner } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { ListingPublic, ListingStatus } from "@/lib/api/types";
@@ -49,6 +49,7 @@ export default function MyListingCard({ listing, onEdit }: MyListingCardProps) {
   const [reactivating, setReactivating] = useState(false);
   const [reactivateDate, setReactivateDate] = useState("");
   const [dateLimits] = useState(reactivateDateLimits);
+  const reactivateDateRef = useRef<HTMLInputElement>(null);
 
   const isBusy = updateListing.isPending || deleteListing.isPending;
 
@@ -160,14 +161,22 @@ export default function MyListingCard({ listing, onEdit }: MyListingCardProps) {
           </label>
           <div className="relative mb-[10px]">
             <input
+              ref={reactivateDateRef}
               type="date"
-              className="w-full p-[10px] pr-[38px] border border-[#ddd] rounded-[6px] text-[14px] bg-white outline-none focus:border-[var(--color-green-offer)]"
+              className="w-full p-[10px] pr-[38px] border border-[#ddd] rounded-[6px] text-[14px] bg-white outline-none cursor-pointer focus:border-[var(--color-green-offer)]"
               value={reactivateDate}
               min={dateLimits.min}
               max={dateLimits.max}
               onChange={(e) => setReactivateDate(e.target.value)}
+              onClick={() => reactivateDateRef.current?.showPicker()}
             />
-            <FaCalendarDays className="absolute right-[12px] top-1/2 -translate-y-1/2 text-[#888] pointer-events-none" size={15} />
+            <button
+              type="button"
+              onClick={() => reactivateDateRef.current?.showPicker()}
+              className="absolute right-[12px] top-1/2 -translate-y-1/2 text-[#888] hover:text-[var(--color-green-offer)] transition-colors"
+            >
+              <FaCalendarDays size={15} />
+            </button>
           </div>
           <div className="flex gap-[8px]">
             <button
