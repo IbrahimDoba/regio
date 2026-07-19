@@ -122,8 +122,8 @@ class ListingCreateBase(BaseModel):
         now = datetime.now(timezone.utc)
         if v.tzinfo is None:
             v = v.replace(tzinfo=timezone.utc)
-        if v <= now:
-            raise ValueError("available_until must be in the future")
+        if v.date() < now.date() + timedelta(days=1):
+            raise ValueError("available_until must be at least 1 day ahead")
         if v > now + _TWO_MONTHS:
             raise ValueError(
                 "available_until cannot be more than 2 months ahead"
@@ -230,8 +230,8 @@ class ListingUpdate(BaseModel):
         now = datetime.now(timezone.utc)
         if v.tzinfo is None:
             v = v.replace(tzinfo=timezone.utc)
-        if v <= now:
-            raise ValueError("available_until must be in the future")
+        if v.date() < now.date() + timedelta(days=1):
+            raise ValueError("available_until must be at least 1 day ahead")
         if v > now + _TWO_MONTHS:
             raise ValueError(
                 "available_until cannot be more than 2 months ahead"
