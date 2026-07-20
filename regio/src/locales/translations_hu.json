@@ -85,7 +85,12 @@
     "loading": "Hirdetések betöltése...",
     "error_chat_start": "Nem sikerült elindítani a chatet. Próbáld újra.",
     "error_chat_not_connected": "A chat még nem csatlakozott. Várj egy pillanatot, majd próbáld újra.",
-    "contact_prefill": "Érdeklődöm a(z) \"{title}\" iránt."
+    "contact_prefill": "Érdeklődöm a(z) \"{title}\" iránt.",
+    "empty_state": {
+      "title": "Ezt az ajánlatot nem találtuk...",
+      "subtitle": "A legjobb tehetségeinkkel és szűrőinkkel is sikertelen maradt az oldal keresése. Talán egy kis gépelési hiba csúszott a linkbe?",
+      "cta_button": "Az áttekintéshez"
+    }
   },
   "feed_card": {
     "region_label": "Régió",

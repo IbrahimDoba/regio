@@ -23,6 +23,7 @@ interface FilterPanelProps {
   maxDistanceKm: number | undefined;
   setMaxDistanceKm: (km: number | undefined) => void;
   onSearch: () => void;
+  onClearSearch: () => void;
 }
 
 const categoryFilters = (Object.keys(CATEGORY_CONFIG) as ListingCategory[]).map(
@@ -45,6 +46,7 @@ export default function FilterPanel({
   maxDistanceKm,
   setMaxDistanceKm,
   onSearch,
+  onClearSearch,
 }: FilterPanelProps) {
   const { t } = useLanguage();
   const [inputValue, setInputValue] = useState(q);
@@ -114,6 +116,10 @@ export default function FilterPanel({
 
   const handleClear = () => {
     setInputValue("");
+    setQ("");
+    setDebouncedInput("");
+    setShowDropdown(false);
+    onClearSearch();
   };
 
   return (

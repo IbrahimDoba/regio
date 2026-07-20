@@ -85,7 +85,12 @@
     "loading": "Anzeigen werden geladen...",
     "error_chat_start": "Chat konnte nicht gestartet werden. Bitte versuche es erneut.",
     "error_chat_not_connected": "Chat noch nicht verbunden. Bitte kurz warten.",
-    "contact_prefill": "Ich interessiere mich für \"{title}\"."
+    "contact_prefill": "Ich interessiere mich für \"{title}\".",
+    "empty_state": {
+      "title": "Dieses Angebot konnten wir nicht finden...",
+      "subtitle": "Selbst mit unseren besten Talenten und Filtern blieb die Suche nach dieser Seite erfolglos. Vielleicht hat sich ein kleiner Tippfehler im Link eingeschlichen?",
+      "cta_button": "Zur Übersicht"
+    }
   },
   "feed_card": {
     "region_label": "Region",

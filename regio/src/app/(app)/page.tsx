@@ -114,6 +114,21 @@ export default function FeedPage() {
     });
   };
 
+  // X on the search input: drop only the text query, keep tags / zip / distance.
+  const handleClearSearch = () => {
+    setStagedQ("");
+    setCommittedFilters(({ q, ...rest }) => rest);
+  };
+
+  // Empty-state CTA: full reset to the overview; saved ZIP location is preserved.
+  const handleResetToOverview = () => {
+    setStagedQ("");
+    setStagedTags([]);
+    setStagedMaxDistanceKm(undefined);
+    setActiveFilters(Object.keys(CATEGORY_CONFIG) as ListingCategory[]);
+    setCommittedFilters(({ viewer_zip }) => (viewer_zip ? { viewer_zip } : {}));
+  };
+
   const addTag = (tag: TagAutocomplete) => setStagedTags((prev) => [...prev, tag]);
   const removeTag = (tagName: string) => setStagedTags((prev) => prev.filter((t) => t.name !== tagName));
 
@@ -125,6 +140,14 @@ export default function FeedPage() {
     isFetchingNextPage,
   } = useFeed(committedFilters, showOriginal);
   const listings = data?.pages.flatMap((page) => page.data) || [];
+
+  // Whether the user has narrowed the feed; drives the 404 empty state.
+  const totalCategories = Object.keys(CATEGORY_CONFIG).length;
+  const isFiltered =
+    !!committedFilters.q ||
+    (committedFilters.tags?.length ?? 0) > 0 ||
+    committedFilters.max_distance_km != null ||
+    activeFilters.length < totalCategories;
 
   // Infinite scroll: observe a sentinel near the bottom of the feed and load
   // the next page (20 listings at a time) as it scrolls into view.
@@ -176,6 +199,7 @@ export default function FeedPage() {
           maxDistanceKm={stagedMaxDistanceKm}
           setMaxDistanceKm={setStagedMaxDistanceKm}
           onSearch={handleSearch}
+          onClearSearch={handleClearSearch}
         />
       </Header>
 
@@ -191,6 +215,8 @@ export default function FeedPage() {
           sentinelRef={loadMoreRef}
           isFetchingMore={isFetchingNextPage}
           loadingLabel={t.feed.loading}
+          isFiltered={isFiltered}
+          onReset={handleResetToOverview}
         />
       )}
 
